@@ -1,7 +1,7 @@
 <template>
   <div class="topbar">
     <div class="brand">
-      <img src="/icons/favicon-32x32.png" alt="" class="brand-icon" />
+      <img :src="`${brandIconBase}icons/favicon-32x32.png`" alt="" class="brand-icon" />
       <span class="mark">CADENCE</span>
     </div>
     <AppTabs />
@@ -13,6 +13,9 @@
 <script setup lang="ts">
 import AppTabs from './AppTabs.vue'
 import InboxButton from './InboxButton.vue'
+
+// public/ 底下的資源不經過 Vite 打包，需要手動接上 BASE_URL 才能在子路徑（如 GitHub Pages 的 /cadence/）下正確解析
+const brandIconBase = import.meta.env.BASE_URL
 </script>
 
 <style scoped lang="sass">
