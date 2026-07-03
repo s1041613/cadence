@@ -1,6 +1,7 @@
 <template>
   <div class="topbar">
     <div class="brand">
+      <img src="/icons/favicon-32x32.png" alt="" class="brand-icon" />
       <span class="mark">CADENCE</span>
     </div>
     <AppTabs />
@@ -28,9 +29,13 @@ import InboxButton from './InboxButton.vue'
 
 .brand
   display: flex
-  align-items: baseline
+  align-items: center
   gap: 10px
   margin-right: 6px
+
+  .brand-icon
+    width: 22px
+    height: 22px
 
   .mark
     font-family: 'JetBrains Mono', ui-monospace, monospace
