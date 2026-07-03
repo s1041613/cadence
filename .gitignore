@@ -27,3 +27,7 @@ yarn-error.log*
 
 # Superpowers runtime state (not project source)
 .superpowers/
+.spectra/
+
+.claude/*
+openspec/*

@@ -1,1 +1,61 @@
 /* app global css */
+@import "tailwindcss";
+
+/* 自架字體（取代 demo 版本的 Google Fonts CDN，符合 CSP self-only 限制） */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/noto-sans-tc/400.css";
+@import "@fontsource/noto-sans-tc/500.css";
+@import "@fontsource/noto-sans-tc/700.css";
+@import "@fontsource/zen-kaku-gothic-new/400.css";
+@import "@fontsource/zen-kaku-gothic-new/500.css";
+@import "@fontsource/zen-kaku-gothic-new/700.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "@fontsource/jetbrains-mono/800.css";
+
+html,
+body,
+#q-app {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  background: #F2F1EC;
+}
+
+body {
+  overflow-x: hidden;
+  color: #56585E;
+  font-family: 'Zen Kaku Gothic New', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#q-app,
+.q-layout,
+.q-page-container {
+  width: 100%;
+}
+
+/* Kept in sync with src/css/quasar.variables.sass — quadrant colors excluded (JS single source in use-theme.ts) */
+@theme {
+  --color-bg: #F2F1EC;
+  --color-bar: #F2F1EC;
+  --color-paper: #F1F2EC;
+  --color-surface: #FBFAF7;
+  --color-ink: #56585E;
+  --color-ink-2: #6E7176;
+  --color-ink-3: #9C9E94;
+  --color-line: #E5E3DB;
+  --color-line-2: #D7D4CB;
+  --color-green: #C6CDBC;
+  --color-rest: #E0685E;
+  --color-btn: #B3AC91;
+  --color-now: #E88B9C;
+  --color-sat: #3A6EA5;
+  --color-sun: #C0564B;
+}

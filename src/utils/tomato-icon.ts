@@ -1,0 +1,14 @@
+// Shared Pomodoro tomato icon markup, ported from the prototype's TOMATO_SVG constant.
+export const TOMATO_SVG = `
+  <path d="M12 6.2 C6.7 6.2 2.9 9.6 2.9 13.9 C2.9 18.7 7.2 21.6 12 21.6 C16.8 21.6 21.1 18.7 21.1 13.9 C21.1 9.6 17.3 6.2 12 6.2 Z" fill="#B4322C"/>
+  <path d="M12 13.9 C8.2 13.9 4.8 16.3 5.3 18.7 C6.7 20.6 9.6 21.6 12 21.6 C14.4 21.6 17.3 20.6 18.7 18.7 C19.2 16.3 15.8 13.9 12 13.9 Z" fill="#9E2A25" opacity=".55"/>
+  <ellipse cx="7.2" cy="11.5" rx="1.7" ry="2.6" fill="#C9564C" opacity=".55" transform="rotate(-18 7.2 11.5)"/>
+  <g fill="#2E7D3A">
+    <path d="M12 7.2 C11.8 4.8 11 3.6 10.3 3.4 C10.6 5 10.8 6.2 11.5 7.4 Z"/>
+    <path d="M12 7.2 C12.2 4.8 13 3.6 13.7 3.4 C13.4 5 13.2 6.2 12.5 7.4 Z"/>
+    <path d="M11.8 7.2 C10.1 6 8.4 5.8 7.4 6.2 C9.1 6.7 10.3 7.2 11.3 7.9 Z"/>
+    <path d="M12.2 7.2 C13.9 6 15.6 5.8 16.6 6.2 C14.9 6.7 13.7 7.2 12.7 7.9 Z"/>
+  </g>
+  <path d="M12 3.6 C11.8 4.8 11.8 6.2 12 7.7 C12.2 6.2 12.2 4.8 12 3.6 Z" fill="#3B8C46"/>`
+
+export const TOMATO_EMPTY_SVG = `<circle cx="12" cy="13.6" r="7.6" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.4"/>`

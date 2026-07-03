@@ -11,7 +11,16 @@ export default defineConfig((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
+    //
+    // Boot files run once, before the app mounts — the place for app-wide
+    // init code (e.g. setting up an API client) that used to live at the
+    // top of main.ts. List filenames here (no extension) to register them;
+    // an unlisted file in src/boot/ does nothing.
+    //
+    // 載入第三方套件
+    // 在 app 掛載前載入, 可以用於載入第三方套件或是一些進入畫面前的檢查 e.g. App 啟動時檢查登入狀態，沒登入就導去登入頁
     boot: [
+      'persistence'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -28,9 +37,8 @@ export default defineConfig((/* ctx */) => {
       // 'themify',
       // 'line-awesome',
       // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
-
-      'roboto-font', // optional, you are not bound to it
-      'material-icons', // optional, you are not bound to it
+      // 'roboto-font', // optional, you are not bound to it
+      // 'material-icons', // optional, you are not bound to it
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
@@ -42,7 +50,7 @@ export default defineConfig((/* ctx */) => {
 
       typescript: {
         strict: true,
-        vueShim: true
+        vueShim: true // 讓 TS 認得 .vue 檔可以被 import
         // extendTsConfig (tsConfig) {}
       },
 
@@ -76,7 +84,9 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
-      config: {},
+      config: {
+        ripple: false
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
