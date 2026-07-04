@@ -14,7 +14,7 @@ export interface Toast {
 export const useUiStore = defineStore('ui', () => {
   const tasksStore = useTasksStore()
 
-  const activeView = ref<ActiveView>('day')
+  const activeView = ref<ActiveView>('month')
   const selectedDate = ref(iso(new Date()))
   const taskEditorInitialValues = ref<Partial<Task> | null>(null)
   const previewTaskId = ref<string | null>(null)

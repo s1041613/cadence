@@ -1,9 +1,9 @@
 <template>
   <div class="topbar">
-    <div class="brand">
-      <img :src="`${brandIconBase}icons/favicon-32x32.png`" alt="" class="brand-icon" />
+    <button class="brand" type="button" @click="ui.activeView = 'month'">
+      <img :src="publicIconPath('favicon-32x32.png')" alt="" class="brand-icon" />
       <span class="mark">CADENCE</span>
-    </div>
+    </button>
     <AppTabs />
     <div class="spacer" />
     <InboxButton />
@@ -13,9 +13,10 @@
 <script setup lang="ts">
 import AppTabs from './AppTabs.vue'
 import InboxButton from './InboxButton.vue'
+import { useUiStore } from '@/stores/ui-store'
+import { publicIconPath } from '@/utils/public-assets'
 
-// public/ 底下的資源不經過 Vite 打包，需要手動接上 BASE_URL 才能在子路徑（如 GitHub Pages 的 /cadence/）下正確解析
-const brandIconBase = import.meta.env.BASE_URL
+const ui = useUiStore()
 </script>
 
 <style scoped lang="sass">
@@ -35,10 +36,19 @@ const brandIconBase = import.meta.env.BASE_URL
   align-items: center
   gap: 10px
   margin-right: 6px
+  border: none
+  background: none
+  padding: 0
+  cursor: pointer
+  border-radius: 8px
+  transition: .12s
+
+  &:hover
+    background: rgba(0, 0, 0, .04)
 
   .brand-icon
-    width: 22px
-    height: 22px
+    width: 26px
+    height: 26px
 
   .mark
     font-family: 'JetBrains Mono', ui-monospace, monospace
@@ -48,4 +58,21 @@ const brandIconBase = import.meta.env.BASE_URL
 
 .spacer
   flex: 1
+
+@media (max-width: 640px)
+  .topbar
+    gap: 8px
+    padding: 14px 16px 12px
+
+  .brand
+    margin-right: 0
+
+    .mark
+      display: none
+
+  :deep(.tabs)
+    display: none
+
+  .spacer
+    display: none
 </style>
