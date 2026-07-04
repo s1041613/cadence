@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="inbox-input" @click="focusInput">
-      <span class="ii-plus mono">+</span>
+      <button class="inbox-add" type="button" aria-label="新增草稿" :disabled="!inbox.inboxDraft.trim()" @click.stop="add">+</button>
       <input
         ref="inputRef"
         v-model="inbox.inboxDraft"
@@ -22,10 +22,10 @@
     </div>
     <div v-else class="inbox-list">
       <div v-for="item in inbox.inboxItems" :key="item.id" class="inbox-card card">
+        <button class="x-btn" @click.stop="inbox.removeItem(item.id)">×</button>
         <div class="body" @click="promote(item.id)">
           <div class="ttl">{{ item.text }}</div>
         </div>
-        <button class="x-btn" @click.stop="inbox.removeItem(item.id)">×</button>
       </div>
     </div>
   </div>
@@ -98,12 +98,6 @@ function promote(id: string): void {
   &:focus-within
     border-color: $ink-3
 
-  .ii-plus
-    font-size: 20px
-    color: $ink-3
-    line-height: 0
-    flex: none
-
   input
     flex: 1
     border: none
@@ -117,6 +111,34 @@ function promote(id: string): void {
     &::placeholder
       color: $ink-3
       font-weight: 600
+
+.inbox-add
+  width: 32px
+  height: 32px
+  border-radius: 10px
+  border: 1.5px solid $line-2
+  background: none
+  color: $ink-3
+  cursor: pointer
+  display: grid
+  place-items: center
+  font-family: 'JetBrains Mono', ui-monospace, monospace
+  font-size: 18px
+  font-weight: 700
+  line-height: 1
+  flex: none
+  transition: .15s
+
+  &:not(:disabled)
+    border-color: transparent
+    background: $btn
+    color: $surface
+
+    &:hover
+      filter: brightness(.96)
+
+  &:disabled
+    cursor: default
 
 .inbox-list
   display: flex
@@ -154,14 +176,21 @@ function promote(id: string): void {
 
 .x-btn
   border: none
-  background: none
+  background: transparent
   color: $ink-3
+  width: 30px
+  height: 30px
+  border-radius: 50%
   font-size: 18px
   line-height: 0
-  padding: 8px
   flex: none
+  cursor: pointer
+  transition: .15s
+  display: grid
+  place-items: center
 
   &:hover
+    background: $line
     color: $ink
 
 .empty
