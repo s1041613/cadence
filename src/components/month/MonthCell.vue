@@ -158,4 +158,14 @@ function chipStyle(t: Task): Record<string, string> {
   font-size: 9.5px
   color: $ink-2
   font-family: 'JetBrains Mono', ui-monospace, monospace
+
+@media (hover: none), (pointer: coarse)
+  .mcell-acts
+    opacity: 1
+    transform: scale(1)
+
+  .mcell-btn
+    width: 28px
+    height: 28px
+    border-radius: 9px
 </style>

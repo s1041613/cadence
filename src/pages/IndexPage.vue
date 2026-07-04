@@ -105,8 +105,8 @@ const tasksStore = useTasksStore()
   width: 34px
   height: 34px
   border-radius: 50%
-  border: 1px solid $line-2
-  background: $surface
+  border: none
+  background: transparent
   color: $ink
   font-size: 18px
   line-height: 0
@@ -117,7 +117,6 @@ const tasksStore = useTasksStore()
   z-index: 2
 
   &:hover
-    border-color: $ink
-    background: $ink
-    color: $paper
+    background: $line
+    color: $ink
 </style>
