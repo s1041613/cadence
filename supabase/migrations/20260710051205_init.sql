@@ -318,3 +318,85 @@ for insert with check (
     where c.id = split_part(name, '.', 1)::uuid and c.owner_id = auth.uid()
   )
 );
+
+-- =====================================================================
+-- Column / table documentation (visible in Studio, psql \d+, any tool)
+-- =====================================================================
+
+-- profiles
+comment on table  profiles              is 'Mirror of auth.users; one row per signed-up user, auto-created by handle_new_user() on Google sign-up.';
+comment on column profiles.id           is 'PK; equals auth.users.id (Google identity). Deletes cascade from auth.users.';
+comment on column profiles.display_name is 'Shown name; seeded from Google full_name, falls back to email.';
+comment on column profiles.email        is 'User email from the identity provider.';
+comment on column profiles.avatar_url   is 'Google profile photo URL; member avatars come straight from here (no member_color stored).';
+comment on column profiles.created_at   is 'Row creation timestamp.';
+
+-- calendars
+comment on table  calendars            is 'A calendar. Shared = many calendar_members; personal = a calendar with a single member. Same table for both — the difference is only whether more people were invited.';
+comment on column calendars.id         is 'PK.';
+comment on column calendars.name       is 'Calendar display name.';
+comment on column calendars.purpose    is 'Free-form category, e.g. family | work | personal.';
+comment on column calendars.color      is 'Calendar accent color.';
+comment on column calendars.cover_url  is 'Supabase Storage path for the cover photo (calendar-covers bucket, <calendar_id>.jpg).';
+comment on column calendars.owner_id   is 'Creator / owner (→ profiles). Only the owner can edit the calendar, invite, and edit events.';
+comment on column calendars.created_at is 'Row creation timestamp.';
+
+-- calendar_members (membership + per-user preferences)
+comment on table  calendar_members             is 'Calendar membership plus each member''s own preferences. position/enabled/selected are all per-user, written only via SECURITY DEFINER RPCs (never a broad UPDATE) to avoid clobbering role.';
+comment on column calendar_members.calendar_id is 'Part of PK (→ calendars).';
+comment on column calendar_members.user_id     is 'Part of PK (→ profiles). The member.';
+comment on column calendar_members.role         is 'owner | member. Owner has invite/edit rights.';
+comment on column calendar_members.position     is 'Per-user ordering (Arrange). Set via reorder_calendars().';
+comment on column calendar_members.enabled      is 'Per-user "is this calendar on the shelf". false = not a chip and hidden in every view (still listed in Settings). Set via set_calendar_enabled().';
+comment on column calendar_members.selected     is 'Per-user chip selection: among enabled calendars, whether it currently shows in the grid. Set via set_calendar_selected().';
+comment on column calendar_members.joined_at    is 'When this user joined the calendar.';
+
+-- calendar_invites (link / QR token, TimeTree-style)
+comment on table  calendar_invites             is 'Link/QR invites. Not bound to an email; anyone holding a valid, unexpired token can join via accept_invite(). Only the owner can create/manage invites.';
+comment on column calendar_invites.id          is 'PK.';
+comment on column calendar_invites.calendar_id is 'Target calendar (→ calendars).';
+comment on column calendar_invites.token       is 'Random join token (gen_random_bytes, hex). Surfaced as /join/<token>. Needs pgcrypto.';
+comment on column calendar_invites.created_by  is 'Owner who created the invite (→ profiles).';
+comment on column calendar_invites.expires_at  is 'Optional expiry; null = never. No revoke/max-uses by design (kept simple).';
+comment on column calendar_invites.created_at  is 'Row creation timestamp.';
+
+-- events (task = has quadrant; event = no quadrant)
+comment on table  events             is 'Calendar entries. type=task carries a quadrant and cannot be all-day; type=event has no quadrant and may be all-day. Members can read; only the owner can create/edit/delete.';
+comment on column events.id          is 'PK.';
+comment on column events.calendar_id is 'Owning calendar (→ calendars).';
+comment on column events.owner_id    is 'Creator = responsible person (→ profiles). Others'' events are read-only.';
+comment on column events.type        is 'task | event. The core discriminant; drives quadrant and all-day rules (see CHECK constraints).';
+comment on column events.title       is 'Entry title.';
+comment on column events.quadrant    is 'Eisenhower quadrant for tasks: do | plan | quick | later. NULL for events (enforced by task_has_quadrant).';
+comment on column events.color       is 'Event: custom color (decoupled from quadrant palette). Task: derived quadrant color.';
+comment on column events.icon        is 'Event icon (events only).';
+comment on column events.all_day     is 'All-day flag. Must be false for tasks (task_has_no_allday).';
+comment on column events.starts_at   is 'Start time (UTC). Time axis in UI is 06:00–23:00.';
+comment on column events.ends_at     is 'End time (UTC). Must be > starts_at unless all_day (end_after_start).';
+comment on column events.location    is 'Free-form location.';
+comment on column events.notes       is 'Free-form notes.';
+comment on column events.repeat_rule is 'RRULE string, stored only; expansion is deferred to v2.';
+comment on column events.created_at  is 'Row creation timestamp.';
+comment on column events.updated_at  is 'Last update timestamp.';
+
+-- event_reminders (drives server-scheduled push)
+comment on table  event_reminders                is 'Reminders that pg_cron scans to send Web Push. A row is due when its time arrives and fired_at is still null.';
+comment on column event_reminders.id             is 'PK.';
+comment on column event_reminders.event_id       is 'Parent event (→ events). Only the event owner can read/write its reminders.';
+comment on column event_reminders.minutes_before is 'Lead time before the event start to fire the reminder.';
+comment on column event_reminders.fired_at       is 'When the push was sent; null = not yet fired.';
+
+-- push_subscriptions (transport-agnostic: webpush now, fcm/apns later)
+comment on table  push_subscriptions            is 'Push endpoints per user. type routes web-push vs native; one table/function serves both to keep the native (Capacitor) seam cheap.';
+comment on column push_subscriptions.id         is 'PK.';
+comment on column push_subscriptions.user_id    is 'Owner (→ profiles). Users can only touch their own.';
+comment on column push_subscriptions.type       is 'webpush | fcm | apns. Splits transport; PWA uses webpush today.';
+comment on column push_subscriptions.payload    is 'web-push subscription JSON or native device token.';
+comment on column push_subscriptions.created_at is 'Row creation timestamp.';
+
+-- month_photos (per-user 1–12 overrides of the system defaults)
+comment on table  month_photos            is 'Per-user month photo overrides (personal-level decoration, not tied to one calendar). Resolution: photoForMonth(m) = user override ?? month-defaults/<m>.jpg.';
+comment on column month_photos.user_id    is 'Part of PK (→ profiles). Owner of the override.';
+comment on column month_photos.month      is 'Part of PK. Calendar month 1–12 (CHECK month between 1 and 12).';
+comment on column month_photos.image_url  is 'Storage path in the month-photos bucket (<uid>/<month>.jpg).';
+comment on column month_photos.updated_at is 'Last update timestamp.';
