@@ -29,6 +29,7 @@
     "@tailwindcss/postcss": "^4.3.2",
     "@types/node": "^22.19.11",
     "autoprefixer": "^10.4.27",
+    "supabase": "^2.109.1",
     "tailwindcss": "^4.3.2",
     "typescript": "^6.0.0",
     "vitest": "^4.1.9",
