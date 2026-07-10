@@ -36,7 +36,7 @@ export const QUADRANTS: Quadrant[] = [
     description: '重要又緊急',
     important: true,
     urgent: true,
-    backgroundColor: '#E3A75C',
+    backgroundColor: '#C56A5E',
     textColor: '#4A3318',
     texture: 'none',
     icon: DO_ICON
@@ -47,7 +47,7 @@ export const QUADRANTS: Quadrant[] = [
     description: '重要不緊急',
     important: true,
     urgent: false,
-    backgroundColor: '#8C928B',
+    backgroundColor: '#6E839B',
     textColor: '#2A2D27',
     texture: 'none',
     icon: PLAN_ICON
@@ -58,7 +58,7 @@ export const QUADRANTS: Quadrant[] = [
     description: '緊急不重要',
     important: false,
     urgent: true,
-    backgroundColor: '#D6C7DB',
+    backgroundColor: '#BFA86A',
     textColor: '#3E3845',
     texture: 'none',
     icon: QUICK_ICON
@@ -69,7 +69,7 @@ export const QUADRANTS: Quadrant[] = [
     description: '不重要不緊急',
     important: false,
     urgent: false,
-    backgroundColor: '#C6CDBC',
+    backgroundColor: '#9A988F',
     textColor: '#33403A',
     texture: 'dot',
     icon: LATER_ICON
