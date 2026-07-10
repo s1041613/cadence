@@ -29,5 +29,8 @@ yarn-error.log*
 .superpowers/
 .spectra/
 
+# Git worktrees live here; never track their contents
+.worktrees/
+
 .claude/*
 openspec/*
