@@ -1,193 +1,228 @@
 <template>
-  <div>
-    <div class="viewhead">
-      <div>
-        <div class="month-top">
-          <span class="yr mono">{{ cur.getFullYear() }}</span>
-          <span class="mo mono">{{ pad(cur.getMonth() + 1) }}</span>
-        </div>
-        <p class="lede" style="margin-top: 2px">
-          像店家的營業日曆——能用、休息、活動日一眼分得出來。點任一天可跳到當天細排。
-        </p>
+  <div class="month-view">
+    <div v-if="showPhoto" class="month-view__banner">
+      <div class="month-view__banner-slot" :style="{ height: `${bannerHeight}px` }">
+        <span class="month-view__banner-placeholder">
+          <CdIcon name="image" :size="20" color="var(--cd-muted)" />
+          Drop this month's photo
+        </span>
       </div>
-      <div class="navset">
-        <div class="fmt-seg" role="tablist">
-          <button class="fmt-opt" :class="{ on: !showTime }" @click="showTime = false">名稱</button>
-          <button class="fmt-opt" :class="{ on: showTime }" @click="showTime = true">時間＋名稱</button>
-        </div>
-        <button class="iconbtn" @click="ui.selectedDate = iso(new Date(cur.getFullYear(), cur.getMonth() - 1, 1))">‹</button>
-        <button class="iconbtn wide" @click="ui.selectedDate = iso(new Date())">本月</button>
-        <button class="iconbtn" @click="ui.selectedDate = iso(new Date(cur.getFullYear(), cur.getMonth() + 1, 1))">›</button>
+      <div
+        class="month-view__banner-grip"
+        title="Drag to resize"
+        @pointerdown="onBannerGripDown"
+      >
+        <span class="month-view__banner-grip-bar" />
       </div>
     </div>
-    <div class="month">
-      <div class="month-dow">
-        <div v-for="(d, i) in ['M', 'T', 'W', 'T', 'F', 'S', 'S']" :key="i" :class="{ sat: i === 5, sun: i === 6 }">
-          {{ d }}
-        </div>
-      </div>
-      <div class="month-grid">
-        <MonthCell
-          v-for="(d, i) in cells"
-          :key="i"
-          :date="iso(d)"
-          :tasks="byDay(iso(d))"
-          :in-month="d.getMonth() === cur.getMonth()"
-          :show-time="showTime"
-          @add-task="(initialValues) => (ui.taskEditorInitialValues = initialValues)"
-          @pick-day="pickDay"
-          @open="(taskId) => (ui.previewTaskId = taskId)"
-        />
-      </div>
+
+    <CdDatePoster
+      variant="month"
+      :year="String(year)"
+      :title="monthLabel"
+      @prev="stepMonthBy(-1)"
+      @next="stepMonthBy(1)"
+      @today="goToday"
+      @open-calendar-sheet="emit('openMonthSheet')"
+    />
+
+    <div class="month-view__grid-wrap">
+      <CdMonthGrid :cells="gridCells" :fmt="cellFmt" @cell-click="onCellClick" @event-click="onEventClick" @more="onMore" />
     </div>
+
+    <CdDrawerOrSheet
+      v-if="ui.monthSheet"
+      :presentation="isDesktop ? 'drawer' : 'sheet'"
+      side="left"
+      width="min(400px, 44%)"
+      @scrim-click="ui.monthSheet = false"
+    >
+      <CdMonthSheet
+        :mode="sheetMode"
+        :month-label="monthLabel"
+        :cells="sheetCells"
+        :months="wheelMonths"
+        :years="wheelYears"
+        :center-idx="wheelCenterIdx"
+        @close="ui.monthSheet = false"
+        @toggle-mode="sheetMode = sheetMode === 'grid' ? 'wheel' : 'grid'"
+        @select-day="onSheetSelectDay"
+        @today="goToday"
+      />
+    </CdDrawerOrSheet>
+
+    <CdDrawerOrSheet
+      v-if="ui.dayList"
+      :presentation="isDesktop ? 'drawer' : 'sheet'"
+      width="min(380px, 40%)"
+      @scrim-click="ui.dayList = null"
+    >
+      <CdDayList
+        :year="String(year)"
+        :date-label="dayListLabel"
+        :events="dayListEvents"
+        @close="ui.dayList = null"
+        @event-click="onDayListEventClick"
+      />
+    </CdDrawerOrSheet>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import MonthCell from './MonthCell.vue'
+import CdDatePoster from '@/components/ui/CdDatePoster.vue'
+import CdMonthGrid, { type MonthGridCell } from '@/components/ui/CdMonthGrid.vue'
+import CdMonthSheet, { type MonthSheetCell } from '@/components/ui/CdMonthSheet.vue'
+import CdDayList, { type DayListEvent } from '@/components/ui/CdDayList.vue'
+import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
+import CdIcon from '@/components/ui/CdIcon.vue'
+import type { MonthCellEvent } from '@/components/ui/CdMonthCell.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
-import { addDays, iso, pad, parseISO, startOfWeek } from '@/utils/convert-date-time'
-import type { Task } from '@/types/task'
+import { useBreakpoint } from '@/composables/use-breakpoint'
+import { themeOf } from '@/composables/use-theme'
+import { parseISO, iso, addDays } from '@/utils/convert-date-time'
+import { monthGridCells, stepMonth } from '@/utils/month-grid'
 
+// MonthView — poster header + resizable photo banner + Monday-start grid, rebuilt against the
+// CADENCE Handoff month-poster screen (design.md "3.1 Rebuild Month view"). Photo banner is
+// local-only component state for now: settings-store (task 7.1/8.1) does not exist yet, so
+// `showPhoto`/`bannerHeight` are not persisted — task 7.1 wires them into the real setting.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
 
-const showTime = ref(true)
+const emit = defineEmits<{
+  openMonthSheet: []
+}>()
 
 const cur = computed(() => parseISO(ui.selectedDate))
-const cells = computed(() => {
-  const first = new Date(cur.value.getFullYear(), cur.value.getMonth(), 1)
-  const gridStart = startOfWeek(first)
-  return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i))
-})
+const year = computed(() => cur.value.getFullYear())
+const month = computed(() => cur.value.getMonth())
+const monthLabel = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long' }).format(cur.value))
+const cellFmt = computed<'time' | 'name' | 'dot'>(() => 'time')
 
-function byDay(dt: string): Task[] {
-  return tasksStore.tasks.filter((t) => t.date === dt)
+const showPhoto = ref(false)
+const DEFAULT_BANNER_H = 230
+const MIN_BANNER_H = 90
+const MAX_BANNER_H = 560
+const bannerHeight = ref(DEFAULT_BANNER_H)
+
+function onBannerGripDown(e: PointerEvent): void {
+  e.preventDefault()
+  const startY = e.clientY
+  const base = bannerHeight.value
+  function move(ev: PointerEvent): void {
+    bannerHeight.value = Math.max(MIN_BANNER_H, Math.min(MAX_BANNER_H, base + (ev.clientY - startY)))
+  }
+  function up(): void {
+    window.removeEventListener('pointermove', move)
+    window.removeEventListener('pointerup', up)
+  }
+  window.addEventListener('pointermove', move)
+  window.addEventListener('pointerup', up)
 }
 
-function pickDay(date: string): void {
-  ui.selectedDate = date
-  ui.activeView = 'day'
+function stepMonthBy(delta: number): void {
+  const { year: y, month: m } = stepMonth(year.value, month.value, delta)
+  ui.selectedDate = iso(new Date(y, m, 1))
 }
+
+function goToday(): void {
+  ui.selectedDate = iso(new Date())
+}
+
+function eventsForDate(date: string): MonthCellEvent[] {
+  return tasksStore.tasks
+    .filter((t) => t.date === date)
+    .map((t) => {
+      const theme = themeOf(t)
+      return {
+        title: t.title,
+        color: theme.backgroundColor,
+        quad: theme.isEvent ? 'event' : (theme.quad?.key ?? 'later'),
+        time: t.start,
+        allDay: t.allDay,
+        done: t.done
+      }
+    })
+}
+
+const gridCells = computed<MonthGridCell[]>(() =>
+  monthGridCells(year.value, month.value).map((c) => ({
+    date: c.date,
+    dayNum: c.dayNum,
+    dow: c.dow,
+    outsideMonth: c.outsideMonth,
+    today: c.date === iso(new Date()),
+    events: eventsForDate(c.date)
+  }))
+)
+
+// Cell/event/more clicks open Quick-Add, the event preview, and the Day List respectively — all
+// anchored popovers wired in tasks 3.2 (Day List) and 5.1/5.2 (Quick-Add, event preview), which
+// need the click event's bounding rect to compute `PopoverAnchor`. Not wired here; task 3.1 is
+// scoped to the grid's own rendering and date navigation.
+function onCellClick(_date: string): void {}
+
+function onEventClick(_date: string, _event: MonthCellEvent): void {}
+
+function onMore(_date: string): void {}
 </script>
 
-<style scoped lang="sass">
-.viewhead
-  display: flex
-  align-items: flex-end
-  justify-content: space-between
-  margin-bottom: 22px
-  gap: 20px
-  flex-wrap: wrap
+<style scoped>
+.month-view {
+  display: flex;
+  flex-direction: column;
+}
 
-.lede
-  color: $ink-2
-  font-size: 13.5px
-  margin-top: 9px
-  max-width: 42ch
-  line-height: 1.5
+.month-view__banner {
+  position: relative;
+  padding: 18px 30px 0;
+}
 
-.navset
-  display: flex
-  align-items: center
-  gap: 6px
+.month-view__banner-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border-radius: var(--cd-radius-lg, 16px);
+  background: var(--cd-topbar);
+  border: 1px dashed var(--cd-line);
+  color: var(--cd-muted);
+  font: 500 13px var(--cd-font-ui);
+  box-sizing: border-box;
+}
 
-.fmt-seg
-  display: inline-flex
-  background: $paper
-  border: 1px solid $line
-  border-radius: 999px
-  padding: 3px
-  margin-right: 4px
+.month-view__banner-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-.fmt-opt
-  border: none
-  background: none
-  cursor: pointer
-  font-size: 12px
-  font-weight: 600
-  color: $ink-3
-  padding: 6px 12px
-  border-radius: 999px
-  transition: .15s
+.month-view__banner-grip {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  cursor: ns-resize;
+  background: rgba(28, 26, 20, 0.34);
+  border-radius: var(--cd-radius-pill);
+  backdrop-filter: blur(2px);
+}
 
-  &:hover
-    color: $ink-2
+.month-view__banner-grip-bar {
+  width: 26px;
+  height: 4px;
+  border-radius: var(--cd-radius-pill);
+  background: rgba(255, 255, 255, 0.9);
+}
 
-  &.on
-    background: $btn
-    color: $ink
-
-.iconbtn
-  width: 34px
-  height: 34px
-  border-radius: 50%
-  border: 1px solid $line-2
-  background: none
-  color: $ink-2
-  cursor: pointer
-  transition: .15s
-
-  &:hover
-    border-color: $ink
-    background: $surface
-
-  &.wide
-    width: auto
-    padding: 0 14px
-    font-size: 13px
-    font-weight: 600
-    border-radius: 999px
-
-.month-top
-  display: flex
-  align-items: flex-end
-  gap: 16px
-  margin-bottom: 18px
-
-  .yr
-    font-family: 'JetBrains Mono', ui-monospace, monospace
-    font-size: 14px
-    color: $ink-2
-    font-weight: 500
-
-  .mo
-    font-family: 'JetBrains Mono', ui-monospace, monospace
-    font-size: 48px
-    font-weight: 800
-    line-height: .9
-    letter-spacing: -.04em
-
-.month
-  border: 1px solid $line
-  border-radius: 14px
-  overflow: hidden
-  background: $surface
-
-.month-dow
-  display: grid
-  grid-template-columns: repeat(7, 1fr)
-  border-bottom: 1px solid $line
-
-  div
-    padding: 11px 0
-    text-align: center
-    font-size: 11px
-    font-weight: 600
-    letter-spacing: .1em
-    color: $ink-3
-
-    &.sat
-      color: $sat
-    &.sun
-      color: $sun
-
-.month-grid
-  display: grid
-  grid-template-columns: repeat(7, 1fr)
-
-  :deep(.mcell:nth-child(7n+1))
-    border-left: none
+.month-view__grid-wrap {
+  padding: 0 22px 22px;
+}
 </style>

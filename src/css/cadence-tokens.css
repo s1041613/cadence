@@ -1,0 +1,202 @@
+/*
+ * CADENCE design tokens — CSS custom properties
+ * Source: design-research-report.md §6 (Design Tokens 彙整)
+ *
+ * Fonts are loaded from the project's existing @fontsource packages (see src/css/app.css):
+ * Inter, Zen Kaku Gothic New, JetBrains Mono, Noto Sans TC.
+ * Storybook's preview.ts imports those same @fontsource CSS files directly since Storybook
+ * does not load the Quasar app's boot chain / app.css.
+ */
+
+:root {
+  /* ---------- Layout: breakpoint ----------
+   * Desktop/phone split. CSS custom properties cannot parameterize
+   * @media queries, so this value is documented here and mirrored in
+   * src/css/breakpoints.sass for stylesheet use. Keep the two in sync.
+   */
+  --cd-bp-desktop: 900px;
+
+  /* ---------- Color: neutrals / ink ---------- */
+  --cd-ink: #56585E;
+  --cd-ink-2: #6E7176;
+  --cd-muted: #9C9E94;
+  --cd-ink-3: #9C9E94;
+
+  /* ---------- Color: lines ---------- */
+  --cd-line: #E5E3DB;
+  --cd-line-2: #D7D4CB;
+  --cd-line-3: #EEECE4;
+  --cd-line-4: #E9E6DD;
+  --cd-line-5: #E4E1D6;
+
+  /* ---------- Color: surfaces ---------- */
+  --cd-surface: #FBFAF7;
+  --cd-topbar: #F2F1EC;
+  --cd-editor-card: #F4F2EC;
+  --cd-month-paper: #F1F2EC;
+  --cd-draft-paper: #EEEBE1;
+  --cd-inbox-paper: #F7F5EF;
+
+  /* ---------- Color: olive accent ---------- */
+  --cd-olive: #B3AC91;
+  --cd-olive-ink: #3f4136;
+  --cd-olive-mix-1: #8F8A6E;
+  --cd-olive-mix-2: #6E6A52;
+  --cd-olive-mix-3: #6E6A54;
+
+  /* ---------- Color: weekday accents ---------- */
+  --cd-sat: #3A6EA5;
+  --cd-sun: #C0564B;
+
+  /* ---------- Color: quadrants (prototype-authoritative, see decision log) ---------- */
+  --cd-quad-plan: #6E839B;
+  --cd-quad-do: #C56A5E;
+  --cd-quad-quick: #BFA86A;
+  --cd-quad-later: #9A988F;
+  --cd-event: #E3A75C;
+
+  /* editor header tint (pale) per quadrant */
+  --cd-quad-do-tint: #EFDCD5;
+  --cd-quad-plan-tint: #D9E0E7;
+  --cd-quad-quick-tint: #EAE4D0;
+  --cd-quad-later-tint: #E4E2DC;
+
+  /* event custom color palette — handoff eColorOpts: cool band (teal→green→indigo→violet→plum→near-black),
+     deliberately excludes every quadrant hue so events and quadrants stay visually distinct */
+  --cd-swatch-1: #4A8B85;
+  --cd-swatch-2: #63996B;
+  --cd-swatch-3: #6863B0;
+  --cd-swatch-4: #8E6FB0;
+  --cd-swatch-5: #A56D91;
+  --cd-swatch-6: #4C4E57;
+
+  /* ---------- Color: danger / warn ---------- */
+  --cd-danger: #C0564B;
+  --cd-danger-2: #B4655C;
+  --cd-danger-3: #D9483C;
+  --cd-warn: #C98A2E;
+
+  /* ---------- Scrim opacities (used with rgba(40,38,30, N)) ---------- */
+  --cd-scrim-rgb: 40, 38, 30;
+  --cd-scrim-light: rgba(40, 38, 30, .28);
+  --cd-scrim: rgba(40, 38, 30, .3);
+  --cd-scrim-mid: rgba(40, 38, 30, .32);
+  --cd-scrim-strong: rgba(40, 38, 30, .34);
+  --cd-scrim-heavy: rgba(40, 38, 30, .4);
+
+  /* ---------- Typography: families ---------- */
+  --cd-font-title: 'Zen Kaku Gothic New', sans-serif;
+  --cd-font-ui: 'Inter', sans-serif;
+  --cd-font-mono: 'JetBrains Mono', monospace;
+  --cd-font-draft: 'Helvetica Neue', 'Inter', sans-serif;
+
+  /* ---------- Typography: sizes (px scale used across the design) ---------- */
+  --cd-fs-8: 8px;
+  --cd-fs-8-5: 8.5px;
+  --cd-fs-9-5: 9.5px;
+  --cd-fs-10: 10px;
+  --cd-fs-10-5: 10.5px;
+  --cd-fs-11: 11px;
+  --cd-fs-12: 12px;
+  --cd-fs-12-5: 12.5px;
+  --cd-fs-13: 13px;
+  --cd-fs-13-5: 13.5px;
+  --cd-fs-14: 14px;
+  --cd-fs-15: 15px;
+  --cd-fs-15-5: 15.5px;
+  --cd-fs-16: 16px;
+  --cd-fs-17: 17px;
+  --cd-fs-18: 18px;
+  --cd-fs-19: 19px;
+  --cd-fs-20: 20px;
+  --cd-fs-21: 21px;
+  --cd-fs-22: 22px;
+  --cd-fs-24: 24px;
+  --cd-fs-26: 26px;
+  --cd-fs-30: 30px;
+  --cd-fs-44: 44px;
+  --cd-fs-46: 46px;
+
+  /* ---------- Radius ---------- */
+  --cd-radius-pill: 999px;
+  --cd-radius-drawer: 22px;
+  --cd-radius-picker: 20px;
+  --cd-radius-preview: 16px;
+  --cd-radius-field: 14px;
+  --cd-radius-editor-field: 13px;
+  --cd-radius-matrix: 11px;
+  --cd-radius-sm: 9px;
+  --cd-radius-chip: 7px;
+  --cd-radius-xs: 6px;
+
+  /* ---------- Shadows ---------- */
+  --cd-shadow-frame: 0 1px 3px rgba(86, 88, 94, .06);
+  --cd-shadow-pill-active: 0 1px 2px rgba(86, 88, 94, .12);
+  --cd-shadow-pill-active-2: 0 1px 2px rgba(86, 88, 94, .18);
+  --cd-shadow-drawer: -22px 0 52px -22px rgba(40, 38, 30, .42);
+  --cd-shadow-sheet: 0 -18px 42px -20px rgba(40, 38, 30, .4);
+  --cd-shadow-modal: 0 34px 70px -26px rgba(40, 38, 30, .55);
+  --cd-shadow-picker: 0 30px 60px -24px rgba(40, 38, 30, .5);
+  --cd-shadow-settings: 0 24px 60px -30px rgba(40, 38, 30, .5);
+  --cd-shadow-dropdown: 0 12px 32px -12px rgba(40, 38, 30, .32);
+  --cd-shadow-dropdown-2: 0 16px 34px -16px rgba(40, 38, 30, .36);
+  --cd-shadow-menu: 0 10px 26px -14px rgba(40, 38, 30, .42);
+  --cd-shadow-matrix-selected: 0 5px 12px -7px;
+
+  /* ---------- Motion: durations / easings ---------- */
+  --cd-ease-standard: cubic-bezier(.22, 1, .36, 1);
+  --cd-duration-drawer: .34s;
+  --cd-duration-sheet: .3s;
+  --cd-duration-sheet-draft: .28s;
+  --cd-duration-scrim: .2s;
+  --cd-duration-pop: .26s;
+  --cd-duration-picker-pop: .22s;
+  --cd-duration-micro-1: .12s;
+  --cd-duration-micro-2: .14s;
+  --cd-duration-micro-3: .15s;
+  --cd-duration-micro-4: .18s;
+  --cd-duration-micro-5: .2s;
+  --cd-duration-micro-6: .22s;
+  --cd-duration-spin: .8s;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes cd-drawerIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes cd-drawerInLeft {
+  from { transform: translateX(-108%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes cd-sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes cd-scrimIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cd-popIn {
+  from { opacity: 0; transform: scale(.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes cd-gspin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* cd-dockIn: added in v2 prototype (line 51) but has zero usages anywhere in the v2 source at the
+   time of export (grepped the full file, not just the truncated region) — included here per spec
+   for forward-compatibility since it's a named token in the design source, but no current component
+   uses it. Likely intended for the FAB's mount-in transition on Month desktop (new in v2) based on
+   its values (small upward dock + scale-in), but the prototype doesn't wire it up. */
+@keyframes cd-dockIn {
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}

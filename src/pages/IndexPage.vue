@@ -1,6 +1,13 @@
 <template>
   <div class="app">
-    <AppTopbar />
+    <!--
+      Month is rebuilt against the new design (design.md "Replacement proceeds shell-first, then
+      views by dependency"); Day/Week still render behind the legacy AppTopbar until tasks 4.2/4.3
+      rebuild them. AppShellChrome only mounts for the new Month screen so old and new chrome never
+      render at once, matching "a view is either fully old or fully new" (design.md Risks).
+    -->
+    <AppShellChrome v-if="ui.activeView === 'month'" />
+    <AppTopbar v-else />
     <div class="main">
       <div v-if="tasksStore.isLoading" class="loading-state">載入中…</div>
       <template v-else>
@@ -30,6 +37,7 @@
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import AppTopbar from '@/components/shell/AppTopbar.vue'
+import AppShellChrome from '@/components/shell/AppShellChrome.vue'
 import DayView from '@/components/day/DayView.vue'
 import WeekView from '@/components/week/WeekView.vue'
 import MonthView from '@/components/month/MonthView.vue'
@@ -55,6 +63,13 @@ const tasksStore = useTasksStore()
   width: 100%
   min-width: 0
   padding: 22px 28px
+
+  @media (max-width: 899px)
+    // Clears AppShellChrome's fixed bottom nav (task 3.1) so phone-viewport content
+    // never renders underneath it. 899px mirrors $cd-bp-desktop - 1px from breakpoints.sass;
+    // duplicated as a literal because Sass @import ordering here would pull the whole
+    // token partial into a page-scoped stylesheet for one value.
+    padding-bottom: 96px
 
 .loading-state
   display: flex
