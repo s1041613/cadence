@@ -23,6 +23,17 @@
     </section>
 
     <section class="gallery__section">
+      <h2>LoginPage (/login)</h2>
+      <p class="gallery__note">
+        Static sign-in screen — primary review surface is the live <code>/login</code> route. This is a clipped
+        thumbnail preview.
+      </p>
+      <div class="gallery__login-frame">
+        <LoginPage />
+      </div>
+    </section>
+
+    <section class="gallery__section">
       <h2>CdSegmented</h2>
       <CdSegmented v-model="segmentValue" :options="segmentOptions" />
     </section>
@@ -126,6 +137,7 @@ import CdSwitch from '@/components/ui/CdSwitch.vue'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdTimeGrid, { type TimeGridColumn } from '@/components/ui/CdTimeGrid.vue'
 import AppShellChrome from '@/components/shell/AppShellChrome.vue'
+import LoginPage from '@/pages/LoginPage.vue'
 import { ICONS, type IconName } from '@/components/ui/icons'
 import { QUADRANTS } from '@/composables/use-theme'
 import { useCurrentTime } from '@/composables/use-current-time'
@@ -248,6 +260,15 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 .gallery__timegrid-frame {
   max-height: 420px;
   overflow-y: auto;
+}
+
+.gallery__login-frame {
+  width: 100%;
+  max-width: 420px;
+  height: 720px;
+  overflow: hidden;
+  border: 1px dashed var(--cd-line, #e5e3db);
+  border-radius: var(--cd-radius-sm, 9px);
 }
 
 .gallery__overlay-demo {

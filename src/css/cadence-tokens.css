@@ -89,6 +89,7 @@
   --cd-font-ui: 'Inter', sans-serif;
   --cd-font-mono: 'JetBrains Mono', monospace;
   --cd-font-draft: 'Helvetica Neue', 'Inter', sans-serif;
+  --cd-font-script: 'Dancing Script', cursive;
 
   /* ---------- Typography: sizes (px scale used across the design) ---------- */
   --cd-fs-8: 8px;
