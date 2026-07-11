@@ -46,7 +46,7 @@
       <h2>CdEventChip</h2>
       <div class="gallery__row">
         <CdEventChip
-          v-for="fmt in (['time', 'name', 'icon', 'dot'] as const)"
+          v-for="fmt in (['name', 'icon', 'dot'] as const)"
           :key="fmt"
           title="Deep work"
           color="#6E839B"
@@ -137,7 +137,6 @@ const segmentValue = ref('name')
 const segmentOptions = [
   { value: 'name', label: 'Name' },
   { value: 'icon', label: 'Icon' },
-  { value: 'time', label: 'Time' },
   { value: 'dot', label: 'Dots' }
 ]
 

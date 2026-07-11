@@ -1,25 +1,24 @@
 <template>
   <nav class="cd-bottom-nav">
     <!-- <button type="button" class="cd-bottom-nav__btn" aria-label="Day view" @click="emit('update:activeView', 'day')">
-      <CdIcon name="view-day" :size="24" :color="activeView === 'day' ? '#56585E' : '#9C9E94'" />
+      <CdIcon name="view-day" :size="24" />
     </button> -->
     <button type="button" class="cd-bottom-nav__btn" aria-label="Month view" @click="emit('update:activeView', 'month')">
-      <CdIcon name="view-month" :size="24" :color="activeView === 'month' ? '#56585E' : '#9C9E94'" />
+      <CdIcon name="view-month" :size="24" />
     </button>
     <button type="button" class="cd-bottom-nav__btn" aria-label="Week view" @click="emit('update:activeView', 'week')">
-      <CdIcon name="view-week" :size="24" :color="activeView === 'week' ? '#56585E' : '#9C9E94'" />
+      <CdIcon name="view-week" :size="24" />
     </button>
     <!-- <button type="button" class="cd-bottom-nav__ai" aria-label="Assistant" @click="emit('openAssistant')">
-      <CdIcon name="spark" :size="24" color="#3A6EA5" />
+      <CdIcon name="spark" :size="24" />
     </button> -->
     <button type="button" class="cd-bottom-nav__btn" aria-label="Journal" @click="emit('openJournal')">
-      <CdIcon name="journal" :size="24" color="#9C9E94" />
+      <CdIcon name="journal" :size="26" />
     </button>
     <button type="button" class="cd-bottom-nav__avatar-btn" aria-label="Settings" @click="emit('openSettings')">
       <span class="cd-bottom-nav__avatar">
         <img v-if="avatarSrc" :src="avatarSrc" alt="" class="cd-bottom-nav__avatar-img" />
-        <span v-else class="cd-bottom-nav__avatar-fallback" />
-        <span v-if="notify" class="cd-bottom-nav__avatar-dot" />
+        <span v-else class="cd-bottom-nav__avatar-fallback">{{ initials }}</span>
       </span>
     </button>
   </nav>
@@ -42,17 +41,18 @@
 // avatar slot opens Settings (CdTopbar treats avatar -> openSettings identically).
 //
 // Kept a pure presentational component per design.md's ui-layer contract: no store imports, only
-// props/emits. The active/selected color logic (#56585E ink vs #9C9E94 muted) is ported verbatim
-// from the handoff's `items` array construction in `_bottomNav`.
+// props/emits. Nav glyphs are mode:'img' two-tone brand files rendered at their fixed design
+// colors regardless of active view — no active/inactive recolor or dimming (Zoe 2026-07-11).
+import { computed } from 'vue'
 import CdIcon from './CdIcon.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     activeView: string
     avatarSrc?: string | null
-    notify?: boolean
+    avatarName?: string
   }>(),
-  { avatarSrc: null, notify: true }
+  { avatarSrc: null, avatarName: 'chloe.rivera' }
 )
 
 const emit = defineEmits<{
@@ -61,6 +61,16 @@ const emit = defineEmits<{
   openJournal: []
   openSettings: []
 }>()
+
+const initials = computed(() =>
+  props.avatarName
+    .split(/[.\s_-]+/)
+    .filter(Boolean)
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+)
 </script>
 
 <style scoped>
@@ -127,22 +137,15 @@ const emit = defineEmits<{
 }
 
 .cd-bottom-nav__avatar-fallback {
-  display: block;
+  display: grid;
+  place-items: center;
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--cd-line-3);
+  background: var(--cd-topbar);
   border: 1px solid var(--cd-line);
+  font: 700 12px var(--cd-font-ui);
+  color: var(--cd-ink);
 }
 
-.cd-bottom-nav__avatar-dot {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #c0564b;
-  border: 2px solid var(--cd-topbar);
-}
 </style>

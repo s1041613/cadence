@@ -1,7 +1,7 @@
 <template>
   <div class="cd-sheet-root" :class="{ 'cd-sheet-root--fullscreen': fullscreen, 'cd-sheet-root--raised': raised }">
     <CdScrim v-if="!fullscreen" :color="scrimColor" @click="emit('scrimClick')" />
-    <div class="cd-sheet" :class="{ 'cd-sheet--fullscreen': fullscreen }" :style="{ animationDuration: duration }">
+    <div class="cd-sheet" :class="{ 'cd-sheet--fullscreen': fullscreen }" :style="{ animationDuration: duration, ...(surface ? { background: surface } : {}) }">
       <div v-if="shouldShowHandle" class="cd-sheet__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
         <div class="cd-sheet__handle" />
       </div>
@@ -34,6 +34,9 @@ const props = withDefaults(
     showHandle?: boolean
     fullscreen?: boolean
     raised?: boolean
+    // Overrides the sheet's default #fff surface (e.g. Draft passes its paper token so the
+    // fullscreen sheet's edge-to-edge background matches the drawer content, not white).
+    surface?: string
   }>(),
   { scrimColor: 'var(--cd-scrim-mid)', duration: '.3s', showHandle: true, fullscreen: false, raised: false }
 )

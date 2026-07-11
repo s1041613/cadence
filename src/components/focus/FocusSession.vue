@@ -3,7 +3,9 @@
     <div class="fx-top">
       <button v-if="phase === 'breathing'" class="fx-skip" @click="skipBreathing">跳過</button>
       <button class="fx-mute" @click="onToggleMute">{{ muted ? '開聲' : '靜音' }}</button>
-      <button aria-label="關閉" @click="close">×</button>
+      <button class="fx-close" aria-label="關閉" @click="close">
+        <CdIcon name="close" :size="16" color="#fff" />
+      </button>
     </div>
 
     <template v-if="phase === 'breathing'">
@@ -89,6 +91,7 @@ import { useTasksStore } from '@/stores/tasks-store'
 import { autoPoms } from '@/utils/convert-date-time'
 import { makeFocusAudio, type FocusAudio } from '@/utils/make-focus-audio'
 import { TOMATO_SVG } from '@/utils/tomato-icon'
+import CdIcon from '../ui/CdIcon.vue'
 
 const FOCUS_MIN = 25
 const REST_MIN = 5
@@ -470,6 +473,13 @@ onUnmounted(() => {
 
     &:hover
       background: rgba(255, 255, 255, .26)
+
+  .fx-close
+    display: flex
+    align-items: center
+    justify-content: center
+    padding: 0
+    width: 36px
 
 .fx .fx-timer
   position: absolute

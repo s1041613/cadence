@@ -144,6 +144,7 @@ const eyebrowLabel = computed(() => {
     border: none;
     border-radius: 0;
     box-sizing: border-box;
+    padding-bottom: 35px;
   }
 }
 
@@ -345,7 +346,7 @@ const eyebrowLabel = computed(() => {
 }
 
 .cd-preview-card__focus-wrap {
-  padding: 10px 16px 14px;
+  padding: 10px 16px 0px;
 }
 
 .cd-preview-card__managed-note {

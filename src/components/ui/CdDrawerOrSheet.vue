@@ -10,7 +10,7 @@
   >
     <slot />
   </CdDrawer>
-  <CdSheet v-else v-bind="scrimColorAttr" :duration="sheetDuration" :fullscreen="sheetFullscreen" :raised="raised" @scrim-click="emit('scrimClick')" @dismiss="emit('dismiss')">
+  <CdSheet v-else v-bind="{ ...scrimColorAttr, ...sheetSurfaceAttr }" :duration="sheetDuration" :fullscreen="sheetFullscreen" :raised="raised" @scrim-click="emit('scrimClick')" @dismiss="emit('dismiss')">
     <slot />
   </CdSheet>
 </template>
@@ -55,6 +55,8 @@ const props = withDefaults(
     sheetDuration?: string
     sheetFullscreen?: boolean
     raised?: boolean
+    /** CdSheet-only: overrides the sheet's default white surface (e.g. Draft's paper token). */
+    sheetSurface?: string
   }>(),
   {
     width: 'min(440px, 46%)',
@@ -77,4 +79,8 @@ const emit = defineEmits<{
 // child's own prop type is `string`, not `string | undefined`) — v-bind-ing an object that omits the
 // key entirely when unset lets each child's own default (heavy for drawer, mid for sheet) apply.
 const scrimColorAttr = computed(() => (props.scrimColor === undefined ? {} : { scrimColor: props.scrimColor }))
+
+// Same `exactOptionalPropertyTypes` workaround as scrimColor: CdSheet's `surface` prop is `string`,
+// not `string | undefined`, so omit the key entirely when unset rather than forwarding `undefined`.
+const sheetSurfaceAttr = computed(() => (props.sheetSurface === undefined ? {} : { surface: props.sheetSurface }))
 </script>

@@ -10,5 +10,3 @@ export const TOMATO_SVG = `
     <path d="M12.2 7.2 C13.9 6 15.6 5.8 16.6 6.2 C14.9 6.7 13.7 7.2 12.7 7.9 Z"/>
   </g>
   <path d="M12 3.6 C11.8 4.8 11.8 6.2 12 7.7 C12.2 6.2 12.2 4.8 12 3.6 Z" fill="#3B8C46"/>`
-
-export const TOMATO_EMPTY_SVG = `<circle cx="12" cy="13.6" r="7.6" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.4"/>`

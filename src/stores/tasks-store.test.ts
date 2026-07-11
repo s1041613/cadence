@@ -43,7 +43,7 @@ describe('tasks-store', () => {
         estimatedPomodoros: 3,
         backgroundColor: '#c8a2c8',
         texture: 'dot',
-        icon: 'bolt',
+        icon: 'star',
         important: true,
         urgent: true,
         notes: 'Keep this note'
@@ -61,7 +61,7 @@ describe('tasks-store', () => {
         estimatedPomodoros: 3,
         backgroundColor: '#c8a2c8',
         texture: 'dot',
-        icon: 'bolt',
+        icon: 'star',
         important: true,
         urgent: true,
         notes: 'Keep this note'

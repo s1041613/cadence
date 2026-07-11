@@ -94,10 +94,10 @@ const analytics = ref(true)
 const crashReports = ref(true)
 const lockScreenTitles = ref(true)
 
-// addCalendar/calendarDetail nest one level under calendars, so back from those
-// returns to the calendars list rather than all the way to root.
+// Calendar detail nests one level under calendars, so back from it returns to the calendars list
+// rather than all the way to root.
 function goBack(): void {
-  ui.settingsPane = ui.settingsPane === 'addCalendar' || ui.settingsPane === 'calendarDetail' ? 'calendars' : 'root'
+  ui.settingsPane = ui.settingsPane === 'calendarDetail' ? 'calendars' : 'root'
 }
 
 function close(): void {

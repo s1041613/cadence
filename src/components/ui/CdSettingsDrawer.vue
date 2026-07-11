@@ -65,7 +65,7 @@
 
           <div class="cd-settings__group">
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'privacy')">
-              <span class="cd-settings__row-icon"><CdIcon name="info" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="shield" :size="20" color="var(--cd-ink-2)" /></span>
               <span class="cd-settings__row-label">Privacy</span>
               <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
             </button>
@@ -203,11 +203,11 @@
             </div>
             <CdSegmented
               :model-value="monthEventLabel"
-              :options="[{ value: 'name', label: 'Name' }, { value: 'icon', label: 'Icon' }, { value: 'time', label: 'Time' }, { value: 'dot', label: 'Dots' }]"
-              @update:model-value="(v) => emit('update:monthEventLabel', v as 'name' | 'icon' | 'time' | 'dot')"
+              :options="[{ value: 'name', label: 'Name' }, { value: 'icon', label: 'Icon' }, { value: 'dot', label: 'Dots' }]"
+              @update:model-value="(v) => emit('update:monthEventLabel', v as 'name' | 'icon' | 'dot')"
             />
           </div>
-          <p class="cd-settings__note">"Name" shows the task title only; "Icon" adds the quadrant icon before it; "Time" prefixes it with the start time. Month view only — Week and Day always show times on the grid.</p>
+          <p class="cd-settings__note">"Name" shows the task title only; "Icon" adds the quadrant icon before it; "Dots" shows compact color markers. Month view only.</p>
 
           <div class="cd-settings__row cd-settings__row--bordered">
             <div class="cd-settings__row-text">
@@ -333,27 +333,6 @@
               <CdIcon name="plus" :size="16" color="var(--cd-ink)" />
               Add Calendar
             </button>
-          </div>
-        </template>
-
-        <template v-else-if="activePane === 'addCalendar'">
-          <p class="cd-settings__note cd-settings__note--center">Get useful suggestions based on the calendar’s purpose.</p>
-          <div class="cd-settings__group">
-            <template v-for="(purpose, index) in CAL_PURPOSES" :key="purpose.id">
-              <button type="button" class="cd-settings__cal-purpose-row" @click="openCalendarDetail(null, purpose)">
-                <span class="cd-settings__cal-icon-tile cd-settings__cal-icon-tile--lg" :style="{ background: calTint(purpose.color) }">
-                  <CdIcon :name="purpose.icon" :size="24" :color="calIconColor(purpose.color)" />
-                </span>
-                <span class="cd-settings__cal-purpose-meta">
-                  <span class="cd-settings__cal-purpose-name">{{ purpose.name }}</span>
-                  <span class="cd-settings__cal-purpose-desc">{{ purpose.desc }}</span>
-                </span>
-              </button>
-              <div v-if="index < CAL_PURPOSES.length - 1" class="cd-settings__divider" />
-            </template>
-          </div>
-          <div class="cd-settings__field-stack">
-            <button type="button" class="cd-settings__gcal-connect-btn" @click="openCalendarDetail(null)">Start from a blank calendar</button>
           </div>
         </template>
 
@@ -497,8 +476,6 @@ import type { Calendar } from '@/types/calendar'
 // CADENCE Handoff §_settingsDrawer (full file, no longer truncated).
 //
 // Icon substitutions (no matching glyph exists in icons.ts):
-//  - Privacy row icon: design calls for a shield glyph; none exists, so 'info' is used instead
-//    (closest available utility-tier glyph).
 //  - Timezone field icon: design calls for a globe glyph; none exists, so 'clock' is reused
 //    (closest available field icon).
 //
@@ -539,32 +516,18 @@ const TITLE_MAP: Record<Exclude<Props['activePane'], 'root'>, string> = {
   notifications: 'Notifications',
   privacy: 'Privacy',
   calendars: 'Calendars',
-  addCalendar: 'Add Calendar',
   calendarDetail: 'Calendar'
 }
 
-// CAL_PURPOSES mirrors the handoff's _calPurposes() (§_addCalPane) — a static onboarding
-// list of common calendar "purposes" that pre-fill name/color/icon, not a stored entity.
-const CAL_PURPOSES: { id: string; name: string; icon: IconName; color: string; desc: string }[] = [
-  { id: 'family', name: 'Family', icon: 'home', color: '#7BA05B', desc: 'See the whole family’s schedule at a glance.' },
-  { id: 'personal', name: 'Personal', icon: 'lock', color: '#3A6EA5', desc: 'Private events, viewed alongside your other calendars.' },
-  { id: 'relationship', name: 'Relationship', icon: 'heart', color: '#C56A5E', desc: 'Find time for each other by sharing schedules.' },
-  { id: 'work', name: 'Work', icon: 'work', color: '#6E839B', desc: 'Meetings, colleagues’ schedules and client status in one place.' },
-  { id: 'friends', name: 'Friends', icon: 'users', color: '#7BA05B', desc: 'Plan hangouts and chat in the comments.' },
-  { id: 'lesson', name: 'Lesson', icon: 'target', color: '#6E839B', desc: 'Track lesson times and see changes instantly.' },
-  { id: 'school', name: 'School events', icon: 'school', color: '#E3A75C', desc: 'Important dates and shared assignment deadlines.' },
-  { id: 'hobbies', name: 'Hobbies', icon: 'bulb', color: '#9C6FA6', desc: 'Share premieres, releases and hobby plans.' }
-]
-
 interface Props {
-  activePane: 'root' | 'account' | 'time' | 'customization' | 'notifications' | 'privacy' | 'calendars' | 'addCalendar' | 'calendarDetail'
+  activePane: 'root' | 'account' | 'time' | 'customization' | 'notifications' | 'privacy' | 'calendars' | 'calendarDetail'
   email: string
   gcalConnected: boolean
   syncedCalendars?: string[]
   firstDay: string
   timezone: string
   theme: 'Light' | 'Auto' | 'Dark'
-  monthEventLabel: 'name' | 'icon' | 'time' | 'dot'
+  monthEventLabel: 'name' | 'icon' | 'dot'
   showPhoto: boolean
   monthlyPhotos: (string | null)[]
   notifEvents: boolean
@@ -596,7 +559,7 @@ const emit = defineEmits<{
   'update:firstDay': [value: string]
   'update:timezone': [value: string]
   'update:theme': [value: 'Light' | 'Auto' | 'Dark']
-  'update:monthEventLabel': [value: 'name' | 'icon' | 'time' | 'dot']
+  'update:monthEventLabel': [value: 'name' | 'icon' | 'dot']
   'update:showPhoto': [value: boolean]
   setMonthPhoto: [monthIndex: number, photo: string | null]
   createCalendar: [draft: { name: string; color: string; icon: string | null; cover: string | null }]
@@ -720,14 +683,14 @@ async function copyInviteLink(): Promise<void> {
 }
 
 function openAddCalendar(): void {
-  emit('navigate', 'addCalendar')
+  openCalendarDetail(null)
 }
 
-function openCalendarDetail(cal: Calendar | null, purpose?: (typeof CAL_PURPOSES)[number]): void {
+function openCalendarDetail(cal: Calendar | null): void {
   draftEditId.value = cal?.id ?? null
-  draftName.value = cal?.name ?? purpose?.name ?? ''
-  draftColor.value = cal?.color ?? purpose?.color ?? '#7BA05B'
-  draftIcon.value = cal?.icon ?? purpose?.icon ?? null
+  draftName.value = cal?.name ?? ''
+  draftColor.value = cal?.color ?? '#7BA05B'
+  draftIcon.value = cal?.icon ?? null
   draftCover.value = cal?.cover ?? null
   emit('navigate', 'calendarDetail')
 }
@@ -841,7 +804,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
   align-items: center;
   gap: 10px;
   padding: 18px 16px 15px;
-  border-bottom: 1px solid var(--cd-line);
+  border-bottom: 0.5px solid var(--cd-line);
 }
 
 .cd-settings__icon-btn {
@@ -1403,7 +1366,7 @@ button.cd-settings__row:hover {
   text-decoration: underline;
 }
 
-/* Calendars pane — reorderable list, detail + purpose sub-panes */
+/* Calendars pane — reorderable list and detail pane */
 
 .cd-settings__cal-toolbar {
   display: flex;
@@ -1475,11 +1438,6 @@ button.cd-settings__row:hover {
   display: block;
 }
 
-.cd-settings__cal-icon-tile--lg {
-  width: 50px;
-  height: 50px;
-}
-
 .cd-settings__cal-name-label {
   flex: 1;
   min-width: 0;
@@ -1493,48 +1451,6 @@ button.cd-settings__row:hover {
 .cd-settings__icon-btn:disabled {
   opacity: 0.35;
   cursor: default;
-}
-
-.cd-settings__note--center {
-  text-align: center;
-  margin-top: 12px;
-}
-
-.cd-settings__cal-purpose-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  box-sizing: border-box;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  padding: 13px 16px;
-  text-align: left;
-  transition: background var(--cd-duration-micro-3);
-}
-
-.cd-settings__cal-purpose-row:hover {
-  background: rgba(86, 88, 94, 0.045);
-}
-
-.cd-settings__cal-purpose-meta {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.cd-settings__cal-purpose-name {
-  font: 700 15.5px var(--cd-font-title);
-  color: var(--cd-ink);
-}
-
-.cd-settings__cal-purpose-desc {
-  font: 500 12.5px var(--cd-font-title);
-  color: var(--cd-muted);
-  line-height: 1.45;
 }
 
 /* Calendar detail pane */

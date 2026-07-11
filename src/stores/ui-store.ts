@@ -14,7 +14,6 @@ export type SettingsPane =
   | 'notifications'
   | 'privacy'
   | 'calendars'
-  | 'addCalendar'
   | 'calendarDetail'
 
 export interface Toast {
