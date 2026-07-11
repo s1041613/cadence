@@ -1,35 +1,33 @@
 <template>
-  <CdDrawer width="min(440px, 46%)" scrim-color="var(--cd-scrim-strong)" @scrim-click="emit('close')">
-    <div class="cd-assistant">
-      <div class="cd-assistant__header">
-        <span class="cd-assistant__icon">
-          <CdIcon name="spark-mono" :size="20" color="#3A6EA5" />
-        </span>
-        <span class="cd-assistant__title">Assistant</span>
-        <button type="button" class="cd-assistant__close" aria-label="Close" @click="emit('close')">✕</button>
-      </div>
-
-      <div class="cd-assistant__greeting">
-        <p>{{ greeting }}</p>
-      </div>
-
-      <div class="cd-assistant__chips">
-        <button v-for="chip in suggestionChips" :key="chip" type="button" class="cd-assistant__chip" @click="emit('chipClick', chip)">
-          {{ chip }}
-        </button>
-      </div>
-
-      <div class="cd-assistant__input-bar">
-        <span class="cd-assistant__input-icon">
-          <CdIcon name="image" :size="22" color="#9C9E94" />
-        </span>
-        <input class="cd-assistant__input" placeholder="Ask, or attach an image…" :value="inputValue" @input="emit('update:inputValue', ($event.target as HTMLInputElement).value)" />
-        <button type="button" class="cd-assistant__send" aria-label="Send" @click="emit('send')">
-          <CdIcon name="arrow-up" :size="18" color="#fff" />
-        </button>
-      </div>
+  <div class="cd-assistant">
+    <div class="cd-assistant__header">
+      <span class="cd-assistant__icon">
+        <CdIcon name="spark-mono" :size="20" color="#3A6EA5" />
+      </span>
+      <span class="cd-assistant__title">Assistant</span>
+      <button type="button" class="cd-assistant__close" aria-label="Close" @click="emit('close')">✕</button>
     </div>
-  </CdDrawer>
+
+    <div class="cd-assistant__greeting">
+      <p>{{ greeting }}</p>
+    </div>
+
+    <div class="cd-assistant__chips">
+      <button v-for="chip in suggestionChips" :key="chip" type="button" class="cd-assistant__chip" @click="emit('chipClick', chip)">
+        {{ chip }}
+      </button>
+    </div>
+
+    <div class="cd-assistant__input-bar">
+      <span class="cd-assistant__input-icon">
+        <CdIcon name="image" :size="22" color="#9C9E94" />
+      </span>
+      <input class="cd-assistant__input" placeholder="Ask, or attach an image…" :value="inputValue" @input="emit('update:inputValue', ($event.target as HTMLInputElement).value)" />
+      <button type="button" class="cd-assistant__send" aria-label="Send" @click="emit('send')">
+        <CdIcon name="arrow-up" :size="18" color="#fff" />
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -37,11 +35,9 @@
 // All-static demo per the prototype: chips and send button have no real handlers upstream; this
 // component still emits so a consumer *could* wire them up, but the reference design leaves them inert.
 //
-// CADENCE Handoff: desktop assistant is a MODAL right drawer (scrim rgba(40,38,30,.34), i.e.
-// var(--cd-scrim-strong)) — not the non-modal/Gmail-Notion side-panel treatment an earlier v2 draft
-// used. Clicking the scrim closes the drawer like Task Editor / Draft. Send button background
-// changed from #3A3833 to #3A6EA5.
-import CdDrawer from './CdDrawer.vue'
+// CADENCE Handoff: desktop assistant is presented by the feature-layer wrapper as a modal right
+// drawer with a strong scrim. This component is content-only so it can also live inside the phone
+// bottom sheet without creating a second overlay container.
 import CdIcon from './CdIcon.vue'
 
 withDefaults(

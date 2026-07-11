@@ -11,11 +11,11 @@
     </div>
     <div class="cd-day-list__list">
       <button
-        v-for="(ev, i) in events"
-        :key="i"
+        v-for="ev in events"
+        :key="ev.id"
         type="button"
         class="cd-day-list__row"
-        @click="emit('eventClick', ev)"
+        @click="(e) => emit('eventClick', ev, e)"
       >
         <span class="cd-day-list__dot" :style="{ background: ev.color }" />
         <span class="cd-day-list__row-title">{{ ev.title }}</span>
@@ -34,6 +34,7 @@ import CdIcon from './CdIcon.vue'
 // "Nothing scheduled." Presentation (desktop right drawer vs phone bottom sheet) is the caller's via
 // CdDrawerOrSheet, per the drawer-or-sheet convention — this component only renders the panel body.
 export interface DayListEvent {
+  id: string
   title: string
   color: string
   time: string
@@ -48,7 +49,7 @@ defineProps<{
 
 const emit = defineEmits<{
   close: []
-  eventClick: [event: DayListEvent]
+  eventClick: [event: DayListEvent, mouseEvent: MouseEvent]
 }>()
 </script>
 

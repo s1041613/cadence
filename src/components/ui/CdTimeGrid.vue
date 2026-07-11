@@ -19,13 +19,14 @@
       <div v-for="col in columns" :key="col.date" class="cd-time-grid__allday-cell">
         <div
           v-for="ev in col.allDayEvents"
-          :key="ev.title"
+          :key="ev.id"
           class="cd-time-grid__allday-item"
           :style="{
             background: `color-mix(in srgb, ${ev.color} 16%, var(--cd-surface))`,
             color: `color-mix(in srgb, ${ev.color} 70%, var(--cd-ink))`,
             borderLeftColor: ev.color
           }"
+          @click="(e) => emit('eventClick', col.date, ev.id, e)"
         >
           {{ ev.title }}
         </div>
@@ -35,11 +36,21 @@
     <!-- Scrollable body: hour lines, column dividers, absolutely-positioned event blocks, now line. -->
     <div class="cd-time-grid__body" :style="{ gridTemplateColumns: gutterCols, height: `${totalHeight}px` }">
       <div class="cd-time-grid__gutter">
-        <span v-for="h in hours" :key="h" class="cd-time-grid__hour-label" :style="{ top: `${top(h * 60) - 6}px` }">
-          {{ String(h).padStart(2, '0') }}:00
+        <span
+          v-for="h in hours"
+          :key="h"
+          class="cd-time-grid__hour-label"
+          :style="{ top: `${top(h * 60) + 2}px` }"
+        >
+          {{ hourLabel(h) }}
         </span>
       </div>
-      <div v-for="col in columns" :key="col.date" class="cd-time-grid__column">
+      <div
+        v-for="col in columns"
+        :key="col.date"
+        class="cd-time-grid__column"
+        @click="(e) => onColumnClick(col.date, e)"
+      >
         <div v-for="h in hours" :key="h" class="cd-time-grid__hour-line" :style="{ top: `${top(h * 60)}px` }" />
         <div
           v-if="col.today"
@@ -71,6 +82,7 @@
 import { computed } from 'vue'
 import CdEventBlock from './CdEventBlock.vue'
 import { assignLanes } from '@/utils/timeline-lanes'
+import { formatTime, type TimeFormatName } from '@/utils/convert-date-time'
 
 // CdTimeGrid — shared Week/Day time grid. design-research-report.md §3.6.
 // Range 6:00-23:00 (START=6, END=23). Gutter 50px. Hour lines rgba(86,88,94,.08); column dividers
@@ -92,7 +104,7 @@ export interface TimeGridColumn {
   dayNum: number
   today: boolean
   events: TimeGridEvent[]
-  allDayEvents: Array<{ title: string; color: string }>
+  allDayEvents: Array<{ id: string; title: string; color: string }>
 }
 
 const START_HOUR = 6
@@ -104,14 +116,22 @@ const props = withDefaults(
     /** Row height in px per hour; desk Week=44, Day=52. */
     rowHeight?: number
     hideHead?: boolean
-    /** "Now" in minutes-from-midnight, for the now-indicator line (prototype demo fixes this at 10:18). */
-    nowMinutes?: number
+    /** "Now" in minutes-from-midnight, for the now-indicator line. Pure ui layer takes no implicit
+     * clock (design.md "Pure presentational ui layer with feature-layer composition") — the caller
+     * derives this from the shared `useCurrentTime()` singleton and passes it down every tick. */
+    nowMinutes: number
+    /** user-settings spec "Time format applies to displayed times" — governs each event block's
+     * start-time label. The hour-gutter itself always shows plain 24-hour numbers per the design. */
+    timeFormat?: TimeFormatName
   }>(),
-  { rowHeight: 44, hideHead: false, nowMinutes: 10 * 60 + 18 }
+  { rowHeight: 44, hideHead: false, timeFormat: '24-Hour' }
 )
 
 const emit = defineEmits<{
   eventClick: [date: string, eventId: string, event: MouseEvent]
+  /** Empty-column click; `minutesFromMidnight` is the raw (unrounded) clicked position — the
+   * feature-layer caller applies quickAddTimeRange() rounding/clamping (design.md "5.1"). */
+  columnClick: [date: string, minutesFromMidnight: number, event: MouseEvent]
 }>()
 
 const hours = computed(() => {
@@ -124,6 +144,16 @@ const totalHeight = computed(() => (END_HOUR - START_HOUR) * props.rowHeight)
 
 function top(minutes: number): number {
   return ((minutes - START_HOUR * 60) / 60) * props.rowHeight
+}
+
+function onColumnClick(date: string, e: MouseEvent): void {
+  // Ignore clicks on event blocks/now-line — they stop propagation via their own @click handlers
+  // (CdEventBlock) except the now-line, which is pointer-events:none in its stylesheet already.
+  if (e.target !== e.currentTarget) return
+  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+  const y = e.clientY - rect.top
+  const clickedMinutes = START_HOUR * 60 + (y / props.rowHeight) * 60
+  emit('columnClick', date, clickedMinutes, e)
 }
 
 const gutterCols = computed(() => `50px repeat(${props.columns.length}, 1fr)`)
@@ -170,7 +200,11 @@ function laidOutBlocks(col: TimeGridColumn): LaidOutBlock[] {
 function minutesToLabel(m: number): string {
   const h = Math.floor(m / 60)
   const mm = m % 60
-  return `${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
+  return formatTime(`${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`, props.timeFormat)
+}
+
+function hourLabel(h: number): string {
+  return String(h).padStart(2, '0')
 }
 </script>
 
@@ -198,13 +232,13 @@ function minutesToLabel(m: number): string {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 0;
+  gap: 3px;
+  padding: 11px 0 10px;
 }
 
 .cd-time-grid__header-dow {
-  font: 600 10px var(--cd-font-ui);
-  letter-spacing: 0.12em;
+  font: 600 10.5px var(--cd-font-ui);
+  letter-spacing: 0.14em;
   color: var(--cd-ink-2);
 }
 
@@ -217,7 +251,7 @@ function minutesToLabel(m: number): string {
 }
 
 .cd-time-grid__header-num {
-  font: 700 17px var(--cd-font-mono);
+  font: 700 18px var(--cd-font-mono);
   color: var(--cd-ink);
 }
 
@@ -247,7 +281,7 @@ function minutesToLabel(m: number): string {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 3px 4px;
+  padding: 4px 4px 3px;
   border-left: 1px solid rgba(86, 88, 94, 0.08);
 }
 

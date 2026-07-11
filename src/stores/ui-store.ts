@@ -6,7 +6,16 @@ import { iso } from '@/utils/convert-date-time'
 import type { PopoverAnchor } from '@/components/ui/CdPopover.vue'
 
 export type ActiveView = 'day' | 'week' | 'month'
-export type SettingsPane = 'root' | 'account' | 'time' | 'customization' | 'calendars' | 'google'
+export type SettingsPane =
+  | 'root'
+  | 'account'
+  | 'time'
+  | 'customization'
+  | 'notifications'
+  | 'privacy'
+  | 'calendars'
+  | 'addCalendar'
+  | 'calendarDetail'
 
 export interface Toast {
   type: 'ok' | 'warn'
@@ -17,6 +26,7 @@ export interface QuickAddState {
   anchor: PopoverAnchor
   date: string
   time: string | null // null = all-day / no time context (month-cell invocation)
+  endTime: string | null // paired with `time`; null iff `time` is null
 }
 
 export interface EventPreviewState {
@@ -30,10 +40,8 @@ export const useUiStore = defineStore('ui', () => {
 
   const activeView = ref<ActiveView>('month')
   const selectedDate = ref(iso(new Date()))
-  const taskEditorInitialValues = ref<Partial<Task> | null>(null)
-  const previewTaskId = ref<string | null>(null)
+  const eventComposerInitialValues = ref<Partial<Task> | null>(null)
   const focusTaskId = ref<string | null>(null)
-  const inboxOpen = ref(false)
   const toast = ref<Toast | null>(null)
 
   // Overlay routing state (design.md "State-driven overlay routing stays in ui-store").
@@ -57,16 +65,13 @@ export const useUiStore = defineStore('ui', () => {
     return tasksStore.tasks.find((t) => t.id === id)
   }
 
-  const previewTask = computed(() => findTask(previewTaskId.value))
   const focusTask = computed(() => findTask(focusTaskId.value))
 
   return {
     activeView,
     selectedDate,
-    taskEditorInitialValues,
-    previewTaskId,
+    eventComposerInitialValues,
     focusTaskId,
-    inboxOpen,
     toast,
     qaPop,
     eventPreview,
@@ -79,7 +84,6 @@ export const useUiStore = defineStore('ui', () => {
     settingsOpen,
     settingsPane,
     findTask,
-    previewTask,
     focusTask
   }
 })

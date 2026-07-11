@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, toHM, fmtDur, autoPoms } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, toHM, fmtDur, autoPoms, quickAddTimeRange, formatTime } from './convert-date-time'
 
 describe('pad', () => {
   it('pads single digits', () => {
@@ -51,6 +51,23 @@ describe('startOfWeek', () => {
     const d = parseISO('2026-06-29')
     expect(iso(startOfWeek(d))).toBe('2026-06-29')
   })
+
+  // user-settings spec "First day of week re-anchors all week-based layouts" / Example: July 2026
+  // anchoring — July 1, 2026 is a Wednesday.
+  it('re-anchors to the given first day of week', () => {
+    const d = parseISO('2026-07-01')
+    expect(iso(startOfWeek(d, 'Sunday'))).toBe('2026-06-28')
+    expect(iso(startOfWeek(d, 'Monday'))).toBe('2026-06-29')
+    expect(iso(startOfWeek(d, 'Saturday'))).toBe('2026-06-27')
+  })
+
+  it('places July 1 2026 in the fourth column with Sunday start and the third with Monday start', () => {
+    const sundayStart = startOfWeek(parseISO('2026-07-01'), 'Sunday')
+    const mondayStart = startOfWeek(parseISO('2026-07-01'), 'Monday')
+    const daysSince = (start: Date) => Math.round((parseISO('2026-07-01').getTime() - start.getTime()) / 86400000)
+    expect(daysSince(sundayStart) + 1).toBe(4)
+    expect(daysSince(mondayStart) + 1).toBe(3)
+  })
 })
 
 describe('minutes', () => {
@@ -94,5 +111,27 @@ describe('autoPoms', () => {
     expect(autoPoms({ allDay: false, start: '09:00', end: '09:30' })).toBe(2)
     expect(autoPoms({ allDay: false, start: '09:00', end: '09:25' })).toBe(1)
     expect(autoPoms({ allDay: false, start: '09:00', end: '10:30' })).toBe(4)
+  })
+})
+
+describe('quickAddTimeRange', () => {
+  // app-shell spec "Creation entry points seed context from where they are invoked" /
+  // Example: rounding and clamping boundaries.
+  it.each([
+    ['10:20', '10:00', '11:00', 'rounds down to 30-minute step'],
+    ['10:45', '10:30', '11:30', 'rounds down to 30-minute step'],
+    ['05:40', '06:00', '07:00', 'clamped to earliest start 06:00'],
+    ['22:50', '22:00', '23:00', 'clamped to latest start 22:00']
+  ])('%s -> start %s, end %s (%s)', (clicked, expectedStart, expectedEnd) => {
+    expect(quickAddTimeRange(minutes(clicked))).toEqual({ start: expectedStart, end: expectedEnd })
+  })
+})
+
+describe('formatTime', () => {
+  // user-settings spec "Time format applies to displayed times" / Example: 2:30 PM stored at
+  // 14:30 displays as 14:30 in 24h mode and unchanged in the stored value either way.
+  it('passes 24-hour values through unchanged', () => {
+    expect(formatTime('14:30', '24-Hour')).toBe('14:30')
+    expect(formatTime('00:00', '24-Hour')).toBe('00:00')
   })
 })

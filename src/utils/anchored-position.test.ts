@@ -41,4 +41,13 @@ describe('anchoredPosition', () => {
     const pos = anchoredPosition(anchor, card, root, 20)
     expect(pos.y).toBe(100 + 30 + 20)
   })
+
+  it('clamps vertically when neither below nor flipped-above fully fits a short root', () => {
+    // A root shorter than card.height + gap leaves no position where the card fits without
+    // clamping — the anchor sits deep enough that flipping above would go negative too.
+    const shortRoot = { width: 1280, height: 300 }
+    const anchor = { x: 100, y: 200, width: 60, height: 20 }
+    const pos = anchoredPosition(anchor, card, shortRoot)
+    expect(pos.y).toBe(shortRoot.height - card.height)
+  })
 })

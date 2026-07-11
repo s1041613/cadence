@@ -10,7 +10,7 @@
   >
     <slot />
   </CdDrawer>
-  <CdSheet v-else v-bind="scrimColorAttr" :duration="sheetDuration" @scrim-click="emit('scrimClick')">
+  <CdSheet v-else v-bind="scrimColorAttr" :duration="sheetDuration" :fullscreen="sheetFullscreen" :raised="raised" @scrim-click="emit('scrimClick')">
     <slot />
   </CdSheet>
 </template>
@@ -28,6 +28,16 @@
 // the shared breakpoint (e.g. a `matchMedia($cd-bp-desktop)` composable) so every consumer reads the
 // same breakpoint token rather than each drawer re-deriving it. `scrimColor` has no default here (each
 // child's own default — heavy for drawer, mid for sheet — applies when the caller doesn't override it).
+//
+// `sheetFullscreen` (Zoe's 2026-07-11 correction): Draft/Settings/Assistant opt into CdSheet's
+// edge-to-edge phone presentation; event composer and the month-calendar picker leave it off and keep
+// the card-style bottom sheet.
+//
+// `raised` (Zoe's 2026-07-11 correction): when the event composer opens from within the Draft drawer
+// (draft-conversion), the Draft sheet stays mounted and open underneath it — the composer needs a
+// higher stacking tier so it isn't hidden behind Draft's own `sheetFullscreen` tier, but must keep its
+// card-style bottom-sheet look (not go edge-to-edge like `sheetFullscreen`), matching the handoff's
+// "new-event card floats above the still-visible Draft list" composition.
 import { computed } from 'vue'
 import CdDrawer from './CdDrawer.vue'
 import CdSheet from './CdSheet.vue'
@@ -43,13 +53,17 @@ const props = withDefaults(
     side?: 'right' | 'left'
     /** CdSheet-only: forwarded when presentation === 'sheet'. */
     sheetDuration?: string
+    sheetFullscreen?: boolean
+    raised?: boolean
   }>(),
   {
     width: 'min(440px, 46%)',
     teleport: false,
     nonModal: false,
     side: 'right',
-    sheetDuration: '.3s'
+    sheetDuration: '.3s',
+    sheetFullscreen: false,
+    raised: false
   }
 )
 

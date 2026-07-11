@@ -52,12 +52,13 @@
           color="#6E839B"
           quad="plan"
           time="14:00"
+          end-time="15:30"
           :all-day="false"
           :done="false"
           :fmt="fmt"
         />
-        <CdEventChip title="All-day trip" color="#C56A5E" quad="do" :time="null" all-day :done="false" fmt="name" />
-        <CdEventChip title="Done task" color="#BFA86A" quad="quick" time="09:00" :all-day="false" done fmt="name" />
+        <CdEventChip title="All-day trip" color="#C56A5E" quad="do" :time="null" :end-time="null" all-day :done="false" fmt="name" />
+        <CdEventChip title="Done task" color="#BFA86A" quad="quick" time="09:00" end-time="09:30" :all-day="false" done fmt="name" />
       </div>
     </section>
 
@@ -83,6 +84,18 @@
     </section>
 
     <section class="gallery__section">
+      <h2>CdTimeGrid (task 4.1)</h2>
+      <p class="gallery__note">
+        Now line tracks the real clock via the shared `useCurrentTime()` singleton (updates every second) — the
+        gutter's current hour highlights as time passes. Two-column demo reproduces the overlap example from
+        design.md: "Deep work" 14:00-16:00 and "Dentist" 14:30-15:00 render half-width side-by-side lanes.
+      </p>
+      <div class="gallery__shell-frame gallery__timegrid-frame">
+        <CdTimeGrid :columns="timeGridColumns" :now-minutes="nowMinutes" @event-click="() => {}" />
+      </div>
+    </section>
+
+    <section class="gallery__section">
       <h2>CdDrawerOrSheet (task 2.4)</h2>
       <p class="gallery__note">
         Both presentations of the same overlay, side by side — verify scrim-click and the close button dismiss each.
@@ -104,16 +117,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
 import CdSegmented from '@/components/ui/CdSegmented.vue'
 import CdIconButton from '@/components/ui/CdIconButton.vue'
 import CdEventChip from '@/components/ui/CdEventChip.vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
+import CdTimeGrid, { type TimeGridColumn } from '@/components/ui/CdTimeGrid.vue'
 import AppShellChrome from '@/components/shell/AppShellChrome.vue'
 import { ICONS, type IconName } from '@/components/ui/icons'
 import { QUADRANTS } from '@/composables/use-theme'
+import { useCurrentTime } from '@/composables/use-current-time'
+import { iso } from '@/utils/convert-date-time'
 
 const iconNames = Object.keys(ICONS) as IconName[]
 
@@ -132,6 +148,24 @@ function closeOverlayDemo(): void {
   drawerOpen.value = false
   sheetOpen.value = false
 }
+
+const now = useCurrentTime()
+const nowMinutes = computed(() => now.value.getHours() * 60 + now.value.getMinutes())
+const todayIso = computed(() => iso(now.value))
+const timeGridColumns = computed<TimeGridColumn[]>(() => [
+  {
+    date: todayIso.value,
+    dow: now.value.getDay(),
+    dowLabel: 'TODAY',
+    dayNum: now.value.getDate(),
+    today: true,
+    allDayEvents: [{ id: 'gallery-conference', title: 'Conference', color: '#6863B0' }],
+    events: [
+      { id: 'deep-work', title: 'Deep work', color: '#6E839B', start: 14 * 60, end: 16 * 60, allDay: false },
+      { id: 'dentist', title: 'Dentist', color: '#C56A5E', start: 14 * 60 + 30, end: 15 * 60, allDay: false }
+    ]
+  }
+])
 </script>
 
 <style scoped>
@@ -209,6 +243,11 @@ function closeOverlayDemo(): void {
 
 .gallery__overlay-frame {
   min-height: 320px;
+}
+
+.gallery__timegrid-frame {
+  max-height: 420px;
+  overflow-y: auto;
 }
 
 .gallery__overlay-demo {

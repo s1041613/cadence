@@ -1,5 +1,4 @@
 <template>
-  <CdDrawer side="left" width="min(440px, 46%)" scrim-color="var(--cd-scrim-light)" @scrim-click="emit('close')">
     <div class="cd-settings">
       <div class="cd-settings__header">
         <button
@@ -100,7 +99,7 @@
                 class="cd-settings__gcal-toggle"
                 :class="{ 'cd-settings__gcal-toggle--on': gcalConnected }"
                 aria-label="Toggle Google Calendar"
-                @click="emit('update:gcalConnected', !gcalConnected)"
+                @click="gcalConnected ? emit('update:gcalConnected', false) : (gcalStep = 'consent')"
               >
                 <span class="cd-settings__gcal-toggle-thumb" />
               </button>
@@ -120,27 +119,15 @@
           </div>
           <p v-if="gcalConnected" class="cd-settings__note">Cadence reads and writes events on these calendars. Turn off to stop syncing.</p>
           <div v-else class="cd-settings__gcal-connect-wrap">
-            <button type="button" class="cd-settings__gcal-connect-btn" @click="emit('update:gcalConnected', true)">
+            <button type="button" class="cd-settings__gcal-connect-btn" @click="gcalStep = 'consent'">
               <CdIcon name="calendar" :size="18" color="var(--cd-olive)" />
               Connect Google Calendar
             </button>
           </div>
-          <!-- Handoff's consent modal (_gcalConsent) and syncing-progress modal (_gcalSyncing) are
-               transient demo flows layered above this pane — skipped; the toggle here flips
-               gcalConnected directly via the update:gcalConnected emit. -->
         </template>
 
         <template v-else-if="activePane === 'time'">
           <span class="cd-settings__section-label">Time</span>
-          <div class="cd-settings__field-stack">
-            <div class="cd-settings__label">Time Format</div>
-            <CdDropdownField
-              icon="clock"
-              :model-value="timeFormat"
-              :options="[{ value: '12-Hour', label: '12-Hour' }, { value: '24-Hour', label: '24-Hour' }]"
-              @update:model-value="(v) => emit('update:timeFormat', v)"
-            />
-          </div>
           <div class="cd-settings__field-stack">
             <div class="cd-settings__label">First Day of The Week</div>
             <CdDropdownField
@@ -221,12 +208,34 @@
               <div class="cd-settings__label-row">
                 <span class="cd-settings__row-label">Header Photo</span>
                 <span class="cd-settings__scope-chip">MONTH</span>
-                <span class="cd-settings__scope-chip">WEEK</span>
-                <span class="cd-settings__scope-chip">DAY</span>
               </div>
-              <div class="cd-settings__row-sub">Hide the header photo across views when off</div>
+              <div class="cd-settings__row-sub">Shows only in Month view — Week and Day never display the header photo</div>
             </div>
             <CdSwitch size="46x28" :model-value="showPhoto" @update:model-value="(v) => emit('update:showPhoto', v)" />
+          </div>
+
+          <div class="cd-settings__field-stack">
+            <div class="cd-settings__label">Monthly Photos</div>
+            <div class="cd-settings__month-photo-grid">
+              <div v-for="(label, i) in MONTH_LABELS" :key="label" class="cd-settings__month-photo-tile">
+                <span class="cd-settings__month-photo-badge">{{ label }}</span>
+                <button type="button" class="cd-settings__month-photo-drop" @click="monthPhotoInputs[i]?.click()">
+                  <img v-if="props.monthlyPhotos[i]" :src="props.monthlyPhotos[i]!" alt="" class="cd-settings__month-photo-img" />
+                  <CdIcon v-else name="image" :size="18" color="var(--cd-muted)" />
+                </button>
+                <div class="cd-settings__month-photo-action">
+                  or
+                  <button type="button" class="cd-settings__month-photo-browse" @click="monthPhotoInputs[i]?.click()">browse files</button>
+                </div>
+                <input
+                  :ref="(el) => (monthPhotoInputs[i] = el as HTMLInputElement)"
+                  type="file"
+                  accept="image/*"
+                  class="cd-settings__cal-file-input"
+                  @change="(e) => onMonthPhotoFileChange(i, e)"
+                />
+              </div>
+            </div>
           </div>
         </template>
 
@@ -279,28 +288,201 @@
         </template>
 
         <template v-else-if="activePane === 'calendars'">
-          <!-- Handoff's `_calendarsPane` / `_addCalPane` / `_calSettingsPane` sub-panes exist in the
-               design but are out of scope this round — placeholder only. -->
-          <span class="cd-settings__section-label">Calendars</span>
+          <div class="cd-settings__cal-toolbar">
+            <button type="button" class="cd-settings__cal-arrange-btn" @click="calArrange = !calArrange">
+              {{ calArrange ? 'Done' : 'Arrange' }}
+            </button>
+          </div>
           <div class="cd-settings__group">
-            <div class="cd-settings__row cd-settings__row--placeholder">
-              <span class="cd-settings__row-label">Calendar management is out of scope this round.</span>
+            <template v-for="(cal, index) in calendars" :key="cal.id">
+              <div
+                class="cd-settings__cal-row"
+                :draggable="calArrange"
+                @dragstart="(e) => onDragStart(index, e)"
+                @dragover.prevent
+                @drop="onDrop(index)"
+                @click="!calArrange && openCalendarDetail(cal)"
+              >
+                <span v-if="calArrange" class="cd-settings__cal-grip" aria-hidden="true">⋮⋮</span>
+                <span class="cd-settings__cal-icon-tile" :style="{ background: calTint(cal.color) }">
+                  <CdIcon :name="(cal.icon as IconName) ?? 'calendar'" :size="20" :color="calIconColor(cal.color)" />
+                </span>
+                <span class="cd-settings__cal-name-label">{{ cal.name }}</span>
+                <CdSwitch
+                  v-if="!calArrange"
+                  size="34x19"
+                  :model-value="isCalendarVisible(cal.id)"
+                  @update:model-value="emit('toggleCalendarVisibility', cal.id)"
+                  @click.stop
+                />
+              </div>
+              <div v-if="index < calendars.length - 1" class="cd-settings__divider" />
+            </template>
+          </div>
+          <div class="cd-settings__field-stack">
+            <button type="button" class="cd-settings__gcal-connect-btn" @click="openAddCalendar">
+              <CdIcon name="plus" :size="16" color="var(--cd-ink)" />
+              Add Calendar
+            </button>
+          </div>
+        </template>
+
+        <template v-else-if="activePane === 'addCalendar'">
+          <p class="cd-settings__note cd-settings__note--center">Get useful suggestions based on the calendar’s purpose.</p>
+          <div class="cd-settings__group">
+            <template v-for="(purpose, index) in CAL_PURPOSES" :key="purpose.id">
+              <button type="button" class="cd-settings__cal-purpose-row" @click="openCalendarDetail(null, purpose)">
+                <span class="cd-settings__cal-icon-tile cd-settings__cal-icon-tile--lg" :style="{ background: calTint(purpose.color) }">
+                  <CdIcon :name="purpose.icon" :size="24" :color="calIconColor(purpose.color)" />
+                </span>
+                <span class="cd-settings__cal-purpose-meta">
+                  <span class="cd-settings__cal-purpose-name">{{ purpose.name }}</span>
+                  <span class="cd-settings__cal-purpose-desc">{{ purpose.desc }}</span>
+                </span>
+              </button>
+              <div v-if="index < CAL_PURPOSES.length - 1" class="cd-settings__divider" />
+            </template>
+          </div>
+          <div class="cd-settings__field-stack">
+            <button type="button" class="cd-settings__gcal-connect-btn" @click="openCalendarDetail(null)">Start from a blank calendar</button>
+          </div>
+        </template>
+
+        <template v-else-if="activePane === 'calendarDetail'">
+          <div class="cd-settings__cal-cover-row">
+            <span class="cd-settings__cal-cover-preview">
+              <img v-if="draftCover" :src="draftCover" alt="" class="cd-settings__cal-cover-img" />
+              <span
+                v-else
+                class="cd-settings__cal-cover-fallback"
+                :style="{ background: calTint(draftColor) }"
+              >
+                <CdIcon :name="(draftIcon as IconName) ?? 'calendar'" :size="30" :color="calIconColor(draftColor)" />
+              </span>
+            </span>
+            <div class="cd-settings__cal-cover-actions">
+              <button type="button" class="cd-settings__cal-cover-btn" @click="coverInput?.click()">
+                <CdIcon name="image" :size="16" color="var(--cd-muted)" />
+                {{ draftCover ? 'Change photo' : 'Choose file' }}
+              </button>
+              <button v-if="draftCover" type="button" class="cd-settings__cal-cover-remove" @click="draftCover = null">Remove</button>
             </div>
+            <input ref="coverInput" type="file" accept="image/*" class="cd-settings__cal-file-input" @change="onCoverFileChange" />
+          </div>
+
+          <div class="cd-settings__field-stack">
+            <div class="cd-settings__label">Name</div>
+            <input class="cd-settings__cal-detail-name" type="text" v-model="draftName" />
+          </div>
+
+          <div class="cd-settings__field-stack">
+            <div class="cd-settings__label-row">
+              <span class="cd-settings__label cd-settings__label--inline">Members</span>
+              <span class="cd-settings__members-count">{{ draftMembers.length }} people</span>
+            </div>
+            <div class="cd-settings__members-list">
+              <div v-for="member in draftMembers" :key="member.id" class="cd-settings__member-row">
+                <span class="cd-settings__member-avatar" :style="{ background: member.color }">{{ member.initial }}</span>
+                <span class="cd-settings__member-name">{{ member.name }}</span>
+                <span v-if="member.isCreator" class="cd-settings__member-badge">Creator</span>
+              </div>
+            </div>
+            <button type="button" class="cd-settings__member-invite-btn" @click="openInvite">
+              <CdIcon name="plus" :size="15" color="var(--cd-muted)" />
+              Invite friends
+            </button>
+          </div>
+
+          <div class="cd-settings__cal-detail-actions">
+            <button type="button" class="cd-settings__cal-detail-btn cd-settings__cal-detail-btn--cancel" @click="emit('navigate', 'calendars')">
+              Cancel
+            </button>
+            <button type="button" class="cd-settings__cal-detail-btn cd-settings__cal-detail-btn--save" @click="saveCalendarDetail">
+              Save
+            </button>
+          </div>
+
+          <div v-if="draftEditId && draftEditId !== defaultCalendarId" class="cd-settings__field-stack">
+            <button type="button" class="cd-settings__cal-remove-btn" @click="removeDraftCalendar">
+              <CdIcon name="trash" :size="15" color="var(--cd-danger)" />
+              Delete calendar
+            </button>
           </div>
         </template>
       </div>
+
+      <div v-if="gcalStep === 'consent'" class="cd-settings__gcal-overlay">
+        <CdScrim color="var(--cd-scrim-strong)" @click="gcalStep = 'idle'" />
+        <div class="cd-settings__gcal-modal">
+          <div class="cd-settings__gcal-modal-badge"><span class="cd-settings__g-badge cd-settings__g-badge--48">G</span></div>
+          <div class="cd-settings__gcal-modal-title">Connect Google Calendar</div>
+          <div class="cd-settings__gcal-modal-sub">Use &ldquo;{{ email }}&rdquo; to let Cadence:</div>
+          <div class="cd-settings__gcal-perms">
+            <div v-for="perm in GCAL_PERMISSIONS" :key="perm.label" class="cd-settings__gcal-perm">
+              <span class="cd-settings__gcal-perm-icon"><CdIcon :name="perm.icon" :size="16" color="var(--cd-olive)" /></span>
+              <span class="cd-settings__gcal-perm-label">{{ perm.label }}</span>
+            </div>
+          </div>
+          <div class="cd-settings__gcal-modal-footer">
+            <button type="button" class="cd-settings__gcal-modal-btn cd-settings__gcal-modal-btn--cancel" @click="gcalStep = 'idle'">Cancel</button>
+            <button type="button" class="cd-settings__gcal-modal-btn cd-settings__gcal-modal-btn--allow" @click="gcalStep = 'syncing'">Allow</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="gcalStep === 'syncing'" class="cd-settings__gcal-overlay">
+        <CdScrim color="var(--cd-scrim-strong)" @click="gcalStep = 'idle'" />
+        <div class="cd-settings__gcal-modal">
+          <div class="cd-settings__gcal-modal-badge"><span class="cd-settings__g-badge cd-settings__g-badge--48">G</span></div>
+          <div class="cd-settings__gcal-modal-title">Syncing your calendars</div>
+          <div class="cd-settings__gcal-modal-sub">Importing events from Google Calendar…</div>
+          <div class="cd-settings__gcal-sync-list">
+            <div v-for="(cal, i) in syncedCalendars" :key="cal" class="cd-settings__gcal-sync-row">
+              <span class="cd-settings__gcal-sync-status">
+                <CdIcon v-if="i === 0" name="check" :size="15" color="#5C7A46" />
+                <span v-else-if="i === 1" class="cd-settings__gcal-spinner" />
+                <span v-else class="cd-settings__gcal-sync-dot" />
+              </span>
+              <span class="cd-settings__gcal-sync-name" :class="{ 'cd-settings__gcal-sync-name--active': i <= 1 }">{{ cal }}</span>
+              <span v-if="i === 1" class="cd-settings__gcal-sync-tag">Importing…</span>
+              <span v-else-if="i === 0" class="cd-settings__gcal-sync-tag cd-settings__gcal-sync-tag--done">Done</span>
+            </div>
+          </div>
+          <div class="cd-settings__gcal-progress-track">
+            <div class="cd-settings__gcal-progress-fill" :style="{ width: Math.round(100 / syncedCalendars.length) + '%' }" />
+          </div>
+        </div>
+      </div>
+
+      <CdSheet v-if="inviteOpen" raised @scrim-click="inviteOpen = false">
+        <div class="cd-settings__invite-sheet">
+          <div class="cd-settings__invite-title">Invite to {{ draftName || 'this calendar' }}</div>
+          <div class="cd-settings__invite-sub">Anyone with the link can join this calendar.</div>
+          <div class="cd-settings__invite-qr" aria-hidden="true">
+            <div class="cd-settings__invite-qr-pattern" />
+          </div>
+          <div class="cd-settings__invite-link-row">
+            <span class="cd-settings__invite-link">{{ inviteLink }}</span>
+            <button type="button" class="cd-settings__invite-copy-btn" @click="copyInviteLink">
+              {{ inviteCopied ? 'Copied' : 'Copy' }}
+            </button>
+          </div>
+        </div>
+      </CdSheet>
     </div>
-  </CdDrawer>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import CdDrawer from './CdDrawer.vue'
+import { computed, ref } from 'vue'
 import CdAvatar from './CdAvatar.vue'
 import CdDropdownField from './CdDropdownField.vue'
 import CdSegmented from './CdSegmented.vue'
 import CdSwitch from './CdSwitch.vue'
 import CdIcon from './CdIcon.vue'
+import CdScrim from './CdScrim.vue'
+import CdSheet from './CdSheet.vue'
+import type { IconName } from './icons'
+import type { Calendar } from '@/types/calendar'
 
 // CdSettingsDrawer — left drawer with stacked-pane (drill-in) navigation, desktop variant only.
 // CADENCE Handoff §_settingsDrawer (full file, no longer truncated).
@@ -309,7 +491,7 @@ import CdIcon from './CdIcon.vue'
 //  - Privacy row icon: design calls for a shield glyph; none exists, so 'info' is used instead
 //    (closest available utility-tier glyph).
 //  - Timezone field icon: design calls for a globe glyph; none exists, so 'clock' is reused
-//    (closest available field icon, and already used by the Time Format field above it).
+//    (closest available field icon).
 //
 // Not implemented (defined-but-unused leftovers in the handoff's own DCLogic script): the `seg()`,
 // `signout`, and `quadRow` helpers are declared in `_settingsDrawer` but never referenced by any
@@ -329,32 +511,62 @@ const THEME_TILES = [
   { key: 'Dark' as const, bg: '#2E2C28', barColor: 'rgba(255,255,255,.4)', diagonal: false }
 ]
 
+const MONTH_LABELS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+
+// GCAL_PERMISSIONS mirrors the handoff's consent-card permission rows (§_gcalConsentOverlay:
+// 'eye'/'pencil'/'reset'). No 'eye' glyph exists in icons.ts (deliberately excluded per that
+// file's header note), so 'search' substitutes as the closest available "view" utility icon,
+// same substitution pattern as the timezone/globe icon above.
+const GCAL_PERMISSIONS: { icon: IconName; label: string }[] = [
+  { icon: 'search', label: 'See your events and calendar list' },
+  { icon: 'pencil', label: 'Create and edit events' },
+  { icon: 'reset', label: 'Keep everything in sync automatically' }
+]
+
 const TITLE_MAP: Record<Exclude<Props['activePane'], 'root'>, string> = {
   account: 'Account',
   time: 'Time',
   customization: 'Customization',
   notifications: 'Notifications',
   privacy: 'Privacy',
-  calendars: 'Calendars'
+  calendars: 'Calendars',
+  addCalendar: 'Add Calendar',
+  calendarDetail: 'Calendar'
 }
 
+// CAL_PURPOSES mirrors the handoff's _calPurposes() (§_addCalPane) — a static onboarding
+// list of common calendar "purposes" that pre-fill name/color/icon, not a stored entity.
+const CAL_PURPOSES: { id: string; name: string; icon: IconName; color: string; desc: string }[] = [
+  { id: 'family', name: 'Family', icon: 'home', color: '#7BA05B', desc: 'See the whole family’s schedule at a glance.' },
+  { id: 'personal', name: 'Personal', icon: 'lock', color: '#3A6EA5', desc: 'Private events, viewed alongside your other calendars.' },
+  { id: 'relationship', name: 'Relationship', icon: 'heart', color: '#C56A5E', desc: 'Find time for each other by sharing schedules.' },
+  { id: 'work', name: 'Work', icon: 'work', color: '#6E839B', desc: 'Meetings, colleagues’ schedules and client status in one place.' },
+  { id: 'friends', name: 'Friends', icon: 'users', color: '#7BA05B', desc: 'Plan hangouts and chat in the comments.' },
+  { id: 'lesson', name: 'Lesson', icon: 'target', color: '#6E839B', desc: 'Track lesson times and see changes instantly.' },
+  { id: 'school', name: 'School events', icon: 'school', color: '#E3A75C', desc: 'Important dates and shared assignment deadlines.' },
+  { id: 'hobbies', name: 'Hobbies', icon: 'bulb', color: '#9C6FA6', desc: 'Share premieres, releases and hobby plans.' }
+]
+
 interface Props {
-  activePane: 'root' | 'account' | 'time' | 'customization' | 'notifications' | 'privacy' | 'calendars'
+  activePane: 'root' | 'account' | 'time' | 'customization' | 'notifications' | 'privacy' | 'calendars' | 'addCalendar' | 'calendarDetail'
   email: string
   gcalConnected: boolean
   syncedCalendars?: string[]
-  timeFormat: string
   firstDay: string
   timezone: string
   theme: 'Light' | 'Auto' | 'Dark'
   monthEventLabel: 'name' | 'time' | 'dot'
   showPhoto: boolean
+  monthlyPhotos: (string | null)[]
   notifEvents: boolean
   notifAgenda: boolean
   notifAssistant: boolean
   analytics: boolean
   crashReports: boolean
   lockScreenTitles: boolean
+  calendars: Calendar[]
+  defaultCalendarId: string
+  visibleCalendarIds: string[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -367,12 +579,20 @@ const emit = defineEmits<{
   navigate: [pane: Exclude<Props['activePane'], 'root'>]
   logout: []
   'update:gcalConnected': [value: boolean]
-  'update:timeFormat': [value: string]
   'update:firstDay': [value: string]
   'update:timezone': [value: string]
   'update:theme': [value: 'Light' | 'Auto' | 'Dark']
   'update:monthEventLabel': [value: 'name' | 'time' | 'dot']
   'update:showPhoto': [value: boolean]
+  setMonthPhoto: [monthIndex: number, photo: string | null]
+  createCalendar: [draft: { name: string; color: string; icon: string | null; cover: string | null }]
+  renameCalendar: [id: string, name: string]
+  recolorCalendar: [id: string, color: string]
+  setCalendarIcon: [id: string, icon: string | null]
+  setCalendarCover: [id: string, cover: string | null]
+  removeCalendar: [id: string]
+  reorderCalendars: [orderedIds: string[]]
+  toggleCalendarVisibility: [id: string]
   'update:notifEvents': [value: boolean]
   'update:notifAgenda': [value: boolean]
   'update:notifAssistant': [value: boolean]
@@ -386,13 +606,168 @@ const emit = defineEmits<{
 const accountName = computed(() => props.email.split('@')[0] ?? props.email)
 
 const paneTitle = computed(() => (props.activePane === 'root' ? 'Settings' : TITLE_MAP[props.activePane]))
+
+// Native HTML5 drag-and-drop reorder, mirroring the settings calendars-pane-management
+// spec's "Reordering is reflected in the filter strip" example — drop emits the full reordered
+// id list so the feature layer can call calendars-store.reorderCalendars in one call.
+const dragIndex = ref<number | null>(null)
+
+// Firefox requires dataTransfer.setData() in dragstart to commit to a drag session on a plain
+// element — without it, dragover/drop never fire (Chrome/Safari are lenient and don't need this).
+function onDragStart(index: number, e: DragEvent): void {
+  dragIndex.value = index
+  e.dataTransfer?.setData('text/plain', String(index))
+}
+
+function onDrop(targetIndex: number): void {
+  const from = dragIndex.value
+  dragIndex.value = null
+  if (from === null || from === targetIndex) return
+  const ids = props.calendars.map((c) => c.id)
+  const [moved] = ids.splice(from, 1)
+  if (moved === undefined) return
+  ids.splice(targetIndex, 0, moved)
+  emit('reorderCalendars', ids)
+}
+
+// Arrange mode (§_calendarsPane) swaps the row's trailing visibility switch for a leading
+// drag handle and disables the tap-to-open-detail interaction, matching the handoff's
+// mutually-exclusive "browse/toggle" vs. "reorder" row affordances.
+const calArrange = ref(false)
+
+function isCalendarVisible(id: string): boolean {
+  return props.visibleCalendarIds.includes(id)
+}
+
+// Icon tile tint mirrors the handoff's `color-mix(in srgb, ${col} 18%, #F1EFE8)` background /
+// `color-mix(in srgb, ${col} 60%, #7A776C)` icon formula (§_calendarsPane, §_addCalPane).
+function calTint(color: string): string {
+  return `color-mix(in srgb, ${color} 18%, #F1EFE8)`
+}
+
+function calIconColor(color: string): string {
+  return `color-mix(in srgb, ${color} 60%, #7A776C)`
+}
+
+// Calendar detail pane — draft state for both "add" (draftEditId === null) and "edit" (existing
+// id) flows; nothing touches the store until Save so Cancel is a true no-op (§_calSettingsPane).
+const draftEditId = ref<string | null>(null)
+const draftName = ref('')
+const draftColor = ref('#7BA05B')
+const draftIcon = ref<string | null>(null)
+const draftCover = ref<string | null>(null)
+const coverInput = ref<HTMLInputElement | null>(null)
+
+// Mock roster for the static Members shell — no backend, mirrors the design's fixed 4-person
+// list. Always shows the signed-in user first as Creator; other members are placeholder data.
+const draftMembers = computed(() => [
+  { id: 'you', name: accountName.value, initial: accountName.value.slice(0, 1).toUpperCase(), color: 'var(--cd-olive)', isCreator: true },
+  { id: 'chita', name: 'Chita', initial: 'C', color: '#C56A5E', isCreator: false },
+  { id: 'da', name: 'Da', initial: 'D', color: '#6E839B', isCreator: false },
+  { id: 'yann', name: 'Yann', initial: 'Y', color: '#E3A75C', isCreator: false }
+])
+
+// Invite sheet — static-shell share link (no backend), same "no network activity" treatment as
+// the Google Calendar connect flow. Slug derives from the draft name so the link looks calendar-
+// specific; Copy uses the real Clipboard API since that's a self-contained browser action, not a
+// network call.
+const inviteOpen = ref(false)
+const inviteCopied = ref(false)
+
+const inviteLink = computed(() => {
+  const slug = (draftName.value || 'calendar')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return `cadence.app/j/${slug || 'CALENDAR'}-8F2K`
+})
+
+function openInvite(): void {
+  inviteCopied.value = false
+  inviteOpen.value = true
+}
+
+async function copyInviteLink(): Promise<void> {
+  await navigator.clipboard.writeText(inviteLink.value)
+  inviteCopied.value = true
+}
+
+function openAddCalendar(): void {
+  emit('navigate', 'addCalendar')
+}
+
+function openCalendarDetail(cal: Calendar | null, purpose?: (typeof CAL_PURPOSES)[number]): void {
+  draftEditId.value = cal?.id ?? null
+  draftName.value = cal?.name ?? purpose?.name ?? ''
+  draftColor.value = cal?.color ?? purpose?.color ?? '#7BA05B'
+  draftIcon.value = cal?.icon ?? purpose?.icon ?? null
+  draftCover.value = cal?.cover ?? null
+  emit('navigate', 'calendarDetail')
+}
+
+// FileReader → data URL matches the handoff's pickFile/onFile pair (§_calSettingsPane) — this
+// is a static-shell upload (no backend), so the draft just holds the data URL until Save.
+function onCoverFileChange(e: Event): void {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    draftCover.value = typeof reader.result === 'string' ? reader.result : null
+  }
+  reader.readAsDataURL(file)
+}
+
+function saveCalendarDetail(): void {
+  const name = draftName.value.trim() || 'New Calendar'
+  if (draftEditId.value) {
+    const id = draftEditId.value
+    emit('renameCalendar', id, name)
+    emit('recolorCalendar', id, draftColor.value)
+    emit('setCalendarIcon', id, draftIcon.value)
+    emit('setCalendarCover', id, draftCover.value)
+  } else {
+    emit('createCalendar', { name, color: draftColor.value, icon: draftIcon.value, cover: draftCover.value })
+  }
+  emit('navigate', 'calendars')
+}
+
+// Monthly Photos grid (Customization pane) — same FileReader-to-data-URL, no-backend pattern as
+// the calendar cover upload above. One file input per month tile; monthPhotoInputs holds the
+// refs so the tile's own click (and its "browse files" link) can both trigger the same input.
+const monthPhotoInputs = ref<(HTMLInputElement | null)[]>([])
+
+function onMonthPhotoFileChange(monthIndex: number, e: Event): void {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    if (typeof reader.result === 'string') emit('setMonthPhoto', monthIndex, reader.result)
+  }
+  reader.readAsDataURL(file)
+}
+
+function removeDraftCalendar(): void {
+  if (!draftEditId.value) return
+  emit('removeCalendar', draftEditId.value)
+  emit('navigate', 'calendars')
+}
+
+// Google Calendar connect flow — static visual shell only (design.md "7.4 Ship the static
+// shells: Google Calendar connect flow (consent card, progress animation, no network activity)").
+// `gcalStep` just switches which static card is shown; the "progress animation" is a CSS
+// keyframe (cd-gcal-spin) on the first row's spinner, not a timer-driven sequence — there is no
+// business logic here, no fake per-calendar completion, and clicking Allow does not itself
+// connect the calendar (that stays the toggle's job, matching the "no network activity" shell).
+const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 </script>
 
 <style scoped>
 .cd-settings {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   background: #f4f2ec;
 }
 
@@ -890,5 +1265,624 @@ button.cd-settings__row:hover {
 .cd-settings__theme-tile-label--selected {
   font-weight: 700;
   color: var(--cd-ink);
+}
+
+/* Customization pane — monthly photo grid */
+
+.cd-settings__month-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cd-settings__month-photo-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px dashed var(--cd-line);
+  border-radius: 14px;
+  padding: 10px 8px 12px;
+}
+
+.cd-settings__month-photo-badge {
+  align-self: flex-start;
+  font: 700 10px var(--cd-font-mono);
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: #8a877c;
+  border-radius: 6px;
+  padding: 2px 7px;
+}
+
+.cd-settings__month-photo-drop {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--cd-surface);
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin: 2px 0;
+}
+
+.cd-settings__month-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cd-settings__month-photo-action {
+  font: 500 11.5px var(--cd-font-title);
+  color: var(--cd-muted);
+}
+
+.cd-settings__month-photo-browse {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  font: 600 11.5px var(--cd-font-title);
+  color: var(--cd-ink-2);
+  text-decoration: underline;
+}
+
+/* Calendars pane — reorderable list, detail + purpose sub-panes */
+
+.cd-settings__cal-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 20px 8px;
+}
+
+.cd-settings__cal-arrange-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: 700 13px var(--cd-font-title);
+  color: var(--cd-olive);
+  padding: 4px 2px;
+}
+
+.cd-settings__cal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  padding: 11px 14px 11px 10px;
+  transition: background var(--cd-duration-micro-3);
+}
+
+.cd-settings__cal-row:hover {
+  background: rgba(86, 88, 94, 0.045);
+}
+
+.cd-settings__cal-grip {
+  flex: none;
+  cursor: grab;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  letter-spacing: -2px;
+  color: var(--cd-muted);
+  font-size: 13px;
+}
+
+.cd-settings__cal-icon-tile {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.cd-settings__cal-icon-tile--lg {
+  width: 50px;
+  height: 50px;
+}
+
+.cd-settings__cal-name-label {
+  flex: 1;
+  min-width: 0;
+  font: 600 15px var(--cd-font-title);
+  color: var(--cd-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cd-settings__icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cd-settings__note--center {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.cd-settings__cal-purpose-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 13px 16px;
+  text-align: left;
+  transition: background var(--cd-duration-micro-3);
+}
+
+.cd-settings__cal-purpose-row:hover {
+  background: rgba(86, 88, 94, 0.045);
+}
+
+.cd-settings__cal-purpose-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cd-settings__cal-purpose-name {
+  font: 700 15.5px var(--cd-font-title);
+  color: var(--cd-ink);
+}
+
+.cd-settings__cal-purpose-desc {
+  font: 500 12.5px var(--cd-font-title);
+  color: var(--cd-muted);
+  line-height: 1.45;
+}
+
+/* Calendar detail pane */
+
+.cd-settings__cal-cover-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 20px 6px;
+}
+
+.cd-settings__cal-cover-preview {
+  width: 78px;
+  height: 78px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--cd-line);
+  display: block;
+}
+
+.cd-settings__cal-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cd-settings__cal-cover-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.cd-settings__cal-cover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cd-settings__cal-cover-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font: 700 14px var(--cd-font-title);
+  color: var(--cd-ink);
+  transition: background var(--cd-duration-micro-3);
+}
+
+.cd-settings__cal-cover-btn:hover {
+  background: rgba(179, 172, 145, 0.1);
+}
+
+.cd-settings__cal-cover-remove {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: 600 13px var(--cd-font-title);
+  color: var(--cd-muted);
+  text-align: left;
+  padding: 0 4px;
+}
+
+.cd-settings__cal-file-input {
+  display: none;
+}
+
+.cd-settings__cal-detail-name {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface);
+  border-radius: 13px;
+  padding: 14px 16px;
+  font: 500 15px var(--cd-font-title);
+  color: var(--cd-ink);
+  outline: none;
+}
+
+.cd-settings__members-count {
+  font: 700 11px var(--cd-font-mono);
+  letter-spacing: 0.06em;
+  color: var(--cd-muted);
+}
+
+.cd-settings__members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cd-settings__member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cd-settings__member-avatar {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 700 13px var(--cd-font-ui);
+  color: #fff;
+}
+
+.cd-settings__member-name {
+  flex: 1;
+  min-width: 0;
+  font: 600 14.5px var(--cd-font-title);
+  color: var(--cd-ink);
+}
+
+.cd-settings__member-badge {
+  flex: none;
+  font: 700 10px var(--cd-font-ui);
+  letter-spacing: 0.04em;
+  color: var(--cd-muted);
+  border: 1px solid var(--cd-line);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+
+.cd-settings__member-invite-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px dashed var(--cd-line);
+  background: transparent;
+  border-radius: 13px;
+  padding: 12px;
+  cursor: pointer;
+  font: 600 13.5px var(--cd-font-title);
+  color: var(--cd-muted);
+}
+
+.cd-settings__invite-sheet {
+  padding: 8px 24px 28px;
+  text-align: center;
+}
+
+.cd-settings__invite-title {
+  font: 800 19px var(--cd-font-title);
+  color: var(--cd-ink);
+  margin-bottom: 6px;
+}
+
+.cd-settings__invite-sub {
+  font: 500 13px var(--cd-font-ui);
+  color: var(--cd-ink-3);
+  margin-bottom: 22px;
+}
+
+.cd-settings__invite-qr {
+  width: 168px;
+  height: 168px;
+  margin: 0 auto 22px;
+  background: #fff;
+  border: 1px solid var(--cd-line);
+  border-radius: 16px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.cd-settings__invite-qr-pattern {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  background-image: conic-gradient(#2e2c28 90deg, transparent 90deg 180deg, #2e2c28 180deg 270deg, transparent 270deg);
+  background-size: 16px 16px;
+}
+
+.cd-settings__invite-link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface);
+  border-radius: 13px;
+  padding: 6px 6px 6px 16px;
+}
+
+.cd-settings__invite-link {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font: 600 13.5px var(--cd-font-mono);
+  color: var(--cd-ink-2);
+}
+
+.cd-settings__invite-copy-btn {
+  flex: none;
+  border: none;
+  background: var(--cd-olive);
+  color: #fff;
+  border-radius: 9px;
+  padding: 10px 16px;
+  font: 700 13px var(--cd-font-title);
+  cursor: pointer;
+}
+
+.cd-settings__cal-detail-actions {
+  display: flex;
+  gap: 12px;
+  padding: 22px 20px 6px;
+}
+
+.cd-settings__cal-detail-btn {
+  flex: 1;
+  border-radius: 13px;
+  padding: 14px;
+  font: 700 15px var(--cd-font-title);
+  cursor: pointer;
+}
+
+.cd-settings__cal-detail-btn--cancel {
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface);
+  color: var(--cd-ink-2);
+}
+
+.cd-settings__cal-detail-btn--save {
+  border: none;
+  background: var(--cd-olive);
+  color: #fff;
+}
+
+.cd-settings__cal-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 10px;
+  font: 700 14px var(--cd-font-title);
+  color: var(--cd-danger);
+}
+
+.cd-settings__gcal-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.cd-settings__gcal-modal {
+  position: relative;
+  z-index: 2;
+  width: min(360px, 100%);
+  background: #fff;
+  border-radius: var(--cd-radius-picker);
+  box-shadow: var(--cd-shadow-modal);
+  padding: 22px 22px 18px;
+  animation: cd-popIn var(--cd-duration-pop) var(--cd-ease-standard);
+}
+
+.cd-settings__gcal-modal-badge {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.cd-settings__g-badge--48 {
+  width: 48px;
+  height: 48px;
+  font-size: 23px;
+}
+
+.cd-settings__gcal-modal-title {
+  text-align: center;
+  font: 800 18px var(--cd-font-title);
+  color: var(--cd-ink);
+  margin-bottom: 6px;
+}
+
+.cd-settings__gcal-modal-sub {
+  text-align: center;
+  font: 500 13px var(--cd-font-ui);
+  color: var(--cd-ink-3);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.cd-settings__gcal-perms {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cd-settings__gcal-perm {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.cd-settings__gcal-perm-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--cd-surface);
+  border: 1px solid var(--cd-line);
+  display: grid;
+  place-items: center;
+}
+
+.cd-settings__gcal-perm-label {
+  flex: 1;
+  font: 500 13.5px var(--cd-font-ui);
+  color: var(--cd-ink);
+}
+
+.cd-settings__gcal-modal-footer {
+  display: flex;
+  gap: 10px;
+}
+
+.cd-settings__gcal-modal-btn {
+  flex: 1;
+  border-radius: 12px;
+  padding: 12px;
+  font: 700 14px var(--cd-font-ui);
+  cursor: pointer;
+}
+
+.cd-settings__gcal-modal-btn--cancel {
+  border: 1px solid var(--cd-line);
+  background: transparent;
+  color: var(--cd-ink-2);
+}
+
+.cd-settings__gcal-modal-btn--allow {
+  border: none;
+  background: var(--cd-olive);
+  color: #fff;
+}
+
+.cd-settings__gcal-sync-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-bottom: 18px;
+}
+
+.cd-settings__gcal-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.cd-settings__gcal-sync-status {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.cd-settings__gcal-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #e4e1d6;
+  border-top-color: var(--cd-olive);
+  box-sizing: border-box;
+  animation: cd-gcal-spin 0.7s linear infinite;
+}
+
+.cd-settings__gcal-sync-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #dad6c9;
+  box-sizing: border-box;
+}
+
+.cd-settings__gcal-sync-name {
+  flex: 1;
+  font: 500 14px var(--cd-font-ui);
+  color: var(--cd-ink-3);
+}
+
+.cd-settings__gcal-sync-name--active {
+  font-weight: 600;
+  color: var(--cd-ink);
+}
+
+.cd-settings__gcal-sync-tag {
+  font: 600 11px var(--cd-font-mono);
+  color: var(--cd-ink-3);
+}
+
+.cd-settings__gcal-sync-tag--done {
+  color: #5c7a46;
+}
+
+.cd-settings__gcal-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #edeae0;
+  overflow: hidden;
+}
+
+.cd-settings__gcal-progress-fill {
+  height: 100%;
+  background: var(--cd-olive);
+  border-radius: 999px;
+  transition: width 0.5s var(--cd-ease-standard);
+}
+
+@keyframes cd-gcal-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

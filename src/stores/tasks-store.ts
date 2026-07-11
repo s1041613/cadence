@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Task } from '@/types/task'
-import { findConflictingTask } from '@/utils/check-task-conflict'
 import { autoPoms } from '@/utils/convert-date-time'
+import { DEFAULT_CALENDAR_ID } from '@/stores/calendars-store'
 
 export function mkTask(overrides: Partial<Task> & Pick<Task, 'date'>): Task {
   const start = overrides.start ?? ''
@@ -27,6 +27,8 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date'>): Task {
     backgroundColor: null,
     texture: 'none',
     icon: null,
+    calendarId: DEFAULT_CALENDAR_ID,
+    reminder: null,
     ...overrides
   }
 }
@@ -35,17 +37,13 @@ export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
   const isLoading = ref(true)
 
-  function saveTask(task: Task): Task | null {
-    const conflict = findConflictingTask(task, tasks.value)
-    if (conflict) return conflict
-
+  function saveTask(task: Task): void {
     const idx = tasks.value.findIndex((t) => t.id === task.id)
     if (idx === -1) {
       tasks.value.push(task)
     } else {
       tasks.value[idx] = task
     }
-    return null
   }
 
   function deleteTask(id: string): void {
@@ -65,30 +63,19 @@ export const useTasksStore = defineStore('tasks', () => {
     task.completedPomodoros = Math.min(task.completedPomodoros + 1, limit)
   }
 
-  function copyToDays(task: Task, dates: string[]): { created: Task[]; skipped: string[] } {
-    const created: Task[] = []
-    const skipped: string[] = []
-    const pool = [...tasks.value]
-
-    for (const date of dates) {
-      const candidate = mkTask({
+  function copyToDays(task: Task, dates: string[]): Task[] {
+    const created = dates.map((date) =>
+      mkTask({
         ...task,
         id: crypto.randomUUID(),
         date,
         done: false,
         completedPomodoros: 0
       })
-      const conflict = findConflictingTask(candidate, pool)
-      if (conflict) {
-        skipped.push(date)
-        continue
-      }
-      pool.push(candidate)
-      created.push(candidate)
-    }
+    )
 
     if (created.length) tasks.value.push(...created)
-    return { created, skipped }
+    return created
   }
 
   return {

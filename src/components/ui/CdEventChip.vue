@@ -40,6 +40,7 @@ const props = defineProps<{
   color: string
   quad: 'do' | 'plan' | 'quick' | 'later' | 'event'
   time: string | null // null = all-day
+  endTime: string | null
   allDay: boolean
   done: boolean
   fmt: 'time' | 'name' | 'dot'
@@ -51,7 +52,22 @@ const emit = defineEmits<{
 
 const solid = computed(() => props.allDay)
 const quadIcon = computed(() => MINI_ICONS[props.quad] ?? MINI_ICONS.event)
-const timeLabel = computed(() => (props.allDay ? `All-day ${props.title}` : `${props.time} ${props.title}`))
+// Timed chips show a start-end range (end defaults to start + 60min when the task has no end),
+// matching the screenshot format "10:00-11:00 Q3 review".
+function addMinutes(time: string, minutes: number): string {
+  const [h, m] = time.split(':').map(Number)
+  const total = (((h! * 60 + m! + minutes) % 1440) + 1440) % 1440
+  const hh = Math.floor(total / 60)
+  const mm = total % 60
+  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
+}
+
+const timeLabel = computed(() => {
+  if (props.allDay) return `All-day ${props.title}`
+  const start = props.time ?? ''
+  const end = props.endTime ?? (start ? addMinutes(start, 60) : '')
+  return `${start}-${end} ${props.title}`
+})
 
 const chipStyle = computed(() => ({
   background: props.fmt === 'dot' ? 'transparent' : solid.value ? props.color : 'transparent',

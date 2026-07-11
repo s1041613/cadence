@@ -6,11 +6,16 @@
         <span>{{ title }}</span>
         <span v-if="variant === 'month'" class="cd-date-poster__caret">▾</span>
       </button>
-      <div class="cd-date-poster__nav">
+      <div v-if="variant !== 'month'" class="cd-date-poster__nav cd-date-poster__nav--inline">
         <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">‹</button>
         <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
         <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">›</button>
       </div>
+    </div>
+    <div class="cd-date-poster__nav" :class="{ 'cd-date-poster__nav--phone-only': variant !== 'month' }">
+      <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">‹</button>
+      <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
+      <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">›</button>
     </div>
     <div v-if="$slots.extra" class="cd-date-poster__extra">
       <slot name="extra" />
@@ -48,6 +53,15 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   align-items: flex-end;
   justify-content: space-between;
   padding: 22px 30px 18px;
+}
+
+.cd-date-poster--month {
+  padding-top: 12px;
+  padding-bottom: 30px;
+}
+
+.cd-date-poster--week,
+.cd-date-poster--day {
   background: var(--cd-topbar);
 }
 
@@ -81,7 +95,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster--month .cd-date-poster__title {
-  font-size: 46px;
+  font-size: 44px;
 }
 
 .cd-date-poster__title:hover {
@@ -98,7 +112,78 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.cd-date-poster__nav--inline {
   margin-top: 8px;
+}
+
+.cd-date-poster--week .cd-date-poster__nav--inline,
+.cd-date-poster--day .cd-date-poster__nav--inline {
+  margin-left: -4px;
+}
+
+.cd-date-poster__nav--phone-only {
+  display: none;
+}
+
+/* Phone: collapse to a single baseline row (title + year left, nav pinned right) —
+   design-research-report.md §3.3 phone header spec, distinct from the desktop stacked layout. */
+@media (max-width: 899px) {
+  .cd-date-poster {
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 16px 16px 12px;
+  }
+
+  .cd-date-poster--month {
+    padding: 16px 16px 12px;
+  }
+
+  .cd-date-poster__left {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 7px;
+    flex: none;
+  }
+
+  .cd-date-poster__year {
+    font-size: 13px;
+    order: 2;
+    white-space: nowrap;
+  }
+
+  .cd-date-poster__title {
+    font-size: 20px;
+    line-height: 1;
+    order: 1;
+    margin: 0;
+    padding: 2px 4px 2px 0;
+    white-space: nowrap;
+  }
+
+  .cd-date-poster--month .cd-date-poster__title {
+    font-size: 20px;
+  }
+
+  .cd-date-poster__caret {
+    font-size: 14px;
+    transform: translateY(-1px);
+  }
+
+  .cd-date-poster__nav--inline {
+    display: none;
+  }
+
+  .cd-date-poster__nav--phone-only {
+    display: flex;
+    flex: none;
+  }
+
+  .cd-date-poster__extra {
+    flex-basis: 100%;
+  }
 }
 
 .cd-date-poster__chev {
@@ -142,5 +227,6 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 
 .cd-date-poster__extra {
   display: flex;
+  justify-content: center;
 }
 </style>

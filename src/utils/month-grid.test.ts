@@ -2,11 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { monthGridCells, stepMonth } from './month-grid'
 
 describe('monthGridCells', () => {
-  it('returns 42 cells starting on the preceding Monday', () => {
-    const cells = monthGridCells(2026, 6) // July 2026, starts on a Wednesday
-    expect(cells).toHaveLength(42)
+  it('returns 35 cells (5 weeks) starting on the preceding Monday', () => {
+    const cells = monthGridCells(2026, 6) // July 2026, starts on a Wednesday, fits in 5 weeks
+    expect(cells).toHaveLength(35)
     expect(cells[0]!.date).toBe('2026-06-29') // Monday before July 1
     expect(cells[0]!.outsideMonth).toBe(true)
+  })
+
+  it('returns 42 cells (6 weeks) when the month needs a 6th week', () => {
+    const cells = monthGridCells(2026, 7) // August 2026 starts on a Saturday, needs 6 weeks
+    expect(cells).toHaveLength(42)
   })
 
   it('marks in-month days correctly', () => {

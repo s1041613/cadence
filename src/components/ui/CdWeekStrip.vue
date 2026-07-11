@@ -49,10 +49,12 @@ const emit = defineEmits<{
 .cd-week-strip {
   display: flex;
   gap: 2px;
+  width: 100%;
 }
 
 .cd-week-strip__pill {
-  width: 50px;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;

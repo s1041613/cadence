@@ -1,16 +1,14 @@
 <template>
-  <CdSheet scrim-color="var(--cd-scrim-mid)" duration=".3s" @scrim-click="emit('close')">
-    <div class="cd-month-sheet">
-      <button type="button" class="cd-month-sheet__close" aria-label="Close" @click="emit('close')">✕</button>
+  <div class="cd-month-sheet">
+    <div class="cd-month-sheet__header">
+      <button type="button" class="cd-month-sheet__title" @click="emit('toggleMode')">
+        <span>{{ monthLabel }} {{ year }}</span>
+        <span class="cd-month-sheet__caret">▾</span>
+      </button>
+      <button v-if="mode === 'grid'" type="button" class="cd-month-sheet__today-pill" @click="emit('today')">Today</button>
+    </div>
 
-      <div class="cd-month-sheet__header">
-        <button type="button" class="cd-month-sheet__title" @click="emit('toggleMode')">
-          <span>{{ monthLabel }}</span>
-          <span class="cd-month-sheet__caret">▾</span>
-        </button>
-        <button v-if="mode === 'grid'" type="button" class="cd-month-sheet__today-pill" @click="emit('today')">Today</button>
-      </div>
-
+    <div class="cd-month-sheet__body">
       <template v-if="mode === 'grid'">
         <div class="cd-month-sheet__dow-row">
           <span v-for="d in DOW" :key="d" class="cd-month-sheet__dow">{{ d }}</span>
@@ -55,12 +53,10 @@
         </div>
       </template>
     </div>
-  </CdSheet>
+  </div>
 </template>
 
 <script setup lang="ts">
-import CdSheet from './CdSheet.vue'
-
 // CdMonthSheet — bottom-sheet calendar picker with grid<->wheel toggle. CADENCE Handoff §3.17.
 // Grid: Sunday-start, today = 22px ink circle + white number, event dots (max shown per day left to
 // caller-provided `cells`). Grid header title is 700 17px title font, paired with a "Today" pill
@@ -78,6 +74,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const props = defineProps<{
   mode: 'grid' | 'wheel'
   monthLabel: string
+  year: string
   cells: Array<MonthSheetCell | null> // null = leading/trailing blank cell
   months: string[]
   years: string[]
@@ -85,7 +82,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  close: []
   toggleMode: []
   selectDay: [day: number]
   today: []
@@ -105,20 +101,6 @@ function wheelOpacity(i: number, center: number): number {
 .cd-month-sheet {
   position: relative;
   padding: 0 18px 22px;
-}
-
-.cd-month-sheet__close {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: var(--cd-topbar);
-  border-radius: 50%;
-  cursor: pointer;
-  color: #8a8a80;
-  font-size: 14px;
 }
 
 .cd-month-sheet__header {
@@ -155,6 +137,13 @@ function wheelOpacity(i: number, center: number): number {
   font: 600 12px var(--cd-font-ui);
   color: var(--cd-ink);
   cursor: pointer;
+}
+
+.cd-month-sheet__body {
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .cd-month-sheet__dow-row {
@@ -222,7 +211,7 @@ function wheelOpacity(i: number, center: number): number {
 
 .cd-month-sheet__wheels {
   display: flex;
-  height: 300px;
+  height: 100%;
   overflow: hidden;
   align-items: center;
   -webkit-mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent);
