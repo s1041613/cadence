@@ -53,7 +53,7 @@ const emit = defineEmits<{
   gap: 4px;
   padding: 14px 20px;
   background: var(--cd-topbar);
-  border-bottom: 1px solid var(--cd-line);
+  border-bottom: 0.1px solid var(--cd-line);
 }
 
 .cd-topbar__spacer {

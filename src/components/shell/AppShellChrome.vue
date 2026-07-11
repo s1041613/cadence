@@ -9,7 +9,6 @@
         @open-assistant="ui.assistantOpen = true"
         @create-task="ui.createOpen = true"
       />
-      <CdCalStrip :calendars="placeholderCalendars" :selected="selectedCalendarIds" @toggle="onToggleCalendar" />
     </div>
 
     <div class="app-shell-chrome__phone">
@@ -26,27 +25,28 @@
 </template>
 
 <script setup lang="ts">
-// AppShellChrome — feature-layer composition of the desktop topbar+cal-strip and phone
-// bottom-nav+FAB, per design.md "Pure presentational ui layer with feature-layer composition" and
-// "Replacement proceeds shell-first". This is the ONLY place in tasks 2.1/2.2 that imports the
-// ui-store; CdTopbar/CdCalStrip/CdBottomNav/CdFab stay pure props/emits components.
+// AppShellChrome — feature-layer composition of the desktop topbar and phone bottom-nav+FAB, per
+// design.md "Pure presentational ui layer with feature-layer composition" and "Replacement proceeds
+// shell-first". This is the ONLY place in tasks 2.1/2.2 that imports the ui-store; CdTopbar/
+// CdBottomNav/CdFab stay pure props/emits components.
 //
 // Both `.app-shell-chrome__desktop` and `.app-shell-chrome__phone` always mount; the scoped
 // stylesheet below toggles `display` at the shared breakpoint so exactly one is visible at a time.
 // This is deliberate, not an oversight: a JS viewport check (matchMedia / window.innerWidth) would
 // need a resize listener and a hydration-safe initial value, whereas plain CSS satisfies "no FAB/
-// bottom-nav at or above the breakpoint" and "no topbar/cal-strip below it" with zero JS branching —
-// matching how CdTopbar/CdCalStrip already avoid JS-driven layout decisions.
+// bottom-nav at or above the breakpoint" and "no topbar below it" with zero JS branching — matching
+// how CdTopbar already avoids JS-driven layout decisions.
 //
-// Mounted into IndexPage.vue only when `ui.activeView === 'month'` (task 3.1): Month is the first
-// rebuilt view, so the new shell now has a live screen underneath it. Day/Week still render behind
-// the legacy AppTopbar until tasks 4.2/4.3 rebuild them, per design.md's "a view is either fully old
-// or fully new" — swapping every view to this chrome at once would run the new shell above two
-// legacy view bodies with no design mandate to do so.
+// CdCalStrip lives in MonthView.vue instead, directly under its month-label header on both
+// desktop and phone — matching the handoff's monthPoster ordering (nav strip -> calStrip -> grid),
+// which AppShellChrome's old "CdCalStrip above CdTopbar's month label" placement did not.
+//
+// Mounted unconditionally into IndexPage.vue (tasks 3.1/4.2/4.3): Month, Day, and Week are all
+// now rebuilt against the new design, so every view body under this chrome is new, matching
+// design.md's "a view is either fully old or fully new."
 import { computed } from 'vue'
 import { useUiStore, type ActiveView } from '@/stores/ui-store'
 import CdTopbar from '@/components/ui/CdTopbar.vue'
-import CdCalStrip, { type CalStripCalendar } from '@/components/ui/CdCalStrip.vue'
 import CdBottomNav from '@/components/ui/CdBottomNav.vue'
 import CdFab from '@/components/ui/CdFab.vue'
 
@@ -63,19 +63,6 @@ const activeViewLabel = computed(() => VIEW_LABELS[ui.activeView])
 function onActiveViewLabel(label: string): void {
   const view = LABEL_VIEWS[label]
   if (view) ui.activeView = view
-}
-
-// Placeholder calendar-filter data — no calendars-store exists yet (task 8.1 adds `Calendar` type
-// and `calendars-store` per design.md's Interface/data shape section). This static single-entry list
-// only exercises CdCalStrip's layout/rendering; task 8.1 replaces it with live store data and task
-// 7.3 wires reordering/visibility. `selectedCalendarIds` mirrors `placeholderCalendars` so the strip
-// renders every chip "on" by default (no calendar is excluded before real visibility state exists).
-const placeholderCalendars: CalStripCalendar[] = [{ id: 'placeholder-all', name: 'All events', iconSvg: '' }]
-const selectedCalendarIds = computed(() => placeholderCalendars.map((c) => c.id))
-
-function onToggleCalendar(_id: string): void {
-  // No-op until calendars-store (task 8.1) exists: there is nowhere yet to persist a toggled-off
-  // calendar, and design.md scopes visibility filtering to task 7.3. Intentionally not wired further.
 }
 </script>
 

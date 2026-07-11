@@ -5,7 +5,7 @@
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
   >
     <div class="cd-event-block__title">{{ title }}</div>
-    <div v-if="showTime" class="cd-event-block__time">{{ startLabel }}</div>
+    <div class="cd-event-block__time">{{ startLabel }}</div>
   </div>
 </template>
 
@@ -14,7 +14,7 @@ import { computed } from 'vue'
 
 // CdEventBlock — absolutely-positioned time-grid event block. design-research-report.md §3.6.
 // radius 7px, border-left 3px solid color, bg color-mix(color 13%, surface), padding 3px 8px.
-// Title: 600 10.5px Zen Kaku. Height > 30px shows start time (8.5px mono, opacity .7).
+// Title: 600 10.5px Zen Kaku. Start time always shown (8.5px mono, opacity .7).
 // "In progress" (today + now within [start,end)): solid color fill + white text.
 const props = defineProps<{
   title: string
@@ -31,8 +31,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   click: [event: MouseEvent]
 }>()
-
-const showTime = computed(() => props.height > 30)
 
 const blockStyle = computed(() => ({
   position: 'absolute' as const,

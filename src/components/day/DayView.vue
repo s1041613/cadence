@@ -1,27 +1,20 @@
 <template>
-  <div>
-    <div class="viewhead">
-      <div class="dayhead-row">
-        <div class="dayhead-left">
-          <h1>{{ label }}</h1>
-          <div v-if="isToday" class="liveclock">
-            <span class="tnow mono">
-              {{ pad(now.getHours()) }}:{{ pad(now.getMinutes()) }}<span class="sec">:{{ pad(now.getSeconds()) }}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <WeekStrip />
-    <div class="day-grid solo">
-      <Timeline
-        :date="ui.selectedDate"
-        :tasks="tasksStore.tasks"
-        :now="now"
-        @open="(taskId) => (ui.previewTaskId = taskId)"
-        @toggle-done="(taskId) => tasksStore.toggleDone(taskId)"
-        @focus="(taskId) => (ui.focusTaskId = taskId)"
-        @new="(initialValues) => (ui.taskEditorInitialValues = initialValues)"
+  <div class="day-view">
+    <CdDatePoster variant="day" :year="String(year)" :title="dayTitle" @prev="stepDayBy(-1)" @next="stepDayBy(1)" @today="goToday" @open-calendar-sheet="() => {}">
+      <template #extra>
+        <CdWeekStrip :days="stripDays" :selected="ui.selectedDate" @select="onStripSelect" />
+      </template>
+    </CdDatePoster>
+
+    <div class="day-view__grid-wrap">
+      <CdTimeGrid
+        :columns="[gridColumn]"
+        :row-height="52"
+        hide-head
+        :now-minutes="nowMinutes"
+        :time-format="settings.timeFormat"
+        @event-click="onEventClick"
+        @column-click="onColumnClick"
       />
     </div>
   </div>
@@ -29,88 +22,117 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import WeekStrip from './WeekStrip.vue'
-import Timeline from './Timeline.vue'
+import CdDatePoster from '@/components/ui/CdDatePoster.vue'
+import CdWeekStrip, { type WeekStripDay } from '@/components/ui/CdWeekStrip.vue'
+import CdTimeGrid, { type TimeGridColumn } from '@/components/ui/CdTimeGrid.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
+import { useSettingsStore } from '@/stores/settings-store'
+import { useCalendarsStore } from '@/stores/calendars-store'
 import { useCurrentTime } from '@/composables/use-current-time'
-import { pad, parseISO, iso } from '@/utils/convert-date-time'
+import { themeOf } from '@/composables/use-theme'
+import { parseISO, iso, addDays, startOfWeek, minutes, quickAddTimeRange, WD_CAP } from '@/utils/convert-date-time'
+import { anchorFromEvent } from '@/utils/popover-anchor'
 
+// DayView — single-column CdTimeGrid + poster header + week-strip cluster, rebuilt against the
+// CADENCE Handoff day screen (design.md "4.2 Rebuild Day view"). Reuses the shared CdTimeGrid that
+// task 4.1 built for both Day and Week, passing a single-column `columns` array. The week-strip
+// re-anchors with settings.firstDay (task 7.2 "First day of week re-anchors all week-based layouts").
 const ui = useUiStore()
 const tasksStore = useTasksStore()
-// 共享的 singleton 時鐘（見 use-current-time.ts），每秒更新一次，往下透過 props 傳給 Timeline
+const settings = useSettingsStore()
+const calendarsStore = useCalendarsStore()
 const now = useCurrentTime()
 
-const isToday = computed(() => ui.selectedDate === iso(new Date()))
-const label = computed(() => {
-  const d = parseISO(ui.selectedDate)
-  return `${d.getFullYear()}年 ${d.getMonth() + 1}月${d.getDate()}日`
+const cur = computed(() => parseISO(ui.selectedDate))
+const year = computed(() => cur.value.getFullYear())
+const dayTitle = computed(() => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(cur.value))
+
+const nowMinutes = computed(() => now.value.getHours() * 60 + now.value.getMinutes())
+
+function stepDayBy(delta: number): void {
+  ui.selectedDate = iso(addDays(cur.value, delta))
+}
+
+function goToday(): void {
+  ui.selectedDate = iso(new Date())
+}
+
+function onStripSelect(date: string): void {
+  ui.selectedDate = date
+}
+
+const stripDays = computed<WeekStripDay[]>(() => {
+  const start = startOfWeek(cur.value, settings.firstDay)
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = addDays(start, i)
+    const date = iso(d)
+    return {
+      date,
+      dow: d.getDay(),
+      label: WD_CAP[d.getDay()]!.toUpperCase(),
+      dayNum: d.getDate(),
+      dots: eventsForDate(date)
+        .slice(0, 4)
+        .map((e) => e.color)
+    }
+  })
 })
+
+// calendar-management spec "Calendar visibility filters all views": hidden calendars' tasks
+// disappear immediately from Day, Week, and Month — display-only, tasksStore.tasks is untouched.
+function eventsForDate(date: string) {
+  return tasksStore.tasks
+    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
+    .map((t) => {
+      const theme = themeOf(t)
+      return { id: t.id, title: t.title, color: theme.backgroundColor, start: t.start, end: t.end, allDay: t.allDay }
+    })
+}
+
+const gridColumn = computed<TimeGridColumn>(() => {
+  const date = ui.selectedDate
+  const events = eventsForDate(date)
+  return {
+    date,
+    dow: cur.value.getDay(),
+    dowLabel: WD_CAP[cur.value.getDay()]!.toUpperCase(),
+    dayNum: cur.value.getDate(),
+    today: date === iso(new Date()),
+    events: events
+      .filter((e) => !e.allDay)
+      .map((e) => ({ id: e.id, title: e.title, color: e.color, start: minutes(e.start), end: minutes(e.end), allDay: false })),
+    allDayEvents: events.filter((e) => e.allDay).map((e) => ({ id: e.id, title: e.title, color: e.color }))
+  }
+})
+
+// Event-block click opens the anchored preview (app-shell spec "Anchored popovers remain fully
+// visible").
+function onEventClick(_date: string, eventId: string, e: MouseEvent): void {
+  ui.eventPreview = { taskId: eventId, anchor: anchorFromEvent(e), mode: 'preview' }
+}
+
+// Empty time-grid click opens Quick-Add with the clicked time rounded down to 30 minutes and a
+// one-hour duration, clamped to 06:00-22:00 (app-shell spec "Creation entry points seed context
+// from where they are invoked" / "Time-grid click rounds the start time").
+function onColumnClick(date: string, clickedMinutes: number, e: MouseEvent): void {
+  const { start, end } = quickAddTimeRange(clickedMinutes)
+  ui.qaPop = { anchor: anchorFromEvent(e), date, time: start, endTime: end }
+}
 </script>
 
-<style scoped lang="sass">
-.viewhead
-  display: flex
-  align-items: flex-end
-  justify-content: space-between
-  margin-bottom: 22px
-  gap: 20px
-  flex-wrap: wrap
+<style scoped>
+.day-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+}
 
-  h1
-    margin: 0
-    font-weight: 700
-    font-size: 30px
-    letter-spacing: -.02em
-    line-height: 1
-
-.dayhead-row
-  display: flex
-  align-items: center
-  gap: 18px
-  flex-wrap: wrap
-  margin-top: 10px
-
-  h1
-    margin: 0
-
-  .liveclock
-    margin-top: 0
-
-.dayhead-left
-  display: flex
-  align-items: center
-  gap: 18px
-  flex-wrap: wrap
-  min-width: 0
-
-.liveclock
-  display: flex
-  align-items: baseline
-  gap: 9px
-  margin-top: 14px
-
-  .tnow
-    font-family: 'JetBrains Mono', ui-monospace, monospace
-    font-weight: 700
-    font-size: 21px
-    letter-spacing: .02em
-    line-height: 1
-    font-variant-numeric: tabular-nums
-
-    .sec
-      color: $ink-3
-
-.day-grid
-  display: grid
-  grid-template-columns: minmax(360px, 1fr) minmax(420px, 1.05fr)
-  gap: 20px
-  align-items: start
-
-  &.solo
-    grid-template-columns: 1fr
-
-@media (max-width: 980px)
-  .day-grid
-    grid-template-columns: 1fr
+.day-view__grid-wrap {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 22px 22px;
+}
 </style>

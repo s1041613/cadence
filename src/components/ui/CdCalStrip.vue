@@ -81,7 +81,12 @@ onBeforeUnmount(() => {
   gap: 8px;
   padding: 11px 10px 11px 18px;
   background: var(--cd-topbar);
-  border-bottom: 1px solid var(--cd-line);
+}
+
+@media (max-width: 899px) {
+  .cd-cal-strip {
+    padding: 10px 8px 10px 14px;
+  }
 }
 
 .cd-cal-strip__row {

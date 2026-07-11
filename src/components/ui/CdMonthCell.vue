@@ -1,5 +1,5 @@
 <template>
-  <div class="cd-month-cell" @click="emit('click')">
+  <div class="cd-month-cell" @click="(e) => emit('click', e)">
     <div class="cd-month-cell__head">
       <span
         class="cd-month-cell__num"
@@ -7,7 +7,8 @@
           'cd-month-cell__num--sat': dow === 6,
           'cd-month-cell__num--sun': dow === 0,
           'cd-month-cell__num--outside': outsideMonth,
-          'cd-month-cell__num--today': today
+          'cd-month-cell__num--today': today,
+          'cd-month-cell__num--selected': selected
         }"
       >
         {{ dayNum }}
@@ -18,16 +19,17 @@
     </div>
     <div v-else class="cd-month-cell__events">
       <CdEventChip
-        v-for="(ev, i) in events.slice(0, 2)"
-        :key="i"
+        v-for="ev in events.slice(0, 2)"
+        :key="ev.id"
         :title="ev.title"
         :color="ev.color"
         :quad="ev.quad"
         :time="ev.allDay ? null : ev.time"
+        :end-time="ev.allDay ? null : ev.endTime"
         :all-day="ev.allDay"
         :done="ev.done"
         :fmt="fmt"
-        @click="(e) => { e.stopPropagation(); emit('eventClick', ev) }"
+        @click="(e) => { e.stopPropagation(); emit('eventClick', ev, e) }"
       />
       <button v-if="events.length > 2" type="button" class="cd-month-cell__more" @click.stop="emit('more')">
         +{{ events.length - 2 }}
@@ -44,10 +46,12 @@
 import CdEventChip from './CdEventChip.vue'
 
 export interface MonthCellEvent {
+  id: string
   title: string
   color: string
   quad: 'do' | 'plan' | 'quick' | 'later' | 'event'
   time: string
+  endTime: string | null
   allDay: boolean
   done: boolean
 }
@@ -57,13 +61,14 @@ defineProps<{
   dow: number // 0=Sun..6=Sat
   outsideMonth: boolean
   today: boolean
+  selected?: boolean
   events: MonthCellEvent[]
   fmt: 'time' | 'name' | 'dot'
 }>()
 
 const emit = defineEmits<{
-  click: []
-  eventClick: [event: MonthCellEvent]
+  click: [event: MouseEvent]
+  eventClick: [event: MonthCellEvent, mouseEvent: MouseEvent]
   more: []
 }>()
 </script>
@@ -78,6 +83,7 @@ const emit = defineEmits<{
   gap: 3px;
   cursor: pointer;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .cd-month-cell__head {
@@ -88,6 +94,11 @@ const emit = defineEmits<{
 .cd-month-cell__num {
   font: 500 19px var(--cd-font-mono);
   color: var(--cd-ink);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
 }
 
 .cd-month-cell__num--sat {
@@ -104,13 +115,12 @@ const emit = defineEmits<{
 
 .cd-month-cell__num--today {
   font-weight: 800;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
   background: var(--cd-olive);
   color: #3f4136;
-  display: grid;
-  place-items: center;
+}
+
+.cd-month-cell__num--selected {
+  background: rgba(86, 88, 94, 0.12);
 }
 
 .cd-month-cell__events {
@@ -140,5 +150,13 @@ const emit = defineEmits<{
   text-align: left;
   font: 8px var(--cd-font-mono);
   color: var(--cd-muted);
+}
+
+@media (max-width: 899px) {
+  .cd-month-cell {
+    height: 52px;
+    padding: 4px 4px;
+    gap: 1px;
+  }
 }
 </style>

@@ -2,7 +2,6 @@
   <div class="cd-edit-card">
     <div class="cd-edit-card__head">
       <button type="button" class="cd-edit-card__back" @click="emit('back')">‹ {{ isNew ? 'New' : 'Edit' }}</button>
-      <button type="button" class="cd-edit-card__close" aria-label="Close" @click="emit('close')">✕</button>
     </div>
 
     <input
@@ -13,28 +12,25 @@
       @input="emit('update:title', ($event.target as HTMLInputElement).value)"
     />
 
-    <CdSegmented
-      class="cd-edit-card__type"
-      :model-value="type"
-      :options="[{ value: 'event', label: 'Event' }, { value: 'task', label: 'Task' }]"
-      @update:model-value="(v) => emit('update:type', v as 'event' | 'task')"
-    />
+    <div class="cd-edit-card__scroll">
+      <CdSegmented
+        class="cd-edit-card__type"
+        :model-value="type"
+        :options="[{ value: 'event', label: 'Event' }, { value: 'task', label: 'Task' }]"
+        @update:model-value="(v) => emit('update:type', v as 'event' | 'task')"
+      />
 
-    <div v-if="type === 'event'" class="cd-edit-card__colors">
-      <span class="cd-edit-card__colors-label">COLOR</span>
-      <div class="cd-edit-card__colors-row">
-        <button
-          v-for="c in COLOR_SWATCHES"
-          :key="c"
-          type="button"
-          class="cd-edit-card__color-swatch"
-          :aria-label="c"
-          :style="{ background: c, boxShadow: color === c ? `0 0 0 3px #F1EFE8, 0 0 0 5px ${c}` : 'none' }"
-          @click="emit('update:color', c)"
-        >
-          <CdIcon v-if="color === c" name="check" :size="18" color="#fff" :stroke-width="2.6" />
-        </button>
-      </div>
+    <div v-if="type === 'event'" class="cd-edit-card__style-row">
+      <span class="cd-edit-card__field-icon">
+        <CdIcon name="brush" :size="18" color="#9C9E94" />
+      </span>
+      <span class="cd-edit-card__style-label">Style</span>
+      <button type="button" class="cd-edit-card__style-trigger" aria-label="Edit style" @click="appearanceOpen = true">
+        <span class="cd-edit-card__style-dot" :style="{ background: color }">
+          <CdIcon v-if="iconName" :name="iconName" :size="11" color="#fff" />
+        </span>
+        <CdIcon name="chevron-right" :size="14" color="#9C9E94" />
+      </button>
     </div>
 
     <div v-if="type === 'task'" class="cd-edit-card__matrix">
@@ -54,7 +50,7 @@
             type="button"
             class="cd-edit-card__matrix-cell"
             :class="{ 'cd-edit-card__matrix-cell--selected': quad === q.k }"
-            :style="quad === q.k ? { borderColor: quadColor(q.k), background: quadColor(q.k), boxShadow: `0 5px 12px -7px ${quadColor(q.k)}` } : { borderColor: 'var(--cd-line)' }"
+            :style="quad === q.k ? { borderColor: quadColor(q.k), background: quadColor(q.k), boxShadow: `0 5px 12px -7px ${quadColor(q.k)}` } : { borderColor: 'var(--cd-line)', '--cd-matrix-hover': `${quadColor(q.k)}88` }"
             @click="emit('update:quad', q.k)"
           >
             <span class="cd-edit-card__matrix-cell-label" :style="{ color: quad === q.k ? '#fff' : quadColor(q.k) }">{{ q.l }}</span>
@@ -69,22 +65,31 @@
         <CdIcon name="calendar" :size="18" color="#9C9E94" />
       </span>
       <div class="cd-edit-card__when-content">
-        <div class="cd-edit-card__allday-row">
+        <div v-if="type === 'event'" class="cd-edit-card__allday-row">
           <span class="cd-edit-card__label">All-day</span>
           <CdSwitch :model-value="allDay" size="34x19" @update:model-value="(v) => emit('update:allDay', v)" />
         </div>
-        <div v-if="!allDay" class="cd-edit-card__time-row">
+        <div class="cd-edit-card__time-row">
+          <span class="cd-edit-card__time-label">Starts</span>
           <span class="cd-edit-card__date-pill">{{ dateLabel }}</span>
-          <CdTimeDropdown :model-value="start" @update:model-value="(v) => emit('update:start', v)" />
-          <span class="cd-edit-card__arrow">→</span>
-          <CdTimeDropdown :model-value="end" @update:model-value="(v) => emit('update:end', v)" />
+          <CdTimeDropdown v-if="!effectiveAllDay" :model-value="start" :format="timeFormat" @update:model-value="(v) => emit('update:start', v)" />
+        </div>
+        <div class="cd-edit-card__time-row">
+          <span class="cd-edit-card__time-label">Ends</span>
+          <span class="cd-edit-card__date-pill">{{ dateLabel }}</span>
+          <CdTimeDropdown v-if="!effectiveAllDay" :model-value="end" :format="timeFormat" @update:model-value="(v) => emit('update:end', v)" />
         </div>
         <p v-if="timeInvalid" class="cd-edit-card__time-warning">⚠ End time must be after start time</p>
+        <div v-else-if="type === 'task'" class="cd-edit-card__pomodoro-estimate">
+          <CdIcon name="tomato" :size="16" />
+          <span>{{ pomodoroCount }} pomodoro{{ pomodoroCount === 1 ? '' : 's' }}</span>
+          <span class="cd-edit-card__pomodoro-cycle">25 min focus · 5 min break</span>
+        </div>
       </div>
     </div>
 
     <button type="button" class="cd-edit-card__more-toggle" @click="moreOpen = !moreOpen">
-      <span>More options</span>
+      <span>{{ moreOpen ? 'Fewer options' : 'More options' }}</span>
       <span class="cd-edit-card__more-chevron" :class="{ 'cd-edit-card__more-chevron--open': moreOpen }">
         <CdIcon name="chevron-down" :size="14" />
       </span>
@@ -105,15 +110,16 @@
       </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
-          <CdIcon name="location" :size="18" color="#9C9E94" />
+          <CdIcon name="globe" :size="18" color="#9C9E94" />
         </span>
         <input
           class="cd-edit-card__input"
           :value="location"
-          placeholder="Location"
+          placeholder="Add location"
           @input="emit('update:location', ($event.target as HTMLInputElement).value)"
         />
       </div>
+      <div class="cd-edit-card__divider" />
       <div class="cd-edit-card__field-row cd-edit-card__field-row--top">
         <span class="cd-edit-card__field-icon" style="margin-top: 2px">
           <CdIcon name="notes" :size="18" color="#9C9E94" />
@@ -121,11 +127,12 @@
         <textarea
           class="cd-edit-card__textarea"
           :value="notes"
-          placeholder="Notes"
-          rows="3"
+          placeholder="Add notes…"
+          rows="2"
           @input="emit('update:notes', ($event.target as HTMLTextAreaElement).value)"
         />
       </div>
+    </div>
     </div>
 
     <div class="cd-edit-card__footer">
@@ -143,6 +150,16 @@
         {{ isNew ? 'Add' : 'Save' }}
       </button>
     </div>
+
+    <CdAppearancePicker
+      v-if="appearanceOpen && type === 'event'"
+      :icon="icon"
+      :color="color"
+      @close="appearanceOpen = false"
+      @remove="emit('removeIcon')"
+      @pick-icon="(v) => emit('update:icon', v)"
+      @pick-color="(v) => emit('update:color', v)"
+    />
   </div>
 </template>
 
@@ -152,15 +169,15 @@ import CdSegmented from './CdSegmented.vue'
 import CdSwitch from './CdSwitch.vue'
 import CdTimeDropdown from './CdTimeDropdown.vue'
 import CdRepeatPill from './CdRepeatPill.vue'
+import CdAppearancePicker from './CdAppearancePicker.vue'
 import CdIcon from './CdIcon.vue'
-import { minutes } from '@/utils/convert-date-time'
+import { autoPoms, minutes, type TimeFormatName } from '@/utils/convert-date-time'
+import type { IconName } from './icons'
 
 // CdEventEditCard — Event/Task edit popover (same popover swaps between preview/edit, no slide
 // transition). design-research-report.md §3.9. desk width 388px.
 //
-// v2 update: when type==='event', the Eisenhower matrix is replaced by a COLOR swatch row (events
-// aren't quadrant-scoped — they carry their own color instead). type==='task' still shows the
-// quadrant matrix, unchanged.
+// Event rows use the handoff's Style push subview for color/icon. Tasks show the quadrant matrix.
 //
 // CADENCE Handoff: event swatches use the handoff's cool event palette (#4A8B85 #63996B #6863B0
 // #8E6FB0 #A56D91 #4C4E57) — deliberately distinct from the warm/slate quadrant palette so the two
@@ -176,8 +193,6 @@ const QUAD_COLORS: Record<string, string> = {
   later: '#9A988F'
 }
 
-const COLOR_SWATCHES = ['#4A8B85', '#63996B', '#6863B0', '#8E6FB0', '#A56D91', '#4C4E57']
-
 function quadColor(k: string): string {
   return QUAD_COLORS[k] ?? '#9A988F'
 }
@@ -189,6 +204,7 @@ const props = withDefaults(
     type: 'event' | 'task'
     quad: 'do' | 'plan' | 'quick' | 'later'
     color?: string
+    icon?: string | null
     allDay: boolean
     dateLabel: string
     start: string
@@ -197,13 +213,14 @@ const props = withDefaults(
     repeatLabel: string
     location: string
     notes: string
+    estimatedPomodoros?: number
+    timeFormat?: TimeFormatName
   }>(),
-  { color: '#E3A75C' }
+  { color: '#E3A75C', icon: null, timeFormat: '24-Hour' }
 )
 
 const emit = defineEmits<{
   back: []
-  close: []
   cancel: []
   delete: []
   save: []
@@ -211,6 +228,8 @@ const emit = defineEmits<{
   'update:type': [value: 'event' | 'task']
   'update:quad': [value: 'do' | 'plan' | 'quick' | 'later']
   'update:color': [value: string]
+  'update:icon': [value: IconName]
+  removeIcon: []
   'update:allDay': [value: boolean]
   'update:start': [value: string]
   'update:end': [value: string]
@@ -221,8 +240,18 @@ const emit = defineEmits<{
 }>()
 
 const moreOpen = ref(false)
+const appearanceOpen = ref(false)
 
-const timeInvalid = computed(() => !props.allDay && minutes(props.end) <= minutes(props.start))
+const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.allDay))
+const timeInvalid = computed(() => !effectiveAllDay.value && minutes(props.end) <= minutes(props.start))
+const pomodoroCount = computed(() => props.estimatedPomodoros ?? autoPoms({ allDay: false, start: props.start, end: props.end }))
+const iconName = computed<IconName | null>(() => (props.icon && isIconName(props.icon) ? props.icon : null))
+
+function isIconName(value: string): value is IconName {
+  return ICON_NAMES.has(value)
+}
+
+const ICON_NAMES = new Set<string>(['copy', 'pencil', 'trash', 'journal', 'spark', 'bell', 'target', 'search', 'calendar', 'clock', 'check', 'image', 'repeat', 'location', 'notes', 'info', 'sync', 'mail', 'reset', 'spark-mono', 'journal-plain', 'calendar-alt', 'tomato', 'view-day', 'view-week', 'view-month', 'view-list', 'gear'])
 
 const matrixOptions = [
   { k: 'do' as const, l: 'Do Now', s: 'Right away' },
@@ -240,7 +269,17 @@ const matrixOptions = [
   border-radius: var(--cd-radius-preview);
   display: flex;
   flex-direction: column;
-  padding-bottom: 16px;
+  height: min(600px, calc(100dvh - 24px));
+  max-height: min(600px, calc(100dvh - 24px));
+  overflow: hidden;
+}
+
+@media (max-width: 899px) {
+  .cd-edit-card {
+    width: 100%;
+    border: none;
+    border-radius: 0;
+  }
 }
 
 .cd-edit-card__head {
@@ -259,16 +298,6 @@ const matrixOptions = [
   color: var(--cd-ink-2);
 }
 
-.cd-edit-card__close {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: none;
-  background: var(--cd-topbar);
-  cursor: pointer;
-  color: var(--cd-ink);
-}
-
 .cd-edit-card__title {
   flex: none;
   width: 100%;
@@ -285,35 +314,47 @@ const matrixOptions = [
   margin: 0 16px 2px;
 }
 
-.cd-edit-card__colors {
-  padding: 13px 16px 6px;
+.cd-edit-card__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(120, 116, 100, 0.28) transparent;
 }
 
-.cd-edit-card__colors-label {
-  display: block;
-  font: 800 8.5px var(--cd-font-mono);
-  letter-spacing: 0.12em;
-  color: #b0ad9f;
-  margin-bottom: 10px;
-}
-
-.cd-edit-card__colors-row {
+.cd-edit-card__style-row {
+  flex: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 11px;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 16px;
 }
 
-.cd-edit-card__color-swatch {
-  width: 38px;
-  height: 38px;
+.cd-edit-card__style-label {
+  flex: 1;
+  min-width: 0;
+  font: 600 13px var(--cd-font-title);
+  color: var(--cd-ink);
+}
+
+.cd-edit-card__style-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--cd-line);
+  background: #fff;
+  border-radius: 11px;
+  padding: 5px 7px;
+  cursor: pointer;
+}
+
+.cd-edit-card__style-dot {
+  width: 22px;
+  height: 22px;
   flex: none;
   border-radius: 50%;
-  border: none;
-  padding: 0;
-  cursor: pointer;
   display: grid;
   place-items: center;
-  transition: box-shadow var(--cd-duration-micro-2);
 }
 
 .cd-edit-card__matrix {
@@ -384,6 +425,10 @@ const matrixOptions = [
   transition: border-color var(--cd-duration-micro-2), background var(--cd-duration-micro-2);
 }
 
+.cd-edit-card__matrix-cell:not(.cd-edit-card__matrix-cell--selected):hover {
+  border-color: var(--cd-matrix-hover);
+}
+
 .cd-edit-card__matrix-cell-label {
   font: 800 13px var(--cd-font-title);
 }
@@ -427,16 +472,20 @@ const matrixOptions = [
 .cd-edit-card__time-row {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+  min-height: 30px;
+}
+
+.cd-edit-card__time-label {
+  margin-right: auto;
+  font: 600 12.5px var(--cd-font-ui);
+  color: var(--cd-muted);
 }
 
 .cd-edit-card__date-pill {
   font: 600 12.5px var(--cd-font-ui);
   color: var(--cd-ink);
-}
-
-.cd-edit-card__arrow {
-  color: var(--cd-muted);
 }
 
 .cd-edit-card__time-warning {
@@ -445,10 +494,30 @@ const matrixOptions = [
   color: #c0564b;
 }
 
-.cd-edit-card__more-toggle {
+.cd-edit-card__pomodoro-estimate {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid rgba(179, 172, 145, 0.4);
+  border-radius: 10px;
+  background: rgba(179, 172, 145, 0.14);
+  font: 600 12.5px var(--cd-font-ui);
+  color: var(--cd-ink);
+}
+
+.cd-edit-card__pomodoro-cycle {
+  margin-left: auto;
+  font: 600 11px var(--cd-font-mono);
+  color: var(--cd-muted);
+}
+
+.cd-edit-card__more-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -505,23 +574,34 @@ const matrixOptions = [
 .cd-edit-card__textarea {
   flex: 1;
   min-width: 0;
-  border: 1px solid var(--cd-line);
-  border-radius: var(--cd-radius-editor-field);
-  padding: 8px 12px;
-  font: 500 13.5px var(--cd-font-ui);
+  border: none;
+  outline: none;
+  background: transparent;
+  font: 600 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
-  background: #fff;
+  padding: 2px 0;
 }
 
 .cd-edit-card__textarea {
-  resize: vertical;
+  resize: none;
+  line-height: 1.5;
+}
+
+.cd-edit-card__divider {
+  height: 1px;
+  margin: 2px 16px;
+  background: var(--cd-line);
 }
 
 .cd-edit-card__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px 0;
+  flex: none;
+  margin-top: 6px;
+  padding: 12px 16px 15px;
+  border-top: 1px solid var(--cd-line);
+  background: #fff;
 }
 
 .cd-edit-card__cancel {

@@ -1,17 +1,17 @@
 <template>
   <nav class="cd-bottom-nav">
-    <button type="button" class="cd-bottom-nav__btn" aria-label="Day view" @click="emit('update:activeView', 'day')">
+    <!-- <button type="button" class="cd-bottom-nav__btn" aria-label="Day view" @click="emit('update:activeView', 'day')">
       <CdIcon name="view-day" :size="24" :color="activeView === 'day' ? '#56585E' : '#9C9E94'" />
-    </button>
+    </button> -->
     <button type="button" class="cd-bottom-nav__btn" aria-label="Month view" @click="emit('update:activeView', 'month')">
       <CdIcon name="view-month" :size="24" :color="activeView === 'month' ? '#56585E' : '#9C9E94'" />
     </button>
     <button type="button" class="cd-bottom-nav__btn" aria-label="Week view" @click="emit('update:activeView', 'week')">
       <CdIcon name="view-week" :size="24" :color="activeView === 'week' ? '#56585E' : '#9C9E94'" />
     </button>
-    <button type="button" class="cd-bottom-nav__ai" aria-label="Assistant" @click="emit('openAssistant')">
+    <!-- <button type="button" class="cd-bottom-nav__ai" aria-label="Assistant" @click="emit('openAssistant')">
       <CdIcon name="spark" :size="24" color="#3A6EA5" />
-    </button>
+    </button> -->
     <button type="button" class="cd-bottom-nav__btn" aria-label="Journal" @click="emit('openJournal')">
       <CdIcon name="journal" :size="24" color="#9C9E94" />
     </button>

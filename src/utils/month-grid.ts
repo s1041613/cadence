@@ -1,7 +1,9 @@
-// Pure month-grid cell generator: Monday-start 6x7 grid (42 cells), always including the full
-// month plus leading/trailing days from adjacent months. Year carries correctly across the
-// December/January boundary because it derives from `new Date(y, m, 1)` / `new Date(y, m + 1, 0)`,
-// which normalize out-of-range month indices instead of needing manual carry logic.
+// Pure month-grid cell generator: rows just enough to cover the full month (5 or 6 weeks),
+// including leading/trailing days from adjacent months to fill each week — matching CADENCE
+// Handoff.dc.html's _calRows, which stops padding once the last week is complete instead of
+// always emitting a 6th row. Year carries correctly across the December/January boundary because
+// it derives from `new Date(y, m, 1)` / `new Date(y, m + 1, 0)`, which normalize out-of-range
+// month indices instead of needing manual carry logic.
 export interface MonthGridCellDate {
   date: string // ISO YYYY-MM-DD
   dayNum: number
@@ -9,12 +11,15 @@ export interface MonthGridCellDate {
   outsideMonth: boolean
 }
 
-import { addDays, iso, startOfWeek } from './convert-date-time'
+import { addDays, iso, startOfWeek, type FirstDayName } from './convert-date-time'
 
-export function monthGridCells(year: number, month: number): MonthGridCellDate[] {
+export function monthGridCells(year: number, month: number, firstDay?: FirstDayName): MonthGridCellDate[] {
   const first = new Date(year, month, 1)
-  const gridStart = startOfWeek(first)
-  return Array.from({ length: 42 }, (_, i) => {
+  const gridStart = startOfWeek(first, firstDay)
+  const lastDayOfMonth = new Date(year, month + 1, 0)
+  const daysFromGridStart = Math.round((lastDayOfMonth.getTime() - gridStart.getTime()) / 86400000) + 1
+  const cellCount = Math.ceil(daysFromGridStart / 7) * 7
+  return Array.from({ length: cellCount }, (_, i) => {
     const d = addDays(gridStart, i)
     return {
       date: iso(d),

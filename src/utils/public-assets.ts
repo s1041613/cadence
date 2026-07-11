@@ -15,3 +15,11 @@ export function publicIconSrcset(name: string): string {
     `${publicIconPath(`${name}-64.png`)} 2x`
   ].join(', ')
 }
+
+// jan.jpg … dec.jpg — system default banner photo per calendar month, used whenever the user
+// hasn't uploaded their own (settings-store.monthlyPhotos[i] is null). index 0 = January.
+const MONTH_PHOTO_FILES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+export function defaultMonthPhotoPath(monthIndex: number): string {
+  return publicAssetPath(`month-photos/${MONTH_PHOTO_FILES[monthIndex % 12]}.jpg`)
+}

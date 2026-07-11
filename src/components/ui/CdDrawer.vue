@@ -29,11 +29,8 @@
 // shadow -22px 0 52px -22px rgba(40,38,30,.42), animation drawerIn .34s cubic-bezier(.22,1,.36,1).
 // Widths differ by consumer: Task Editor min(600px,60%), Draft/Assistant min(440px,46%).
 //
-// v2 update (Assistant drawer only): desktop `_assistantDrawer` became non-modal — no scrim, the
-// outer overlay wrapper gets `pointer-events:none` (so clicks pass through to the calendar beneath),
-// and the drawer panel itself gets `pointer-events:auto` + `border:1px solid #E9E6DD` (Gmail/Notion
-// side-panel pattern). `nonModal` opts a consumer into this variant; default false preserves the
-// modal (scrim + pointer-events default) behavior for Task Editor / Draft.
+// `nonModal` remains available for future side-panel variants. Current CADENCE overlays use the
+// default modal behavior with scrim dismissal.
 //
 // CADENCE Handoff §_settingsDrawer (full file): `side="left"` opts a consumer into the left-anchored
 // desk variant (Settings drawer) — panel anchors `left: 14px` instead of `right: 14px`, the shadow

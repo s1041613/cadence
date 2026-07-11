@@ -8,28 +8,26 @@ describe('tasks-store', () => {
   })
 
   describe('copyToDays', () => {
-    it('copies to three days, skipping one conflict, and reports the skipped date', () => {
+    it('copies to every date even when the slot conflicts with an existing task', () => {
       const store = useTasksStore()
       const existing = mkTask({ date: '2026-07-11', start: '14:30', end: '15:30' })
       store.tasks.push(existing)
 
       const source = mkTask({ date: '2026-07-10', start: '14:00', end: '15:00' })
-      const { created, skipped } = store.copyToDays(source, ['2026-07-11', '2026-07-12', '2026-07-13'])
+      const created = store.copyToDays(source, ['2026-07-11', '2026-07-12', '2026-07-13'])
 
-      expect(created).toHaveLength(2)
-      expect(created.map((t) => t.date).sort()).toEqual(['2026-07-12', '2026-07-13'])
-      expect(skipped).toEqual(['2026-07-11'])
-      // existing (1) + two newly created tasks
-      expect(store.tasks).toHaveLength(3)
+      expect(created).toHaveLength(3)
+      expect(created.map((t) => t.date).sort()).toEqual(['2026-07-11', '2026-07-12', '2026-07-13'])
+      // existing (1) + three newly created tasks
+      expect(store.tasks).toHaveLength(4)
     })
 
     it('creates a task on every date when none conflict', () => {
       const store = useTasksStore()
       const source = mkTask({ date: '2026-07-10', start: '14:00', end: '15:00' })
-      const { created, skipped } = store.copyToDays(source, ['2026-07-11', '2026-07-12'])
+      const created = store.copyToDays(source, ['2026-07-11', '2026-07-12'])
 
       expect(created).toHaveLength(2)
-      expect(skipped).toEqual([])
       expect(store.tasks).toHaveLength(2)
     })
 
@@ -51,7 +49,7 @@ describe('tasks-store', () => {
         notes: 'Keep this note'
       })
 
-      const { created } = store.copyToDays(source, ['2026-07-11'])
+      const created = store.copyToDays(source, ['2026-07-11'])
 
       expect(created[0]).toMatchObject({
         title: 'Review notes',
@@ -117,16 +115,27 @@ describe('tasks-store', () => {
   })
 
   describe('saveTask', () => {
-    it('blocks saving and returns the conflicting task without closing the caller', () => {
+    it('saves successfully even when the time overlaps an existing task', () => {
       const store = useTasksStore()
       const existing = mkTask({ date: '2026-07-10', start: '14:00', end: '15:00' })
       store.tasks.push(existing)
 
       const incoming = mkTask({ date: '2026-07-10', start: '14:30', end: '15:30' })
-      const conflict = store.saveTask(incoming)
+      store.saveTask(incoming)
 
-      expect(conflict?.id).toBe(existing.id)
+      expect(store.tasks).toHaveLength(2)
+      expect(store.tasks.map((t) => t.id)).toContain(incoming.id)
+    })
+
+    it('updates an existing task in place when saving by the same id', () => {
+      const store = useTasksStore()
+      const task = mkTask({ date: '2026-07-10', title: 'Original' })
+      store.tasks.push(task)
+
+      store.saveTask({ ...task, title: 'Updated' })
+
       expect(store.tasks).toHaveLength(1)
+      expect(store.tasks[0]!.title).toBe('Updated')
     })
   })
 })

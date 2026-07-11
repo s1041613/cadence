@@ -21,9 +21,12 @@
 // utility-set icons already present in this registry (bell/target/search/calendar/clock/check/
 // image/info/reset) were cross-checked against `sysIcon`/`uic` in the source and are the same
 // silhouettes already in use by live Cd* call sites; turn 19 grid entries with no current Cd*
-// consumer (account/users/at/home/lock/work/heart/school/bulb/layers/star/adv/brush/shield/help/
-// cloud/logout/eye) were deliberately NOT added — nothing in this codebase references them yet, and
-// speculative entries would be untestable dead code until a real call site needs them.
+// consumer (account/at/adv/shield/help/cloud/logout) were deliberately NOT added — nothing in this
+// codebase references them yet, and speculative entries would be untestable dead code until a real
+// call site needs them. `brush`/`globe`/`star`/`layers`/`home`/`lock`/`heart`/`work`/`users`/
+// `school`/`bulb`/`eye`/`note` were added later once CdEventEditCard's Style/Location rows and
+// CdAppearancePicker's icon-category set gave them real call sites (design-fidelity pass against
+// CADENCE Handoff.dc.html's editCard/ICO_CATS, lines ~2070/2114-2119/2134).
 
 export type IconName =
   | 'close'
@@ -62,6 +65,19 @@ export type IconName =
   | 'view-month'
   | 'view-list'
   | 'gear'
+  | 'brush'
+  | 'globe'
+  | 'star'
+  | 'layers'
+  | 'home'
+  | 'lock'
+  | 'heart'
+  | 'work'
+  | 'users'
+  | 'school'
+  | 'bulb'
+  | 'eye'
+  | 'note'
 
 /** Sentinel fill/stroke value meaning "use CdIcon's resolved color prop" (as opposed to a fixed
  *  hex, or the literal CSS keyword `currentColor` which would instead track the element's `color`
@@ -168,11 +184,7 @@ export const ICONS: Record<IconName, IconSpec> = {
   },
 
   // Chevron right — disclosure chevron at rest pointing right (rotated via CSS per call site to
-  // point down/up for expand-collapse). Ported verbatim from CdCalStrip / CdEventPreviewCard /
-  // CdTaskEditorPanel's existing identical `polyline points="9 18 15 12 9 6"` — geometrically the
-  // same rightward chevron shape as the audit's turn-11 date-nav glyph, kept at the app's existing
-  // polyline coordinates (rather than switching to the audit's `path` syntax) since 3 live call
-  // sites already agree on this exact form and their CSS rotation math is tuned to it.
+  // point down/up for expand-collapse).
   'chevron-right': {
     viewBox: '0 0 24 24',
     strokeWidth: 2,
@@ -238,7 +250,7 @@ export const ICONS: Record<IconName, IconSpec> = {
     ]
   },
 
-  // Bell — reminder/alert field icon (CdEventEditCard, CdEventPreviewCard, CdTaskEditorPanel).
+  // Bell — reminder/alert field icon (CdEventEditCard, CdEventPreviewCard).
   // Not in the audit file; ported from CADENCE-Prototype-v2.dc.html `st_icon('bell', …)`.
   bell: {
     viewBox: '0 0 24 24',
@@ -274,9 +286,8 @@ export const ICONS: Record<IconName, IconSpec> = {
 
   // Calendar — plain day-grid glyph (rect + top ticks + horizontal rule). Not in the audit file
   // (the audit's calendar glyphs are the bound-notebook `cal()`/`cd_month` family, which is a
-  // distinct nav/view-switcher glyph, not this field icon). Ported verbatim from the existing inline
-  // SVG shared by CdDraftDrawer's schedule button, CdEventEditCard's when-row, and
-  // CdTaskEditorPanel's date field (identical path in all three call sites already).
+  // distinct nav/view-switcher glyph, not this field icon). Used by Draft schedule buttons and
+  // event edit date/time rows.
   calendar: {
     viewBox: '0 0 24 24',
     strokeWidth: 2,
@@ -288,8 +299,7 @@ export const ICONS: Record<IconName, IconSpec> = {
 
   // Clock — circle + hour/minute hand. Not in the audit file; ported from
   // CADENCE-Prototype-v2.dc.html `st_icon('clock', …)` / the app's existing `clockSvg` helper.
-  // Used by CdEventEditCard's alert row is bell not clock; clock is used by CdTaskEditorPanel's
-  // start/end time fields.
+  // CdEventEditCard's alert row uses bell; clock is used in settings/time affordances.
   clock: {
     viewBox: '0 0 24 24',
     strokeWidth: 2,
@@ -329,7 +339,7 @@ export const ICONS: Record<IconName, IconSpec> = {
   },
 
   // Repeat — loop/cycle arrows. Not covered by either reference file; carried over unchanged from
-  // the existing inline SVG shared by CdEventEditCard and CdTaskEditorPanel's repeat-field icon.
+  // the existing inline SVG used by CdEventEditCard's repeat-field icon.
   repeat: {
     viewBox: '0 0 24 24',
     strokeWidth: 2,
@@ -453,8 +463,7 @@ export const ICONS: Record<IconName, IconSpec> = {
     ]
   },
 
-  // Pencil, small (mark-pen badge on CdTaskEditorPanel's appearance circle) — ported verbatim from
-  // its existing inline SVG. NOT a scaled-down `pencil`/`cd_draft`: it's a distinct single-path
+  // Pencil, small — NOT a scaled-down `pencil`/`cd_draft`: it's a distinct single-path
   // badge silhouette (no cap/seam/tip detail — those would smear at its 12px render size), so per
   // Zoe's ruling (align only if it were a same-shape reduction) it stays unchanged.
   'pencil-small': {
@@ -463,7 +472,7 @@ export const ICONS: Record<IconName, IconSpec> = {
     paths: [{ tag: 'path', attrs: { d: 'M5 19l1-4L16 5l3 3L9 18z' } }]
   },
 
-  // Calendar, alt proportions — ported verbatim from CdTaskEditorPanel's date-field inline SVG.
+  // Calendar, alt proportions — preserved for the larger date-field proportions.
   // Differs from `calendar` (rect height 18 vs 17, and the tick-line path draws the horizontal rule
   // first then the two vertical ticks, vs `calendar`'s ticks-then-rule order/position) — kept as a
   // distinct entry to preserve the exact original proportions at this call site.
@@ -591,6 +600,130 @@ export const ICONS: Record<IconName, IconSpec> = {
         }
       },
       { tag: 'circle', attrs: { cx: 12, cy: 12, r: 3.4 } }
+    ]
+  },
+
+  // Brush — Style row field icon (CdEventEditCard). Ported verbatim from CADENCE Handoff.dc.html's
+  // `brush` glyph: paint-tube body + angled ferrule + bristle tip.
+  brush: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'rect', attrs: { x: 3.5, y: 4.5, width: 13, height: 6, rx: 1.6 } },
+      { tag: 'path', attrs: { d: 'M14 7.5h4.5a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H11' } },
+      { tag: 'path', attrs: { d: 'M9.5 13.5v2.5a2 2 0 0 1-2 2H7a1 1 0 0 0-1 1v1' } }
+    ]
+  },
+
+  // Globe — Location field icon (CdEventEditCard) and Timezone row icon. Ported verbatim from
+  // CADENCE Handoff.dc.html's `globe` glyph: circle + equator line + meridian lens shape.
+  globe: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'circle', attrs: { cx: 12, cy: 12, r: 8.5 } },
+      { tag: 'path', attrs: { d: 'M3.5 12h17' } },
+      { tag: 'path', attrs: { d: 'M12 3.5c2.4 2.3 3.6 5.3 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.3-3.6-8.5s1.2-6.2 3.6-8.5z' } }
+    ]
+  },
+
+  // Icon-picker category glyphs (CdAppearancePicker) — ported verbatim from CADENCE Handoff.dc.html's
+  // `ICO_CATS` category set (General / Home & Life / Work & Study) and their per-icon options.
+  star: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [{ tag: 'path', attrs: { d: 'M12 3.6l2.5 5.1 5.6.8-4 3.9.95 5.6L12 17.9 6.9 20l1-5.6-4-3.9 5.6-.8z' } }]
+  },
+
+  layers: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M12 3.5l8.5 4.5-8.5 4.5-8.5-4.5z' } },
+      { tag: 'path', attrs: { d: 'M3.5 12.5l8.5 4.5 8.5-4.5' } },
+      { tag: 'path', attrs: { d: 'M3.5 16.8l8.5 4.5 8.5-4.5' } }
+    ]
+  },
+
+  home: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M4 10.5L12 4l8 6.5' } },
+      { tag: 'path', attrs: { d: 'M6 9.5V19a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V9.5' } }
+    ]
+  },
+
+  lock: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'rect', attrs: { x: 5, y: 10.5, width: 14, height: 9, rx: 2 } },
+      { tag: 'path', attrs: { d: 'M8 10.5V8a4 4 0 0 1 8 0v2.5' } }
+    ]
+  },
+
+  heart: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [{ tag: 'path', attrs: { d: 'M12 20s-7-4.6-7-9.5A3.7 3.7 0 0 1 12 8a3.7 3.7 0 0 1 7-2.5c0 4.9-7 9.5-7 9.5z' } }]
+  },
+
+  work: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'rect', attrs: { x: 3.5, y: 7.5, width: 17, height: 12, rx: 2 } },
+      { tag: 'path', attrs: { d: 'M8.5 7.5V6a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.5' } }
+    ]
+  },
+
+  users: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'circle', attrs: { cx: 9, cy: 9, r: 3 } },
+      { tag: 'path', attrs: { d: 'M3.5 19c.9-2.6 3-3.7 5.5-3.7s4.6 1.1 5.5 3.7' } },
+      { tag: 'path', attrs: { d: 'M16 6.2a3 3 0 0 1 0 5.8' } },
+      { tag: 'path', attrs: { d: 'M17.5 15.6c1.8.5 3 1.7 3.5 3.4' } }
+    ]
+  },
+
+  school: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M12 4l9 4-9 4-9-4 9-4z' } },
+      { tag: 'path', attrs: { d: 'M6.5 10v5c0 1.4 2.5 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-5' } }
+    ]
+  },
+
+  bulb: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M9 17.5h6M9.5 20h5' } },
+      { tag: 'path', attrs: { d: 'M12 3.5a5.5 5.5 0 0 0-3.2 10c.5.4.7.9.7 1.5h5c0-.6.2-1.1.7-1.5A5.5 5.5 0 0 0 12 3.5z' } }
+    ]
+  },
+
+  eye: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z' } },
+      { tag: 'circle', attrs: { cx: 12, cy: 12, r: 3 } }
+    ]
+  },
+
+  note: {
+    viewBox: '0 0 24 24',
+    strokeWidth: 2,
+    paths: [
+      { tag: 'path', attrs: { d: 'M6.5 3.5h7L19 9v10.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19.5v-14a2 2 0 0 1 1.5-2z' } },
+      { tag: 'path', attrs: { d: 'M13 3.5V9h5.5' } },
+      { tag: 'line', attrs: { x1: 8.5, y1: 13, x2: 15.5, y2: 13 } },
+      { tag: 'line', attrs: { x1: 8.5, y1: 16, x2: 13, y2: 16 } }
     ]
   }
 }
