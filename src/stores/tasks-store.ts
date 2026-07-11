@@ -25,7 +25,6 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date'>): Task {
     completedPomodoros: 0,
     type: 'quadrant',
     backgroundColor: null,
-    texture: 'none',
     icon: null,
     calendarId: DEFAULT_CALENDAR_ID,
     reminder: null,
