@@ -1,9 +1,8 @@
-import type { Task, Texture } from '@/types/task'
+import type { Task } from '@/types/task'
 
 export interface Appearance {
   backgroundColor: string
   textColor: string
-  texture: Texture
   icon: string | null
 }
 
@@ -32,7 +31,6 @@ export const QUADRANTS: Quadrant[] = [
     urgent: true,
     backgroundColor: '#C56A5E',
     textColor: '#4A3318',
-    texture: 'none',
     icon: null
   },
   {
@@ -43,7 +41,6 @@ export const QUADRANTS: Quadrant[] = [
     urgent: false,
     backgroundColor: '#6E839B',
     textColor: '#2A2D27',
-    texture: 'none',
     icon: null
   },
   {
@@ -54,7 +51,6 @@ export const QUADRANTS: Quadrant[] = [
     urgent: true,
     backgroundColor: '#BFA86A',
     textColor: '#3E3845',
-    texture: 'none',
     icon: null
   },
   {
@@ -65,7 +61,6 @@ export const QUADRANTS: Quadrant[] = [
     urgent: false,
     backgroundColor: '#9A988F',
     textColor: '#33403A',
-    texture: 'dot',
     icon: null
   }
 ]
@@ -84,7 +79,6 @@ export function themeOf(task: Task): TaskTheme {
     return {
       backgroundColor: task.backgroundColor ?? FALLBACK_EVENT_COLOR,
       textColor: '#fff',
-      texture: task.texture || 'none',
       icon: task.icon,
       isEvent: true
     }
@@ -93,53 +87,8 @@ export function themeOf(task: Task): TaskTheme {
   return {
     backgroundColor: quad.backgroundColor,
     textColor: quad.textColor,
-    texture: quad.texture,
     icon: quad.icon,
     isEvent: false,
     quad
-  }
-}
-
-// Cute texture: hand-drawn scattered bows/stars/hearts/diamonds/dots, returned as a background-image url().
-function cuteSVG(stroke: string): string {
-  const paths = [
-    `<path d="M8 30c-2-2-2-4 0-5 2 1 2 3 0 5z M8 30c2-2 2-4 0-5-2 1-2 3 0 5z" fill="${stroke}"/>`,
-    `<path d="M40 8c1 3 2 4 5 5-3 1-4 2-5 5-1-3-2-4-5-5 3-1 4-2 5-5z" fill="${stroke}"/>`,
-    `<path d="M20 46c-3-2-5-4-5-6a2.2 2.2 0 014-1 2.2 2.2 0 014 1c0 2-2 4-3 6z" fill="${stroke}"/>`,
-    `<path d="M48 40l3 3-3 3-3-3z" fill="${stroke}"/>`,
-    `<path d="M30 20v6M27 23h6" stroke="${stroke}" stroke-width="1.6" stroke-linecap="round"/>`,
-    `<circle cx="12" cy="16" r="2.2" fill="none" stroke="${stroke}" stroke-width="1.6"/>`,
-    `<circle cx="44" cy="24" r="1.4" fill="${stroke}"/>`,
-    `<circle cx="24" cy="34" r="1.2" fill="${stroke}"/>`
-  ].join('')
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'>${paths}</svg>`
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
-}
-
-// Dark modal-header band: white-tinted overlay.
-export function textureBackground(texture: Texture, color: string): string {
-  if (!texture || texture === 'none') return 'none'
-  const w = 'rgba(255,255,255,.6)'
-  switch (texture) {
-    case 'dot':
-      return `radial-gradient(${w} 1.2px,transparent 1.5px) 0 0/9px 9px`
-    case 'cute':
-      return cuteSVG(w)
-    default:
-      return 'none'
-  }
-}
-
-// Light card surface: overlay tinted with the task's own color.
-export function textureBackgroundForCard(texture: Texture, color: string): string {
-  if (!texture || texture === 'none') return 'none'
-  const c = `color-mix(in srgb, ${color} 30%, transparent)`
-  switch (texture) {
-    case 'dot':
-      return `radial-gradient(${c} 1px,transparent 1.3px) 0 0/8px 8px`
-    case 'cute':
-      return cuteSVG(`color-mix(in srgb, ${color} 55%, transparent)`)
-    default:
-      return 'none'
   }
 }
