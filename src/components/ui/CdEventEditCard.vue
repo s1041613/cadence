@@ -1,7 +1,10 @@
 <template>
   <div class="cd-edit-card">
     <div class="cd-edit-card__head">
-      <button type="button" class="cd-edit-card__back" @click="emit('back')">‹ {{ isNew ? 'New' : 'Edit' }}</button>
+      <button v-if="!isNew" type="button" class="cd-edit-card__back" @click="emit('back')">
+        <CdIcon name="chevron-left" :size="14" color="var(--cd-ink-2)" />
+        Edit
+      </button>
     </div>
 
     <input
@@ -290,6 +293,9 @@ const matrixOptions = [
 }
 
 .cd-edit-card__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -447,7 +453,16 @@ const matrixOptions = [
 .cd-edit-card__field-icon {
   margin-top: 0;
   flex: none;
-  display: flex;
+  width: 20px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+}
+
+.cd-edit-card__when-row > .cd-edit-card__field-icon {
+  padding-top: 8px;
+  min-height: 0;
+  align-self: flex-start;
 }
 
 .cd-edit-card__when-content {
@@ -546,11 +561,17 @@ const matrixOptions = [
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 11px 16px;
+  padding: 7px 16px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .cd-edit-card__field-row--top {
   align-items: flex-start;
+}
+
+.cd-edit-card__field-row--top .cd-edit-card__field-icon {
+  align-self: flex-start;
 }
 
 .cd-edit-card__pill-btn {
@@ -585,6 +606,15 @@ const matrixOptions = [
 .cd-edit-card__textarea {
   resize: none;
   line-height: 1.5;
+  min-height: 42px;
+}
+
+.cd-edit-card__textarea:placeholder-shown {
+  min-height: 34px;
+  height: 34px;
+  line-height: 34px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .cd-edit-card__divider {
@@ -599,7 +629,7 @@ const matrixOptions = [
   justify-content: space-between;
   flex: none;
   margin-top: 6px;
-  padding: 12px 16px 15px;
+  padding: 12px 16px 35px;
   border-top: 1px solid var(--cd-line);
   background: #fff;
 }

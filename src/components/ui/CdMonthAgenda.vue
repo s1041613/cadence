@@ -51,7 +51,7 @@ const emit = defineEmits<{
 
 <style scoped>
 .cd-month-agenda {
-  padding: 4px 16px 18px;
+  padding: 4px 16px 35px;
 }
 
 .cd-month-agenda__header {

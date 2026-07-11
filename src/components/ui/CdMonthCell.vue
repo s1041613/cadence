@@ -68,7 +68,7 @@ const props = defineProps<{
   today: boolean
   selected?: boolean
   events: MonthCellEvent[]
-  fmt: 'time' | 'name' | 'icon' | 'dot'
+  fmt: 'name' | 'icon' | 'dot'
   maxChips?: number
 }>()
 

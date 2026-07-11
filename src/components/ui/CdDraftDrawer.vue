@@ -16,7 +16,9 @@
       <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
            swipe-down dismisses instead. swipeEnabled is already phone-only (shell passes !isDesktop),
            so it doubles as the sheet-mode flag here rather than adding a redundant prop. -->
-      <button v-if="!swipeEnabled" type="button" class="cd-draft__icon-btn" aria-label="Close" @click="emit('close')">✕</button>
+      <button v-if="!swipeEnabled" type="button" class="cd-draft__icon-btn" aria-label="Close" @click="emit('close')">
+        <CdIcon name="close" :size="17" color="#8A8A80" />
+      </button>
     </div>
 
     <div v-if="searchOpen" class="cd-draft__search">

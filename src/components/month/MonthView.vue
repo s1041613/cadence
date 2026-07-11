@@ -158,7 +158,7 @@ const cur = computed(() => parseISO(ui.selectedDate))
 const year = computed(() => cur.value.getFullYear())
 const month = computed(() => cur.value.getMonth())
 const monthLabel = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long' }).format(cur.value))
-const cellFmt = computed<'time' | 'name' | 'icon' | 'dot'>(() => settings.monthEventLabel)
+const cellFmt = computed<'name' | 'icon' | 'dot'>(() => settings.monthEventLabel)
 
 // Calendar filter strip (task 7.3 "Calendar visibility filters all views"), sorted by the stored
 // `order` so drag-reorder in the settings calendars pane is reflected here immediately. Icon slot
@@ -484,7 +484,7 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  padding-bottom: 35px;
 }
 
 .month-view__agenda-sheet :deep(.cd-month-agenda__list) {

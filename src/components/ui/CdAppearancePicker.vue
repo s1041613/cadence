@@ -1,7 +1,9 @@
 <template>
   <div class="cd-appearance-subview">
     <div class="cd-appearance-subview__head">
-      <button type="button" class="cd-appearance-subview__back" aria-label="Back" @click="emit('close')">‹</button>
+      <button type="button" class="cd-appearance-subview__back" aria-label="Back" @click="emit('close')">
+        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+      </button>
       <div class="cd-appearance-subview__tabs">
         <button
           v-for="t in TABS"
@@ -123,7 +125,10 @@ const filteredIcons = computed(() => {
   const q = query.value.trim().toLowerCase()
   return q ? allIcons.value.filter((n) => n.includes(q)) : []
 })
-const recentIcons = computed(() => (props.recent ?? ['calendar', 'spark', 'clock', 'notes']).filter((n) => n !== props.icon).slice(0, 4))
+// Default recents use spark-mono, not spark: the picker tints icons to the calendar's color, and
+// two-tone brand glyphs (spark, journal, view-*) are img-mode with fixed design colors that ignore
+// the tint. spark-mono is the mask-mode, tintable variant. (icons.ts hybrid-coloring ruling.)
+const recentIcons = computed(() => (props.recent ?? ['calendar', 'spark-mono', 'clock', 'notes']).filter((n) => n !== props.icon).slice(0, 4))
 const canRemove = computed(() => props.icon !== null)
 
 const IconTile = defineComponent({
@@ -173,6 +178,8 @@ const IconTile = defineComponent({
 .cd-appearance-subview__back {
   width: 30px;
   height: 30px;
+  display: grid;
+  place-items: center;
   border: none;
   border-radius: 8px;
   background: transparent;

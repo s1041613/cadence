@@ -81,15 +81,22 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
   padding: 6px 18px 18px;
   background: var(--cd-surface);
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
 }
 
 .cd-week-agenda__row {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 14px;
   padding: 14px 4px;
   border-top: 1px solid var(--cd-line);
+  flex: 1 1 0;
+  min-height: 64px;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .cd-week-agenda__row--first {
@@ -99,6 +106,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 .cd-week-agenda__badge {
   width: 46px;
   flex: none;
+  align-self: center;
   text-align: center;
   cursor: pointer;
   border-radius: var(--cd-radius-matrix, 11px);
@@ -155,6 +163,13 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 .cd-week-agenda__list {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .cd-week-agenda__item {

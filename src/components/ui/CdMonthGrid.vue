@@ -63,10 +63,10 @@ export interface MonthGridCell {
 const props = withDefaults(
   defineProps<{
     cells: MonthGridCell[]
-    fmt?: 'time' | 'name' | 'icon' | 'dot'
+    fmt?: 'name' | 'icon' | 'dot'
     selectedDate?: string | null
   }>(),
-  { fmt: 'time' }
+  { fmt: 'name' }
 )
 
 const emit = defineEmits<{

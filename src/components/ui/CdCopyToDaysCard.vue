@@ -2,13 +2,19 @@
   <div class="cd-copy-card">
     <div class="cd-copy-card__top">
       <span class="cd-copy-card__title">Copy to days</span>
-      <button type="button" class="cd-copy-card__close" aria-label="Close" @click="emit('close')">✕</button>
+      <button type="button" class="cd-copy-card__close" aria-label="Close" @click="emit('close')">
+        <CdIcon name="close" :size="16" color="var(--cd-ink)" />
+      </button>
     </div>
 
     <div class="cd-copy-card__month-row">
-      <button type="button" class="cd-copy-card__nav" aria-label="Previous month" @click="emit('prevMonth')">‹</button>
+      <button type="button" class="cd-copy-card__nav" aria-label="Previous month" @click="emit('prevMonth')">
+        <CdIcon name="chevron-left" :size="16" color="var(--cd-ink-2)" />
+      </button>
       <span class="cd-copy-card__month-label">{{ monthLabel }}</span>
-      <button type="button" class="cd-copy-card__nav" aria-label="Next month" @click="emit('nextMonth')">›</button>
+      <button type="button" class="cd-copy-card__nav" aria-label="Next month" @click="emit('nextMonth')">
+        <CdIcon name="chevron-right" :size="16" color="var(--cd-ink-2)" />
+      </button>
     </div>
 
     <div class="cd-copy-card__dow-row">
@@ -41,6 +47,8 @@
 // export was truncated for this region (design.md "Design export had truncated regions ... copy-to-days"),
 // so this is a from-scratch standard pattern: a compact month grid with toggleable day cells, styled to
 // match CdMonthSheet's grid cell conventions, swapped into the same CdPopover as the preview/edit cards.
+import CdIcon from './CdIcon.vue'
+
 export interface CopyToDaysCell {
   date: string
   day: number
@@ -104,6 +112,9 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   background: var(--cd-topbar);
   cursor: pointer;
   color: var(--cd-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cd-copy-card__month-row {
@@ -121,6 +132,9 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   color: var(--cd-ink-2);
   width: 24px;
   height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cd-copy-card__month-label {
@@ -154,7 +168,9 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   height: 34px;
   border-radius: 9px;
   cursor: pointer;
-  transition: background var(--cd-duration-micro-3);
+  transition:
+    background var(--cd-duration-micro-3),
+    box-shadow var(--cd-duration-micro-3);
 }
 
 .cd-copy-card__cell:hover {
@@ -162,12 +178,17 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__cell--selected {
-  background: var(--cd-olive);
+  background: var(--cd-topbar);
+  box-shadow: inset 0 0 0 1px rgba(179, 172, 145, 0.42);
+}
+
+.cd-copy-card__cell--selected:hover {
+  background: var(--cd-topbar);
 }
 
 .cd-copy-card__cell--selected .cd-copy-card__num {
-  color: #fff;
-  font-weight: 700;
+  color: var(--cd-olive-ink);
+  font-weight: 800;
 }
 
 .cd-copy-card__cell--disabled {

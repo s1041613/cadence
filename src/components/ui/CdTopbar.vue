@@ -5,10 +5,10 @@
     <CdViewSwitcher :model-value="activeView" :options="['Day', 'Week', 'Month']" @update:model-value="(v) => emit('update:activeView', v)" />
     <span class="cd-topbar__divider" />
     <CdIconButton ariaLabel="Journal" @click="emit('openJournal')">
-      <CdIcon name="journal" :size="23" color="#56585E" />
+      <CdIcon name="journal" :size="26" />
     </CdIconButton>
     <CdIconButton ariaLabel="Assistant" @click="emit('openAssistant')">
-      <CdIcon name="spark" :size="21" color="#56585E" />
+      <CdIcon name="spark" :size="21" />
     </CdIconButton>
     <CdCreateButton @click="emit('createTask')" />
   </div>

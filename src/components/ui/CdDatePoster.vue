@@ -7,15 +7,23 @@
         <span v-if="variant === 'month'" class="cd-date-poster__caret">▾</span>
       </button>
       <div v-if="variant !== 'month'" class="cd-date-poster__nav cd-date-poster__nav--inline">
-        <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">‹</button>
+        <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">
+          <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+        </button>
         <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
-        <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">›</button>
+        <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">
+          <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-2)" />
+        </button>
       </div>
     </div>
     <div class="cd-date-poster__nav" :class="{ 'cd-date-poster__nav--phone-only': variant !== 'month' }">
-      <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">‹</button>
+      <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">
+        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+      </button>
       <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
-      <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">›</button>
+      <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">
+        <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-2)" />
+      </button>
     </div>
     <div v-if="$slots.extra" class="cd-date-poster__extra">
       <slot name="extra" />
@@ -25,6 +33,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import CdIcon from './CdIcon.vue'
 
 // CdDatePoster — big date navigation header, 3 variants (month/week/day). design-research-report.md §3.3.
 // Year row: 700 14px mono, ls .14em, #9C9E94. Title: 800 46px (month) / 44px (week/day) Zen Kaku, ls -.01em, lh .95.

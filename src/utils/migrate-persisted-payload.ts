@@ -1,5 +1,6 @@
 import type { PersistedShape, PersistedSettings } from '@/boot/persistence'
 import { DEFAULT_CALENDAR_ID, defaultCalendar } from '@/stores/calendars-store'
+import type { MonthEventLabel } from '@/stores/settings-store'
 import { defaultMonthlyPhotos } from '@/stores/settings-store'
 import { iso } from '@/utils/convert-date-time'
 
@@ -50,6 +51,10 @@ function fillForwardInboxItem(item: unknown): unknown {
   }
 }
 
+function normalizeMonthEventLabel(value: unknown): MonthEventLabel {
+  return value === 'icon' || value === 'dot' || value === 'name' ? value : 'name'
+}
+
 // Pure fill-forward: reads whatever `loadStore` produced and returns the enriched in-memory shape.
 // Never writes to storage — the boot module's normal $subscribe-driven persist() does that on the
 // next state change, per design.md's "no destructive rewrite on load" rule.
@@ -67,6 +72,7 @@ export function migratePersistedPayload(raw: unknown): PersistedShape | undefine
       ...DEFAULT_SETTINGS,
       ...(v.settings ?? {}),
       timeFormat: '24-Hour',
+      monthEventLabel: normalizeMonthEventLabel(v.settings?.monthEventLabel),
       monthlyPhotos: v.settings?.monthlyPhotos ?? defaultMonthlyPhotos()
     }
   }

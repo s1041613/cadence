@@ -1,5 +1,5 @@
 <template>
-  <CdDrawerOrSheet v-if="ui.draftDrawer" :presentation="isDesktop ? 'drawer' : 'sheet'" width="min(440px, 46%)" scrim-color="var(--cd-scrim-strong)" sheet-fullscreen @scrim-click="close" @dismiss="close">
+  <CdDrawerOrSheet v-if="ui.draftDrawer" :presentation="isDesktop ? 'drawer' : 'sheet'" width="min(440px, 46%)" scrim-color="var(--cd-scrim-strong)" sheet-fullscreen sheet-surface="var(--cd-draft-paper)" @scrim-click="close" @dismiss="close">
     <CdDraftDrawer
       :groups="groups"
       :composer-text="inbox.inboxDraft"

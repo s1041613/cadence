@@ -11,7 +11,9 @@
       <span class="cd-assistant__title">Assistant</span>
       <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
            swipe-down dismisses instead. -->
-      <button v-if="!sheetMode" type="button" class="cd-assistant__close" aria-label="Close" @click="emit('close')">✕</button>
+      <button v-if="!sheetMode" type="button" class="cd-assistant__close" aria-label="Close" @click="emit('close')">
+        <CdIcon name="close" :size="18" color="var(--cd-muted)" />
+      </button>
     </div>
 
     <div class="cd-assistant__greeting">
@@ -127,8 +129,8 @@ function onSwipeDown(): void {
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--cd-muted);
-  font-size: 18px;
+  display: grid;
+  place-items: center;
   border-radius: var(--cd-radius-pill);
   transition: background var(--cd-duration-micro-3);
 }

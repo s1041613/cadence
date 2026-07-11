@@ -9,35 +9,28 @@
       <span class="cd-event-chip__dot" :style="{ background: color }" />
     </template>
     <template v-else-if="fmt === 'icon'">
-      <span class="cd-event-chip__mini-icon" v-html="quadIcon" />
-      <span class="cd-event-chip__label">{{ title }}</span>
-    </template>
-    <template v-else-if="fmt === 'name'">
+      <span class="cd-event-chip__mini-icon" :style="quadIconStyle" aria-hidden="true" />
       <span class="cd-event-chip__label">{{ title }}</span>
     </template>
     <template v-else>
-      {{ timeLabel }}
+      <span class="cd-event-chip__label">{{ title }}</span>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { QUAD_ICON_SRC } from './icons'
 
 // CdEventChip — month cell event chip. design-research-report.md §3.5:
-//  - fmt='time'/'name'/'icon': font 600 9.5px (time uses mono, name/icon use Zen Kaku); radius 6px; padding 1px 5px; border 1px solid quadColor.
+//  - fmt='name'/'icon': font 600 9.5px Zen Kaku; radius 6px; padding 1px 5px; border 1px solid quadColor.
 //  - all-day = solid fill (bg=color, text=white); timed = outline (border+text=color, transparent bg).
 //  - done: line-through + opacity .5.
 //  - fmt='name': title only (no icon — maximizes text room in narrow phone cells).
 //  - fmt='icon': 10px quadrant mini-icon (do=check, plan=flag, quick=bolt, later=moon, event=star) + title.
 //  - fmt='dot': cell shows only a 5px colored dot (max 4 per cell, enforced by the parent CdMonthCell).
-const MINI_ICONS: Record<string, string> = {
-  do: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
-  plan: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V3a1 1 0 011-1h13l-2 5 2 5H6"/></svg>',
-  quick: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-  later: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>',
-  event: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.3 16.7 14 18.5 21 12 17.1 5.5 21 7.3 14 2 9.3 9 9 12 2"/></svg>'
-}
+// Mini-icons are CSS-masked from public/icons files (QUAD_ICON_SRC) so they take the chip's text
+// color, same as the old inline v-html `stroke="currentColor"` glyphs did.
 
 const props = defineProps<{
   title: string
@@ -47,7 +40,7 @@ const props = defineProps<{
   endTime: string | null
   allDay: boolean
   done: boolean
-  fmt: 'time' | 'name' | 'icon' | 'dot'
+  fmt: 'name' | 'icon' | 'dot'
 }>()
 
 const emit = defineEmits<{
@@ -55,29 +48,28 @@ const emit = defineEmits<{
 }>()
 
 const solid = computed(() => props.allDay)
-const quadIcon = computed(() => MINI_ICONS[props.quad] ?? MINI_ICONS.event)
-// Timed chips show a start-end range (end defaults to start + 60min when the task has no end),
-// matching the screenshot format "10:00-11:00 Q3 review".
-function addMinutes(time: string, minutes: number): string {
-  const [h, m] = time.split(':').map(Number)
-  const total = (((h! * 60 + m! + minutes) % 1440) + 1440) % 1440
-  const hh = Math.floor(total / 60)
-  const mm = total % 60
-  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
-}
 
-const timeLabel = computed(() => {
-  if (props.allDay) return `All-day ${props.title}`
-  const start = props.time ?? ''
-  const end = props.endTime ?? (start ? addMinutes(start, 60) : '')
-  return `${start}-${end} ${props.title}`
+const quadIconStyle = computed(() => {
+  const src = QUAD_ICON_SRC[props.quad] ?? QUAD_ICON_SRC.event
+  const tint = solid.value ? '#fff' : props.color
+  return {
+    width: '10px',
+    height: '10px',
+    backgroundColor: tint,
+    maskImage: `url(${src})`,
+    WebkitMaskImage: `url(${src})`,
+    maskRepeat: 'no-repeat',
+    WebkitMaskRepeat: 'no-repeat',
+    maskSize: '100% 100%',
+    WebkitMaskSize: '100% 100%'
+  }
 })
 
 const chipStyle = computed(() => ({
   background: props.fmt === 'dot' ? 'transparent' : solid.value ? props.color : 'transparent',
   color: props.fmt === 'dot' ? undefined : solid.value ? '#fff' : props.color,
   border: props.fmt === 'dot' ? 'none' : `1px solid ${props.color}`,
-  fontFamily: props.fmt === 'time' && props.time ? 'var(--cd-font-mono)' : 'var(--cd-font-title)'
+  fontFamily: 'var(--cd-font-title)'
 }))
 </script>
 

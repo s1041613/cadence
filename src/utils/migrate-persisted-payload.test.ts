@@ -141,4 +141,30 @@ describe('migratePersistedPayload', () => {
       monthlyPhotos: Array(12).fill(null)
     })
   })
+
+  it('normalizes the removed time month event label to name', () => {
+    const raw = {
+      tasks: [],
+      inbox: [],
+      inboxDraft: '',
+      settings: { timeFormat: '24-Hour', firstDay: 'Monday', monthEventLabel: 'time', showPhoto: false }
+    }
+
+    const migrated = migratePersistedPayload(raw)
+
+    expect(migrated?.settings.monthEventLabel).toBe('name')
+  })
+
+  it('normalizes unknown month event labels to name', () => {
+    const raw = {
+      tasks: [],
+      inbox: [],
+      inboxDraft: '',
+      settings: { timeFormat: '24-Hour', firstDay: 'Monday', monthEventLabel: 'timeline', showPhoto: false }
+    }
+
+    const migrated = migratePersistedPayload(raw)
+
+    expect(migrated?.settings.monthEventLabel).toBe('name')
+  })
 })

@@ -20,15 +20,9 @@ export interface TaskTheme extends Appearance {
   quad?: Quadrant
 }
 
-const DO_ICON =
-  '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>'
-const PLAN_ICON =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>'
-const QUICK_ICON =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.2-8.5M21 4v5h-5"/></svg>'
-const LATER_ICON =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12M6 21h12M8 3c0 5 8 5 8 9s-8 4-8 9M16 3c0 5-8 5-8 9"/></svg>'
-
+// Quadrant tasks carry no glyph — the month/week/day views render the quad via the CdEventChip
+// mini-icon (keyed off quad.key, see CdEventChip QUAD_ICON_SRC), never off theme.icon. Only event
+// tasks have a user-picked icon (task.icon). So Appearance.icon stays null for quadrants.
 export const QUADRANTS: Quadrant[] = [
   {
     key: 'do',
@@ -39,7 +33,7 @@ export const QUADRANTS: Quadrant[] = [
     backgroundColor: '#C56A5E',
     textColor: '#4A3318',
     texture: 'none',
-    icon: DO_ICON
+    icon: null
   },
   {
     key: 'plan',
@@ -50,7 +44,7 @@ export const QUADRANTS: Quadrant[] = [
     backgroundColor: '#6E839B',
     textColor: '#2A2D27',
     texture: 'none',
-    icon: PLAN_ICON
+    icon: null
   },
   {
     key: 'quick',
@@ -61,7 +55,7 @@ export const QUADRANTS: Quadrant[] = [
     backgroundColor: '#BFA86A',
     textColor: '#3E3845',
     texture: 'none',
-    icon: QUICK_ICON
+    icon: null
   },
   {
     key: 'later',
@@ -72,7 +66,7 @@ export const QUADRANTS: Quadrant[] = [
     backgroundColor: '#9A988F',
     textColor: '#33403A',
     texture: 'dot',
-    icon: LATER_ICON
+    icon: null
   }
 ]
 
