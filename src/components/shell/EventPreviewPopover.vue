@@ -137,7 +137,7 @@ import { useTasksStore } from '@/stores/tasks-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
-import { parseISO, iso, addDays, startOfWeek, formatTime } from '@/utils/convert-date-time'
+import { parseISO, iso, addDays, startOfWeek, formatTime, autoPoms } from '@/utils/convert-date-time'
 import type { RepeatMode, Task } from '@/types/task'
 
 const REPEAT_LABELS: Record<RepeatMode, string> = {
@@ -283,7 +283,12 @@ function saveEdit(): void {
     end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value,
     location: editLocation.value,
     notes: editNotes.value,
-    repeat: editRepeat.value
+    repeat: editRepeat.value,
+    estimatedPomodoros: autoPoms({
+      allDay: editType.value === 'event' && editAllDay.value,
+      start: editType.value === 'event' && editAllDay.value ? '' : editStart.value,
+      end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value
+    })
   }
 
   tasksStore.saveTask(updated)

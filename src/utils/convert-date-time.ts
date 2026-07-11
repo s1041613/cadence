@@ -37,6 +37,10 @@ export const minutes = (t: string): number => {
   return h * 60 + m
 }
 
+export const isTimeValue = (t: string): boolean => /^([01]\d|2[0-3]):[0-5]\d$/.test(t)
+
+export const hasTimeRange = (t: { start: string; end: string }): boolean => isTimeValue(t.start) && isTimeValue(t.end) && minutes(t.end) > minutes(t.start)
+
 export const toHM = (mins: number): string => `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`
 
 export type TimeFormatName = '24-Hour'

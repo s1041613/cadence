@@ -25,7 +25,7 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { themeOf } from '@/composables/use-theme'
-import { parseISO, iso, addDays, startOfWeek, minutes, quickAddTimeRange, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { parseISO, iso, addDays, startOfWeek, minutes, hasTimeRange, quickAddTimeRange, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 
 // WeekView — desktop 7-column CdTimeGrid, phone per-day agenda list, rebuilt against the CADENCE
@@ -87,7 +87,7 @@ const gridColumns = computed<TimeGridColumn[]>(() =>
       dayNum: d.getDate(),
       today: date === iso(new Date()),
       events: events
-        .filter((e) => !e.allDay)
+        .filter((e) => !e.allDay && hasTimeRange(e))
         .map((e) => ({ id: e.id, title: e.title, color: e.color, start: minutes(e.start), end: minutes(e.end), allDay: false })),
       allDayEvents: events.filter((e) => e.allDay).map((e) => ({ id: e.id, title: e.title, color: e.color }))
     }
