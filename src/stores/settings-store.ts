@@ -3,7 +3,7 @@ import { ref } from 'vue'
 
 export type TimeFormat = '24-Hour'
 export type FirstDay = 'Sunday' | 'Monday' | 'Saturday'
-export type MonthEventLabel = 'name' | 'time' | 'dot'
+export type MonthEventLabel = 'name' | 'icon' | 'time' | 'dot'
 
 // Index 0 = January … 11 = December. `null` means "no user upload for this month" — the
 // system default in public/month-photos/ is used instead (see MonthView's monthPhotoSrc).

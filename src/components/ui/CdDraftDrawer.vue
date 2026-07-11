@@ -4,12 +4,19 @@
       <div v-for="i in 7" :key="i" class="cd-draft__hole" />
     </div>
 
-    <div class="cd-draft__header">
+    <div
+      class="cd-draft__header"
+      :class="{ 'cd-draft__header--sheet': swipeEnabled }"
+      v-touch-swipe.down.mouse="onHeaderSwipeDown"
+    >
       <span class="cd-draft__title">Draft</span>
       <button type="button" class="cd-draft__icon-btn" aria-label="Search" @click="searchOpen = !searchOpen">
         <CdIcon name="search" :size="17" color="#8A8A80" />
       </button>
-      <button type="button" class="cd-draft__icon-btn" aria-label="Close" @click="emit('close')">✕</button>
+      <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
+           swipe-down dismisses instead. swipeEnabled is already phone-only (shell passes !isDesktop),
+           so it doubles as the sheet-mode flag here rather than adding a redundant prop. -->
+      <button v-if="!swipeEnabled" type="button" class="cd-draft__icon-btn" aria-label="Close" @click="emit('close')">✕</button>
     </div>
 
     <div v-if="searchOpen" class="cd-draft__search">
@@ -157,6 +164,16 @@ const emit = defineEmits<{
 
 const searchOpen = ref(false)
 
+// Swipe-down on the header is the only close affordance when swipeEnabled (phone sheet mode),
+// since the X button is hidden there (Zoe's 2026-07-11 correction). The directive is always bound
+// (Quasar's TouchSwipe invokes whatever handler is currently attached with no type guard, so
+// conditionally passing `undefined` would throw on a stray gesture) — this guard is what actually
+// gates the behavior to sheet mode; on desktop the swipe is a no-op.
+function onHeaderSwipeDown(): void {
+  if (!props.swipeEnabled) return
+  emit('close')
+}
+
 // Swipe-to-reveal row actions (CADENCE Handoff mkSwipeRow, phone/pad only) — drag clamps to
 // [-140, 0], releasing past -70 snaps open to -132 (revealing the 140px Schedule/Remove action
 // strip), otherwise snaps closed. Desktop keeps the hover-reveal row instead (swipeEnabled=false).
@@ -274,6 +291,14 @@ function highlight(text: string): string {
   padding: 14px 22px;
   /* border-bottom: 0.5px solid rgba(120, 116, 100, 0.18); */
   flex: none;
+}
+
+/* Sheet mode's header carries the only close gesture (swipe down), so it needs touch-action:none
+   to be a reliable v-touch-swipe target — same reasoning as CdSheet's .cd-sheet__handle-zone.
+   Scoped to sheet mode only so desktop hover/click on the header (incl. the search button) is
+   unaffected. */
+.cd-draft__header--sheet {
+  touch-action: none;
 }
 
 .cd-draft__header-icon {

@@ -10,7 +10,7 @@
   >
     <slot />
   </CdDrawer>
-  <CdSheet v-else v-bind="scrimColorAttr" :duration="sheetDuration" :fullscreen="sheetFullscreen" :raised="raised" @scrim-click="emit('scrimClick')">
+  <CdSheet v-else v-bind="scrimColorAttr" :duration="sheetDuration" :fullscreen="sheetFullscreen" :raised="raised" @scrim-click="emit('scrimClick')" @dismiss="emit('dismiss')">
     <slot />
   </CdSheet>
 </template>
@@ -69,6 +69,8 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   scrimClick: []
+  /** Sheet-only: handle swipe-down; drawers have no handle so this never fires in drawer mode. */
+  dismiss: []
 }>()
 
 // `exactOptionalPropertyTypes` rejects forwarding `scrimColor` directly when it's undefined (the

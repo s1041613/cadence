@@ -2,7 +2,9 @@
   <div class="cd-sheet-root" :class="{ 'cd-sheet-root--fullscreen': fullscreen, 'cd-sheet-root--raised': raised }">
     <CdScrim v-if="!fullscreen" :color="scrimColor" @click="emit('scrimClick')" />
     <div class="cd-sheet" :class="{ 'cd-sheet--fullscreen': fullscreen }" :style="{ animationDuration: duration }">
-      <div v-if="showHandle" class="cd-sheet__handle" />
+      <div v-if="shouldShowHandle" class="cd-sheet__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
+        <div class="cd-sheet__handle" />
+      </div>
       <slot />
     </div>
   </div>
@@ -22,9 +24,10 @@
 // `raised` (Zoe's 2026-07-11 correction): stacks this sheet above another already-open `fullscreen`
 // sheet (e.g. the event composer opened from within the still-open Draft drawer) while keeping the
 // card-style look — a z-index bump only, independent of `fullscreen`'s edge-to-edge styling.
+import { computed } from 'vue'
 import CdScrim from './CdScrim.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     scrimColor?: string
     duration?: string
@@ -37,7 +40,18 @@ withDefaults(
 
 const emit = defineEmits<{
   scrimClick: []
+  dismiss: []
 }>()
+
+// `fullscreen` sheets are edge-to-edge and not swipe-dismissable, so the drag handle affordance is
+// suppressed regardless of `showHandle` (Zoe's 2026-07-11 correction).
+const shouldShowHandle = computed(() => props.showHandle && !props.fullscreen)
+
+// Swipe-to-dismiss is bound to the handle zone only, not the whole sheet — sheet bodies contain
+// their own overflow-y:auto regions and a sheet-wide gesture would swallow their scroll.
+function onSwipeDown(): void {
+  emit('dismiss')
+}
 </script>
 
 <style scoped>
@@ -52,6 +66,7 @@ const emit = defineEmits<{
 
 .cd-sheet-root--fullscreen {
   z-index: 70;
+  bottom: 86px;
 }
 
 .cd-sheet-root--raised {
@@ -77,6 +92,16 @@ const emit = defineEmits<{
   height: 100%;
   border-radius: 0;
   box-shadow: none;
+  animation-name: none;
+}
+
+/* Zone is taller than the 4px pill so the swipe target is actually hittable; the pill's former
+   10px/4px margins live here to keep the rendered layout identical. */
+.cd-sheet__handle-zone {
+  padding: 10px 0 4px;
+  flex: none;
+  touch-action: none;
+  cursor: grab;
 }
 
 .cd-sheet__handle {
@@ -84,7 +109,6 @@ const emit = defineEmits<{
   height: 4px;
   border-radius: 999px;
   background: #ddd9cf;
-  margin: 10px auto 4px;
-  flex: none;
+  margin: 0 auto;
 }
 </style>

@@ -22,4 +22,10 @@ describe('settings-store', () => {
     store.showPhoto = false
     expect(store).toMatchObject({ timeFormat: '24-Hour', firstDay: 'Monday', monthEventLabel: 'dot', showPhoto: false })
   })
+
+  it('accepts the icon label mode (icon + name chips)', () => {
+    const store = useSettingsStore()
+    store.monthEventLabel = 'icon'
+    expect(store.monthEventLabel).toBe('icon')
+  })
 })

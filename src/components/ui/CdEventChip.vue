@@ -8,8 +8,11 @@
     <template v-if="fmt === 'dot'">
       <span class="cd-event-chip__dot" :style="{ background: color }" />
     </template>
-    <template v-else-if="fmt === 'name'">
+    <template v-else-if="fmt === 'icon'">
       <span class="cd-event-chip__mini-icon" v-html="quadIcon" />
+      <span class="cd-event-chip__label">{{ title }}</span>
+    </template>
+    <template v-else-if="fmt === 'name'">
       <span class="cd-event-chip__label">{{ title }}</span>
     </template>
     <template v-else>
@@ -22,10 +25,11 @@
 import { computed } from 'vue'
 
 // CdEventChip — month cell event chip. design-research-report.md §3.5:
-//  - fmt='time'/'name': font 600 9.5px (time uses mono, name uses Zen Kaku); radius 6px; padding 1px 5px; border 1px solid quadColor.
+//  - fmt='time'/'name'/'icon': font 600 9.5px (time uses mono, name/icon use Zen Kaku); radius 6px; padding 1px 5px; border 1px solid quadColor.
 //  - all-day = solid fill (bg=color, text=white); timed = outline (border+text=color, transparent bg).
 //  - done: line-through + opacity .5.
-//  - fmt='name': 10px quadrant mini-icon (do=check, plan=flag, quick=bolt, later=moon, event=star) + title.
+//  - fmt='name': title only (no icon — maximizes text room in narrow phone cells).
+//  - fmt='icon': 10px quadrant mini-icon (do=check, plan=flag, quick=bolt, later=moon, event=star) + title.
 //  - fmt='dot': cell shows only a 5px colored dot (max 4 per cell, enforced by the parent CdMonthCell).
 const MINI_ICONS: Record<string, string> = {
   do: '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
@@ -43,7 +47,7 @@ const props = defineProps<{
   endTime: string | null
   allDay: boolean
   done: boolean
-  fmt: 'time' | 'name' | 'dot'
+  fmt: 'time' | 'name' | 'icon' | 'dot'
 }>()
 
 const emit = defineEmits<{
@@ -73,13 +77,14 @@ const chipStyle = computed(() => ({
   background: props.fmt === 'dot' ? 'transparent' : solid.value ? props.color : 'transparent',
   color: props.fmt === 'dot' ? undefined : solid.value ? '#fff' : props.color,
   border: props.fmt === 'dot' ? 'none' : `1px solid ${props.color}`,
-  fontFamily: props.fmt !== 'name' && props.time ? 'var(--cd-font-mono)' : 'var(--cd-font-title)'
+  fontFamily: props.fmt === 'time' && props.time ? 'var(--cd-font-mono)' : 'var(--cd-font-title)'
 }))
 </script>
 
 <style scoped>
 .cd-event-chip {
   cursor: pointer;
+  flex: none;
   align-self: stretch;
   display: flex;
   align-items: center;
@@ -92,6 +97,16 @@ const chipStyle = computed(() => ({
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+@media (max-width: 899px) {
+  .cd-event-chip {
+    /* Fixed 15px chip height keeps CdMonthGrid's maxChips row math exact on phones; tighter
+       side padding leaves more of the ~50px-wide cell to the title text. */
+    padding: 1px 3px;
+    height: 15px;
+    box-sizing: border-box;
+  }
 }
 
 .cd-event-chip--done {

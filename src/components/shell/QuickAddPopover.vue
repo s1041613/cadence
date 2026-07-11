@@ -34,7 +34,7 @@
       @save="onAdd"
     />
   </CdPopover>
-  <CdDrawerOrSheet v-else-if="ui.qaPop" presentation="sheet" scrim-color="var(--cd-scrim-mid)" @scrim-click="close">
+  <CdDrawerOrSheet v-else-if="ui.qaPop" presentation="sheet" scrim-color="var(--cd-scrim-mid)" @scrim-click="close" @dismiss="close">
     <CdEventEditCard
       is-new
       :title="title"

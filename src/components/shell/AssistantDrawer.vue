@@ -6,8 +6,16 @@
     scrim-color="var(--cd-scrim-strong)"
     sheet-fullscreen
     @scrim-click="close"
+    @dismiss="close"
   >
-    <CdAssistantDrawer :input-value="inputValue" @close="close" @chip-click="onChipClick" @update:input-value="(v) => (inputValue = v)" @send="onSend" />
+    <CdAssistantDrawer
+      :input-value="inputValue"
+      :sheet-mode="!isDesktop"
+      @close="close"
+      @chip-click="onChipClick"
+      @update:input-value="(v) => (inputValue = v)"
+      @send="onSend"
+    />
   </CdDrawerOrSheet>
 </template>
 
