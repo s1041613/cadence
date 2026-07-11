@@ -9,6 +9,11 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
+  {
+    path: '/login',
+    component: () => import('@/pages/LoginPage.vue'),
+  },
+
   // Dev-only visual verification surface (replaces Storybook). Must not exist in production builds.
   ...(import.meta.env.DEV
     ? [{ path: '/dev/gallery', component: () => import('@/pages/DevGalleryPage.vue') }]
