@@ -18,6 +18,7 @@
 // glyphs the design batch doesn't cover yet). Chevrons are one design file baked into three
 // direction variants at export time — no runtime rotation, so call sites' own expand/collapse
 // `transform: rotate()` animations keep working.
+import { publicAssetPath } from '@/utils/public-assets'
 
 export type IconName =
   | 'close'
@@ -80,8 +81,8 @@ export interface IconSource {
   weights?: Record<string, string>
 }
 
-const B = '/icons/brand'
-const U = '/icons/utility'
+const B = publicAssetPath('icons/brand')
+const U = publicAssetPath('icons/utility')
 
 export const ICONS: Record<IconName, IconSource> = {
   close: { src: `${U}/close.svg`, mode: 'mask' },
