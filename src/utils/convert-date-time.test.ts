@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, toHM, fmtDur, autoPoms, quickAddTimeRange, formatTime } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, quickAddTimeRange, formatTime } from './convert-date-time'
 
 describe('pad', () => {
   it('pads single digits', () => {
@@ -74,6 +74,15 @@ describe('minutes', () => {
   it('converts HH:MM to minutes since midnight', () => {
     expect(minutes('09:30')).toBe(570)
     expect(minutes('00:00')).toBe(0)
+  })
+})
+
+describe('hasTimeRange', () => {
+  it('requires valid start/end values with a positive duration', () => {
+    expect(hasTimeRange({ start: '09:00', end: '09:30' })).toBe(true)
+    expect(hasTimeRange({ start: '', end: '' })).toBe(false)
+    expect(hasTimeRange({ start: '09:30', end: '09:00' })).toBe(false)
+    expect(hasTimeRange({ start: 'nope', end: '09:30' })).toBe(false)
   })
 })
 

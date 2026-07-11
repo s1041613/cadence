@@ -31,7 +31,7 @@ import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { themeOf } from '@/composables/use-theme'
-import { parseISO, iso, addDays, startOfWeek, minutes, quickAddTimeRange, WD_CAP } from '@/utils/convert-date-time'
+import { parseISO, iso, addDays, startOfWeek, minutes, hasTimeRange, quickAddTimeRange, WD_CAP } from '@/utils/convert-date-time'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 
 // DayView — single-column CdTimeGrid + poster header + week-strip cluster, rebuilt against the
@@ -100,7 +100,7 @@ const gridColumn = computed<TimeGridColumn>(() => {
     dayNum: cur.value.getDate(),
     today: date === iso(new Date()),
     events: events
-      .filter((e) => !e.allDay)
+      .filter((e) => !e.allDay && hasTimeRange(e))
       .map((e) => ({ id: e.id, title: e.title, color: e.color, start: minutes(e.start), end: minutes(e.end), allDay: false })),
     allDayEvents: events.filter((e) => e.allDay).map((e) => ({ id: e.id, title: e.title, color: e.color }))
   }
