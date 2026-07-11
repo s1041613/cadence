@@ -69,7 +69,7 @@ const emit = defineEmits<{
   align-items: center;
   background: var(--cd-topbar);
   border-top: 1px solid var(--cd-line);
-  padding: 6px 8px 20px;
+  padding: 6px 8px 35px;
 }
 
 .cd-bottom-nav__btn {

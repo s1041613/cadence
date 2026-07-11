@@ -19,7 +19,7 @@
     </div>
     <div v-else class="cd-month-cell__events">
       <CdEventChip
-        v-for="ev in events.slice(0, 2)"
+        v-for="ev in visibleEvents"
         :key="ev.id"
         :title="ev.title"
         :color="ev.color"
@@ -31,8 +31,8 @@
         :fmt="fmt"
         @click="(e) => { e.stopPropagation(); emit('eventClick', ev, e) }"
       />
-      <button v-if="events.length > 2" type="button" class="cd-month-cell__more" @click.stop="emit('more')">
-        +{{ events.length - 2 }}
+      <button v-if="hiddenCount > 0" type="button" class="cd-month-cell__more" @click.stop="emit('more')">
+        +{{ hiddenCount }}
       </button>
     </div>
   </div>
@@ -40,9 +40,14 @@
 
 <script setup lang="ts">
 // CdMonthCell — single month-grid day cell. design-research-report.md §3.5.
-// Date number: JetBrains Mono 19px (desk); weekday default #56585E, Sat #3A6EA5, Sun #C0564B,
-// outside-month rgba(156,158,148,.5); today = 800 weight, 26x26 circle bg #B3AC91 color #3f4136.
-// "+N more" link: 8px mono, color #9C9E94.
+// Date number: JetBrains Mono 700 19px in a 26x26 circle (desk) / 12px in 20x20 (<899px, kept small
+// so phone rows spend their height on chips), matching CdWeekAgenda's .cd-week-agenda__num type
+// system; weekday default #56585E, Sat #3A6EA5, Sun #C0564B, outside-month rgba(156,158,148,.5);
+// today = 800 weight, circle bg #B3AC91 color #3f4136. "+N more" link: 8px mono, color #9C9E94.
+// Chip count: `maxChips` (computed by CdMonthGrid from the measured row height) caps how much
+// event density the cell attempts. When events overflow, the last slot is given to the "+N" button,
+// but month cells preserve at least 3 visible events before collapsing the rest.
+import { computed } from 'vue'
 import CdEventChip from './CdEventChip.vue'
 
 export interface MonthCellEvent {
@@ -56,14 +61,15 @@ export interface MonthCellEvent {
   done: boolean
 }
 
-defineProps<{
+const props = defineProps<{
   dayNum: number
   dow: number // 0=Sun..6=Sat
   outsideMonth: boolean
   today: boolean
   selected?: boolean
   events: MonthCellEvent[]
-  fmt: 'time' | 'name' | 'dot'
+  fmt: 'time' | 'name' | 'icon' | 'dot'
+  maxChips?: number
 }>()
 
 const emit = defineEmits<{
@@ -71,11 +77,20 @@ const emit = defineEmits<{
   eventClick: [event: MonthCellEvent, mouseEvent: MouseEvent]
   more: []
 }>()
+
+const MIN_VISIBLE_EVENTS = 3
+const cap = computed(() => Math.max(MIN_VISIBLE_EVENTS, props.maxChips ?? MIN_VISIBLE_EVENTS))
+const visibleEvents = computed(() =>
+  props.events.length <= cap.value
+    ? props.events
+    : props.events.slice(0, Math.max(MIN_VISIBLE_EVENTS, cap.value - 1))
+)
+const hiddenCount = computed(() => props.events.length - visibleEvents.value.length)
 </script>
 
 <style scoped>
 .cd-month-cell {
-  height: 100px;
+  height: 100%;
   padding: 8px 6px;
   border-top: 1px solid var(--cd-line);
   display: flex;
@@ -87,12 +102,15 @@ const emit = defineEmits<{
 }
 
 .cd-month-cell__head {
+  flex: none;
   display: flex;
-  justify-content: flex-start;
+  /* Day number sits centered under the (also centered) dow letter of its column,
+     per the handoff mockup's alignItems:center cells. */
+  justify-content: center;
 }
 
 .cd-month-cell__num {
-  font: 500 19px var(--cd-font-mono);
+  font: 700 19px var(--cd-font-mono);
   color: var(--cd-ink);
   width: 26px;
   height: 26px;
@@ -133,6 +151,7 @@ const emit = defineEmits<{
 
 .cd-month-cell__dots {
   display: flex;
+  justify-content: center;
   gap: 3px;
 }
 
@@ -143,6 +162,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-cell__more {
+  flex: none;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -154,9 +174,17 @@ const emit = defineEmits<{
 
 @media (max-width: 899px) {
   .cd-month-cell {
-    height: 52px;
-    padding: 4px 4px;
+    /* Fill the readable month-grid row floor; the parent scrolls when the full month exceeds the
+       phone viewport instead of compressing event chips. */
+    height: 100%;
+    padding: 3px;
     gap: 1px;
+  }
+
+  .cd-month-cell__num {
+    font: 700 12px var(--cd-font-mono);
+    width: 20px;
+    height: 20px;
   }
 }
 </style>

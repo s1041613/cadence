@@ -10,7 +10,7 @@
         {{ d.label }}
       </span>
     </div>
-    <div class="cd-month-grid__grid">
+    <div ref="gridEl" class="cd-month-grid__grid">
       <CdMonthCell
         v-for="cell in cells"
         :key="cell.date"
@@ -21,6 +21,7 @@
         :selected="cell.date === selectedDate"
         :events="cell.events"
         :fmt="fmt"
+        :max-chips="maxChips"
         @click="(e) => emit('cellClick', cell.date, e)"
         @event-click="(ev, e) => emit('eventClick', cell.date, ev, e)"
         @more="emit('more', cell.date)"
@@ -38,12 +39,17 @@
 // `cells[0..6].dow` rather than a hardcoded Monday-start array, so this component stays a pure
 // function of the cells it's given instead of duplicating the firstDay concept into a second prop.
 // Weekday header: 10.5px 600 letter-spacing .14em, Sat=#3A6EA5, Sun=#C0564B.
-// Grid: 7-col, `grid-auto-rows` fixed (100px desk / 52px phone) so every cell is the same size
-// regardless of event count or whether the month needs 5 or 6 weeks — cells clip overflow rather
-// than growing, and the grid's own height is the natural sum of its rows (parent scrolls if it
-// doesn't fit), only border-top divider (no vertical column lines).
-import { computed } from 'vue'
+// Grid: 7-col; every cell is the same size regardless of event count. Rows use a readable floor
+// and the parent scrolls if the month doesn't fit, which keeps the phone month view grid-first
+// instead of compressing cells to make room for a permanent agenda split. Only border-top divider
+// (no vertical column lines).
+// A single ResizeObserver measures the grid's height to derive the per-row budget, and
+// `maxChips` tells each CdMonthCell how many chips fit that budget — the constants below must
+// mirror CdMonthCell's cell padding/gap/day-number box and CdEventChip's chip height per
+// breakpoint.
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import CdMonthCell, { type MonthCellEvent } from './CdMonthCell.vue'
+import { useBreakpoint } from '@/composables/use-breakpoint'
 
 export interface MonthGridCell {
   date: string
@@ -57,7 +63,7 @@ export interface MonthGridCell {
 const props = withDefaults(
   defineProps<{
     cells: MonthGridCell[]
-    fmt?: 'time' | 'name' | 'dot'
+    fmt?: 'time' | 'name' | 'icon' | 'dot'
     selectedDate?: string | null
   }>(),
   { fmt: 'time' }
@@ -72,6 +78,37 @@ const emit = defineEmits<{
 const DOW_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] // indexed by Date.getDay() (0=Sun..6=Sat)
 
 const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.dow, label: DOW_LETTERS[c.dow] })))
+
+// Per-breakpoint cell chrome sizes (px), mirroring CdMonthCell/CdEventChip CSS: vertical cell
+// padding (both edges), head→events gap, day-number box height, chip height, chip gap.
+const CELL_METRICS = {
+  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 16.5, chipGap: 2 },
+  phone: { cellPad: 6, headGap: 1, headH: 20, chipH: 15, chipGap: 2 }
+} as const
+
+const { isDesktop } = useBreakpoint()
+const gridEl = ref<HTMLElement | null>(null)
+const gridHeight = ref(0)
+let resizeObserver: ResizeObserver | null = null
+
+onMounted(() => {
+  resizeObserver = new ResizeObserver((entries) => {
+    gridHeight.value = entries[0]?.contentRect.height ?? 0
+  })
+  if (gridEl.value) resizeObserver.observe(gridEl.value)
+})
+
+onBeforeUnmount(() => resizeObserver?.disconnect())
+
+const weekCount = computed(() => Math.max(1, Math.round(props.cells.length / 7)))
+
+const maxChips = computed(() => {
+  if (gridHeight.value <= 0) return 3 // pre-measure fallback: preserve the month-cell density floor
+  const m = isDesktop.value ? CELL_METRICS.desktop : CELL_METRICS.phone
+  const rowH = gridHeight.value / weekCount.value
+  const availH = rowH - m.cellPad - m.headGap - m.headH
+  return Math.max(1, Math.floor((availH + m.chipGap) / (m.chipH + m.chipGap)))
+})
 </script>
 
 <style scoped>
@@ -89,9 +126,9 @@ const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.do
 }
 
 .cd-month-grid__dow {
-  padding-left: 6px;
-  text-align: left;
-  box-sizing: border-box;
+  /* Centered over its column, matching the handoff mockup (monthPoster dow row uses
+     textAlign:center) and CdMonthCell's centered day number below. */
+  text-align: center;
   font: 600 10.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
@@ -108,12 +145,19 @@ const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.do
 .cd-month-grid__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: 100px;
+  grid-auto-rows: 112px;
 }
 
 @media (max-width: 899px) {
+  .cd-month-grid {
+    height: auto;
+    min-height: 100%;
+  }
+
   .cd-month-grid__grid {
-    grid-auto-rows: 52px;
+    /* The phone grid is allowed to scroll as a month-first surface; this row floor usually permits
+       more than 3 visible events, with +N reserved for true overflow. */
+    grid-auto-rows: minmax(112px, auto);
   }
 }
 </style>

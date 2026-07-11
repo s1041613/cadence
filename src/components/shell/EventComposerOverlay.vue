@@ -44,6 +44,7 @@
     scrim-color="var(--cd-scrim-strong)"
     :raised="!!ui.draftConv"
     @scrim-click="close"
+    @dismiss="close"
   >
     <CdEventEditCard
       is-new

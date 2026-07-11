@@ -1,11 +1,11 @@
 <template>
-  <div class="month-view" :class="{ 'month-view--phone-split': !isDesktop }">
+  <div class="month-view" :class="{ 'month-view--phone-month': !isDesktop }">
     <div v-if="isDesktop" class="month-view__top">
       <CdCalStrip :calendars="calStripCalendars" :selected="selectedCalendarIds" @toggle="onToggleCalendar" />
 
       <div v-if="showPhoto" class="month-view__banner">
         <div class="month-view__banner-slot" :style="{ height: `${bannerHeight}px` }">
-          <img :src="monthPhotoSrc" alt="" class="month-view__banner-img" />
+          <img :src="monthPhotoSrc" alt="" class="month-view__banner-img" @error="onMonthPhotoError" />
         </div>
         <div
           class="month-view__banner-grip"
@@ -31,7 +31,7 @@
     </div>
 
     <template v-else>
-      <div class="month-view__pane month-view__pane--top" :style="{ height: `${splitHeight}px` }">
+      <div class="month-view__phone">
         <CdDatePoster
           variant="month"
           :year="String(year)"
@@ -46,7 +46,7 @@
         <div class="month-view__top-scroll">
           <div v-if="showPhoto" class="month-view__banner">
             <div class="month-view__banner-slot" :style="{ height: `${bannerHeight}px` }">
-              <img :src="monthPhotoSrc" alt="" class="month-view__banner-img" />
+              <img :src="monthPhotoSrc" alt="" class="month-view__banner-img" @error="onMonthPhotoError" />
             </div>
             <div
               class="month-view__banner-grip"
@@ -62,29 +62,13 @@
               :fmt="cellFmt"
               :selected-date="ui.selectedDate"
               @cell-click="onCellSelect"
+              @event-click="(date) => onCellSelect(date)"
+              @more="onMore"
             />
           </div>
         </div>
       </div>
 
-      <div
-        class="month-view__split-grip"
-        title="Drag to resize"
-        @pointerdown="onSplitGripDown"
-      >
-        <span class="month-view__split-grip-bar" />
-      </div>
-
-      <div class="month-view__pane month-view__pane--agenda">
-        <CdMonthAgenda
-          :dow="agendaDow"
-          :date-label="agendaDateLabel"
-          :today="agendaIsToday"
-          :events="agendaEvents"
-          @event-click="onAgendaEventClick"
-          @open-day="ui.activeView = 'day'"
-        />
-      </div>
     </template>
 
     <CdSheet v-if="ui.monthSheet" :show-handle="false" @scrim-click="ui.monthSheet = false">
@@ -102,11 +86,28 @@
       />
     </CdSheet>
 
+    <CdSheet
+      v-if="phoneAgendaSheet && !isDesktop"
+      class="month-view__agenda-sheet"
+      @scrim-click="phoneAgendaSheet = false"
+      @dismiss="phoneAgendaSheet = false"
+    >
+      <CdMonthAgenda
+        :dow="agendaDow"
+        :date-label="agendaDateLabel"
+        :today="agendaIsToday"
+        :events="agendaEvents"
+        @event-click="onAgendaEventClick"
+        @open-day="openSelectedDay"
+      />
+    </CdSheet>
+
     <CdDrawerOrSheet
       v-if="ui.dayList"
       :presentation="isDesktop ? 'drawer' : 'sheet'"
       width="min(380px, 40%)"
       @scrim-click="ui.dayList = null"
+      @dismiss="ui.dayList = null"
     >
       <CdDayList
         :year="String(year)"
@@ -120,7 +121,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import CdDatePoster from '@/components/ui/CdDatePoster.vue'
 import CdCalStrip, { type CalStripCalendar } from '@/components/ui/CdCalStrip.vue'
 import CdMonthGrid, { type MonthGridCell } from '@/components/ui/CdMonthGrid.vue'
@@ -139,14 +140,14 @@ import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
-import { defaultMonthPhotoPath } from '@/utils/public-assets'
+import { defaultMonthPhotoPath, defaultMonthPhotoPaths } from '@/utils/public-assets'
 
 // MonthView — poster header + resizable photo banner + first-day-aware grid, rebuilt against the
 // CADENCE Handoff month-poster screen (design.md "3.1 Rebuild Month view"). Grid column start
 // (task 7.2 "First day of week re-anchors all week-based layouts"), cell label mode ("Month event
 // label style drives cell rendering"), and the photo banner toggle ("Settings persist across
-// reloads") all read live from settings-store; `bannerHeight`/`splitHeight` stay local-only per the
-// design's silence on persisting the banner's resized height or the phone split position.
+// reloads") all read live from settings-store; `bannerHeight` stays local-only per the design's
+// silence on persisting the banner's resized height.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
 const settings = useSettingsStore()
@@ -157,7 +158,7 @@ const cur = computed(() => parseISO(ui.selectedDate))
 const year = computed(() => cur.value.getFullYear())
 const month = computed(() => cur.value.getMonth())
 const monthLabel = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long' }).format(cur.value))
-const cellFmt = computed<'time' | 'name' | 'dot'>(() => settings.monthEventLabel)
+const cellFmt = computed<'time' | 'name' | 'icon' | 'dot'>(() => settings.monthEventLabel)
 
 // Calendar filter strip (task 7.3 "Calendar visibility filters all views"), sorted by the stored
 // `order` so drag-reorder in the settings calendars pane is reflected here immediately. Icon slot
@@ -178,8 +179,24 @@ const showPhoto = computed(() => settings.showPhoto)
 
 // Banner photo for the currently viewed month: user's own upload (settings-store.monthlyPhotos)
 // takes priority; otherwise fall back to the system default for that calendar month
-// (public/month-photos/jan.jpg … dec.jpg per "the system provides 1-12 default photos").
-const monthPhotoSrc = computed(() => settings.monthlyPhotos[month.value] ?? defaultMonthPhotoPath(month.value))
+// (public/month-photos/jan.(png|jpg|jpeg) … dec.(png|jpg|jpeg) per "the system provides 1-12 default photos").
+const defaultMonthPhotoFallbackIndex = ref(0)
+const defaultMonthPhotoCandidates = computed(() => defaultMonthPhotoPaths(month.value))
+const monthPhotoSrc = computed(() => settings.monthlyPhotos[month.value] ?? defaultMonthPhotoCandidates.value[defaultMonthPhotoFallbackIndex.value] ?? defaultMonthPhotoPath(month.value))
+
+watch(
+  () => [month.value, settings.monthlyPhotos[month.value]],
+  () => {
+    defaultMonthPhotoFallbackIndex.value = 0
+  }
+)
+
+function onMonthPhotoError(): void {
+  if (settings.monthlyPhotos[month.value]) return
+  if (defaultMonthPhotoFallbackIndex.value < defaultMonthPhotoCandidates.value.length - 1) {
+    defaultMonthPhotoFallbackIndex.value += 1
+  }
+}
 const DEFAULT_BANNER_H = 230
 const MIN_BANNER_H = 90
 const MAX_BANNER_H = 560
@@ -200,34 +217,7 @@ function onBannerGripDown(e: PointerEvent): void {
   window.addEventListener('pointerup', up)
 }
 
-// Phone split-pane: grid pane above, agenda pane below, draggable divider. Local-only component
-// state (persists while the view stays mounted, per design.md "3.3" — no store persistence
-// requirement stated for the split position, matching the banner-height precedent above).
-// DEFAULT sized so the poster (~108px) + calendar strip (~54px) leave a legible ~264px for a full
-// 6-week grid (~44px/row) — below this the grid's rows compress until weeks clip out of view, since
-// CdMonthGrid fills its container via `grid-auto-rows: 1fr` rather than scrolling internally. Users
-// can still drag the grip below this to shrink the grid deliberately; MIN_SPLIT_H is just a floor
-// that keeps the poster/strip chrome itself from being clipped.
-const DEFAULT_SPLIT_H = 426
-const MIN_SPLIT_H = 210
-const MAX_SPLIT_H = 720
-const splitHeight = ref(DEFAULT_SPLIT_H)
-
-function onSplitGripDown(e: PointerEvent): void {
-  e.preventDefault()
-  const startY = e.clientY
-  const base = splitHeight.value
-  function move(ev: PointerEvent): void {
-    splitHeight.value = Math.max(MIN_SPLIT_H, Math.min(MAX_SPLIT_H, base + (ev.clientY - startY)))
-  }
-  function up(): void {
-    window.removeEventListener('pointermove', move)
-    window.removeEventListener('pointerup', up)
-  }
-  window.addEventListener('pointermove', move)
-  window.addEventListener('pointerup', up)
-}
-
+const phoneAgendaSheet = ref(false)
 const agendaIsToday = computed(() => ui.selectedDate === iso(new Date()))
 const agendaDow = computed(() => WD_CAP[cur.value.getDay()]!.toUpperCase())
 const agendaDateLabel = computed(
@@ -244,6 +234,7 @@ const agendaEvents = computed<MonthAgendaEvent[]>(() =>
 )
 
 function onAgendaEventClick(event: MonthAgendaEvent, e: MouseEvent): void {
+  phoneAgendaSheet.value = false
   ui.eventPreview = { taskId: event.id, anchor: anchorFromEvent(e), mode: 'preview' }
 }
 
@@ -299,13 +290,21 @@ function onEventClick(_date: string, event: MonthCellEvent, e: MouseEvent): void
 }
 
 function onMore(date: string): void {
+  phoneAgendaSheet.value = false
   ui.dayList = date
 }
 
-// Phone-mode month grid: cell click selects the date so the agenda pane below can show its
-// events, instead of opening Quick-Add (desktop's onCellClick) or the Day List sheet (onMore).
+// Phone-mode month grid: cell and chip clicks select the date and open the day agenda as a bottom
+// sheet. The grid remains the primary surface, so cell height can favor readable event density
+// instead of sharing the viewport with a permanently visible split-pane agenda.
 function onCellSelect(date: string): void {
   ui.selectedDate = date
+  phoneAgendaSheet.value = true
+}
+
+function openSelectedDay(): void {
+  phoneAgendaSheet.value = false
+  ui.activeView = 'day'
 }
 
 function openMonthSheet(): void {
@@ -392,20 +391,21 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
   overflow: hidden;
 }
 
-.month-view--phone-split {
+.month-view--phone-month {
   flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
 }
 
-.month-view__pane--top {
-  flex: none;
+.month-view__phone {
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.month-view__pane--top :deep(.cd-date-poster--month) {
+.month-view__phone :deep(.cd-date-poster--month) {
   background: var(--cd-topbar);
 }
 
@@ -415,29 +415,6 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-}
-
-.month-view__split-grip {
-  flex: none;
-  height: 20px;
-  display: grid;
-  place-items: center;
-  cursor: ns-resize;
-  border-top: 1px solid var(--cd-line);
-  touch-action: none;
-}
-
-.month-view__split-grip-bar {
-  width: 40px;
-  height: 4px;
-  border-radius: var(--cd-radius-pill);
-  background: var(--cd-line);
-}
-
-.month-view__pane--agenda {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .month-view__banner {
@@ -492,9 +469,32 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
   padding: 0 22px 18px;
 }
 
-.month-view--phone-split .month-view__grid-wrap {
+.month-view--phone-month .month-view__grid-wrap {
   flex: none;
   overflow: visible;
+}
+
+.month-view__agenda-sheet :deep(.cd-sheet) {
+  height: min(320px, 44vh);
+  max-height: min(320px, 44vh);
+}
+
+.month-view__agenda-sheet :deep(.cd-month-agenda) {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+}
+
+.month-view__agenda-sheet :deep(.cd-month-agenda__list) {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.month-view__agenda-sheet :deep(.cd-month-agenda__empty) {
+  flex: 1 1 auto;
 }
 
 @media (max-width: 899px) {

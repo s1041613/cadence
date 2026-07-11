@@ -14,10 +14,10 @@
     <div class="app-shell-chrome__phone">
       <CdBottomNav
         :active-view="ui.activeView"
-        @update:active-view="(v) => (ui.activeView = v as ActiveView)"
-        @open-assistant="ui.assistantOpen = true"
-        @open-journal="ui.draftDrawer = true"
-        @open-settings="ui.settingsOpen = true"
+        @update:active-view="onPhoneActiveView"
+        @open-assistant="openPhoneAssistant"
+        @open-journal="openPhoneJournal"
+        @open-settings="openPhoneSettings"
       />
       <CdFab @click="ui.createOpen = true" />
     </div>
@@ -64,6 +64,35 @@ function onActiveViewLabel(label: string): void {
   const view = LABEL_VIEWS[label]
   if (view) ui.activeView = view
 }
+
+function closePhoneFullscreenPanels(): void {
+  ui.draftDrawer = false
+  ui.draftConv = null
+  ui.assistantOpen = false
+  ui.settingsOpen = false
+  ui.settingsPane = 'root'
+}
+
+function onPhoneActiveView(value: string): void {
+  const view = value as ActiveView
+  closePhoneFullscreenPanels()
+  ui.activeView = view
+}
+
+function openPhoneAssistant(): void {
+  closePhoneFullscreenPanels()
+  ui.assistantOpen = true
+}
+
+function openPhoneJournal(): void {
+  closePhoneFullscreenPanels()
+  ui.draftDrawer = true
+}
+
+function openPhoneSettings(): void {
+  closePhoneFullscreenPanels()
+  ui.settingsOpen = true
+}
 </script>
 
 <style scoped lang="sass">
@@ -85,7 +114,7 @@ function onActiveViewLabel(label: string): void {
 
 // Phone bottom-nav/FAB render only below the breakpoint. Fixed to the viewport bottom (task 3.1):
 // CdBottomNav is a plain in-flow <nav> and CdFab is `position: absolute` expecting a positioned
-// ancestor sized to clear the nav bar (its `bottom: 86px` assumes exactly that) — `display: contents`
+// ancestor sized to clear the nav bar (its `bottom: 104px` floats above that bar) — `display: contents`
 // alone left both floating in document flow above whatever view rendered first. This wrapper is that
 // positioned ancestor: fixed spans the full viewport width and pins to the bottom edge, giving the
 // FAB's absolute offsets a stable containing block while CdBottomNav lays out normally inside it.

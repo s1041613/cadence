@@ -7,6 +7,7 @@
     scrim-color="var(--cd-scrim-light)"
     sheet-fullscreen
     @scrim-click="close"
+    @dismiss="close"
   >
     <CdSettingsDrawer
       :active-pane="ui.settingsPane"
@@ -27,6 +28,7 @@
       :calendars="sortedCalendars"
       :default-calendar-id="DEFAULT_CALENDAR_ID"
       :visible-calendar-ids="visibleCalendarIds"
+      :sheet-mode="!isDesktop"
       @close="close"
       @back="goBack"
       @navigate="(pane) => (ui.settingsPane = pane)"

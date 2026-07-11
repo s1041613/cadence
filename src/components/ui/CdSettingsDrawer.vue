@@ -1,6 +1,10 @@
 <template>
     <div class="cd-settings">
-      <div class="cd-settings__header">
+      <div
+        class="cd-settings__header"
+        :class="{ 'cd-settings__header--sheet': sheetMode }"
+        v-touch-swipe.down.mouse="onHeaderSwipeDown"
+      >
         <button
           v-if="activePane !== 'root'"
           type="button"
@@ -11,7 +15,9 @@
           <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
         </button>
         <span class="cd-settings__title" :class="{ 'cd-settings__title--root': activePane === 'root' }">{{ paneTitle }}</span>
-        <button type="button" class="cd-settings__icon-btn" aria-label="Close" @click="emit('close')">
+        <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
+             swipe-down dismisses instead. -->
+        <button v-if="!sheetMode" type="button" class="cd-settings__icon-btn" aria-label="Close" @click="emit('close')">
           <CdIcon name="close" :size="17" color="var(--cd-muted)" />
         </button>
       </div>
@@ -197,11 +203,11 @@
             </div>
             <CdSegmented
               :model-value="monthEventLabel"
-              :options="[{ value: 'name', label: 'Name' }, { value: 'time', label: 'Time' }, { value: 'dot', label: 'Dots' }]"
-              @update:model-value="(v) => emit('update:monthEventLabel', v as 'name' | 'time' | 'dot')"
+              :options="[{ value: 'name', label: 'Name' }, { value: 'icon', label: 'Icon' }, { value: 'time', label: 'Time' }, { value: 'dot', label: 'Dots' }]"
+              @update:model-value="(v) => emit('update:monthEventLabel', v as 'name' | 'icon' | 'time' | 'dot')"
             />
           </div>
-          <p class="cd-settings__note">"Name" shows the task title only; "Time" prefixes it with the start time. Month view only — Week and Day always show times on the grid.</p>
+          <p class="cd-settings__note">"Name" shows the task title only; "Icon" adds the quadrant icon before it; "Time" prefixes it with the start time. Month view only — Week and Day always show times on the grid.</p>
 
           <div class="cd-settings__row cd-settings__row--bordered">
             <div class="cd-settings__row-text">
@@ -304,7 +310,10 @@
                 @click="!calArrange && openCalendarDetail(cal)"
               >
                 <span v-if="calArrange" class="cd-settings__cal-grip" aria-hidden="true">⋮⋮</span>
-                <span class="cd-settings__cal-icon-tile" :style="{ background: calTint(cal.color) }">
+                <span v-if="cal.cover && !brokenCalendarCoverIds.has(cal.id)" class="cd-settings__cal-cover-thumb">
+                  <img :src="cal.cover" alt="" class="cd-settings__cal-cover-thumb-img" @error="onCalendarCoverImgError(cal.id)" />
+                </span>
+                <span v-else class="cd-settings__cal-icon-tile" :style="{ background: calTint(cal.color) }">
                   <CdIcon :name="(cal.icon as IconName) ?? 'calendar'" :size="20" :color="calIconColor(cal.color)" />
                 </span>
                 <span class="cd-settings__cal-name-label">{{ cal.name }}</span>
@@ -351,7 +360,7 @@
         <template v-else-if="activePane === 'calendarDetail'">
           <div class="cd-settings__cal-cover-row">
             <span class="cd-settings__cal-cover-preview">
-              <img v-if="draftCover" :src="draftCover" alt="" class="cd-settings__cal-cover-img" />
+              <img v-if="draftCover" :src="draftCover" alt="" class="cd-settings__cal-cover-img" @error="onDraftCoverImgError" />
               <span
                 v-else
                 class="cd-settings__cal-cover-fallback"
@@ -367,7 +376,7 @@
               </button>
               <button v-if="draftCover" type="button" class="cd-settings__cal-cover-remove" @click="draftCover = null">Remove</button>
             </div>
-            <input ref="coverInput" type="file" accept="image/*" class="cd-settings__cal-file-input" @change="onCoverFileChange" />
+            <input ref="coverInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.png,.jpg,.jpeg,.webp,.gif" class="cd-settings__cal-file-input" @change="onCoverFileChange" />
           </div>
 
           <div class="cd-settings__field-stack">
@@ -454,7 +463,7 @@
         </div>
       </div>
 
-      <CdSheet v-if="inviteOpen" raised @scrim-click="inviteOpen = false">
+      <CdSheet v-if="inviteOpen" raised @scrim-click="inviteOpen = false" @dismiss="inviteOpen = false">
         <div class="cd-settings__invite-sheet">
           <div class="cd-settings__invite-title">Invite to {{ draftName || 'this calendar' }}</div>
           <div class="cd-settings__invite-sub">Anyone with the link can join this calendar.</div>
@@ -555,7 +564,7 @@ interface Props {
   firstDay: string
   timezone: string
   theme: 'Light' | 'Auto' | 'Dark'
-  monthEventLabel: 'name' | 'time' | 'dot'
+  monthEventLabel: 'name' | 'icon' | 'time' | 'dot'
   showPhoto: boolean
   monthlyPhotos: (string | null)[]
   notifEvents: boolean
@@ -567,10 +576,15 @@ interface Props {
   calendars: Calendar[]
   defaultCalendarId: string
   visibleCalendarIds: string[]
+  /** Phone/sheet presentation (Zoe's 2026-07-11 correction): hides the header close button and
+   * enables swipe-down-to-close on the header instead. Defaults to false so existing desktop
+   * consumers that don't pass this prop keep the close button and no gesture binding. */
+  sheetMode?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  syncedCalendars: () => ['Rivera Family', 'Personal', 'Work']
+  syncedCalendars: () => ['Rivera Family', 'Personal', 'Work'],
+  sheetMode: false
 })
 
 const emit = defineEmits<{
@@ -582,7 +596,7 @@ const emit = defineEmits<{
   'update:firstDay': [value: string]
   'update:timezone': [value: string]
   'update:theme': [value: 'Light' | 'Auto' | 'Dark']
-  'update:monthEventLabel': [value: 'name' | 'time' | 'dot']
+  'update:monthEventLabel': [value: 'name' | 'icon' | 'time' | 'dot']
   'update:showPhoto': [value: boolean]
   setMonthPhoto: [monthIndex: number, photo: string | null]
   createCalendar: [draft: { name: string; color: string; icon: string | null; cover: string | null }]
@@ -606,6 +620,16 @@ const emit = defineEmits<{
 const accountName = computed(() => props.email.split('@')[0] ?? props.email)
 
 const paneTitle = computed(() => (props.activePane === 'root' ? 'Settings' : TITLE_MAP[props.activePane]))
+
+// Swipe-down on the header is the only close affordance in sheet mode, since the X button is
+// hidden there (Zoe's 2026-07-11 correction). The directive is always bound (Quasar's TouchSwipe
+// invokes whatever handler is currently attached with no type guard, so conditionally passing
+// `undefined` would throw on a stray gesture) — this guard is what actually gates the behavior to
+// sheet mode; on desktop the swipe is a no-op.
+function onHeaderSwipeDown(): void {
+  if (!props.sheetMode) return
+  emit('close')
+}
 
 // Native HTML5 drag-and-drop reorder, mirroring the settings calendars-pane-management
 // spec's "Reordering is reflected in the filter strip" example — drop emits the full reordered
@@ -657,6 +681,9 @@ const draftColor = ref('#7BA05B')
 const draftIcon = ref<string | null>(null)
 const draftCover = ref<string | null>(null)
 const coverInput = ref<HTMLInputElement | null>(null)
+const brokenCalendarCoverIds = ref(new Set<string>())
+const SUPPORTED_COVER_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+const SUPPORTED_COVER_IMAGE_EXTENSIONS = /\.(png|jpe?g|webp|gif)$/i
 
 // Mock roster for the static Members shell — no backend, mirrors the design's fixed 4-person
 // list. Always shows the signed-in user first as Creator; other members are placeholder data.
@@ -705,14 +732,51 @@ function openCalendarDetail(cal: Calendar | null, purpose?: (typeof CAL_PURPOSES
   emit('navigate', 'calendarDetail')
 }
 
+function isSupportedCoverImage(file: File): boolean {
+  return SUPPORTED_COVER_IMAGE_TYPES.has(file.type) || SUPPORTED_COVER_IMAGE_EXTENSIONS.test(file.name)
+}
+
+function onDraftCoverImgError(): void {
+  draftCover.value = null
+}
+
+function onCalendarCoverImgError(id: string): void {
+  brokenCalendarCoverIds.value = new Set([...brokenCalendarCoverIds.value, id])
+}
+
 // FileReader → data URL matches the handoff's pickFile/onFile pair (§_calSettingsPane) — this
 // is a static-shell upload (no backend), so the draft just holds the data URL until Save.
 function onCoverFileChange(e: Event): void {
-  const file = (e.target as HTMLInputElement).files?.[0]
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) return
+  if (!isSupportedCoverImage(file)) {
+    input.value = ''
+    draftCover.value = null
+    return
+  }
   const reader = new FileReader()
+  reader.onerror = () => {
+    draftCover.value = null
+  }
   reader.onload = () => {
-    draftCover.value = typeof reader.result === 'string' ? reader.result : null
+    const result = typeof reader.result === 'string' ? reader.result : null
+    if (!result) {
+      draftCover.value = null
+      return
+    }
+
+    const image = new Image()
+    image.onload = () => {
+      draftCover.value = result
+    }
+    image.onerror = () => {
+      draftCover.value = null
+    }
+    image.src = result
+  }
+  reader.onloadend = () => {
+    input.value = ''
   }
   reader.readAsDataURL(file)
 }
@@ -795,6 +859,14 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 
 .cd-settings__icon-btn:hover {
   background: rgba(86, 88, 94, 0.06);
+}
+
+/* Sheet mode's header carries the only close gesture (swipe down), so it needs touch-action:none
+   to be a reliable v-touch-swipe target — same reasoning as CdSheet's .cd-sheet__handle-zone.
+   Scoped to sheet mode only so desktop hover/click on the header (incl. the back chevron) is
+   unaffected. */
+.cd-settings__header--sheet {
+  touch-action: none;
 }
 
 .cd-settings__title {
@@ -1386,6 +1458,23 @@ button.cd-settings__row:hover {
   place-items: center;
 }
 
+.cd-settings__cal-cover-thumb {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface);
+}
+
+.cd-settings__cal-cover-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .cd-settings__cal-icon-tile--lg {
   width: 50px;
   height: 50px;
@@ -1461,10 +1550,11 @@ button.cd-settings__row:hover {
   width: 78px;
   height: 78px;
   flex: none;
-  border-radius: 50%;
+  border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--cd-line);
   display: block;
+  background: var(--cd-surface);
 }
 
 .cd-settings__cal-cover-img {
