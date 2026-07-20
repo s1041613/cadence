@@ -1,6 +1,8 @@
 import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
+  { path: '/auth/callback', component: () => import('@/pages/AuthCallbackPage.vue') },
+
   {
     path: '/',
     component: () => import('@/layouts/MainLayout.vue'),
