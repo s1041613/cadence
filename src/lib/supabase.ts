@@ -10,7 +10,10 @@ function createSupabaseClient(): SupabaseClient | null {
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
+      // Proof Key for Code Exchange: the browser gets a short-lived code, then
+      // exchanges it for the real session token using a locally stored code_verifier.
       flowType: 'pkce',
+      // On init, automatically detect the OAuth callback in the URL and run the PKCE exchange.
       detectSessionInUrl: true,
       persistSession: true,
       autoRefreshToken: true
