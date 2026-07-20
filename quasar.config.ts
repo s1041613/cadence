@@ -1,10 +1,27 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { existsSync, readFileSync } from 'node:fs'
 import { defineConfig } from '#q-app';
 
+function readDotenvValue(name: string): string | undefined {
+  if (!existsSync('.env')) return undefined
+
+  const line = readFileSync('.env', 'utf8')
+    .split(/\r?\n/)
+    .find((entry) => entry.startsWith(`${name}=`))
+
+  return line?.slice(name.length + 1).trim().replace(/^['"]|['"]$/g, '')
+}
+
 export default defineConfig((/* ctx */) => {
+  const supabaseConnectSrc = process.env.QCLI_SUPABASE_URL ?? readDotenvValue('QCLI_SUPABASE_URL') ?? ''
+
   return {
+    htmlVariables: {
+      supabaseConnectSrc
+    },
+
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
 
