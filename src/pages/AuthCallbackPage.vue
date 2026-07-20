@@ -4,39 +4,90 @@
       <p class="auth-callback__eyebrow">Cadence</p>
       <h1>{{ statusTitle }}</h1>
       <p>{{ statusText }}</p>
+      <button v-if="hasError" type="button" class="auth-callback__retry" @click="backToLogin">
+        Back to sign in
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { supabase } from '@/lib/supabase'
+import { useAuthStore } from '@/stores/auth-store'
+
+// The Supabase client is configured with detectSessionInUrl:true, so it exchanges
+// the OAuth code for a session automatically on load. This page must NOT exchange
+// again (the one-time code / PKCE verifier is already consumed) — it only waits for
+// the resulting auth state and routes accordingly.
+const REDIRECT_TIMEOUT_MS = 8000
+
+// Human-readable copy for the OAuth error codes a provider may hand back.
+const ERROR_MESSAGES: Record<string, string> = {
+  access_denied: 'You cancelled the authorization. You can try again.',
+  server_error: 'The sign-in service had a temporary problem. Please try again later.'
+}
 
 const router = useRouter()
+const auth = useAuthStore()
 const error = ref<string | null>(null)
-const isDone = ref(false)
 
-const statusTitle = computed(() => (error.value ? '登入沒有完成' : isDone.value ? '登入完成' : '正在完成登入'))
-const statusText = computed(() => error.value ?? (isDone.value ? '正在帶你回到 Cadence。' : '請稍候。'))
+const hasError = computed(() => error.value !== null)
+const statusTitle = computed(() => {
+  if (hasError.value) return "Sign-in didn't complete"
+  if (auth.isSignedIn) return 'Signed in'
+  return 'Finishing sign-in'
+})
+const statusText = computed(() => {
+  if (error.value) return error.value
+  if (auth.isSignedIn) return 'Taking you back to Cadence.'
+  return 'Please wait.'
+})
 
-onMounted(async () => {
-  if (!supabase) {
-    error.value = 'Supabase is not configured.'
+let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+function backToLogin(): void {
+  void router.replace('/login')
+}
+
+// Watch both flags because isSignedIn === false is ambiguous on its own (see the
+// three-state note in auth-store): it means either "still resolving" or "resolved,
+// not signed in". Only act on failure once isReady confirms resolution is done.
+// Signed in → leave for the app. Ready but still not signed in → the auto exchange
+// failed with no explicit provider error; surface a generic failure.
+const stop = watch(
+  [() => auth.isSignedIn, () => auth.isReady],
+  ([isSignedIn, isReady]) => {
+    if (error.value) return
+    if (isSignedIn) {
+      void router.replace('/')
+    } else if (isReady) {
+      error.value = "Sign-in didn't complete. Please try again."
+    }
+  },
+  { immediate: true }
+)
+
+onMounted(() => {
+  // A provider-supplied error in the callback URL takes precedence over waiting.
+  const params = new URLSearchParams(window.location.search)
+  const errorCode = params.get('error')
+  if (errorCode) {
+    error.value = ERROR_MESSAGES[errorCode] ?? "Sign-in didn't complete. Please try again."
     return
   }
 
-  const code = new URLSearchParams(window.location.search).get('code')
-  if (code) {
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-    if (exchangeError) {
-      error.value = exchangeError.message
-      return
+  // Safety net: never spin forever if the auto-exchange silently stalls.
+  timeoutId = setTimeout(() => {
+    if (!auth.isSignedIn && !error.value) {
+      error.value = 'Sign-in timed out. Please try again.'
     }
-  }
+  }, REDIRECT_TIMEOUT_MS)
+})
 
-  isDone.value = true
-  await router.replace('/')
+onBeforeUnmount(() => {
+  stop()
+  if (timeoutId) clearTimeout(timeoutId)
 })
 </script>
 
@@ -71,5 +122,20 @@ onMounted(async () => {
   letter-spacing: .08em
   text-transform: uppercase
   color: #817d6f !important
+
+.auth-callback__retry
+  margin-top: 20px
+  padding: 10px 18px
+  border: 1px solid rgba(41, 40, 32, .2)
+  border-radius: 8px
+  background: rgba(255, 255, 255, .72)
+  color: #292820
+  font-size: 14px
+  font-weight: 600
+  cursor: pointer
+  transition: background .15s ease
+
+  &:hover
+    background: #ffffff
 </style>
 
