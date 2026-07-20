@@ -1,4 +1,4 @@
-name: CI
+name: pr-check-before-merge-to-main
 
 on:
   pull_request:
