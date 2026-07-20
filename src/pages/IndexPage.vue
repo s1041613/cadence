@@ -25,8 +25,10 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
+import { useAuthStore } from '@/stores/auth-store'
 import AppShellChrome from '@/components/shell/AppShellChrome.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopover from '@/components/shell/EventPreviewPopover.vue'
@@ -41,6 +43,16 @@ import FocusSession from '@/components/focus/FocusSession.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
+const auth = useAuthStore()
+
+watch(
+  () => auth.isSignedIn,
+  (isSignedIn) => {
+    if (!isSignedIn) return
+    tasksStore.isLoading = false
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped lang="sass">

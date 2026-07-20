@@ -1,8 +1,27 @@
-import type { PersistedShape, PersistedSettings } from '@/boot/persistence'
 import { DEFAULT_CALENDAR_ID, defaultCalendar } from '@/stores/calendars-store'
-import type { MonthEventLabel } from '@/stores/settings-store'
+import type { InboxItem } from '@/stores/inbox-store'
+import type { FirstDay, MonthlyPhotos, MonthEventLabel, TimeFormat } from '@/stores/settings-store'
 import { defaultMonthlyPhotos } from '@/stores/settings-store'
+import type { Calendar } from '@/types/calendar'
+import type { Task } from '@/types/task'
 import { iso } from '@/utils/convert-date-time'
+
+interface PersistedSettings {
+  timeFormat: TimeFormat
+  firstDay: FirstDay
+  monthEventLabel: MonthEventLabel
+  showPhoto: boolean
+  monthlyPhotos: MonthlyPhotos
+}
+
+interface PersistedShape {
+  tasks: Task[]
+  inbox: InboxItem[]
+  inboxDraft: string
+  calendars: Calendar[]
+  hiddenCalendarIds: string[]
+  settings: PersistedSettings
+}
 
 const DEFAULT_SETTINGS: PersistedSettings = {
   timeFormat: '24-Hour',

@@ -11,7 +11,12 @@
       <div class="login__panel">
         <p class="login__label">Sign in to get started</p>
 
-        <button type="button" class="login__oauth-btn login__oauth-btn--google" @click="signInWithGoogle">
+        <button
+          type="button"
+          class="login__oauth-btn login__oauth-btn--google"
+          :disabled="auth.isLoading || !auth.isConfigured"
+          @click="signInWithGoogle"
+        >
           <span class="login__oauth-icon" aria-hidden="true">
             <!-- Google "G" — official four-color mark, unmodified per brand guidelines -->
             <svg width="20" height="20" viewBox="0 0 18 18">
@@ -41,6 +46,7 @@
           <a href="#" @click.prevent>Terms</a> &amp;
           <a href="#" @click.prevent>Privacy</a>.
         </p>
+        <p v-if="auth.error" class="login__error">{{ auth.error }}</p>
 
         <div class="login__home-indicator" aria-hidden="true"></div>
       </div>
@@ -49,14 +55,27 @@
 </template>
 
 <script setup lang="ts">
-// LoginPage — static sign-in screen. UI only; OAuth wiring lands in a later batch.
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth-store'
 
-function signInWithGoogle(): void {
-  // TODO(auth): kick off Google OAuth (Supabase provider). Static placeholder for now.
+const auth = useAuthStore()
+const router = useRouter()
+
+watch(
+  () => auth.isSignedIn,
+  (isSignedIn) => {
+    if (isSignedIn) void router.replace('/')
+  },
+  { immediate: true }
+)
+
+async function signInWithGoogle(): Promise<void> {
+  await auth.signInWithGoogle()
 }
 
 function signInWithApple(): void {
-  // TODO(auth): kick off Apple OAuth (Supabase provider). Static placeholder for now.
+  auth.error = 'Apple 登入尚未開啟。'
 }
 </script>
 
@@ -139,6 +158,11 @@ function signInWithApple(): void {
   transform: scale(0.99);
 }
 
+.login__oauth-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .login__oauth-icon {
   flex: 0 0 20px;
   width: 20px;
@@ -195,6 +219,14 @@ function signInWithApple(): void {
 .login__fineprint a {
   color: var(--cd-muted);
   text-decoration: underline;
+}
+
+.login__error {
+  width: 100%;
+  margin: 10px 0 0;
+  font: 400 var(--cd-fs-12) var(--cd-font-ui);
+  color: #9a3328;
+  text-align: center;
 }
 
 .login__home-indicator {
