@@ -172,7 +172,8 @@ const calStripCalendars = computed<CalStripCalendar[]>(() =>
 const selectedCalendarIds = computed(() => calendarsStore.calendars.filter((c) => calendarsStore.isVisible(c.id)).map((c) => c.id))
 
 function onToggleCalendar(id: string): void {
-  calendarsStore.toggleVisibility(id)
+  // Chip toggle maps to the per-user `selected` DB field (settings drawer owns `enabled`).
+  calendarsStore.toggleSelected(id)
 }
 
 const showPhoto = computed(() => settings.showPhoto)
