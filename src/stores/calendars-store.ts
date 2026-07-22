@@ -1,23 +1,39 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Calendar } from '@/types/calendar'
-
-// Stable id so tasks-store.mkTask and the persistence migration can both reference the default
-// calendar without a store round-trip; every fresh install and every migrated legacy payload
-// converges on the same default calendar id.
-export const DEFAULT_CALENDAR_ID = 'default'
-
-export function defaultCalendar(): Calendar {
-  return { id: DEFAULT_CALENDAR_ID, name: 'My Calendar', color: '#6E839B', icon: null, cover: null, order: 0 }
-}
+import { fetchCalendars } from '@/services/calendars-service'
 
 export const useCalendarsStore = defineStore('calendars', () => {
-  const calendars = ref<Calendar[]>([defaultCalendar()])
+  const calendars = ref<Calendar[]>([])
   const hiddenCalendarIds = ref<string[]>([])
+  // The uuid of the user's default calendar, set once per sign-in by loadFromRemote. Null while
+  // loading/signed-out — removeCalendar treats null as "not safe to delete anything yet".
+  const defaultCalendarId = ref<string | null>(null)
+
+  // Bumped on loadFromRemote and resetLocal so a load in flight at sign-out never writes back
+  // into state, mirroring tasks-store's generation guard.
+  let generation = 0
+
+  async function loadFromRemote(userId: string, defaultId: string): Promise<void> {
+    generation += 1
+    const gen = generation
+    defaultCalendarId.value = defaultId
+    const remote = await fetchCalendars(userId)
+    if (gen !== generation) return
+    calendars.value = remote
+    hiddenCalendarIds.value = remote.filter((c) => !c.enabled || !c.selected).map((c) => c.id)
+  }
+
+  function resetLocal(): void {
+    generation += 1
+    calendars.value = []
+    hiddenCalendarIds.value = []
+    defaultCalendarId.value = null
+  }
 
   function addCalendar(name: string, color: string): Calendar {
     const order = calendars.value.length ? Math.max(...calendars.value.map((c) => c.order)) + 1 : 0
-    const calendar: Calendar = { id: crypto.randomUUID(), name, color, icon: null, cover: null, order }
+    const calendar: Calendar = { id: crypto.randomUUID(), name, color, icon: null, cover: null, order, role: 'owner' }
     calendars.value.push(calendar)
     return calendar
   }
@@ -42,8 +58,14 @@ export const useCalendarsStore = defineStore('calendars', () => {
     if (calendar) calendar.cover = cover
   }
 
+  // Three-fold safety net: unloaded (null defaultCalendarId), the default calendar itself, and
+  // any calendar the current user does not own are all no-ops. DB-level protection (position
+  // uniqueness, delete policy) is tracked as a follow-up — see plan risk item 2.
   function removeCalendar(id: string): void {
-    if (id === DEFAULT_CALENDAR_ID) return
+    if (defaultCalendarId.value === null) return
+    if (id === defaultCalendarId.value) return
+    const calendar = calendars.value.find((c) => c.id === id)
+    if (calendar?.role !== 'owner') return
     calendars.value = calendars.value.filter((c) => c.id !== id)
     hiddenCalendarIds.value = hiddenCalendarIds.value.filter((hiddenId) => hiddenId !== id)
   }
@@ -73,6 +95,9 @@ export const useCalendarsStore = defineStore('calendars', () => {
   return {
     calendars,
     hiddenCalendarIds,
+    defaultCalendarId,
+    loadFromRemote,
+    resetLocal,
     addCalendar,
     renameCalendar,
     recolorCalendar,
