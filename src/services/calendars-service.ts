@@ -99,6 +99,103 @@ export async function fetchCalendars(userId: string): Promise<CalendarWithMember
   }))
 }
 
+// User-editable calendar metadata. cover is intentionally absent: calendars.cover_url is a
+// Storage-path contract and cover persistence is out of scope for this change.
+export interface CalendarDraft {
+  name: string
+  color: string
+  icon: string | null
+}
+
+export type CalendarPatch = Partial<CalendarDraft>
+
+// Atomic create via RPC (calendar + owner membership + next position). Returns the new uuid;
+// the caller builds the local Calendar from the draft since the RPC returns only the id.
+export async function createCalendar(draft: CalendarDraft): Promise<string> {
+  const supabase = requireSupabase()
+
+  const { data, error } = await supabase
+    .rpc('create_calendar', {
+      calendar_name: draft.name,
+      calendar_color: draft.color,
+      calendar_icon: draft.icon
+    })
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+  if (typeof data !== 'string') {
+    throw new Error('create_calendar returned no calendar id')
+  }
+  return data
+}
+
+export async function updateCalendar(id: string, patch: CalendarPatch): Promise<void> {
+  const supabase = requireSupabase()
+
+  const row: Record<string, string | null> = {}
+  if ('name' in patch && patch.name !== undefined) row.name = patch.name
+  if ('color' in patch && patch.color !== undefined) row.color = patch.color
+  if ('icon' in patch) row.icon = patch.icon ?? null
+
+  const { error } = await supabase
+    .from('calendars')
+    .update(row)
+    .eq('id', id)
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
+// Owner-only per RLS; events/members/invites rows go with the calendar via FK cascade.
+export async function deleteCalendar(id: string): Promise<void> {
+  const supabase = requireSupabase()
+
+  const { error } = await supabase
+    .from('calendars')
+    .delete()
+    .eq('id', id)
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
+// Self-removal from a shared calendar (RLS lets members delete their own membership row).
+export async function leaveCalendar(calendarId: string, userId: string): Promise<void> {
+  const supabase = requireSupabase()
+
+  const { error } = await supabase
+    .from('calendar_members')
+    .delete()
+    .eq('calendar_id', calendarId)
+    .eq('user_id', userId)
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
+export async function reorderCalendars(orderedIds: string[]): Promise<void> {
+  const supabase = requireSupabase()
+
+  const { error } = await supabase
+    .rpc('reorder_calendars', { ordered: orderedIds })
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
+export async function setCalendarEnabled(id: string, enabled: boolean): Promise<void> {
+  const supabase = requireSupabase()
+
+  const { error } = await supabase
+    .rpc('set_calendar_enabled', { cal: id, en: enabled })
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
+export async function setCalendarSelected(id: string, selected: boolean): Promise<void> {
+  const supabase = requireSupabase()
+
+  const { error } = await supabase
+    .rpc('set_calendar_selected', { cal: id, sel: selected })
+    .abortSignal(AbortSignal.timeout(REQUEST_TIMEOUT_MS))
+  if (error) throw error
+}
+
 // Members of one calendar, joined with their profile (Google display name/avatar). Display name
 // falls back to email, matching CdSettingsDrawer's own accountName fallback for the signed-in user.
 export async function fetchMembers(calendarId: string): Promise<CalendarMember[]> {
