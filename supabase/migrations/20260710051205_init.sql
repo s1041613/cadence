@@ -3,8 +3,10 @@
 -- 貼進： supabase/migrations/<timestamp>_init.sql
 -- =====================================================================
 
--- pgcrypto: gen_random_bytes (calendar_invites.token default) lives here, not in core PG
-create extension if not exists pgcrypto;
+-- pgcrypto: gen_random_bytes (calendar_invites.token default) lives here, not in core PG.
+-- Pin to the `extensions` schema so remote (Supabase) and local agree on where the
+-- function lives; callers must qualify it as extensions.gen_random_bytes(...).
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---- enums ----------------------------------------------------------
 create type event_type  as enum ('task', 'event');
@@ -95,7 +97,7 @@ create index events_owner_time_idx    on events (owner_id, starts_at);
 create table calendar_invites (
   id          uuid primary key default gen_random_uuid(),
   calendar_id uuid not null references calendars(id) on delete cascade,
-  token       text not null unique default encode(gen_random_bytes(16), 'hex'),
+  token       text not null unique default encode(extensions.gen_random_bytes(16), 'hex'),
   created_by  uuid not null references profiles(id),
   expires_at  timestamptz,
   created_at  timestamptz not null default now()
