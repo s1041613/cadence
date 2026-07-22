@@ -16,6 +16,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/LoginPage.vue'),
   },
 
+  // Invite deep link (public — boot/auth.ts whitelists the /join/ prefix; the page itself
+  // handles the signed-out branch so the token survives the login round-trip).
+  {
+    path: '/join/:token',
+    component: () => import('@/pages/JoinCalendarPage.vue'),
+  },
+
   // Dev-only visual verification surface (replaces Storybook). Must not exist in production builds.
   ...(import.meta.env.DEV
     ? [{ path: '/dev/gallery', component: () => import('@/pages/DevGalleryPage.vue') }]
