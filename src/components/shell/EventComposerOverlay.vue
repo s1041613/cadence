@@ -89,6 +89,7 @@ import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore, mkTask } from '@/stores/tasks-store'
+import { useCalendarsStore } from '@/stores/calendars-store'
 import { useInboxStore } from '@/stores/inbox-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
@@ -101,6 +102,7 @@ import type { RepeatMode, Task } from '@/types/task'
 // not the larger prototype that looked like a full task detail drawer.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
+const calendarsStore = useCalendarsStore()
 const inboxStore = useInboxStore()
 const settings = useSettingsStore()
 const { isDesktop } = useBreakpoint()
@@ -138,7 +140,12 @@ watch(
     }
     const existing = initialValues.id ? tasksStore.tasks.find((t) => t.id === initialValues.id) : undefined
     isEditing.value = existing !== undefined
-    draft.value = existing ? { ...existing } : mkTask({ date: ui.selectedDate, ...initialValues })
+    // DraftDrawer's seed (ui.eventComposerInitialValues from openSchedule) carries no calendarId —
+    // this is the one mkTask call that has to supply it for every fresh-draft path, since
+    // initialValues can come from either DraftDrawer or the plain topbar/FAB Create flow below.
+    draft.value = existing
+      ? { ...existing }
+      : mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId!, ...initialValues })
     // CdTimeDropdown expects a valid 'HH:MM' — a new draft with no time context yet (e.g. Quick-Add's
     // month-cell escalation, which carries no clicked time) falls back to a sensible default rather
     // than the empty string mkTask() otherwise leaves in place. A task's time block always shows
@@ -166,7 +173,9 @@ watch(
   { immediate: true }
 )
 
-const theme = computed(() => (draft.value ? themeOf(draft.value) : themeOf(mkTask({ date: ui.selectedDate }))))
+const theme = computed(() =>
+  draft.value ? themeOf(draft.value) : themeOf(mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId! }))
+)
 const dateLabel = computed(() => (draft.value ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(parseISO(draft.value.date)) : ''))
 const estimatedPomodoros = computed(() => (draft.value ? autoPoms(draft.value) : 1))
 const repeatLabel = computed(() => REPEAT_LABELS[draft.value?.repeat ?? 'none'])
@@ -197,7 +206,10 @@ function cycleRepeat(): void {
 }
 
 function trySave(): void {
-  if (!draft.value) return
+  // Defensive second layer: covers the residual window where the composer was already open when
+  // isLoading flipped back to true (e.g. a retried load after sign-in), same reasoning as
+  // QuickAddPopover.onAdd's guard.
+  if (!draft.value || tasksStore.isLoading) return
   draft.value.estimatedPomodoros = autoPoms(draft.value)
   tasksStore.saveTask(draft.value)
   inboxStore.completePromotion({ type: draft.value.type === 'event' ? 'event' : 'task', color: theme.value.backgroundColor, tag: 'Scheduled' })
