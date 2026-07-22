@@ -27,7 +27,7 @@
           <div class="cd-settings__spacer" />
           <div class="cd-settings__group">
             <button type="button" class="cd-settings__account-row" @click="emit('navigate', 'account')">
-              <CdAvatar :name="accountName" :size="48" />
+              <CdAvatar :src="avatarSrc" :name="accountName" :size="48" />
               <div class="cd-settings__account-meta">
                 <div class="cd-settings__account-name">{{ accountName }}</div>
                 <div class="cd-settings__account-email">{{ email }}</div>
@@ -366,13 +366,13 @@
           <div class="cd-settings__field-stack">
             <div class="cd-settings__label-row">
               <span class="cd-settings__label cd-settings__label--inline">Members</span>
-              <span class="cd-settings__members-count">{{ draftMembers.length }} people</span>
+              <span class="cd-settings__members-count">{{ props.members.length }} people</span>
             </div>
             <div class="cd-settings__members-list">
-              <div v-for="member in draftMembers" :key="member.id" class="cd-settings__member-row">
-                <span class="cd-settings__member-avatar" :style="{ background: member.color }">{{ member.initial }}</span>
+              <div v-for="member in props.members" :key="member.id" class="cd-settings__member-row">
+                <CdAvatar :src="member.avatarUrl" :name="member.name" :size="34" />
                 <span class="cd-settings__member-name">{{ member.name }}</span>
-                <span v-if="member.isCreator" class="cd-settings__member-badge">Creator</span>
+                <span v-if="member.role === 'owner'" class="cd-settings__member-badge">Creator</span>
               </div>
             </div>
             <button type="button" class="cd-settings__member-invite-btn" @click="openInvite">
@@ -390,7 +390,10 @@
             </button>
           </div>
 
-          <div v-if="draftEditId && draftEditId !== defaultCalendarId" class="cd-settings__field-stack">
+          <div
+            v-if="draftEditId && defaultCalendarId && draftEditId !== defaultCalendarId && draftCalendar?.role === 'owner'"
+            class="cd-settings__field-stack"
+          >
             <button type="button" class="cd-settings__cal-remove-btn" @click="removeDraftCalendar">
               <CdIcon name="trash" :size="15" color="var(--cd-danger)" />
               Delete calendar
@@ -470,7 +473,7 @@ import CdIcon from './CdIcon.vue'
 import CdScrim from './CdScrim.vue'
 import CdSheet from './CdSheet.vue'
 import type { IconName } from './icons'
-import type { Calendar } from '@/types/calendar'
+import type { Calendar, CalendarMember } from '@/types/calendar'
 
 // CdSettingsDrawer — left drawer with stacked-pane (drill-in) navigation, desktop variant only.
 // CADENCE Handoff §_settingsDrawer (full file, no longer truncated).
@@ -522,6 +525,8 @@ const TITLE_MAP: Record<Exclude<Props['activePane'], 'root'>, string> = {
 interface Props {
   activePane: 'root' | 'account' | 'time' | 'customization' | 'notifications' | 'privacy' | 'calendars' | 'calendarDetail'
   email: string
+  /** Signed-in account's avatar image; null falls back to CdAvatar's initial letter. */
+  avatarSrc?: string | null
   gcalConnected: boolean
   syncedCalendars?: string[]
   firstDay: string
@@ -537,8 +542,13 @@ interface Props {
   crashReports: boolean
   lockScreenTitles: boolean
   calendars: Calendar[]
-  defaultCalendarId: string
+  /** Null while calendars are loading (or the load failed) — the delete button stays hidden in
+   * that state (fail-safe: "cannot delete" beats guessing). */
+  defaultCalendarId: string | null
   visibleCalendarIds: string[]
+  /** Members of the calendar currently open in the detail pane, fetched by the feature layer
+   * (SettingsDrawer.vue) once draftEditId is known. Empty for the "add calendar" flow (no id yet). */
+  members: CalendarMember[]
   /** Phone/sheet presentation (Zoe's 2026-07-11 correction): hides the header close button and
    * enables swipe-down-to-close on the header instead. Defaults to false so existing desktop
    * consumers that don't pass this prop keep the close button and no gesture binding. */
@@ -547,6 +557,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   syncedCalendars: () => ['Rivera Family', 'Personal', 'Work'],
+  avatarSrc: null,
   sheetMode: false
 })
 
@@ -570,6 +581,9 @@ const emit = defineEmits<{
   removeCalendar: [id: string]
   reorderCalendars: [orderedIds: string[]]
   toggleCalendarVisibility: [id: string]
+  /** Fired when the detail pane opens for an existing calendar, so the feature layer can fetch its
+   * member roster. Not fired for the "add calendar" flow (draftEditId is null — nothing to fetch). */
+  openCalendarDetail: [id: string]
   'update:notifEvents': [value: boolean]
   'update:notifAgenda': [value: boolean]
   'update:notifAssistant': [value: boolean]
@@ -639,6 +653,11 @@ function calIconColor(color: string): string {
 // Calendar detail pane — draft state for both "add" (draftEditId === null) and "edit" (existing
 // id) flows; nothing touches the store until Save so Cancel is a true no-op (§_calSettingsPane).
 const draftEditId = ref<string | null>(null)
+
+// The calendar currently open in the detail pane, looked up for its role — the delete button is
+// owner-only (member calendars can't be deleted from here), mirroring calendars-store.removeCalendar's
+// own role check.
+const draftCalendar = computed(() => props.calendars.find((c) => c.id === draftEditId.value) ?? null)
 const draftName = ref('')
 const draftColor = ref('#7BA05B')
 const draftIcon = ref<string | null>(null)
@@ -647,15 +666,6 @@ const coverInput = ref<HTMLInputElement | null>(null)
 const brokenCalendarCoverIds = ref(new Set<string>())
 const SUPPORTED_COVER_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
 const SUPPORTED_COVER_IMAGE_EXTENSIONS = /\.(png|jpe?g|webp|gif)$/i
-
-// Mock roster for the static Members shell — no backend, mirrors the design's fixed 4-person
-// list. Always shows the signed-in user first as Creator; other members are placeholder data.
-const draftMembers = computed(() => [
-  { id: 'you', name: accountName.value, initial: accountName.value.slice(0, 1).toUpperCase(), color: 'var(--cd-olive)', isCreator: true },
-  { id: 'chita', name: 'Chita', initial: 'C', color: '#C56A5E', isCreator: false },
-  { id: 'da', name: 'Da', initial: 'D', color: '#6E839B', isCreator: false },
-  { id: 'yann', name: 'Yann', initial: 'Y', color: '#E3A75C', isCreator: false }
-])
 
 // Invite sheet — static-shell share link (no backend), same "no network activity" treatment as
 // the Google Calendar connect flow. Slug derives from the draft name so the link looks calendar-
@@ -692,6 +702,9 @@ function openCalendarDetail(cal: Calendar | null): void {
   draftColor.value = cal?.color ?? '#7BA05B'
   draftIcon.value = cal?.icon ?? null
   draftCover.value = cal?.cover ?? null
+  // Only an existing calendar has members to fetch — the "add calendar" flow (cal === null) has no
+  // id yet, so props.members stays whatever it currently is (the feature layer clears it on close).
+  if (cal) emit('openCalendarDetail', cal.id)
   emit('navigate', 'calendarDetail')
 }
 

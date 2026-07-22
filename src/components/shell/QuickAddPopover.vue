@@ -78,6 +78,7 @@ import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore, mkTask } from '@/stores/tasks-store'
+import { useCalendarsStore } from '@/stores/calendars-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { parseISO } from '@/utils/convert-date-time'
@@ -90,6 +91,7 @@ import type { RepeatMode } from '@/types/task'
 // quick-add card.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
+const calendarsStore = useCalendarsStore()
 const settings = useSettingsStore()
 const { isDesktop } = useBreakpoint()
 
@@ -145,10 +147,14 @@ function cycleRepeat(): void {
 }
 
 function onAdd(): void {
-  if (!ui.qaPop || !title.value.trim()) return
+  // Defensive second layer: the popover itself only opens from views already behind the
+  // isLoading gate, but a save button race (e.g. isLoading flips true again mid-edit) is cheap
+  // to guard here too.
+  if (!ui.qaPop || !title.value.trim() || tasksStore.isLoading) return
   const { date, time, endTime } = ui.qaPop
   const task = mkTask({
     date,
+    calendarId: calendarsStore.defaultCalendarId!,
     title: title.value.trim(),
     type: type.value === 'event' ? 'event' : 'quadrant',
     allDay: type.value === 'event' ? allDay.value : false,

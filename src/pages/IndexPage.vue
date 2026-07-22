@@ -12,7 +12,10 @@
         <WeekView v-else-if="ui.activeView === 'week'" />
         <MonthView v-else-if="ui.activeView === 'month'" />
       </template>
-      <QuickAddPopover v-if="ui.qaPop" />
+      <!-- Defensive gate: ui.qaPop is only ever set by Month/Day/Week click handlers, which already
+           live inside the v-else block above — this guard covers the case where isLoading flips
+           back to true (a retried load) while qaPop is still set from before. -->
+      <QuickAddPopover v-if="ui.qaPop && !tasksStore.isLoading" />
       <EventPreviewPopover v-if="ui.eventPreview" />
     </div>
 
@@ -25,10 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
-import { useAuthStore } from '@/stores/auth-store'
 import AppShellChrome from '@/components/shell/AppShellChrome.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopover from '@/components/shell/EventPreviewPopover.vue'
@@ -43,16 +44,6 @@ import FocusSession from '@/components/focus/FocusSession.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
-const auth = useAuthStore()
-
-watch(
-  () => auth.isSignedIn,
-  (isSignedIn) => {
-    if (!isSignedIn) return
-    tasksStore.isLoading = false
-  },
-  { immediate: true }
-)
 </script>
 
 <style scoped lang="sass">

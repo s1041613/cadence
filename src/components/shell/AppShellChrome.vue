@@ -3,23 +3,26 @@
     <div class="app-shell-chrome__desktop">
       <CdTopbar
         :active-view="activeViewLabel"
+        :avatar-src="auth.avatarUrl"
         @update:active-view="onActiveViewLabel"
         @open-settings="ui.settingsOpen = true"
         @open-journal="ui.draftDrawer = true"
         @open-assistant="ui.assistantOpen = true"
-        @create-task="ui.createOpen = true"
+        @create-task="onCreateTask"
       />
     </div>
 
     <div class="app-shell-chrome__phone">
       <CdBottomNav
         :active-view="ui.activeView"
+        :avatar-src="auth.avatarUrl"
+        :avatar-name="auth.displayName"
         @update:active-view="onPhoneActiveView"
         @open-assistant="openPhoneAssistant"
         @open-journal="openPhoneJournal"
         @open-settings="openPhoneSettings"
       />
-      <CdFab @click="ui.createOpen = true" />
+      <CdFab @click="onCreateTask" />
     </div>
   </div>
 </template>
@@ -46,11 +49,15 @@
 // design.md's "a view is either fully old or fully new."
 import { computed } from 'vue'
 import { useUiStore, type ActiveView } from '@/stores/ui-store'
+import { useAuthStore } from '@/stores/auth-store'
+import { useTasksStore } from '@/stores/tasks-store'
 import CdTopbar from '@/components/ui/CdTopbar.vue'
 import CdBottomNav from '@/components/ui/CdBottomNav.vue'
 import CdFab from '@/components/ui/CdFab.vue'
 
 const ui = useUiStore()
+const auth = useAuthStore()
+const tasksStore = useTasksStore()
 
 // CdTopbar's CdViewSwitcher speaks Title-Case labels ('Day'/'Week'/'Month'); the store speaks
 // lowercase ActiveView. This mapping is local to the composition layer per the pure-ui-layer
@@ -63,6 +70,15 @@ const activeViewLabel = computed(() => VIEW_LABELS[ui.activeView])
 function onActiveViewLabel(label: string): void {
   const view = LABEL_VIEWS[label]
   if (view) ui.activeView = view
+}
+
+// Gates the topbar Create pill / mobile FAB — the two entry points AppShellChrome owns — against
+// the load-window race documented in the events-supabase-sync plan: a task created before
+// loadFromRemote resolves would either be silently dropped (syncCtx not yet set) or wiped out by
+// the incoming full-replace fetch result.
+function onCreateTask(): void {
+  if (tasksStore.isLoading) return
+  ui.createOpen = true
 }
 
 function closePhoneFullscreenPanels(): void {

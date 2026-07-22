@@ -23,6 +23,7 @@ import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdDraftDrawer, { type DraftItem } from '@/components/ui/CdDraftDrawer.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useInboxStore } from '@/stores/inbox-store'
+import { useTasksStore } from '@/stores/tasks-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { groupByRecency } from '@/utils/group-by-recency'
@@ -36,6 +37,7 @@ import { parseISO } from '@/utils/convert-date-time'
 // matching the handoff's eventPreview/edit/fromDraft path.
 const ui = useUiStore()
 const inbox = useInboxStore()
+const tasksStore = useTasksStore()
 const { isDesktop } = useBreakpoint()
 const now = useCurrentTime()
 
@@ -70,7 +72,10 @@ function whenLabelFor(date: string): string {
   return date === ui.selectedDate ? 'Today' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(parseISO(date))
 }
 
+// Fourth creation entry point (topbar Create, mobile FAB, QuickAddPopover are the other three):
+// scheduling a draft opens the same EventComposerOverlay, so it needs the same load-window gate.
 function openSchedule(id: string): void {
+  if (tasksStore.isLoading) return
   const item = inbox.promoteItem(id)
   if (!item) return
   ui.draftConv = id
