@@ -18,11 +18,13 @@ function timeoutSignal(): AbortSignal {
   return AbortSignal.timeout(REQUEST_TIMEOUT_MS)
 }
 
-export async function fetchTasks(ctx: MapContext): Promise<Task[]> {
+// Explicit id filter (not RLS-implied scope): the caller supplies every calendar the user is a
+// member of, so shared calendars' events load alongside the user's own.
+export async function fetchTasks(ctx: MapContext, memberCalendarIds: string[]): Promise<Task[]> {
   const { data, error } = await requireSupabase()
     .from('events')
     .select('*, event_reminders(minutes_before)')
-    .eq('calendar_id', ctx.remoteDefaultCalendarId)
+    .in('calendar_id', memberCalendarIds)
     .abortSignal(timeoutSignal())
   if (error) throw error
 

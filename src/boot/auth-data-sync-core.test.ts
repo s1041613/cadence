@@ -24,10 +24,14 @@ function flush(): Promise<void> {
 describe('onAuthUserChange', () => {
   type StoreMock = { loadFromRemote: Mock<(userId: string, defaultId: string) => Promise<void>>; resetLocal: Mock<() => void> }
   let ensureDefaultCalendar: Mock<(userId: string) => Promise<string>>
-  let tasksStore: StoreMock
+  let tasksStore: {
+    loadFromRemote: Mock<(userId: string, defaultId: string, memberCalendarIds: string[]) => Promise<void>>
+    resetLocal: Mock<() => void>
+  }
   let calendarsStore: StoreMock
   let inboxStore: StoreMock
   let getCurrentUserId: Mock<() => string | null>
+  let getMemberCalendarIds: Mock<() => string[]>
 
   beforeEach(() => {
     ensureDefaultCalendar = vi.fn()
@@ -35,22 +39,39 @@ describe('onAuthUserChange', () => {
     calendarsStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     inboxStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     getCurrentUserId = vi.fn()
+    getMemberCalendarIds = vi.fn().mockReturnValue(['cal-uuid-1'])
   })
 
-  it('ensures the default calendar once, then loads both stores with the same id', async () => {
+  it('ensures the default calendar once, then loads calendars and feeds their ids to the events load', async () => {
     ensureDefaultCalendar.mockResolvedValue('cal-uuid-1')
     getCurrentUserId.mockReturnValue('user-1')
+    getMemberCalendarIds.mockReturnValue(['cal-uuid-1', 'cal-uuid-2'])
 
-    await onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId })
+    await onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
 
     expect(ensureDefaultCalendar).toHaveBeenCalledWith('user-1')
-    expect(tasksStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1')
     expect(calendarsStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1')
+    expect(tasksStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1', ['cal-uuid-1', 'cal-uuid-2'])
     expect(inboxStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1')
   })
 
+  it('loads calendars to completion before starting the events load', async () => {
+    ensureDefaultCalendar.mockResolvedValue('cal-uuid-1')
+    getCurrentUserId.mockReturnValue('user-1')
+    const calendarsPending = deferred<void>()
+    calendarsStore.loadFromRemote.mockReturnValue(calendarsPending.promise)
+
+    const run = onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
+    await flush()
+    expect(tasksStore.loadFromRemote).not.toHaveBeenCalled()
+
+    calendarsPending.resolve()
+    await run
+    expect(tasksStore.loadFromRemote).toHaveBeenCalledTimes(1)
+  })
+
   it('resets all stores when the user signs out', async () => {
-    await onAuthUserChange(null, { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId })
+    await onAuthUserChange(null, { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
 
     expect(tasksStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(calendarsStore.resetLocal).toHaveBeenCalledTimes(1)
@@ -64,7 +85,7 @@ describe('onAuthUserChange', () => {
     // By the time ensureDefaultCalendar resolves, auth has moved on to a different user.
     getCurrentUserId.mockReturnValue('user-2')
 
-    const run = onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId })
+    const run = onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
     pending.resolve('cal-uuid-1')
     await run
 
@@ -78,7 +99,7 @@ describe('onAuthUserChange', () => {
     ensureDefaultCalendar.mockReturnValue(pending.promise)
     getCurrentUserId.mockReturnValue(null)
 
-    const run = onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId })
+    const run = onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
     pending.resolve('cal-uuid-1')
     await run
 
@@ -91,7 +112,7 @@ describe('onAuthUserChange', () => {
     ensureDefaultCalendar.mockRejectedValue(new Error('offline'))
     getCurrentUserId.mockReturnValue('user-1')
 
-    await onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId })
+    await onAuthUserChange('user-1', { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds })
     await flush()
 
     expect(tasksStore.loadFromRemote).not.toHaveBeenCalled()

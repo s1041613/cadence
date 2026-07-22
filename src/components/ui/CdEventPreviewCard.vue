@@ -71,7 +71,9 @@
       </div>
     </div>
 
-    <div v-if="isTask" class="cd-preview-card__focus-wrap">
+    <!-- Focus sessions write completed_pomodoros back to the event row, which RLS only allows for
+         the author — hidden alongside the other write actions on foreign events. -->
+    <div v-if="isTask && mine" class="cd-preview-card__focus-wrap">
       <button type="button" class="cd-preview-card__focus-start" @click="emit('startFocus')">
         <CdIcon name="tomato" :size="19" />
         Start focus session
