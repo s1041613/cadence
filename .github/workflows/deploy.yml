@@ -26,6 +26,9 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run build
+        env:
+          QCLI_SUPABASE_URL: ${{ secrets.QCLI_SUPABASE_URL }}
+          QCLI_SUPABASE_ANON_KEY: ${{ secrets.QCLI_SUPABASE_ANON_KEY }}
 
   build:
     needs: test
@@ -39,6 +42,8 @@ jobs:
       - run: npm run build
         env:
           GITHUB_PAGES: 'true'
+          QCLI_SUPABASE_URL: ${{ secrets.QCLI_SUPABASE_URL }}
+          QCLI_SUPABASE_ANON_KEY: ${{ secrets.QCLI_SUPABASE_ANON_KEY }}
       - run: cp dist/spa/index.html dist/spa/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
