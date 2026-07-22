@@ -99,6 +99,20 @@
     </button>
 
     <div v-if="moreOpen" class="cd-edit-card__more-body">
+      <!-- Calendar target — rendered only when the caller passes multiple member calendars
+           (single-calendar users see no picker noise). -->
+      <div v-if="calendarOptions && calendarOptions.length > 1" class="cd-edit-card__field-row">
+        <span class="cd-edit-card__field-icon">
+          <CdIcon name="calendar" :size="18" color="#9C9E94" />
+        </span>
+        <select
+          class="cd-edit-card__calendar-select"
+          :value="calendarId ?? ''"
+          @change="emit('update:calendarId', ($event.target as HTMLSelectElement).value)"
+        >
+          <option v-for="option in calendarOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
+        </select>
+      </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
           <CdIcon name="bell" :size="18" color="#9C9E94" />
@@ -218,8 +232,11 @@ const props = withDefaults(
     notes: string
     estimatedPomodoros?: number
     timeFormat?: TimeFormatName
+    /** Member calendars the entry can be created in; the picker renders only for 2+ options. */
+    calendarOptions?: Array<{ id: string; name: string }>
+    calendarId?: string | null
   }>(),
-  { color: '#E3A75C', icon: null, timeFormat: '24-Hour' }
+  { color: '#E3A75C', icon: null, timeFormat: '24-Hour', calendarId: null }
 )
 
 const emit = defineEmits<{
@@ -240,6 +257,7 @@ const emit = defineEmits<{
   'update:notes': [value: string]
   cycleRepeat: []
   openAlertMenu: []
+  'update:calendarId': [value: string]
 }>()
 
 const moreOpen = ref(false)
@@ -585,6 +603,17 @@ const matrixOptions = [
   cursor: pointer;
   font: 600 13px var(--cd-font-title);
   color: var(--cd-ink);
+}
+
+.cd-edit-card__calendar-select {
+  border: 1px solid var(--cd-line);
+  background: #fff;
+  border-radius: 9px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font: 600 13px var(--cd-font-title);
+  color: var(--cd-ink);
+  max-width: 100%;
 }
 
 .cd-edit-card__pill-btn:hover {

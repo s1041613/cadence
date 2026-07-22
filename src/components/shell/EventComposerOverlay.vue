@@ -18,6 +18,9 @@
         :notes="draft.notes"
         :estimated-pomodoros="estimatedPomodoros"
         :time-format="settings.timeFormat"
+        :calendar-options="calendarOptions"
+        :calendar-id="draft.calendarId"
+        @update:calendar-id="(v) => (draft!.calendarId = v)"
         @back="close"
         @close="close"
         @cancel="close"
@@ -63,6 +66,9 @@
       :notes="draft.notes"
       :estimated-pomodoros="estimatedPomodoros"
       :time-format="settings.timeFormat"
+      :calendar-options="calendarOptions"
+      :calendar-id="draft.calendarId"
+      @update:calendar-id="(v) => (draft!.calendarId = v)"
       @back="close"
       @close="close"
       @cancel="close"
@@ -129,6 +135,12 @@ const isEditing = ref(false)
 // mirroring EventPreviewPopover's edit-state pattern.
 const editType = computed<'event' | 'task'>(() => (draft.value?.type === 'event' ? 'event' : 'task'))
 const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'later'))
+
+// All member calendars (own and shared) as picker options, in display order. The picker only
+// renders for 2+ options; the draft defaults to the user's default calendar.
+const calendarOptions = computed(() =>
+  [...calendarsStore.calendars].sort((a, b) => a.order - b.order).map((c) => ({ id: c.id, name: c.name }))
+)
 
 watch(
   () => ui.eventComposerInitialValues,

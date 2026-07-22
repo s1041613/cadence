@@ -106,21 +106,23 @@ export const useTasksStore = defineStore('tasks', () => {
 
   // defaultCalendarId is resolved once in boot/auth-data-sync.ts (ensureDefaultCalendar) and passed in here
   // so both tasks-store and calendars-store load against the same uuid without either re-deriving it.
-  async function loadFromRemote(userId: string, defaultCalendarId: string): Promise<void> {
+  // memberCalendarIds scopes the fetch to every calendar the user belongs to (shared calendars
+  // included) — resolved from the calendars store, which loads first.
+  async function loadFromRemote(userId: string, defaultCalendarId: string, memberCalendarIds: string[]): Promise<void> {
     sessionVersion += 1
     const version = sessionVersion
     isLoading.value = true
     try {
       const ctx: MapContext = { ownerId: userId, remoteDefaultCalendarId: defaultCalendarId }
       syncCtx = ctx
-      const remote = await eventsService.fetchTasks(ctx)
+      const remote = await eventsService.fetchTasks(ctx, memberCalendarIds)
       if (version !== sessionVersion) return
       tasks.value = remote
       syncStatusByTaskId.value = {}
     } catch {
       if (version !== sessionVersion) return
       notifySyncError('載入失敗', () => {
-        void loadFromRemote(userId, defaultCalendarId)
+        void loadFromRemote(userId, defaultCalendarId, memberCalendarIds)
       })
     } finally {
       if (version === sessionVersion) isLoading.value = false

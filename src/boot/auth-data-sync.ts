@@ -27,7 +27,8 @@ export default defineBoot(({ store }) => {
         tasksStore,
         calendarsStore,
         inboxStore,
-        getCurrentUserId: () => auth.user?.id ?? null
+        getCurrentUserId: () => auth.user?.id ?? null,
+        getMemberCalendarIds: () => calendarsStore.calendars.map((c) => c.id)
       })
     },
     { immediate: true }

@@ -26,6 +26,21 @@ function roundTrip(task: Task): Task {
 const CAL_ID = ctx.remoteDefaultCalendarId
 
 describe('events-mapper', () => {
+  describe('ownerId mapping', () => {
+    it('surfaces the row owner_id as Task.ownerId so the UI can gate edits on authorship', () => {
+      const row = taskToRow(mkTask({ date: '2026-07-10', calendarId: CAL_ID }), ctx)
+      const foreignRow: EventRow = { ...row, owner_id: '99999999-9999-9999-9999-999999999999' }
+
+      expect(rowToTask(foreignRow, ctx).ownerId).toBe('99999999-9999-9999-9999-999999999999')
+    })
+
+    it('writes the current user as owner_id regardless of the local ownerId field', () => {
+      const task = { ...mkTask({ date: '2026-07-10', calendarId: CAL_ID }), ownerId: 'someone-else' }
+
+      expect(taskToRow(task, ctx).owner_id).toBe(ctx.ownerId)
+    })
+  })
+
   describe('round-trip', () => {
     it('round-trips a timed quadrant task unchanged', () => {
       const task = mkTask({
@@ -45,7 +60,7 @@ describe('events-mapper', () => {
         reminder: null
       })
 
-      expect(roundTrip(task)).toEqual(task)
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
     })
 
     it('round-trips a timed event unchanged, keeping color and icon', () => {
@@ -63,7 +78,7 @@ describe('events-mapper', () => {
         repeat: 'none'
       })
 
-      expect(roundTrip(task)).toEqual(task)
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
     })
 
     it('round-trips an all-day event unchanged', () => {
@@ -77,7 +92,7 @@ describe('events-mapper', () => {
         icon: 'flag'
       })
 
-      expect(roundTrip(task)).toEqual(task)
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
     })
   })
 
@@ -258,7 +273,7 @@ describe('events-mapper', () => {
       const task = mkTask({ date: '2026-07-10', calendarId: CAL_ID, start: '09:00', end: '10:00', reminder: '15-min' })
       const row = { ...taskToRow(task, ctx), event_reminders: [{ minutes_before: 15 }] }
 
-      expect(rowToTask(row, ctx)).toEqual(task)
+      expect(rowToTask(row, ctx)).toEqual({ ...task, ownerId: ctx.ownerId })
     })
   })
 })

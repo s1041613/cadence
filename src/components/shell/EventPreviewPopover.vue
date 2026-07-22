@@ -54,6 +54,7 @@
       :quad-label="quadLabel"
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
+      :mine="isOwnTask"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
@@ -116,6 +117,7 @@
       :quad-label="quadLabel"
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
+      :mine="isOwnTask"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
@@ -134,6 +136,7 @@ import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
 import CdCopyToDaysCard, { type CopyToDaysCell } from '@/components/ui/CdCopyToDaysCard.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
@@ -155,12 +158,21 @@ const REPEAT_CYCLE: RepeatMode[] = ['none', 'daily', 'weekly', 'monthly']
 // copies through tasks-store. Mounted once in IndexPage.vue, matching QuickAddPopover's precedent.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
+const auth = useAuthStore()
 const settings = useSettingsStore()
 const { isDesktop } = useBreakpoint()
 
 const task = computed<Task | null>(() => {
   const id = ui.eventPreview?.taskId
   return id ? (tasksStore.tasks.find((t) => t.id === id) ?? null) : null
+})
+
+// Authorship gate: events fetched from shared calendars carry ownerId; a missing ownerId means a
+// locally created task (always the current user's). Foreign events render read-only — RLS would
+// reject the write anyway, so no write affordance is offered.
+const isOwnTask = computed(() => {
+  const ownerId = task.value?.ownerId
+  return ownerId === undefined || ownerId === auth.user?.id
 })
 
 // theme/quadLabel/whenLabel are only read by the template when `task` is non-null (guarded by
@@ -248,12 +260,14 @@ function close(): void {
 // task 7.5 "restyled start button that sets focusTaskId" — FocusSession.vue itself is untouched
 // (design.md Non-Goals), this only supplies the trigger the preview surface was missing.
 function startFocus(): void {
-  if (!task.value) return
+  if (!task.value || !isOwnTask.value) return
   ui.focusTaskId = task.value.id
   close()
 }
 
 function openEditMode(): void {
+  // Defense in depth behind the hidden buttons: a foreign event never enters edit mode.
+  if (!isOwnTask.value) return
   if (ui.eventPreview) ui.eventPreview.mode = 'edit'
 }
 
@@ -262,7 +276,7 @@ function backToPreview(): void {
 }
 
 function deleteTask(): void {
-  if (!task.value) return
+  if (!task.value || !isOwnTask.value) return
   tasksStore.deleteTask(task.value.id)
   close()
 }

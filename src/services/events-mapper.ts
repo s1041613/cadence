@@ -159,6 +159,7 @@ export function rowToTask(row: EventRow & { event_reminders?: ReminderRow[] }, _
     // loaded, so there is nothing left to translate here (taskToRow is the only sentinel-consuming
     // boundary now).
     calendarId: row.calendar_id,
-    reminder: reminderRow ? minutesToReminder(reminderRow.minutes_before) : null
+    reminder: reminderRow ? minutesToReminder(reminderRow.minutes_before) : null,
+    ownerId: row.owner_id
   }
 }
