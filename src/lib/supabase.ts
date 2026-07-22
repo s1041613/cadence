@@ -23,6 +23,15 @@ function createSupabaseClient(): SupabaseClient | null {
 
 export const supabase = createSupabaseClient()
 
+// Service-layer entry guard. The auth guard makes the null path unreachable in
+// practice (data pages require a signed-in session, which requires a client).
+export function requireSupabase(): SupabaseClient {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Set QCLI_SUPABASE_URL and QCLI_SUPABASE_ANON_KEY.')
+  }
+  return supabase
+}
+
 export function authCallbackUrl(): string {
   const base = import.meta.env.QUASAR_VUE_ROUTER_BASE || '/'
   const baseUrl = new URL(base, window.location.origin)
