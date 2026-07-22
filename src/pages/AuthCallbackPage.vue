@@ -15,6 +15,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth-store'
+import { consumePostLoginRedirect } from '@/lib/post-login-redirect'
 
 // The Supabase client is configured with detectSessionInUrl:true, so it exchanges
 // the OAuth code for a session automatically on load. This page must NOT exchange
@@ -60,7 +61,9 @@ const stop = watch(
   ([isSignedIn, isReady]) => {
     if (error.value) return
     if (isSignedIn) {
-      void router.replace('/')
+      // A pending /join destination (saved before the login round-trip) wins over the root view;
+      // consume validates the /join/ prefix so nothing else can hijack this navigation.
+      void router.replace(consumePostLoginRedirect() ?? '/')
     } else if (isReady) {
       error.value = "Sign-in didn't complete. Please try again."
     }
