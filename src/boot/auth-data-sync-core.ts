@@ -11,6 +11,10 @@ export interface OnAuthUserChangeDeps {
   ensureDefaultCalendar: (userId: string) => Promise<string>
   tasksStore: DataStoreLike
   calendarsStore: DataStoreLike
+  // Inbox has no calendar concept, but it shares the same load/reset lifecycle. It's loaded in the
+  // same Promise.all, so a failed ensureDefaultCalendar also leaves inbox un-loaded — acceptable
+  // since that failure makes the whole app unusable anyway.
+  inboxStore: DataStoreLike
   // Reads the *current* signed-in user id at the moment it's called (not the userId this change
   // event started with) — used only for the stale-session check below.
   getCurrentUserId: () => string | null
@@ -25,11 +29,12 @@ export interface OnAuthUserChangeDeps {
 // loading stores with another user's (or no user's) data. A failed ensureDefaultCalendar (thrown)
 // also leaves both stores un-loaded rather than partially loaded.
 export async function onAuthUserChange(userId: string | null, deps: OnAuthUserChangeDeps): Promise<void> {
-  const { ensureDefaultCalendar, tasksStore, calendarsStore, getCurrentUserId } = deps
+  const { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId } = deps
 
   if (userId === null) {
     tasksStore.resetLocal()
     calendarsStore.resetLocal()
+    inboxStore.resetLocal()
     return
   }
 
@@ -42,5 +47,9 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
 
   if (getCurrentUserId() !== userId) return
 
-  await Promise.all([tasksStore.loadFromRemote(userId, defaultId), calendarsStore.loadFromRemote(userId, defaultId)])
+  await Promise.all([
+    tasksStore.loadFromRemote(userId, defaultId),
+    calendarsStore.loadFromRemote(userId, defaultId),
+    inboxStore.loadFromRemote(userId, defaultId)
+  ])
 }
