@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { Task } from '@/types/task'
 import type { MapContext } from './events-mapper'
-import { insertTasks, upsertTask } from './events-service'
+import { fetchTasks, insertTasks, upsertTask } from './events-service'
 
 const requireSupabaseMock = vi.fn()
 
@@ -41,6 +41,32 @@ const task: Task = {
 describe('events-service', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+  })
+
+  it('fetches events across all member calendars with an explicit id filter', async () => {
+    const calls: Array<[string, unknown]> = []
+    const builder = {
+      select: vi.fn((columns: string) => {
+        calls.push(['select', columns])
+        return builder
+      }),
+      in: vi.fn((column: string, values: unknown) => {
+        calls.push(['in', [column, values]])
+        return builder
+      }),
+      abortSignal: vi.fn(async () => ({ data: [], error: null }))
+    }
+    const supabase = { from: vi.fn(() => builder) }
+    requireSupabaseMock.mockReturnValue(supabase)
+
+    const memberCalendarIds = [OWN_CALENDAR_UUID, '55555555-5555-5555-5555-555555555555']
+    await expect(fetchTasks(ctx, memberCalendarIds)).resolves.toEqual([])
+
+    expect(supabase.from).toHaveBeenCalledWith('events')
+    expect(calls).toEqual([
+      ['select', expect.stringContaining('event_reminders')],
+      ['in', ['calendar_id', memberCalendarIds]]
+    ])
   })
 
   it('resets fired_at when upserting a reminder so changed future reminders can fire again', async () => {

@@ -48,7 +48,7 @@ function flush(): Promise<void> {
 // made by the initial load, so tests only observe their own service traffic.
 async function signedInStore() {
   const store = useTasksStore()
-  await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID)
+  await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID, [DEFAULT_CALENDAR_UUID])
   fetchTasksMock.mockClear()
   return store
 }
@@ -427,7 +427,7 @@ describe('tasks-store', () => {
 
       const store = useTasksStore()
       expect(store.isLoading).toBe(true)
-      await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID)
+      await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID, [DEFAULT_CALENDAR_UUID])
 
       expect(fetchTasksMock).toHaveBeenCalledTimes(1)
       expect(store.tasks).toEqual(serverTasks)
@@ -438,7 +438,7 @@ describe('tasks-store', () => {
       fetchTasksMock.mockRejectedValueOnce(new Error('offline'))
 
       const store = useTasksStore()
-      await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID)
+      await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID, [DEFAULT_CALENDAR_UUID])
 
       expect(notifySyncErrorMock).toHaveBeenCalledTimes(1)
       expect(notifySyncErrorMock.mock.calls[0]![0]).toBe('載入失敗')
@@ -456,7 +456,7 @@ describe('tasks-store', () => {
       fetchTasksMock.mockReturnValueOnce(pendingFetch.promise)
 
       const store = useTasksStore()
-      const load = store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID)
+      const load = store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID, [DEFAULT_CALENDAR_UUID])
       await flush()
 
       store.resetLocal()

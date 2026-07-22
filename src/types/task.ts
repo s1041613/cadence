@@ -22,4 +22,8 @@ export interface Task {
   icon: string | null
   calendarId: string
   reminder: ReminderPreset | null
+  /** Event author (events.owner_id). Absent on locally created tasks — the creator is always the
+   * current user, so absence means "own task". Foreign ownerId gates the UI to read-only (RLS
+   * only lets the author write the row). */
+  ownerId?: string
 }
