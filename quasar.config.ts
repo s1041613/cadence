@@ -37,7 +37,8 @@ export default defineConfig((/* ctx */) => {
     // 載入第三方套件
     // 在 app 掛載前載入, 可以用於載入第三方套件或是一些進入畫面前的檢查 e.g. App 啟動時檢查登入狀態，沒登入就導去登入頁
     boot: [
-      'auth'
+      'auth',
+      'auth-data-sync'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -116,7 +117,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: ['Notify']
     },
 
     // animations: 'all', // --- includes all animations
