@@ -55,6 +55,9 @@ const groups = computed(() => {
 })
 
 function onSubmitComposer(): void {
+  // Load-window gate: before loadFromRemote completes, addItem is rejected (syncCtx is null).
+  // Without this, submitting would clear the draft text without ever persisting it — silent loss.
+  if (inbox.isLoading) return
   const text = inbox.inboxDraft.trim()
   if (!text) return
   inbox.addItem(text)

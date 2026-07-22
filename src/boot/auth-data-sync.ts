@@ -3,6 +3,7 @@ import { watch } from 'vue'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
+import { useInboxStore } from '@/stores/inbox-store'
 import { ensureDefaultCalendar } from '@/services/calendars-service'
 import { onAuthUserChange } from './auth-data-sync-core'
 
@@ -16,6 +17,7 @@ export default defineBoot(({ store }) => {
   const auth = useAuthStore(store)
   const tasksStore = useTasksStore(store)
   const calendarsStore = useCalendarsStore(store)
+  const inboxStore = useInboxStore(store)
 
   watch(
     () => auth.user?.id ?? null,
@@ -24,6 +26,7 @@ export default defineBoot(({ store }) => {
         ensureDefaultCalendar,
         tasksStore,
         calendarsStore,
+        inboxStore,
         getCurrentUserId: () => auth.user?.id ?? null
       })
     },
