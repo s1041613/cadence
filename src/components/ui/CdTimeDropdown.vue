@@ -1,11 +1,20 @@
 <template>
   <div ref="rootEl" class="cd-time-dropdown">
-    <button type="button" class="cd-time-dropdown__trigger" :class="{ 'cd-time-dropdown__trigger--open': open }" @click="toggle">
-      <span>{{ label(modelValue) }}</span>
-      <span class="cd-time-dropdown__chevron" :class="{ 'cd-time-dropdown__chevron--open': open }">
-        <CdIcon name="chevron-down" :size="12" />
-      </span>
-    </button>
+    <div class="cd-time-dropdown__field" :class="{ 'cd-time-dropdown__field--open': open }">
+      <input
+        ref="inputEl"
+        class="cd-time-dropdown__input"
+        :value="draftText"
+        aria-label="Time"
+        :aria-expanded="open"
+        @focus="openMenu"
+        @click="openMenu"
+        @input="onInput"
+        @keydown.enter="onEnter"
+        @keydown.esc="onEscape"
+        @blur="onBlur"
+      />
+    </div>
     <Teleport to="body">
       <div v-if="open" ref="menuEl" class="cd-time-dropdown__menu" :style="menuStyle">
         <button
@@ -26,12 +35,12 @@
 
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import CdIcon from './CdIcon.vue'
-import { formatTime, type TimeFormatName } from '@/utils/convert-date-time'
+import { formatTime, isTimeValue, type TimeFormatName } from '@/utils/convert-date-time'
 
-// CdTimeDropdown — 15-minute-increment time picker dropdown. CADENCE Handoff §5.2:
+// CdTimeDropdown — 30-minute-increment time picker dropdown, with an editable input for typing
+// an arbitrary HH:MM directly. CADENCE Handoff §5.2:
 // trigger 86px wide, menu 104px wide, opens upward (anchored above the trigger), max-height 208px
-// scrollable, 96 entries (full 24h at 15-minute steps), selected row background
+// scrollable, 48 entries (full 24h at 30-minute steps), selected row background
 // rgba(179,172,145,.16) + font-weight 800; opening auto-scrolls so the selected item is centered
 // (`scrollTop = offsetTop - 84`). Label format follows the `format` prop (user-settings spec "Time
 // format applies to displayed times") — the underlying `modelValue`/slot values stay `HH:MM`
@@ -53,7 +62,7 @@ const emit = defineEmits<{
 }>()
 
 const slots: string[] = []
-for (let m = 0; m < 24 * 60; m += 15) {
+for (let m = 0; m < 24 * 60; m += 30) {
   const h = Math.floor(m / 60)
   const mm = m % 60
   slots.push(`${String(h).padStart(2, '0')}:${String(mm).padStart(2, '0')}`)
@@ -63,8 +72,52 @@ function label(t: string): string {
   return formatTime(t, props.format)
 }
 
+// draftText holds the input's live text, kept separate from modelValue so every keystroke
+// doesn't emit — only a valid blur/Enter commits. The watcher below re-syncs draftText whenever
+// modelValue changes from outside (parent writes, menu selection), so the input never goes stale.
+// lastValid tracks the same committed value so an invalid blur reverts to the current model, not a
+// stale earlier one (e.g. after a menu pick moved modelValue on).
+const draftText = ref(props.modelValue)
+const lastValid = ref(props.modelValue)
+
+watch(
+  () => props.modelValue,
+  (v) => {
+    draftText.value = v
+    lastValid.value = v
+  },
+  { immediate: true }
+)
+
+function onInput(e: Event): void {
+  draftText.value = (e.target as HTMLInputElement).value
+}
+
+function onEnter(e: Event): void {
+  ;(e.target as HTMLInputElement).blur()
+}
+
+function onBlur(): void {
+  if (isTimeValue(draftText.value)) {
+    lastValid.value = draftText.value
+    emit('update:modelValue', draftText.value)
+  } else {
+    draftText.value = lastValid.value
+  }
+}
+
+function onEscape(): void {
+  if (open.value) {
+    close()
+    return
+  }
+  draftText.value = lastValid.value
+  ;(inputEl.value as HTMLInputElement | null)?.blur()
+}
+
 const open = ref(false)
 const rootEl = ref<HTMLElement | null>(null)
+const inputEl = ref<HTMLInputElement | null>(null)
 const menuEl = ref<HTMLElement | null>(null)
 const itemRefs = new Map<string, HTMLElement>()
 const menuStyle = ref<{ position: 'fixed'; left: string; bottom: string; width: string }>({
@@ -101,12 +154,13 @@ function close(): void {
   open.value = false
 }
 
-function toggle(): void {
-  open.value = !open.value
-  if (open.value) {
-    updateMenuPosition()
-    nextTick(scrollToSelected)
-  }
+// Chevron removed per Zoe's 2026-07-22 correction — focusing/clicking the input opens the quick-pick
+// list instead. Idempotent (focus and click both fire) so it never toggles the freshly-opened menu shut.
+function openMenu(): void {
+  if (open.value) return
+  open.value = true
+  updateMenuPosition()
+  nextTick(scrollToSelected)
 }
 
 function select(slot: string): void {
@@ -120,16 +174,22 @@ function onOutsideInteraction(e: Event): void {
   close()
 }
 
+function onMenuKeydown(e: KeyboardEvent): void {
+  if (e.key === 'Escape') close()
+}
+
 watch(open, (v) => {
   if (v) {
     nextTick(scrollToSelected)
     window.addEventListener('scroll', updateMenuPosition, true)
     window.addEventListener('resize', updateMenuPosition)
     document.addEventListener('mousedown', onOutsideInteraction)
+    document.addEventListener('keydown', onMenuKeydown)
   } else {
     window.removeEventListener('scroll', updateMenuPosition, true)
     window.removeEventListener('resize', updateMenuPosition)
     document.removeEventListener('mousedown', onOutsideInteraction)
+    document.removeEventListener('keydown', onMenuKeydown)
   }
 })
 
@@ -137,6 +197,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateMenuPosition, true)
   window.removeEventListener('resize', updateMenuPosition)
   document.removeEventListener('mousedown', onOutsideInteraction)
+  document.removeEventListener('keydown', onMenuKeydown)
 })
 </script>
 
@@ -145,34 +206,30 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-.cd-time-dropdown__trigger {
+.cd-time-dropdown__field {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  width: 86px;
+  width: 72px;
   border: 1px solid var(--cd-line-2);
   background: var(--cd-surface);
   border-radius: 10px;
   padding: 8px 10px;
-  font: 700 12.5px var(--cd-font-mono);
-  color: var(--cd-ink);
-  cursor: pointer;
   transition: border-color var(--cd-duration-micro-3);
 }
 
-.cd-time-dropdown__trigger--open {
+.cd-time-dropdown__field--open {
   border-color: var(--cd-olive);
 }
 
-.cd-time-dropdown__chevron {
-  display: flex;
-  color: var(--cd-muted);
-  transition: transform var(--cd-duration-micro-3);
-}
-
-.cd-time-dropdown__chevron--open {
-  transform: rotate(180deg);
+.cd-time-dropdown__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: 700 12.5px var(--cd-font-mono);
+  color: var(--cd-ink);
+  padding: 0;
 }
 
 .cd-time-dropdown__menu {
@@ -206,6 +263,7 @@ onBeforeUnmount(() => {
 
 .cd-time-dropdown__item--selected {
   background: rgba(179, 172, 145, 0.16);
+  color: var(--cd-olive-mix-1);
   font-weight: 800;
 }
 </style>

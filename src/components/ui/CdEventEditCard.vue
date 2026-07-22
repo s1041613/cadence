@@ -74,12 +74,12 @@
         </div>
         <div class="cd-edit-card__time-row">
           <span class="cd-edit-card__time-label">Starts</span>
-          <span class="cd-edit-card__date-pill">{{ dateLabel }}</span>
+          <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
           <CdTimeDropdown v-if="!effectiveAllDay" :model-value="start" :format="timeFormat" @update:model-value="(v) => emit('update:start', v)" />
         </div>
         <div class="cd-edit-card__time-row">
           <span class="cd-edit-card__time-label">Ends</span>
-          <span class="cd-edit-card__date-pill">{{ dateLabel }}</span>
+          <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
           <CdTimeDropdown v-if="!effectiveAllDay" :model-value="end" :format="timeFormat" @update:model-value="(v) => emit('update:end', v)" />
         </div>
         <p v-if="timeInvalid" class="cd-edit-card__time-warning">⚠ End time must be after start time</p>
@@ -171,6 +171,7 @@ import { computed, ref } from 'vue'
 import CdSegmented from './CdSegmented.vue'
 import CdSwitch from './CdSwitch.vue'
 import CdTimeDropdown from './CdTimeDropdown.vue'
+import CdDatePicker from './CdDatePicker.vue'
 import CdRepeatPill from './CdRepeatPill.vue'
 import CdAppearancePicker from './CdAppearancePicker.vue'
 import CdIcon from './CdIcon.vue'
@@ -209,7 +210,7 @@ const props = withDefaults(
     color?: string
     icon?: string | null
     allDay: boolean
-    dateLabel: string
+    date: string
     start: string
     end: string
     alertLabel: string
@@ -234,6 +235,7 @@ const emit = defineEmits<{
   'update:icon': [value: IconName]
   removeIcon: []
   'update:allDay': [value: boolean]
+  'update:date': [value: string]
   'update:start': [value: string]
   'update:end': [value: string]
   'update:location': [value: string]
@@ -487,20 +489,28 @@ const matrixOptions = [
 .cd-edit-card__time-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 8px;
   min-height: 30px;
 }
 
+/* Label sits left; the date pill + time dropdown form a content-width group pushed to the right
+   edge via margin-left:auto on the date picker. The pills hug their text (no stretched dead zone),
+   and because Starts/Ends share the same date + time-slot widths, the group is right-aligned and
+   the two rows line up on the right. */
 .cd-edit-card__time-label {
-  margin-right: auto;
+  flex: none;
+  width: 46px;
   font: 600 12.5px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 
-.cd-edit-card__date-pill {
-  font: 600 12.5px var(--cd-font-ui);
-  color: var(--cd-ink);
+.cd-edit-card__time-row > .cd-date-picker {
+  flex: none;
+  margin-left: auto;
+}
+
+.cd-edit-card__time-row > .cd-time-dropdown {
+  flex: none;
 }
 
 .cd-edit-card__time-warning {
