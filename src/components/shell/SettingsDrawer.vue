@@ -30,11 +30,14 @@
       :default-calendar-id="calendars.defaultCalendarId"
       :visible-calendar-ids="visibleCalendarIds"
       :members="members"
+      :invite-url="inviteUrl"
+      :invite-status="inviteStatus"
       :sheet-mode="!isDesktop"
       @close="close"
       @back="goBack"
       @navigate="onNavigate"
       @open-calendar-detail="onOpenCalendarDetail"
+      @open-invite="onOpenInvite"
       @logout="onLogout"
       @update:gcal-connected="(v) => (gcalConnected = v)"
       @update:first-day="(v) => (settings.firstDay = v as FirstDay)"
@@ -47,8 +50,9 @@
       @set-calendar-icon="(id, icon) => calendars.setCalendarIcon(id, icon)"
       @set-calendar-cover="(id, cover) => calendars.setCalendarCover(id, cover)"
       @remove-calendar="(id) => calendars.removeCalendar(id)"
+      @leave-calendar="(id) => calendars.leaveCalendar(id)"
       @reorder-calendars="(ids) => calendars.reorderCalendars(ids)"
-      @toggle-calendar-visibility="(id) => calendars.toggleVisibility(id)"
+      @toggle-calendar-visibility="(id) => calendars.toggleEnabled(id)"
       @update:notif-events="(v) => (notifEvents = v)"
       @update:notif-agenda="(v) => (notifAgenda = v)"
       @update:notif-assistant="(v) => (notifAssistant = v)"
@@ -71,6 +75,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { notifySyncError } from '@/lib/notify'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { fetchMembers } from '@/services/calendars-service'
+import { getOrCreateInviteToken, joinUrl } from '@/services/invites-service'
 import type { CalendarMember } from '@/types/calendar'
 
 // SettingsDrawer — feature-layer composition for the Settings overlay (design.md "7.1 Build the
@@ -90,9 +95,9 @@ const sortedCalendars = computed(() => [...calendars.calendars].sort((a, b) => a
 const visibleCalendarIds = computed(() => calendars.calendars.filter((c) => calendars.isVisible(c.id)).map((c) => c.id))
 
 function onCreateCalendar(draft: { name: string; color: string; icon: string | null; cover: string | null }): void {
-  const calendar = calendars.addCalendar(draft.name, draft.color)
-  calendars.setCalendarIcon(calendar.id, draft.icon)
-  calendars.setCalendarCover(calendar.id, draft.cover)
+  // Single pessimistic store call — the create_calendar RPC persists name/color/icon atomically
+  // and the store keeps the cover local-only (cover persistence is out of scope).
+  void calendars.addCalendar(draft)
 }
 
 // Roster for the calendar detail pane. Held here (not in CdSettingsDrawer) because it's fetched
@@ -115,6 +120,33 @@ async function onOpenCalendarDetail(id: string): Promise<void> {
 function resetCalendarDetail(): void {
   draftEditId.value = null
   members.value = []
+  inviteCalendarId.value = null
+  inviteUrl.value = null
+  inviteStatus.value = 'loading'
+}
+
+// Invite link lifecycle — the token is created/reused server-side (calendar_invites), the URL is
+// absolute so it can be pasted anywhere. Same stale-response guard pattern as onOpenCalendarDetail:
+// a response for a since-switched calendar is discarded.
+const inviteCalendarId = ref<string | null>(null)
+const inviteUrl = ref<string | null>(null)
+const inviteStatus = ref<'loading' | 'ready' | 'error'>('loading')
+
+async function onOpenInvite(id: string): Promise<void> {
+  const userId = auth.user?.id
+  if (!userId) return
+  inviteCalendarId.value = id
+  inviteUrl.value = null
+  inviteStatus.value = 'loading'
+  try {
+    const token = await getOrCreateInviteToken(id, userId)
+    if (inviteCalendarId.value !== id) return
+    inviteUrl.value = joinUrl(token)
+    inviteStatus.value = 'ready'
+  } catch {
+    if (inviteCalendarId.value !== id) return
+    inviteStatus.value = 'error'
+  }
 }
 
 // Static-shell state (no backend, no persistence — matches CdAssistantDrawer's precedent).

@@ -348,7 +348,7 @@
                 <CdIcon :name="(draftIcon as IconName) ?? 'calendar'" :size="30" :color="calIconColor(draftColor)" />
               </span>
             </span>
-            <div class="cd-settings__cal-cover-actions">
+            <div v-if="isDraftOwner" class="cd-settings__cal-cover-actions">
               <button type="button" class="cd-settings__cal-cover-btn" @click="coverInput?.click()">
                 <CdIcon name="image" :size="16" color="var(--cd-muted)" />
                 {{ draftCover ? 'Change photo' : 'Choose file' }}
@@ -360,7 +360,7 @@
 
           <div class="cd-settings__field-stack">
             <div class="cd-settings__label">Name</div>
-            <input class="cd-settings__cal-detail-name" type="text" v-model="draftName" />
+            <input class="cd-settings__cal-detail-name" type="text" v-model="draftName" :disabled="!isDraftOwner" />
           </div>
 
           <div class="cd-settings__field-stack">
@@ -375,7 +375,7 @@
                 <span v-if="member.role === 'owner'" class="cd-settings__member-badge">Creator</span>
               </div>
             </div>
-            <button type="button" class="cd-settings__member-invite-btn" @click="openInvite">
+            <button v-if="draftEditId && isDraftOwner" type="button" class="cd-settings__member-invite-btn" @click="openInvite">
               <CdIcon name="plus" :size="15" color="var(--cd-muted)" />
               Invite friends
             </button>
@@ -385,7 +385,7 @@
             <button type="button" class="cd-settings__cal-detail-btn cd-settings__cal-detail-btn--cancel" @click="emit('navigate', 'calendars')">
               Cancel
             </button>
-            <button type="button" class="cd-settings__cal-detail-btn cd-settings__cal-detail-btn--save" @click="saveCalendarDetail">
+            <button v-if="isDraftOwner" type="button" class="cd-settings__cal-detail-btn cd-settings__cal-detail-btn--save" @click="saveCalendarDetail">
               Save
             </button>
           </div>
@@ -397,6 +397,12 @@
             <button type="button" class="cd-settings__cal-remove-btn" @click="removeDraftCalendar">
               <CdIcon name="trash" :size="15" color="var(--cd-danger)" />
               Delete calendar
+            </button>
+          </div>
+          <div v-else-if="draftEditId && draftCalendar?.role === 'member'" class="cd-settings__field-stack">
+            <button type="button" class="cd-settings__cal-remove-btn" @click="leaveDraftCalendar">
+              <CdIcon name="trash" :size="15" color="var(--cd-danger)" />
+              Leave calendar
             </button>
           </div>
         </template>
@@ -449,15 +455,29 @@
         <div class="cd-settings__invite-sheet">
           <div class="cd-settings__invite-title">Invite to {{ draftName || 'this calendar' }}</div>
           <div class="cd-settings__invite-sub">Anyone with the link can join this calendar.</div>
-          <div class="cd-settings__invite-qr" aria-hidden="true">
-            <div class="cd-settings__invite-qr-pattern" />
-          </div>
-          <div class="cd-settings__invite-link-row">
-            <span class="cd-settings__invite-link">{{ inviteLink }}</span>
-            <button type="button" class="cd-settings__invite-copy-btn" @click="copyInviteLink">
-              {{ inviteCopied ? 'Copied' : 'Copy' }}
-            </button>
-          </div>
+          <template v-if="inviteStatus === 'ready' && inviteUrl">
+            <!-- eslint-disable-next-line vue/no-v-html — uqr renderSVG output is generated locally from inviteUrl, not user HTML -->
+            <div class="cd-settings__invite-qr" aria-hidden="true" v-html="inviteQrSvg" />
+            <div class="cd-settings__invite-link-row">
+              <span class="cd-settings__invite-link">{{ inviteUrl }}</span>
+              <button type="button" class="cd-settings__invite-copy-btn" @click="copyInviteLink">
+                {{ inviteCopied ? 'Copied' : 'Copy' }}
+              </button>
+            </div>
+          </template>
+          <template v-else-if="inviteStatus === 'error'">
+            <div class="cd-settings__invite-qr" aria-hidden="true">
+              <div class="cd-settings__invite-qr-pattern" />
+            </div>
+            <div class="cd-settings__invite-error">Couldn't create the invite link.</div>
+            <button type="button" class="cd-settings__invite-copy-btn" @click="retryInvite">Retry</button>
+          </template>
+          <template v-else>
+            <div class="cd-settings__invite-qr cd-settings__invite-qr--loading" aria-hidden="true">
+              <div class="cd-settings__invite-qr-pattern" />
+            </div>
+            <div class="cd-settings__invite-sub">Generating link…</div>
+          </template>
         </div>
       </CdSheet>
     </div>
@@ -465,6 +485,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { renderSVG } from 'uqr'
 import CdAvatar from './CdAvatar.vue'
 import CdDropdownField from './CdDropdownField.vue'
 import CdSegmented from './CdSegmented.vue'
@@ -549,6 +570,11 @@ interface Props {
   /** Members of the calendar currently open in the detail pane, fetched by the feature layer
    * (SettingsDrawer.vue) once draftEditId is known. Empty for the "add calendar" flow (no id yet). */
   members: CalendarMember[]
+  /** Absolute /join/<token> URL for the calendar open in the detail pane, produced by the feature
+   * layer after openInvite. Null while loading or on error. */
+  inviteUrl?: string | null
+  /** Drives the invite sheet's three states; the feature layer owns the fetch lifecycle. */
+  inviteStatus?: 'loading' | 'ready' | 'error'
   /** Phone/sheet presentation (Zoe's 2026-07-11 correction): hides the header close button and
    * enables swipe-down-to-close on the header instead. Defaults to false so existing desktop
    * consumers that don't pass this prop keep the close button and no gesture binding. */
@@ -558,7 +584,9 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   syncedCalendars: () => ['Rivera Family', 'Personal', 'Work'],
   avatarSrc: null,
-  sheetMode: false
+  sheetMode: false,
+  inviteUrl: null,
+  inviteStatus: 'loading'
 })
 
 const emit = defineEmits<{
@@ -579,11 +607,15 @@ const emit = defineEmits<{
   setCalendarIcon: [id: string, icon: string | null]
   setCalendarCover: [id: string, cover: string | null]
   removeCalendar: [id: string]
+  leaveCalendar: [id: string]
   reorderCalendars: [orderedIds: string[]]
   toggleCalendarVisibility: [id: string]
   /** Fired when the detail pane opens for an existing calendar, so the feature layer can fetch its
    * member roster. Not fired for the "add calendar" flow (draftEditId is null — nothing to fetch). */
   openCalendarDetail: [id: string]
+  /** Fired when the invite sheet opens (and on retry) so the feature layer can create/reuse the
+   * calendar's invite token and hand back inviteUrl/inviteStatus. */
+  openInvite: [id: string]
   'update:notifEvents': [value: boolean]
   'update:notifAgenda': [value: boolean]
   'update:notifAssistant': [value: boolean]
@@ -658,6 +690,10 @@ const draftEditId = ref<string | null>(null)
 // owner-only (member calendars can't be deleted from here), mirroring calendars-store.removeCalendar's
 // own role check.
 const draftCalendar = computed(() => props.calendars.find((c) => c.id === draftEditId.value) ?? null)
+
+// Members get a read-only detail pane (DB RLS only lets owners update calendars — editable fields
+// would optimistically apply and then roll back). The "add calendar" flow counts as owner-to-be.
+const isDraftOwner = computed(() => draftEditId.value === null || draftCalendar.value?.role === 'owner')
 const draftName = ref('')
 const draftColor = ref('#7BA05B')
 const draftIcon = ref<string | null>(null)
@@ -667,28 +703,30 @@ const brokenCalendarCoverIds = ref(new Set<string>())
 const SUPPORTED_COVER_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
 const SUPPORTED_COVER_IMAGE_EXTENSIONS = /\.(png|jpe?g|webp|gif)$/i
 
-// Invite sheet — static-shell share link (no backend), same "no network activity" treatment as
-// the Google Calendar connect flow. Slug derives from the draft name so the link looks calendar-
-// specific; Copy uses the real Clipboard API since that's a self-contained browser action, not a
-// network call.
+// Invite sheet — the real share link and its status come from the feature layer (which owns the
+// calendar_invites fetch); this component only renders the three states and re-emits retry.
 const inviteOpen = ref(false)
 const inviteCopied = ref(false)
 
-const inviteLink = computed(() => {
-  const slug = (draftName.value || 'calendar')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-  return `cadence.app/j/${slug || 'CALENDAR'}-8F2K`
-})
+// uqr renders the QR as a self-contained SVG string sized to the container by the
+// .cd-settings__invite-qr svg rule below.
+const inviteQrSvg = computed(() => (props.inviteUrl ? renderSVG(props.inviteUrl) : ''))
 
 function openInvite(): void {
+  if (!draftEditId.value) return
   inviteCopied.value = false
   inviteOpen.value = true
+  emit('openInvite', draftEditId.value)
+}
+
+function retryInvite(): void {
+  if (!draftEditId.value) return
+  emit('openInvite', draftEditId.value)
 }
 
 async function copyInviteLink(): Promise<void> {
-  await navigator.clipboard.writeText(inviteLink.value)
+  if (!props.inviteUrl) return
+  await navigator.clipboard.writeText(props.inviteUrl)
   inviteCopied.value = true
 }
 
@@ -760,11 +798,14 @@ function onCoverFileChange(e: Event): void {
 function saveCalendarDetail(): void {
   const name = draftName.value.trim() || 'New Calendar'
   if (draftEditId.value) {
+    // Emit only changed fields — each emit is now a persisted Supabase write, so unchanged
+    // fields must not generate network traffic.
     const id = draftEditId.value
-    emit('renameCalendar', id, name)
-    emit('recolorCalendar', id, draftColor.value)
-    emit('setCalendarIcon', id, draftIcon.value)
-    emit('setCalendarCover', id, draftCover.value)
+    const current = draftCalendar.value
+    if (name !== current?.name) emit('renameCalendar', id, name)
+    if (draftColor.value !== current?.color) emit('recolorCalendar', id, draftColor.value)
+    if (draftIcon.value !== current?.icon) emit('setCalendarIcon', id, draftIcon.value)
+    if (draftCover.value !== current?.cover) emit('setCalendarCover', id, draftCover.value)
   } else {
     emit('createCalendar', { name, color: draftColor.value, icon: draftIcon.value, cover: draftCover.value })
   }
@@ -789,6 +830,14 @@ function onMonthPhotoFileChange(monthIndex: number, e: Event): void {
 function removeDraftCalendar(): void {
   if (!draftEditId.value) return
   emit('removeCalendar', draftEditId.value)
+  emit('navigate', 'calendars')
+}
+
+// Member self-removal — same navigation contract as delete: the calendar disappears from the
+// list, so the detail pane has nothing left to show.
+function leaveDraftCalendar(): void {
+  if (!draftEditId.value) return
+  emit('leaveCalendar', draftEditId.value)
   emit('navigate', 'calendars')
 }
 
@@ -1647,6 +1696,33 @@ button.cd-settings__row:hover {
   border-radius: 4px;
   background-image: conic-gradient(#2e2c28 90deg, transparent 90deg 180deg, #2e2c28 180deg 270deg, transparent 270deg);
   background-size: 16px 16px;
+}
+
+.cd-settings__invite-qr :deep(svg),
+.cd-settings__invite-qr svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.cd-settings__invite-qr--loading .cd-settings__invite-qr-pattern {
+  opacity: 0.25;
+  animation: cd-invite-qr-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes cd-invite-qr-pulse {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 0.4;
+  }
+}
+
+.cd-settings__invite-error {
+  font: 600 13.5px var(--cd-font-ui);
+  color: var(--cd-danger);
+  margin-bottom: 14px;
 }
 
 .cd-settings__invite-link-row {
