@@ -20,7 +20,7 @@
       :color="editColor"
       :icon="editIcon"
       :all-day="editAllDay"
-      :date-label="dateLabel"
+      :date="editDate"
       :start="editStart"
       :end="editEnd"
       :alert-label="alertLabel"
@@ -38,6 +38,7 @@
       @update:icon="(v) => (editIcon = v)"
       @remove-icon="editIcon = null"
       @update:all-day="(v) => (editAllDay = v)"
+      @update:date="(v) => (editDate = v)"
       @update:start="(v) => (editStart = v)"
       @update:end="(v) => (editEnd = v)"
       @update:location="(v) => (editLocation = v)"
@@ -82,7 +83,7 @@
       :color="editColor"
       :icon="editIcon"
       :all-day="editAllDay"
-      :date-label="dateLabel"
+      :date="editDate"
       :start="editStart"
       :end="editEnd"
       :alert-label="alertLabel"
@@ -100,6 +101,7 @@
       @update:icon="(v) => (editIcon = v)"
       @remove-icon="editIcon = null"
       @update:all-day="(v) => (editAllDay = v)"
+      @update:date="(v) => (editDate = v)"
       @update:start="(v) => (editStart = v)"
       @update:end="(v) => (editEnd = v)"
       @update:location="(v) => (editLocation = v)"
@@ -189,6 +191,7 @@ const editQuad = ref<'do' | 'plan' | 'quick' | 'later'>('later')
 const editColor = ref<string>('#4A8B85')
 const editIcon = ref<string | null>(null)
 const editAllDay = ref(false)
+const editDate = ref('')
 const editStart = ref('')
 const editEnd = ref('')
 const editLocation = ref('')
@@ -214,6 +217,7 @@ function seedEditState(t: Task): void {
   editColor.value = t.backgroundColor ?? '#4A8B85'
   editIcon.value = t.icon
   editAllDay.value = t.allDay
+  editDate.value = t.date
   editStart.value = t.start
   editEnd.value = t.end
   editLocation.value = t.location
@@ -239,8 +243,6 @@ watch(
   { immediate: true }
 )
 
-const dateLabel = computed(() => (task.value ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(parseISO(task.value.date)) : ''))
-
 function close(): void {
   ui.eventPreview = null
 }
@@ -254,7 +256,13 @@ function startFocus(): void {
 }
 
 function openEditMode(): void {
-  if (ui.eventPreview) ui.eventPreview.mode = 'edit'
+  if (!ui.eventPreview) return
+  // Reseed from the live task on every entry into edit mode. The `ui.eventPreview` watcher only
+  // fires when the popover object changes, but openEditMode/backToPreview just flip `mode` on the
+  // same object — so without this, edits abandoned via Back (e.g. a changed date) survive into the
+  // next Edit session and could be committed on Save. Reseeding discards that stale local state.
+  if (task.value) seedEditState(task.value)
+  ui.eventPreview.mode = 'edit'
 }
 
 function backToPreview(): void {
@@ -279,6 +287,7 @@ function saveEdit(): void {
     backgroundColor: editType.value === 'event' ? editColor.value : task.value.backgroundColor,
     icon: editType.value === 'event' ? editIcon.value : null,
     allDay: editType.value === 'event' ? editAllDay.value : false,
+    date: editDate.value,
     start: editType.value === 'event' && editAllDay.value ? '' : editStart.value,
     end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value,
     location: editLocation.value,

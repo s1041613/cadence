@@ -9,7 +9,7 @@
         :color="draft.backgroundColor ?? FALLBACK_EVENT_COLOR"
         :icon="draft.icon"
         :all-day="draft.allDay"
-        :date-label="dateLabel"
+        :date="draft.date"
         :start="draft.start"
         :end="draft.end"
         :alert-label="alertLabel"
@@ -29,6 +29,7 @@
         @update:icon="(v) => (draft!.icon = v)"
         @remove-icon="draft!.icon = null"
         @update:all-day="(v) => (draft!.allDay = v)"
+        @update:date="(v) => (draft!.date = v)"
         @update:start="(v) => (draft!.start = v)"
         @update:end="(v) => (draft!.end = v)"
         @update:location="(v) => (draft!.location = v)"
@@ -54,7 +55,7 @@
       :color="draft.backgroundColor ?? FALLBACK_EVENT_COLOR"
       :icon="draft.icon"
       :all-day="draft.allDay"
-      :date-label="dateLabel"
+      :date="draft.date"
       :start="draft.start"
       :end="draft.end"
       :alert-label="alertLabel"
@@ -75,6 +76,7 @@
       @update:icon="(v) => (draft!.icon = v)"
       @remove-icon="draft!.icon = null"
       @update:all-day="(v) => (draft!.allDay = v)"
+      @update:date="(v) => (draft!.date = v)"
       @update:start="(v) => (draft!.start = v)"
       @update:end="(v) => (draft!.end = v)"
       @update:location="(v) => (draft!.location = v)"
@@ -94,7 +96,7 @@ import { useInboxStore } from '@/stores/inbox-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
-import { autoPoms, parseISO } from '@/utils/convert-date-time'
+import { autoPoms } from '@/utils/convert-date-time'
 import type { RepeatMode, Task } from '@/types/task'
 
 // EventComposerOverlay — feature-layer composition for the handoff's New Event/Task edit card.
@@ -176,7 +178,6 @@ watch(
 const theme = computed(() =>
   draft.value ? themeOf(draft.value) : themeOf(mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId! }))
 )
-const dateLabel = computed(() => (draft.value ? new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'short', day: 'numeric' }).format(parseISO(draft.value.date)) : ''))
 const estimatedPomodoros = computed(() => (draft.value ? autoPoms(draft.value) : 1))
 const repeatLabel = computed(() => REPEAT_LABELS[draft.value?.repeat ?? 'none'])
 const alertLabel = computed(() => 'No reminder')

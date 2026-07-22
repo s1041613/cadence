@@ -8,7 +8,7 @@
       :color="color"
       :icon="icon"
       :all-day="allDay"
-      :date-label="dateLabel"
+      :date="date"
       :start="start"
       :end="end"
       alert-label="No reminder"
@@ -26,6 +26,7 @@
       @update:icon="(v) => (icon = v)"
       @remove-icon="icon = null"
       @update:all-day="(v) => (allDay = v)"
+      @update:date="(v) => (date = v)"
       @update:start="(v) => (start = v)"
       @update:end="(v) => (end = v)"
       @cycle-repeat="cycleRepeat"
@@ -43,7 +44,7 @@
       :color="color"
       :icon="icon"
       :all-day="allDay"
-      :date-label="dateLabel"
+      :date="date"
       :start="start"
       :end="end"
       alert-label="No reminder"
@@ -61,6 +62,7 @@
       @update:icon="(v) => (icon = v)"
       @remove-icon="icon = null"
       @update:all-day="(v) => (allDay = v)"
+      @update:date="(v) => (date = v)"
       @update:start="(v) => (start = v)"
       @update:end="(v) => (end = v)"
       @cycle-repeat="cycleRepeat"
@@ -81,7 +83,6 @@ import { useTasksStore, mkTask } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
-import { parseISO } from '@/utils/convert-date-time'
 import type { IconName } from '@/components/ui/icons'
 import type { RepeatMode } from '@/types/task'
 
@@ -101,6 +102,7 @@ const quad = ref<'do' | 'plan' | 'quick' | 'later'>('do')
 const color = ref('#E3A75C')
 const icon = ref<IconName | null>(null)
 const allDay = ref(false)
+const date = ref('')
 const start = ref('09:00')
 const end = ref('09:30')
 const repeat = ref<RepeatMode>('none')
@@ -123,17 +125,12 @@ watch(
     color.value = '#E3A75C'
     icon.value = null
     allDay.value = pop.time === null
+    date.value = pop.date
     start.value = pop.time ?? '09:00'
     end.value = pop.endTime ?? '10:00'
     repeat.value = 'none'
   }
 )
-
-const dateLabel = computed(() => {
-  if (!ui.qaPop) return ''
-  const d = parseISO(ui.qaPop.date)
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d)
-})
 
 function close(): void {
   ui.qaPop = null
@@ -151,9 +148,9 @@ function onAdd(): void {
   // isLoading gate, but a save button race (e.g. isLoading flips true again mid-edit) is cheap
   // to guard here too.
   if (!ui.qaPop || !title.value.trim() || tasksStore.isLoading) return
-  const { date, time, endTime } = ui.qaPop
+  const { time, endTime } = ui.qaPop
   const task = mkTask({
-    date,
+    date: date.value,
     calendarId: calendarsStore.defaultCalendarId!,
     title: title.value.trim(),
     type: type.value === 'event' ? 'event' : 'quadrant',
