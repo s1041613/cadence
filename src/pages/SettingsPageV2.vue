@@ -33,7 +33,7 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
 <style scoped>
 .sp2 {
   width: 100%;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
 }
 
@@ -44,7 +44,7 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #efeeec;
+  background: #F1EFE9;
   padding-top: max(env(safe-area-inset-top), 40px);
 }
 

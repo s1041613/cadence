@@ -7,7 +7,7 @@
     <meta name="description" content="<%= productDescription %>">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width<% if (ctx.mode.cordova || ctx.mode.capacitor) { %>, viewport-fit=cover<% } %>">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover">
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com; connect-src 'self'<% if (supabaseConnectSrc) { %> <%= supabaseConnectSrc %><% } %><% if (ctx.dev) { %> ws://localhost:*<% } %>;<% if (ctx.dev) { %> worker-src 'self' blob:;<% } %>"
@@ -15,9 +15,10 @@
 
     <!-- iOS standalone: open the home-screen icon as a full-screen app (no Safari bars) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="<%= productName %>">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon-180x180.png">
+    <link rel="manifest" href="<%= publicPath %>manifest.json">
 
     <link rel="icon" type="image/png" sizes="128x128" href="icons/favicon-128x128.png">
     <link rel="icon" type="image/png" sizes="96x96" href="icons/favicon-96x96.png">

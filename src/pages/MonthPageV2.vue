@@ -67,7 +67,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .mp2 {
   width: 100%;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
 }
 
@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fafaf9; /* 海報底（無背景圖時的底色） */
+  background: #F1EFE9; /* 海報底（無背景圖時的底色，對齊設計稿頁面底色） */
   isolation: isolate; /* 建立堆疊脈絡，讓背景層的負 z-index 只落在 frame 內 */
   /* 頂部 safe-area：真機讓開系統 status bar；至少留一點空白，chip 列不貼到最上方。
      不畫假的 9:41/電量（真機自有系統 status bar），只保留其佔位。 */
@@ -101,7 +101,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #fafaf9;
+  background: #F1EFE9;
   pointer-events: none;
   transition: opacity 0.25s ease;
 }

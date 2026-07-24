@@ -32,9 +32,9 @@ body,
 #q-app {
   width: 100%;
   min-width: 0;
-  height: 100dvh;
+  height: 100svh;
   margin: 0;
-  background: #F2F1EC;
+  background: #F1EFE9;
 }
 
 body {
@@ -53,7 +53,7 @@ body {
 
 /* Kept in sync with src/css/quasar.variables.sass — quadrant colors excluded (JS single source in use-theme.ts) */
 @theme {
-  --color-bg: #F2F1EC;
+  --color-bg: #F1EFE9;
   --color-bar: #F2F1EC;
   --color-paper: #F1F2EC;
   --color-surface: #FBFAF7;

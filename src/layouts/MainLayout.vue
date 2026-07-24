@@ -10,5 +10,5 @@
 .app-layout,
 .app-page-container
   width: 100%
-  height: 100dvh
+  height: 100svh
 </style>

@@ -59,7 +59,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .wp2 {
   width: 100%;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
 }
 
@@ -70,7 +70,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fafaf9;
+  background: #F1EFE9;
   isolation: isolate;
   padding-top: max(env(safe-area-inset-top), 40px);
 }
@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: #fafaf9;
+  background: #F1EFE9;
   pointer-events: none;
   transition: opacity 0.25s ease;
 }

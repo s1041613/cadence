@@ -1,0 +1,15 @@
+{
+  "id": "/cadence/",
+  "name": "Cadence",
+  "short_name": "Cadence",
+  "start_url": "./v2/month",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1EFE9",
+  "theme_color": "#F1EFE9",
+  "icons": [
+    { "src": "icons/favicon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/apple-touch-icon-180x180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

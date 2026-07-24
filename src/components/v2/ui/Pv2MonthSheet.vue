@@ -113,7 +113,7 @@ function itemStyle(dist: number, isYear: boolean): Record<string, string> {
 
 .pv2-sheet {
   width: 100%;
-  background: #fafaf9;
+  background: #F1EFE9;
   border-radius: 24px 24px 0 0;
   padding: 14px 24px 30px;
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
@@ -179,11 +179,11 @@ function itemStyle(dist: number, isYear: boolean): Record<string, string> {
 
 .pv2-sheet__fade--top {
   top: 0;
-  background: linear-gradient(#fafaf9, rgba(250, 250, 249, 0));
+  background: linear-gradient(#F1EFE9, rgba(241, 239, 233, 0));
 }
 
 .pv2-sheet__fade--bottom {
   bottom: 0;
-  background: linear-gradient(rgba(250, 250, 249, 0), #fafaf9);
+  background: linear-gradient(rgba(241, 239, 233, 0), #F1EFE9);
 }
 </style>
