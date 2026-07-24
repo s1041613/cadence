@@ -1,7 +1,8 @@
 <template>
   <div v-if="draft && fromCreate && isDesktop" class="task-editor-dock-root">
     <div class="task-editor-dock-root__panel">
-      <CdEventEditCard
+      <component
+        :is="editCardComponent"
         is-new
         :title="draft.title"
         :type="editType"
@@ -13,6 +14,7 @@
         :start="draft.start"
         :end="draft.end"
         :alert-label="alertLabel"
+        :reminder="draft.reminder"
         :repeat-label="repeatLabel"
         :location="draft.location"
         :notes="draft.notes"
@@ -35,6 +37,7 @@
         @update:date="(v) => (draft!.date = v)"
         @update:start="(v) => (draft!.start = v)"
         @update:end="(v) => (draft!.end = v)"
+        @update:reminder="(v) => (draft!.reminder = v)"
         @update:location="(v) => (draft!.location = v)"
         @update:notes="(v) => (draft!.notes = v)"
         @cycle-repeat="cycleRepeat"
@@ -50,7 +53,8 @@
     @scrim-click="close"
     @dismiss="close"
   >
-    <CdEventEditCard
+    <component
+      :is="editCardComponent"
       is-new
       :title="draft.title"
       :type="editType"
@@ -62,6 +66,7 @@
       :start="draft.start"
       :end="draft.end"
       :alert-label="alertLabel"
+      :reminder="draft.reminder"
       :repeat-label="repeatLabel"
       :location="draft.location"
       :notes="draft.notes"
@@ -85,6 +90,7 @@
       @update:date="(v) => (draft!.date = v)"
       @update:start="(v) => (draft!.start = v)"
       @update:end="(v) => (draft!.end = v)"
+      @update:reminder="(v) => (draft!.reminder = v)"
       @update:location="(v) => (draft!.location = v)"
       @update:notes="(v) => (draft!.notes = v)"
     />
@@ -95,6 +101,7 @@
 import { computed, ref, watch } from 'vue'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
+import Pv2EventEditCard from '@/components/v2/event/Pv2EventEditCard.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore, mkTask } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
@@ -103,6 +110,7 @@ import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
 import { autoPoms } from '@/utils/convert-date-time'
+import { reminderLabel } from '@/utils/event-panel'
 import type { RepeatMode, Task } from '@/types/task'
 
 // EventComposerOverlay — feature-layer composition for the handoff's New Event/Task edit card.
@@ -114,6 +122,13 @@ const calendarsStore = useCalendarsStore()
 const inboxStore = useInboxStore()
 const settings = useSettingsStore()
 const { isDesktop } = useBreakpoint()
+
+const props = withDefaults(
+  defineProps<{
+    variant?: 'legacy' | 'v2'
+  }>(),
+  { variant: 'legacy' }
+)
 
 const fromCreate = ref(false)
 
@@ -137,6 +152,7 @@ const isEditing = ref(false)
 // mirroring EventPreviewPopover's edit-state pattern.
 const editType = computed<'event' | 'task'>(() => (draft.value?.type === 'event' ? 'event' : 'task'))
 const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'later'))
+const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
 
 // All member calendars (own and shared) as picker options, in display order. The picker only
 // renders for 2+ options; the draft defaults to the user's default calendar.
@@ -192,7 +208,7 @@ const theme = computed(() =>
 )
 const estimatedPomodoros = computed(() => (draft.value ? autoPoms(draft.value) : 1))
 const repeatLabel = computed(() => REPEAT_LABELS[draft.value?.repeat ?? 'none'])
-const alertLabel = computed(() => 'No reminder')
+const alertLabel = computed(() => reminderLabel(draft.value?.reminder ?? null))
 const editorWidth = computed(() => (ui.draftConv ? 'min(440px, 46%)' : 'min(500px, 90%)'))
 
 function onUpdateType(type: 'event' | 'task'): void {
@@ -269,12 +285,14 @@ function startFocus(): void {
   box-shadow: 0 30px 64px -22px rgba(40, 38, 30, 0.5);
 }
 
-.task-editor-dock-root__panel :deep(.cd-edit-card) {
+.task-editor-dock-root__panel :deep(.cd-edit-card),
+.task-editor-dock-root__panel :deep(.pv2-edit-card) {
   width: 100%;
   max-height: calc(100dvh - 48px);
 }
 
-:deep(.cd-drawer .cd-edit-card) {
+:deep(.cd-drawer .cd-edit-card),
+:deep(.cd-drawer .pv2-edit-card) {
   width: 100%;
   height: 100%;
   border: none;
@@ -286,7 +304,8 @@ function startFocus(): void {
    active Event/Task tab's content needs, which is exactly the per-tab height jump Zoe flagged
    (2026-07-11). Leaving the card's own fixed height (CdEventEditCard.vue) in control keeps the
    sheet's height stable across tabs. */
-:deep(.cd-sheet .cd-edit-card) {
+:deep(.cd-sheet .cd-edit-card),
+:deep(.cd-sheet .pv2-edit-card) {
   width: 100%;
   border: none;
   border-radius: 0;

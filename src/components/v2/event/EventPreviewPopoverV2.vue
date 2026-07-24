@@ -1,17 +1,18 @@
 <template>
-  <CdPopover v-if="ui.eventPreview && task && isDesktop" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="440" caret @scrim-click="close">
-    <CdCopyToDaysCard
+  <CdPopover v-if="ui.eventPreview && task && isDesktop" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="520" caret @scrim-click="close">
+    <Pv2CopyToDaysCard
       v-if="copyMode"
       :month-label="copyMonthLabel"
       :cells="copyCells"
       :selected="copySelectedDates"
+      :first-day="settings.firstDay"
       @close="copyMode = false"
       @prev-month="copyMonth = addMonths(copyMonth, -1)"
       @next-month="copyMonth = addMonths(copyMonth, 1)"
       @toggle-day="toggleCopyDay"
       @confirm="confirmCopy"
     />
-    <CdEventEditCard
+    <Pv2EventEditCard
       v-else-if="ui.eventPreview.mode === 'edit'"
       :is-new="false"
       :title="editTitle"
@@ -50,37 +51,38 @@
       @update:calendar-id="(v) => (editCalendarId = v)"
       @cycle-repeat="cycleRepeat"
     />
-    <CdEventPreviewCard
+    <Pv2EventPreviewCard
       v-else
       :title="task.title"
       :color="theme.backgroundColor"
+      :eyebrow="eyebrowLabel"
       :when-label="whenLabel"
       :is-task="task.type === 'quadrant'"
-      :alert-label="alertLabel"
-      :quad-label="quadLabel"
+      :reminder-label="alertLabel"
+      :notes="task.notes"
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
       :mine="isOwnTask"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
-      @close="close"
       @start-focus="startFocus"
     />
   </CdPopover>
   <CdDrawerOrSheet v-else-if="ui.eventPreview && task" presentation="sheet" scrim-color="var(--cd-scrim-mid)" @scrim-click="close" @dismiss="close">
-    <CdCopyToDaysCard
+    <Pv2CopyToDaysCard
       v-if="copyMode"
       :month-label="copyMonthLabel"
       :cells="copyCells"
       :selected="copySelectedDates"
+      :first-day="settings.firstDay"
       @close="copyMode = false"
       @prev-month="copyMonth = addMonths(copyMonth, -1)"
       @next-month="copyMonth = addMonths(copyMonth, 1)"
       @toggle-day="toggleCopyDay"
       @confirm="confirmCopy"
     />
-    <CdEventEditCard
+    <Pv2EventEditCard
       v-else-if="ui.eventPreview.mode === 'edit'"
       :is-new="false"
       :title="editTitle"
@@ -119,21 +121,21 @@
       @update:calendar-id="(v) => (editCalendarId = v)"
       @cycle-repeat="cycleRepeat"
     />
-    <CdEventPreviewCard
+    <Pv2EventPreviewCard
       v-else
       :title="task.title"
       :color="theme.backgroundColor"
+      :eyebrow="eyebrowLabel"
       :when-label="whenLabel"
       :is-task="task.type === 'quadrant'"
-      :alert-label="alertLabel"
-      :quad-label="quadLabel"
+      :reminder-label="alertLabel"
+      :notes="task.notes"
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
       :mine="isOwnTask"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
-      @close="close"
       @start-focus="startFocus"
     />
   </CdDrawerOrSheet>
@@ -141,20 +143,20 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import CdPopover from '@/components/ui/CdPopover.vue'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
-import CdEventPreviewCard from '@/components/ui/CdEventPreviewCard.vue'
-import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
-import CdCopyToDaysCard, { type CopyToDaysCell } from '@/components/ui/CdCopyToDaysCard.vue'
-import { useUiStore } from '@/stores/ui-store'
-import { useTasksStore } from '@/stores/tasks-store'
+import CdPopover from '@/components/ui/CdPopover.vue'
+import Pv2CopyToDaysCard from './Pv2CopyToDaysCard.vue'
+import Pv2EventEditCard from './Pv2EventEditCard.vue'
+import Pv2EventPreviewCard from './Pv2EventPreviewCard.vue'
 import { useAuthStore } from '@/stores/auth-store'
-import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
+import { useSettingsStore } from '@/stores/settings-store'
+import { useTasksStore } from '@/stores/tasks-store'
+import { useUiStore } from '@/stores/ui-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
-import { parseISO, iso, addDays, startOfWeek, formatTime, autoPoms } from '@/utils/convert-date-time'
-import { reminderLabel } from '@/utils/event-panel'
+import { autoPoms, formatTime, parseISO } from '@/utils/convert-date-time'
+import { buildCopyToDaysCells, reminderLabel, type CopyToDaysCell } from '@/utils/event-panel'
 import type { ReminderPreset, RepeatMode, Task } from '@/types/task'
 
 const REPEAT_LABELS: Record<RepeatMode, string> = {
@@ -165,11 +167,6 @@ const REPEAT_LABELS: Record<RepeatMode, string> = {
 }
 const REPEAT_CYCLE: RepeatMode[] = ['none', 'daily', 'weekly', 'monthly']
 
-// EventPreviewPopover — feature-layer composition for the event preview/edit/copy overlay
-// (design.md "5.2 Implement the event preview card"). Reads ui.eventPreview (taskId/anchor/mode),
-// swaps CdEventPreviewCard <-> CdEventEditCard <-> CdCopyToDaysCard inside the same CdPopover
-// (no slide transition, matching CdEventEditCard's own header comment), and routes saves/deletes/
-// copies through tasks-store. Mounted once in IndexPage.vue, matching QuickAddPopover's precedent.
 const ui = useUiStore()
 const tasksStore = useTasksStore()
 const auth = useAuthStore()
@@ -182,37 +179,32 @@ const task = computed<Task | null>(() => {
   return id ? (tasksStore.tasks.find((t) => t.id === id) ?? null) : null
 })
 
-// Authorship gate: events fetched from shared calendars carry ownerId; a missing ownerId means a
-// locally created task (always the current user's). Foreign events render read-only — RLS would
-// reject the write anyway, so no write affordance is offered.
 const isOwnTask = computed(() => {
   const ownerId = task.value?.ownerId
   return ownerId === undefined || ownerId === auth.user?.id
 })
-
-// theme/quadLabel/whenLabel are only read by the template when `task` is non-null (guarded by
-// `v-if="ui.eventPreview && task"`); the `!` narrowing below is safe under that invariant.
 const theme = computed(() => themeOf(task.value!))
-const quadLabel = computed(() => {
-  if (!task.value) return ''
-  return task.value.type === 'event' ? 'Event' : quadrantOf(task.value).name
-})
 const alertLabel = computed(() => reminderLabel(task.value?.reminder ?? null))
 const calendarOptions = computed(() =>
   [...calendarsStore.calendars].sort((a, b) => a.order - b.order).map((c) => ({ id: c.id, name: c.name }))
 )
 
+const eyebrowLabel = computed(() => {
+  if (!task.value) return ''
+  if (!isOwnTask.value) return 'READ-ONLY'
+  return task.value.type === 'event' ? 'EVENT' : quadrantOf(task.value).key.toUpperCase()
+})
+
 const whenLabel = computed(() => {
   if (!task.value) return ''
   const d = parseISO(task.value.date)
-  const dateLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d)
+  const dateLabel = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d).toUpperCase()
   if (task.value.allDay) return dateLabel
-  return `${dateLabel} · ${formatTime(task.value.start, settings.timeFormat)}–${formatTime(task.value.end, settings.timeFormat)}`
+  return `${dateLabel} · ${formatTime(task.value.start, settings.timeFormat)}-${formatTime(task.value.end, settings.timeFormat)}`
 })
 
-const popWidth = computed(() => (copyMode.value ? 320 : ui.eventPreview?.mode === 'edit' ? 388 : 370))
+const popWidth = computed(() => (copyMode.value ? 340 : ui.eventPreview?.mode === 'edit' ? 388 : 370))
 
-// Edit-form local state, seeded from `task` whenever the popover opens or switches into edit mode.
 const editTitle = ref('')
 const editType = ref<'event' | 'task'>('task')
 const editQuad = ref<'do' | 'plan' | 'quick' | 'later'>('later')
@@ -227,10 +219,6 @@ const editNotes = ref('')
 const editRepeat = ref<RepeatMode>('none')
 const editReminder = ref<ReminderPreset | null>(null)
 const editCalendarId = ref('')
-
-// copyMode is declared here (ahead of its own "Copy-to-days flow" section below) because the
-// `{ immediate: true }` watch just below reads it synchronously during setup, before later
-// top-level `const` declarations in this file would otherwise be initialized.
 const copyMode = ref(false)
 
 const repeatLabel = computed(() => REPEAT_LABELS[editRepeat.value])
@@ -279,8 +267,6 @@ function close(): void {
   ui.eventPreview = null
 }
 
-// task 7.5 "restyled start button that sets focusTaskId" — FocusSession.vue itself is untouched
-// (design.md Non-Goals), this only supplies the trigger the preview surface was missing.
 function startFocus(): void {
   if (!task.value || !isOwnTask.value) return
   ui.focusTaskId = task.value.id
@@ -288,13 +274,7 @@ function startFocus(): void {
 }
 
 function openEditMode(): void {
-  if (!ui.eventPreview) return
-  // Defense in depth behind the hidden buttons: a foreign event never enters edit mode.
-  if (!isOwnTask.value) return
-  // Reseed from the live task on every entry into edit mode. The `ui.eventPreview` watcher only
-  // fires when the popover object changes, but openEditMode/backToPreview just flip `mode` on the
-  // same object — so without this, edits abandoned via Back (e.g. a changed date) survive into the
-  // next Edit session and could be committed on Save. Reseeding discards that stale local state.
+  if (!ui.eventPreview || !isOwnTask.value) return
   if (task.value) seedEditState(task.value)
   ui.eventPreview.mode = 'edit'
 }
@@ -310,7 +290,7 @@ function deleteTask(): void {
 }
 
 function saveEdit(): void {
-  if (!task.value) return
+  if (!task.value || !isOwnTask.value) return
   const isQuadrant = editType.value === 'task'
   const updated: Task = {
     ...task.value,
@@ -340,9 +320,6 @@ function saveEdit(): void {
   backToPreview()
 }
 
-// Copy-to-days flow (design.md's Implementation Contract: "copy-to-days flow"). Behavior ported
-// from the legacy TaskPreview.vue copy mode: tasksStore.copyToDays + toast on skip/success.
-// (copyMode itself is declared earlier, alongside the edit-form refs — see the comment there.)
 const copyMonth = ref(new Date())
 const copySelectedDates = ref<string[]>([])
 
@@ -351,7 +328,7 @@ function addMonths(d: Date, delta: number): Date {
 }
 
 function openCopyMode(): void {
-  if (!task.value) return
+  if (!task.value || !isOwnTask.value) return
   copyMonth.value = parseISO(task.value.date)
   copySelectedDates.value = []
   copyMode.value = true
@@ -364,18 +341,9 @@ function toggleCopyDay(date: string): void {
 }
 
 const copyMonthLabel = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(copyMonth.value))
-
-const copyCells = computed<Array<CopyToDaysCell | null>>(() => {
-  const first = new Date(copyMonth.value.getFullYear(), copyMonth.value.getMonth(), 1)
-  const gridStart = startOfWeek(first)
-  const srcDate = task.value?.date
-  return Array.from({ length: 42 }, (_, i) => {
-    const d = addDays(gridStart, i)
-    if (d.getMonth() !== copyMonth.value.getMonth()) return null
-    const date = iso(d)
-    return { date, day: d.getDate(), disabled: date === srcDate }
-  })
-})
+const copyCells = computed<Array<CopyToDaysCell | null>>(() =>
+  buildCopyToDaysCells(copyMonth.value.getFullYear(), copyMonth.value.getMonth(), settings.firstDay, task.value?.date)
+)
 
 function confirmCopy(): void {
   if (!task.value || copySelectedDates.value.length === 0) return
