@@ -1,0 +1,76 @@
+%% Cadence Web Push 提醒流程 — 按「執行位置」分組，標明每個角色的職責與所在地。
+%% 顏色：🔵前端(瀏覽器) 🟢資料庫(Postgres) 🟠Edge(Deno伺服器) 🟡外部服務 🟣資料表 🔴失敗
+flowchart TD
+
+    subgraph BROWSER["📱 使用者裝置（瀏覽器 / GitHub Pages 前端）"]
+        direction TB
+        U1["【使用者】<br/>v2 設定 → Notifications<br/>開啟 Event reminders 開關"]
+        U2{{"【瀏覽器】<br/>詢問是否允許通知？"}}
+        U3["【前端 push-service.ts】<br/>註冊 Service Worker (public/sw.js)"]
+        U4["【瀏覽器 PushManager】<br/>用 VAPID 公鑰換取<br/>這台裝置專屬收件地址 (endpoint)"]
+        E1["【使用者】<br/>建立事件並設提醒（如 15 分前）"]
+        UX["【前端】開關回彈 + 錯誤 toast"]
+        U1 --> U2
+        U2 -->|允許| U3 --> U4
+        U2 -->|拒絕| UX
+    end
+
+    subgraph DB["🗄️ Supabase 資料庫（Postgres）"]
+        direction TB
+        T_SUB[("push_subscriptions 表<br/>誰(user_id)+收件地址+加密金鑰")]
+        T_REM[("event_reminders 表<br/>event_id + minutes_before<br/>fired_at=null 代表未送")]
+        CRON{{"【pg_cron 排程器】<br/>職責：每分鐘當鬧鐘<br/>敲一次 Edge Function"}}
+        RPC["【due_reminders() SQL函式】<br/>職責：查『到期且未送』的提醒<br/>(starts_at − minutes_before ≤ now)"]
+        CRON -. 帶 CRON_SECRET 暗號 + 網址 .-> GATE
+    end
+
+    subgraph EDGE["⚙️ Supabase Edge（Deno 伺服器 · 不在 DB 內）"]
+        direction TB
+        GATE{"【send-reminders 工人】<br/>核對 CRON_SECRET 暗號？"}
+        S1["職責1：用 .rpc('due_reminders')<br/>呼叫 DB 函式，拿到期提醒清單"]
+        S2["職責2：用 .from('push_subscriptions')<br/>查每筆 owner 的收件地址"]
+        S3["職責3：用 VAPID 私鑰簽名+加密<br/>發 HTTPS 到推播中繼站<br/>(這些 DB 做不到，故需 Deno)"]
+        S5["職責4：回填 fired_at=now<br/>標記已送、不再重送"]
+        CX["回 401 拒絕（路人）"]
+        GATE -->|對| S1 --> S2 --> S3
+        GATE -->|錯| CX
+        S3 --> S5
+    end
+
+    subgraph RELAY["☁️ 外部推播中繼站"]
+        RLY{{"Google / Apple / Mozilla<br/>職責：把通知轉送到正確裝置"}}
+    end
+
+    subgraph SW["📱 使用者裝置（Service Worker，背景常駐）"]
+        direction TB
+        D1["【sw.js】收到 push 事件<br/>（即使 app 已關閉也會醒）"]
+        D2["showNotification() 系統通知彈出 🔔"]
+        D3["點通知 → 開啟/聚焦 /v2/month"]
+        D1 --> D2 --> D3
+    end
+
+    %% 跨位置的資料流
+    U4 -->|寫入| T_SUB
+    E1 -->|寫入| T_REM
+    T_REM -. 到期資料供查詢 .-> RPC
+    S1 -->|"呼叫函式：supabase.rpc('due_reminders')"| RPC
+    RPC -. 回傳到期清單 .-> S1
+    S2 -->|"查表：supabase.from('push_subscriptions')"| T_SUB
+    T_SUB -. 回傳收件地址 .-> S2
+    S3 --> RLY
+    RLY --> D1
+
+    classDef frontend fill:#dbeafe,stroke:#3b82f6,color:#1e3a5f
+    classDef dbrole fill:#dcfce7,stroke:#22c55e,color:#14532d
+    classDef edge fill:#ffedd5,stroke:#f97316,color:#7c2d12
+    classDef external fill:#fef3c7,stroke:#f59e0b,color:#78350f
+    classDef table fill:#f3e8ff,stroke:#a855f7,color:#581c87
+    classDef fail fill:#fee2e2,stroke:#ef4444,color:#7f1d1d
+
+    class U1,U3,U4,E1,D1,D2,D3 frontend
+    class U2 external
+    class CRON,RPC dbrole
+    class T_SUB,T_REM table
+    class GATE,S1,S2,S3,S5 edge
+    class RLY external
+    class UX,CX fail
