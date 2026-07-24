@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { publicAssetPath } from '@/utils/public-assets'
 
 // v2 外觀 store：Customization 子頁寫、月曆頁讀。與舊 settings-store 分開，
 // 只承載 v2 專屬的整頁背景圖 + 柔紗遮罩，不污染既有設定邏輯。
@@ -14,8 +15,8 @@ const SCRIM_OPACITY: Record<PhotoIntensity, number> = {
   strong: 0.8
 }
 
-// 系統預設背景圖（使用者未上傳時使用）。放在 public/ 下，以絕對路徑引用。
-export const DEFAULT_BACKGROUND = '/v2-backgrounds/default.jpg'
+// 系統預設背景圖（使用者未上傳時使用）。放在 public/ 下，路徑需跟隨部署 base。
+export const DEFAULT_BACKGROUND = publicAssetPath('v2-backgrounds/default.jpg')
 
 export const useV2AppearanceStore = defineStore('v2-appearance', () => {
   // 整頁背景圖（data URL 或路徑）。預設為系統預設圖；使用者上傳會覆蓋。

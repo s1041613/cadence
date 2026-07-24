@@ -43,6 +43,7 @@ import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { parseISO, iso, addDays, WD_CAP } from '@/utils/convert-date-time'
+import { publicAssetPath } from '@/utils/public-assets'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -64,7 +65,7 @@ const activeTab = ref<'schedule' | 'myday'>('schedule')
 
 // MY GOAL（本階段固定預設圖 + 文字，不做上傳/持久化）
 const goalText = 'Ship the week-view redesign and clear inbox to zero.'
-const goalImage = '/v2-backgrounds/default.jpg'
+const goalImage = publicAssetPath('v2-backgrounds/default.jpg')
 
 function onCreate(): void {
   if (tasksStore.isLoading) return
