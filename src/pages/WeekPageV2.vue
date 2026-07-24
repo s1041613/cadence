@@ -59,7 +59,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .wp2 {
   width: 100%;
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
 }
 

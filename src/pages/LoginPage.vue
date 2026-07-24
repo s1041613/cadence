@@ -81,7 +81,7 @@ function signInWithApple(): void {
 
 <style scoped>
 .login {
-  height: 100dvh;
+  height: 100svh;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -91,7 +91,7 @@ function signInWithApple(): void {
 .login__frame {
   width: 100%;
   max-width: 420px;
-  height: 100dvh;
+  height: 100svh;
   max-height: 900px;
   display: flex;
   flex-direction: column;
@@ -130,7 +130,8 @@ function signInWithApple(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 22px 24px 0;
+  /* 暖色 panel 延伸進底部 safe-area，避免露出外層 --cd-topbar 的色差帶 */
+  padding: 22px 24px env(safe-area-inset-bottom);
 }
 
 .login__label {

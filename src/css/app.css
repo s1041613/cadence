@@ -32,7 +32,7 @@ body,
 #q-app {
   width: 100%;
   min-width: 0;
-  height: 100dvh;
+  height: 100svh;
   margin: 0;
   background: #F1EFE9;
 }
