@@ -55,7 +55,7 @@ const emit = defineEmits<{
   right: 0;
   bottom: 6px;
   width: 40px;
-  background: linear-gradient(90deg, rgba(250, 250, 249, 0), #fafaf9);
+  background: linear-gradient(90deg, rgba(241, 239, 233, 0), #F1EFE9);
   pointer-events: none;
 }
 </style>

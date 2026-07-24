@@ -42,7 +42,7 @@ const pane = ref<'root' | 'customization'>('root')
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #efeeec;
+  background: #F1EFE9;
   padding-top: max(env(safe-area-inset-top), 40px);
 }
 

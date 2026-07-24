@@ -16,10 +16,12 @@ function readDotenvValue(name: string): string | undefined {
 
 export default defineConfig((/* ctx */) => {
   const supabaseConnectSrc = process.env.QCLI_SUPABASE_URL ?? readDotenvValue('QCLI_SUPABASE_URL') ?? ''
+  const publicPath = process.env.GITHUB_PAGES === 'true' ? '/cadence/' : '/'
 
   return {
     htmlVariables: {
-      supabaseConnectSrc
+      supabaseConnectSrc,
+      publicPath
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -79,7 +81,7 @@ export default defineConfig((/* ctx */) => {
       // vueRouterBase,
       // vueDevtools,
 
-      publicPath: process.env.GITHUB_PAGES === 'true' ? '/cadence/' : '/',
+      publicPath,
       // define: {},
       // defineEnv: {}
       // ignorePublicFolder: true,
