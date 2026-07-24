@@ -48,7 +48,9 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  padding: 12px 18px 40px;
+  /* 底部由 frame 的 padding-bottom(env safe-area) 讓開 home indicator，
+     這裡不再用假的 40px 佔位，白色 nav 收在 safe-area 之上、底下露 frame #F1EFE9 底色 */
+  padding: 12px 18px;
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }

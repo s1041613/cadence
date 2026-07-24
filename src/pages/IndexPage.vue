@@ -50,7 +50,7 @@ const tasksStore = useTasksStore()
 .app
   position: relative
   width: 100%
-  height: 100svh
+  height: 100dvh
   display: flex
   flex-direction: column
   background: $bg

@@ -96,7 +96,7 @@ onBeforeUnmount(() => {
 
 <style scoped lang="sass">
 .auth-callback
-  min-height: 100svh
+  min-height: 100dvh
   display: grid
   place-items: center
   background: #eeebe1

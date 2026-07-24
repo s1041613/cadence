@@ -120,8 +120,8 @@ function onCreate(): void {
   display: none;
 }
 
-/* FAB 浮在底部 nav 之上（同月曆/週） */
+/* FAB 浮在底部 nav 之上（同月曆/週，nav 縮 40px 後對應下移） */
 .dv2__fab {
-  bottom: 115px;
+  bottom: 75px;
 }
 </style>

@@ -33,7 +33,7 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
 <style scoped>
 .sp2 {
   width: 100%;
-  height: 100svh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -46,6 +46,8 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
   overflow: hidden;
   background: #F1EFE9;
   padding-top: max(env(safe-area-inset-top), 40px);
+  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .sp2__content {
