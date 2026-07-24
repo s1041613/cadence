@@ -159,8 +159,8 @@ function onCreate(): void {
   min-height: 0;
 }
 
-/* FAB 浮在底部 nav 之上（同月曆） */
+/* FAB 浮在底部 nav 之上（同月曆，nav 縮 40px 後對應下移） */
 .wv2__fab {
-  bottom: 115px;
+  bottom: 75px;
 }
 </style>
