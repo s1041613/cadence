@@ -14,7 +14,9 @@
     "postinstall": "quasar prepare --silent"
   },
   "dependencies": {
+    "@fontsource/caveat": "^5.3.0",
     "@fontsource/dancing-script": "^5.2.8",
+    "@fontsource/instrument-serif": "^5.3.0",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@fontsource/noto-sans-tc": "^5.2.9",

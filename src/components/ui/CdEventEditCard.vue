@@ -117,7 +117,7 @@
         <span class="cd-edit-card__field-icon">
           <CdIcon name="bell" :size="18" color="#9C9E94" />
         </span>
-        <button type="button" class="cd-edit-card__pill-btn" @click="emit('openAlertMenu')">{{ alertLabel }}</button>
+        <CdReminderPill :model-value="reminder" @update:model-value="(v) => emit('update:reminder', v)" />
       </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
@@ -187,10 +187,12 @@ import CdSwitch from './CdSwitch.vue'
 import CdTimeDropdown from './CdTimeDropdown.vue'
 import CdDatePicker from './CdDatePicker.vue'
 import CdRepeatPill from './CdRepeatPill.vue'
+import CdReminderPill from './CdReminderPill.vue'
 import CdAppearancePicker from './CdAppearancePicker.vue'
 import CdIcon from './CdIcon.vue'
 import { autoPoms, minutes, type TimeFormatName } from '@/utils/convert-date-time'
 import type { IconName } from './icons'
+import type { ReminderPreset } from '@/types/task'
 
 // CdEventEditCard — Event/Task edit popover (same popover swaps between preview/edit, no slide
 // transition). design-research-report.md §3.9. desk width 388px.
@@ -228,6 +230,7 @@ const props = withDefaults(
     start: string
     end: string
     alertLabel: string
+    reminder: ReminderPreset | null
     repeatLabel: string
     location: string
     notes: string
@@ -259,6 +262,7 @@ const emit = defineEmits<{
   'update:notes': [value: string]
   cycleRepeat: []
   openAlertMenu: []
+  'update:reminder': [value: ReminderPreset | null]
   'update:calendarId': [value: string]
 }>()
 

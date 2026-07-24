@@ -90,6 +90,8 @@
   --cd-font-mono: 'JetBrains Mono', monospace;
   --cd-font-draft: 'Helvetica Neue', 'Inter', sans-serif;
   --cd-font-script: 'Dancing Script', cursive;
+  --cd-font-serif: 'Instrument Serif', serif; /* v2 月曆標題 */
+  --cd-font-caveat: 'Caveat', cursive; /* v2 月曆日期數字 */
 
   /* ---------- Typography: sizes (px scale used across the design) ---------- */
   --cd-fs-8: 8px;
@@ -117,6 +119,7 @@
   --cd-fs-30: 30px;
   --cd-fs-44: 44px;
   --cd-fs-46: 46px;
+  --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
   /* ---------- Radius ---------- */
   --cd-radius-pill: 999px;
