@@ -58,7 +58,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: stretch; /* body 撐滿 row 全高，事件區塊才有高度可捲 */
   gap: 18px;
-  padding: 10px 0;
+  padding: 7px 0;
   border-top: 1px solid rgba(27, 27, 27, 0.08);
   overflow: hidden; /* 等高時事件多的列在自身內裁切，不撐高整體 */
 }
@@ -96,17 +96,17 @@ const emit = defineEmits<{
 }
 
 /* 事件區塊：事件多時內部捲動看全部（DOW 固定在上方不捲）。
-   底部漸層淡出遮罩，讓被裁的事件柔和淡掉而非硬邊銳利切斷。 */
+   底部漸層淡出遮罩只吃最後 12px，讓「還有更多」有暗示但不咬掉第 3 件的字。 */
 .pv2-wdr__events {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   overflow-y: auto;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 10px), transparent);
 }
 
 .pv2-wdr__events::-webkit-scrollbar {
@@ -142,7 +142,7 @@ const emit = defineEmits<{
 .pv2-wdr__title {
   flex: 1;
   min-width: 0;
-  font: 500 14px var(--cd-font-ui);
+  font: 500 13px/1.25 var(--cd-font-ui);
   color: #1b1b1b;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -151,7 +151,7 @@ const emit = defineEmits<{
 
 .pv2-wdr__time {
   flex: none;
-  font: 500 12px var(--cd-font-mono);
+  font: 500 11px var(--cd-font-mono);
   letter-spacing: 0.04em;
   color: #9c9c9c;
 }

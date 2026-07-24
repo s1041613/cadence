@@ -97,7 +97,9 @@ function onFileChange(e: Event): void {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  background: #efefef;
+  /* Same as Pv2SettingsRoot: inherit the frame's paper so the safe-area band above
+     the header matches the content, no lighter stripe. */
+  background: transparent;
 }
 
 .pv2-cust__head {
