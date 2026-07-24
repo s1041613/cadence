@@ -9,6 +9,7 @@
       <div class="sp2__content">
         <Pv2SettingsRoot v-if="pane === 'root'" @open="pane = $event" />
         <Pv2SettingsCustomization v-else-if="pane === 'customization'" @back="pane = 'root'" />
+        <Pv2SettingsNotifications v-else-if="pane === 'notifications'" @back="pane = 'root'" />
       </div>
       <Pv2BottomNav active="setting" />
     </div>
@@ -21,11 +22,12 @@ import { useBreakpoint } from '@/composables/use-breakpoint'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2SettingsRoot from '@/components/v2/settings/Pv2SettingsRoot.vue'
 import Pv2SettingsCustomization from '@/components/v2/settings/Pv2SettingsCustomization.vue'
+import Pv2SettingsNotifications from '@/components/v2/settings/Pv2SettingsNotifications.vue'
 
 const { isDesktop } = useBreakpoint()
 
-// 目前只有 root 與 customization；其餘子頁尚未實作
-const pane = ref<'root' | 'customization'>('root')
+// root、customization、notifications；其餘子頁尚未實作
+const pane = ref<'root' | 'customization' | 'notifications'>('root')
 </script>
 
 <style scoped>

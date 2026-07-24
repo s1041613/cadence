@@ -28,8 +28,7 @@
           class="pv2-set__row"
           :class="{ 'pv2-set__row--divided': i > 0, 'pv2-set__row--enabled': row.enabled }"
           :disabled="!row.enabled"
-          @click="row.enabled && emit('open', 'customization')"
-          data-note="目前僅 Customization 可導航；未來啟用其他子頁時需改成 emit row.key"
+          @click="row.pane && emit('open', row.pane)"
         >
           <span class="pv2-set__row-icon" v-html="row.icon" />
           <span class="pv2-set__row-label">{{ row.label }}</span>
@@ -59,9 +58,9 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth-store'
 
-// 目前只有 Customization 可導航；其餘子頁尚未實作
+// Customization 與 Notifications 可導航；其餘子頁尚未實作
 const emit = defineEmits<{
-  open: [pane: 'customization']
+  open: [pane: 'customization' | 'notifications']
 }>()
 
 const auth = useAuthStore()
@@ -88,12 +87,21 @@ const ICON_PRIVACY =
 const ICON_LOGOUT =
   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c56a5e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 H5 a2 2 0 0 0-2 2 v10 a2 2 0 0 0 2 2 h4 M15 8 l4 4-4 4 M19 12 H9"/></svg>'
 
-// enabled 的子頁才可點；目前只有 Customization 實作
-const prefRows = [
+// enabled 的子頁才可點；目前 Customization 與 Notifications 已實作。
+// key 用字面量聯集，讓可導航列 emit 出的型別對得上 emit('open', ...) 的簽章。
+type NavPane = 'customization' | 'notifications'
+interface PrefRow {
+  key: string
+  label: string
+  icon: string
+  enabled: boolean
+  pane?: NavPane
+}
+const prefRows: PrefRow[] = [
   { key: 'calendars', label: 'Calendars', icon: ICON_CAL, enabled: false },
   { key: 'time', label: 'Time', icon: ICON_TIME, enabled: false },
-  { key: 'customization', label: 'Customization', icon: ICON_CUSTOM, enabled: true },
-  { key: 'notifications', label: 'Notifications', icon: ICON_NOTIF, enabled: false }
+  { key: 'customization', label: 'Customization', icon: ICON_CUSTOM, enabled: true, pane: 'customization' },
+  { key: 'notifications', label: 'Notifications', icon: ICON_NOTIF, enabled: true, pane: 'notifications' }
 ]
 </script>
 
