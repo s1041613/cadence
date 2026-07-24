@@ -46,8 +46,8 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
   overflow: hidden;
   background: #F1EFE9;
   padding-top: max(env(safe-area-inset-top), 40px);
-  /* 底部不留 frame padding：safe-area 由白色底部 nav 的 padding-bottom 自行吃滿，
-     讓白底一路連續到螢幕底，不露出 frame 背景塗鴉/底色帶。 */
+  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .sp2__content {

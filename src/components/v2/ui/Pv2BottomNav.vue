@@ -48,10 +48,9 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  /* 白底吃進底部 safe-area：真機讓白色一路連續蓋到螢幕底（含 home indicator 區），
-     不露出 frame 背景塗鴉/米色帶。無 safe-area（桌面）時退回 40px 視覺留白。 */
+  /* 底部由 frame 的 padding-bottom(env safe-area) 讓開 home indicator，
+     這裡不再用假的 40px 佔位，白色 nav 收在 safe-area 之上、底下露 frame #F1EFE9 底色 */
   padding: 12px 18px;
-  padding-bottom: max(40px, calc(12px + env(safe-area-inset-bottom)));
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }
