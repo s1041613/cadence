@@ -80,7 +80,9 @@ function onSwipeDown(): void {
   position: relative;
   width: 100%;
   max-height: 92%;
-  background: #fff;
+  /* All bottom sheets share the v2 paper surface. Callers may still override via the
+     `surface` prop; this is just the default every sheet gets. */
+  background: #fafaf9;
   border-radius: 22px 22px 0 0;
   box-shadow: var(--cd-shadow-sheet);
   animation-name: cd-sheetUp;

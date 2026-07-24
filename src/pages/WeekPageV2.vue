@@ -64,34 +64,46 @@ onBeforeUnmount(() => {
 }
 
 .wp2__frame {
+  /* --wp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。 */
+  --wp2-safe-top: max(env(safe-area-inset-top), 40px);
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #F1EFE9;
+  background: #fafaf9;
   isolation: isolate;
-  padding-top: max(env(safe-area-inset-top), 40px);
+  padding-top: var(--wp2-safe-top);
   /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* 背景層錨定 padding-box 內緣，用負 top 抵回 padding-top 讓圖鋪到 frame 頂，
+   否則頂部 safe-area 會露出底色（白帶）。 */
 .wp2__bg {
   position: absolute;
-  inset: 0;
+  top: calc(-1 * var(--wp2-safe-top));
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
   width: 100%;
-  height: 100%;
+  /* Explicit height so the <img> fills frame + negated safe-area; width:100% alone
+     leaves it at intrinsic (auto) height and the picture stops partway down. */
+  height: calc(100% + var(--wp2-safe-top));
   object-fit: cover;
   pointer-events: none;
 }
 
 .wp2__scrim {
   position: absolute;
-  inset: 0;
+  top: calc(-1 * var(--wp2-safe-top));
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
-  background: #F1EFE9;
+  background: #fafaf9;
   pointer-events: none;
   transition: opacity 0.25s ease;
 }
@@ -118,7 +130,8 @@ onBeforeUnmount(() => {
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
   isolation: isolate;
-  padding-top: 44px;
+  --wp2-safe-top: 44px;
+  padding-top: var(--wp2-safe-top);
 }
 
 .wp2__loading {

@@ -139,7 +139,7 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   width: 24px;
   height: 24px;
   border-radius: 7px;
-  border: 1.8px solid #c4c1b4;
+  border: 1.8px solid #cdcdcd;
   background: transparent;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
@@ -156,7 +156,7 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
 }
 
 .dmd__reminder-text--done {
-  color: #a7a59b;
+  color: #b2b2b2;
   text-decoration: line-through;
 }
 

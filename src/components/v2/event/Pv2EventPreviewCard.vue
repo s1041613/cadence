@@ -81,8 +81,8 @@ const emit = defineEmits<{
 <style scoped>
 .pv2-preview-card {
   width: 370px;
-  background: #fff;
-  border: 1px solid #d8d2c5;
+  background: #fafaf9;
+  border: 1px solid #e2e2e2;
   border-radius: 8px;
   padding: 18px;
   color: #1b1b1b;
@@ -115,7 +115,7 @@ const emit = defineEmits<{
   gap: 8px;
   font: 800 11px var(--cd-font-mono);
   text-transform: uppercase;
-  color: #4b4943;
+  color: #3a3a3a;
 }
 
 .pv2-preview-card__dot {
@@ -145,7 +145,7 @@ const emit = defineEmits<{
 .pv2-preview-card__when {
   margin: 8px 0 0;
   font: 700 12px var(--cd-font-mono);
-  color: #68645c;
+  color: #6e6e6e;
 }
 
 .pv2-preview-card__rows {
@@ -159,7 +159,7 @@ const emit = defineEmits<{
   align-items: center;
   gap: 10px;
   min-height: 48px;
-  border-bottom: 1px solid #e3ded2;
+  border-bottom: 1px solid #e2e2e2;
 }
 
 .pv2-preview-card__row--notes {
@@ -169,18 +169,18 @@ const emit = defineEmits<{
 
 .pv2-preview-card__row-label {
   font: 800 10px var(--cd-font-mono);
-  color: #777168;
+  color: #6e6e6e;
 }
 
 .pv2-preview-card__row-value {
   min-width: 0;
   overflow-wrap: anywhere;
   font: 600 14px/1.35 var(--cd-font-ui);
-  color: #1f1e1b;
+  color: #1b1b1b;
 }
 
 .pv2-preview-card__row-value--placeholder {
-  color: #9a9489;
+  color: #b2b2b2;
   font-style: italic;
   font-weight: 500;
 }
@@ -188,7 +188,7 @@ const emit = defineEmits<{
 .pv2-preview-card__chevron,
 .pv2-preview-card__meta {
   font: 800 13px var(--cd-font-mono);
-  color: #777168;
+  color: #6e6e6e;
 }
 
 .pv2-preview-card__focus {

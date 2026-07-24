@@ -1,14 +1,19 @@
 <template>
   <div class="pv2-copy-card">
+    <!-- Title row: fixed "Copy to days" heading with a round close button, above a
+         black hairline (the month lives in its own nav row below, per the design). -->
     <div class="pv2-copy-card__head">
-      <h2 class="pv2-copy-card__month">{{ monthLabel }}</h2>
-      <div class="pv2-copy-card__head-actions">
-        <button type="button" class="pv2-copy-card__arrow" aria-label="Previous month" @click="emit('prevMonth')">‹</button>
-        <button type="button" class="pv2-copy-card__arrow" aria-label="Next month" @click="emit('nextMonth')">›</button>
-        <button type="button" class="pv2-copy-card__close" aria-label="Close" @click="emit('close')">
-          <CdIcon name="close" :size="14" color="#1b1b1b" />
-        </button>
-      </div>
+      <h2 class="pv2-copy-card__title">Copy to days</h2>
+      <button type="button" class="pv2-copy-card__close" aria-label="Close" @click="emit('close')">
+        <CdIcon name="close" :size="15" color="#1b1b1b" />
+      </button>
+    </div>
+
+    <!-- Month nav: ‹  italic "July 2026"  › -->
+    <div class="pv2-copy-card__nav">
+      <button type="button" class="pv2-copy-card__arrow" aria-label="Previous month" @click="emit('prevMonth')">‹</button>
+      <span class="pv2-copy-card__month">{{ monthLabel }}</span>
+      <button type="button" class="pv2-copy-card__arrow" aria-label="Next month" @click="emit('nextMonth')">›</button>
     </div>
 
     <div class="pv2-copy-card__dow-row">
@@ -21,8 +26,12 @@
         :key="cell?.date ?? `blank-${index}`"
         type="button"
         class="pv2-copy-card__cell"
-        :class="{ 'pv2-copy-card__cell--blank': !cell, 'pv2-copy-card__cell--selected': !!cell && selected.includes(cell.date) }"
-        :disabled="!cell || cell.disabled"
+        :class="{
+          'pv2-copy-card__cell--blank': !cell,
+          'pv2-copy-card__cell--selected': !!cell && selected.includes(cell.date),
+          'pv2-copy-card__cell--source': !!cell && cell.date === sourceDate
+        }"
+        :disabled="!cell || cell.disabled || (!!cell && cell.date === sourceDate)"
         @click="cell && emit('toggleDay', cell.date)"
       >
         <span v-if="cell">{{ cell.day }}</span>
@@ -49,6 +58,9 @@ const props = defineProps<{
   cells: Array<CopyToDaysCell | null>
   selected: string[]
   firstDay: FirstDayName
+  // The task's own date — marked with a soft ring and made unselectable (you can't
+  // copy a day onto itself), matching the design's greyed source day.
+  sourceDate?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -68,12 +80,23 @@ const weekdays = computed(() => {
 
 <style scoped>
 .pv2-copy-card {
+  /* v2 neutral palette — same ink/paper/line family as the month surface and the
+     edit card, not a warm-beige variant. */
+  --cc-ink: #1b1b1b;
+  --cc-ink-2: #6e6e6e;
+  --cc-ink-3: #b2b2b2;
+  --cc-line: #e2e2e2;
+  --cc-paper: #fafaf9;
+
+  /* Matches the desktop popover width (EventPreviewPopoverV2 popWidth = 340 in copy
+     mode); CdPopover fixes the wrapper to that and clips overflow, so the card must
+     not exceed it. Mobile sheet mode overrides to 100% below. */
   width: 340px;
-  background: #fff;
-  border: 1px solid #d8d2c5;
+  background: var(--cc-paper);
+  border: 1px solid var(--cc-line);
   border-radius: 8px;
-  padding: 18px;
-  color: #1b1b1b;
+  padding: 24px 22px 20px;
+  color: var(--cc-ink);
 }
 
 @media (max-width: 899px) {
@@ -81,49 +104,78 @@ const weekdays = computed(() => {
     width: 100%;
     border: none;
     border-radius: 0;
-    padding-bottom: 32px;
+    padding: 26px 24px 34px;
   }
 }
 
-.pv2-copy-card__head,
-.pv2-copy-card__head-actions,
-.pv2-copy-card__footer {
+/* Title row */
+.pv2-copy-card__head {
   display: flex;
   align-items: center;
-}
-
-.pv2-copy-card__head {
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 16px;
-  border-bottom: 1.5px solid #1b1b1b;
+  padding-bottom: 18px;
+  border-bottom: 1.5px solid var(--cc-ink);
 }
 
-.pv2-copy-card__month {
+.pv2-copy-card__title {
   margin: 0;
-  font: 500 28px/1 var(--cd-font-serif);
+  font: 400 32px/1 var(--cd-font-serif);
+  color: var(--cc-ink);
 }
 
-.pv2-copy-card__head-actions {
-  gap: 7px;
-}
-
-.pv2-copy-card__arrow,
 .pv2-copy-card__close {
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 31px;
-  height: 31px;
-  border: 1px solid #cfc8ba;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--cc-line);
   border-radius: 50%;
   background: #fff;
-  color: #1b1b1b;
   cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.pv2-copy-card__close:hover {
+  background: var(--cc-paper);
+}
+
+/* Month nav */
+.pv2-copy-card__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 20px 0 6px;
+}
+
+.pv2-copy-card__month {
+  min-width: 150px;
+  text-align: center;
+  font: italic 400 26px/1 var(--cd-font-serif);
+  color: var(--cc-ink);
 }
 
 .pv2-copy-card__arrow {
-  font: 500 22px/1 var(--cd-font-ui);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--cc-line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--cc-ink);
+  cursor: pointer;
+  font: 400 20px/1 var(--cd-font-ui);
+  transition: background 160ms ease;
+}
+
+.pv2-copy-card__arrow:hover {
+  background: var(--cc-paper);
 }
 
 .pv2-copy-card__dow-row,
@@ -133,73 +185,105 @@ const weekdays = computed(() => {
 }
 
 .pv2-copy-card__dow-row {
-  padding: 14px 0 8px;
+  padding: 12px 0 10px;
 }
 
 .pv2-copy-card__dow {
   text-align: center;
-  font: 800 10px var(--cd-font-mono);
-  color: #777168;
+  font: 700 11px var(--cd-font-mono);
+  letter-spacing: 0.02em;
+  color: var(--cc-ink-2);
 }
 
 .pv2-copy-card__grid {
-  gap: 4px;
+  gap: 2px 0;
 }
 
+/* Days are bare numerals — no fill, no border — the way the design reads. A day gets
+   a background only when selected (dark disc) or as the source day (soft ring). */
 .pv2-copy-card__cell {
   aspect-ratio: 1;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: #f4f1eb;
-  color: #1b1b1b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cc-ink);
   cursor: pointer;
-  font: 800 12px var(--cd-font-mono);
+  font: 700 15px var(--cd-font-mono);
   transition:
     background 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease;
+    color 160ms ease;
 }
 
-.pv2-copy-card__cell:not(:disabled):hover {
-  border-color: #1b1b1b;
+.pv2-copy-card__cell > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.pv2-copy-card__cell:not(:disabled):hover > span {
+  background: var(--cc-line);
 }
 
 .pv2-copy-card__cell--selected {
-  background: #1b1b1b;
   color: #fff;
 }
 
+.pv2-copy-card__cell--selected > span {
+  background: var(--cc-ink);
+}
+
+/* Source day: greyed and ringed, unselectable. */
+.pv2-copy-card__cell--source {
+  color: var(--cc-ink-3);
+  cursor: default;
+}
+
+.pv2-copy-card__cell--source > span {
+  background: #ececea;
+}
+
 .pv2-copy-card__cell--blank {
-  background: transparent;
   cursor: default;
 }
 
 .pv2-copy-card__footer {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid #e3ded2;
+  margin-top: 16px;
+  padding-top: 18px;
+  border-top: 1px solid var(--cc-line);
 }
 
 .pv2-copy-card__count {
-  font: 800 11px var(--cd-font-mono);
-  color: #777168;
+  font: 700 12px var(--cd-font-mono);
+  letter-spacing: 0.02em;
+  color: var(--cc-ink-2);
 }
 
 .pv2-copy-card__confirm {
-  min-width: 86px;
-  height: 38px;
+  min-width: 132px;
+  height: 52px;
+  padding: 0 26px;
   border: none;
-  border-radius: 6px;
-  background: #1b1b1b;
+  border-radius: 14px;
+  background: var(--cc-ink);
   color: #fff;
   cursor: pointer;
-  font: 800 13px var(--cd-font-ui);
+  font: 600 17px var(--cd-font-ui);
+  transition: opacity 160ms ease;
 }
 
 .pv2-copy-card__confirm:disabled {
-  opacity: 0.35;
+  background: var(--cc-line);
+  color: #fff;
   cursor: not-allowed;
 }
 </style>

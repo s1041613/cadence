@@ -111,7 +111,10 @@ const prefRows: PrefRow[] = [
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  background: #efefef;
+  /* Inherit the frame's paper (#fafaf9) rather than painting a slightly greyer
+     #efefef here — the old mismatch left a lighter band above the title where the
+     safe-area padding showed the frame colour through. One surface, top to bottom. */
+  background: transparent;
 }
 
 .pv2-set__title {

@@ -78,7 +78,7 @@ const emit = defineEmits<{
   height: 50%; /* 固定高度：不論事件多少都一樣高，超過的事件在列表區捲動 */
   display: flex;
   flex-direction: column;
-  background: #F1EFE9;
+  background: #fafaf9;
   border-radius: 24px 24px 0 0;
   padding: 14px 24px 30px;
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);

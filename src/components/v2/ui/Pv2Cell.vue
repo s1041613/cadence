@@ -65,8 +65,8 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-right: 1px solid #e2e2e2;
-  border-bottom: 1px solid #e2e2e2;
+  border-right: 1px solid #cdcdcd;
+  border-bottom: 1px solid #cdcdcd;
   padding: 4px 3px 5px;
   box-sizing: border-box;
   cursor: pointer;

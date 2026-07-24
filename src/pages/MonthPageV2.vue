@@ -72,29 +72,38 @@ onBeforeUnmount(() => {
 }
 
 .mp2__frame {
+  /* --mp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。 */
+  --mp2-safe-top: max(env(safe-area-inset-top), 40px);
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #F1EFE9; /* 海報底（無背景圖時的底色，對齊設計稿頁面底色） */
+  background: #fafaf9; /* 海報底（無背景圖時的底色，對齊設計稿頁面底色） */
   isolation: isolate; /* 建立堆疊脈絡，讓背景層的負 z-index 只落在 frame 內 */
   /* 頂部 safe-area：真機讓開系統 status bar；至少留一點空白，chip 列不貼到最上方。
      不畫假的 9:41/電量（真機自有系統 status bar），只保留其佔位。 */
-  padding-top: max(env(safe-area-inset-top), 40px);
+  padding-top: var(--mp2-safe-top);
   /* 底部 safe-area：把內容欄（含白色底部 nav）推到 home indicator 之上，
-     讓 frame 的 #F1EFE9 底色填滿 safe-area，與頁面連續、不露 body 底色帶。 */
+     讓 frame 的底色填滿 safe-area，與頁面連續、不露 body 底色帶。 */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* 背景圖鋪滿整個 frame（含 safe-area 區），浮在底色上、月曆內容下 */
+/* 背景圖鋪滿整個 frame（含 safe-area 區），浮在底色上、月曆內容下。
+   absolute 的 inset 錨定 padding-box 內緣，所以要用負 top 抵回 padding-top，
+   否則背景層會從 safe-area 之後才開始、頂部露出一條底色（白帶）。 */
 .mp2__bg {
   position: absolute;
-  inset: 0;
+  top: calc(-1 * var(--mp2-safe-top));
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
   width: 100%;
-  height: 100%;
+  /* Explicit height so the <img> fills frame + negated safe-area; width:100% alone
+     leaves it at intrinsic (auto) height and the picture stops partway down. */
+  height: calc(100% + var(--mp2-safe-top));
   object-fit: cover;
   pointer-events: none;
 }
@@ -102,9 +111,12 @@ onBeforeUnmount(() => {
 /* 白紗遮罩：opacity 由 store 的 scrimOpacity 控制，越強背景越淡、文字越清楚 */
 .mp2__scrim {
   position: absolute;
-  inset: 0;
+  top: calc(-1 * var(--mp2-safe-top));
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: -1;
-  background: #F1EFE9;
+  background: #fafaf9;
   pointer-events: none;
   transition: opacity 0.25s ease;
 }
@@ -117,7 +129,8 @@ onBeforeUnmount(() => {
 
 /* 桌面 device frame 沒有系統 safe-area，用固定 status bar 高度佔位維持設計稿比例 */
 .mp2--desktop .mp2__frame {
-  padding-top: 44px;
+  --mp2-safe-top: 44px;
+  padding-top: var(--mp2-safe-top);
 }
 
 /* 桌面：置中 393px 手機 frame（設計稿 device frame：圓角 44、陰影） */

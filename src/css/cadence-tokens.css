@@ -70,6 +70,9 @@
   --cd-swatch-5: #A56D91;
   --cd-swatch-6: #4C4E57;
 
+  /* ---------- Color: v2 edit-card primary CTA ---------- */
+  --cd-btn-primary: #2F3033; /* near-black CTA fill, softer than pure #1b1b1b */
+
   /* ---------- Color: danger / warn ---------- */
   --cd-danger: #C0564B;
   --cd-danger-2: #B4655C;

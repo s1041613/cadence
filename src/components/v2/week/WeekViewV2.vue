@@ -146,7 +146,8 @@ function onCreate(): void {
   margin-bottom: 4px;
 }
 
-/* 7 天等高：每列 flex:1 平均分攤，min-height:0 讓事件多的列在自身內裁切而非撐高 */
+/* 7 天等高塞滿畫面，整頁不捲動。每列平分高度後，靠事件 row 夠緊湊，
+   在等高的空間內至少露得出 3 件；第 4 件起在該列自身內捲（見 Pv2WeekDayRow）。 */
 .wv2__days {
   flex: 1;
   min-height: 0;

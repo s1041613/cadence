@@ -21,8 +21,8 @@ export const DEFAULT_BACKGROUND = publicAssetPath('v2-backgrounds/default.jpg')
 export const useV2AppearanceStore = defineStore('v2-appearance', () => {
   // 整頁背景圖（data URL 或路徑）。預設為系統預設圖；使用者上傳會覆蓋。
   const backgroundImage = ref<string | null>(DEFAULT_BACKGROUND)
-  // 柔紗遮罩強度
-  const photoIntensity = ref<PhotoIntensity>('soft')
+  // 柔紗遮罩強度（預設 strong：背景照最淡、日期與事件最清楚）
+  const photoIntensity = ref<PhotoIntensity>('strong')
 
   // 月曆頁的白紗 overlay 不透明度（0＝無遮罩）
   const scrimOpacity = computed(() => SCRIM_OPACITY[photoIntensity.value])
