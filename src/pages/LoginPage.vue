@@ -80,22 +80,35 @@ function signInWithApple(): void {
 </script>
 
 <style scoped>
+/* 首繪 viewport 短缺（iOS standalone 少算 status bar）露出的是 body 底色；
+   在登入頁把 body 染成 panel 同色，讓任何 viewport 抖動的露出帶隱形 */
+:global(body:has(.login)) {
+  background: var(--cd-inbox-paper);
+}
+
 .login {
   height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
-  background: var(--cd-topbar);
+  /* 與 panel 同色：frame 高度被 cap 或 viewport 短缺時，露出帶與 panel 無色差 */
+  background: var(--cd-inbox-paper);
 }
 
 .login__frame {
   width: 100%;
   max-width: 420px;
   height: 100dvh;
-  max-height: 900px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* 桌面才做 letterbox 框；手機一律滿版（Pro Max 956pt 若被 cap 在 900 會留永久色帶） */
+@media (hover: hover) and (pointer: fine) {
+  .login__frame {
+    max-height: 900px;
+  }
 }
 
 /* ---------- Hero ---------- */

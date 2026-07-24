@@ -39,6 +39,7 @@ export default defineConfig((/* ctx */) => {
     // 載入第三方套件
     // 在 app 掛載前載入, 可以用於載入第三方套件或是一些進入畫面前的檢查 e.g. App 啟動時檢查登入狀態，沒登入就導去登入頁
     boot: [
+      'ios-standalone-viewport',
       'auth',
       'auth-data-sync'
     ],
