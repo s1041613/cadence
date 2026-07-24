@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
 // Mirrors AuthCallbackPage's panel styling — both are full-screen interstitials on the same
 // parchment background.
 .join-calendar
-  min-height: 100dvh
+  min-height: 100svh
   display: grid
   place-items: center
   background: #eeebe1
