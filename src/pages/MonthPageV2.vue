@@ -83,9 +83,8 @@ onBeforeUnmount(() => {
   /* 頂部 safe-area：真機讓開系統 status bar；至少留一點空白，chip 列不貼到最上方。
      不畫假的 9:41/電量（真機自有系統 status bar），只保留其佔位。 */
   padding-top: max(env(safe-area-inset-top), 40px);
-  /* 底部 safe-area：把內容欄（含白色底部 nav）推到 home indicator 之上，
-     讓 frame 的 #F1EFE9 底色填滿 safe-area，與頁面連續、不露 body 底色帶。 */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* 底部不留 padding：safe-area 改由白色 nav 自己吃（見 Pv2BottomNav）。
+     這裡若留 padding，.mp2__bg(inset:0) 會鋪進去，在 nav 下露出壁紙色帶。 */
 }
 
 /* 背景圖鋪滿整個 frame（含 safe-area 區），浮在底色上、月曆內容下 */

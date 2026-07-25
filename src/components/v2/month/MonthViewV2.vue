@@ -200,10 +200,10 @@ void stepMonthBy // 目前未在模板使用（無箭頭），保留給後續切
   overflow: hidden;
 }
 
-/* FAB 浮在底部 nav 之上：nav 現高約 60px（假 40px safe-area padding 已移除，
-   safe-area 改由 frame 的 padding-bottom:env() 讓開），FAB 往上讓開 ~15px */
+/* FAB 浮在底部 nav 之上。nav 高度 = 內容 ~48px + padding-bottom max(40px, 12px+env)，
+   safe-area 由 nav 自己吃，FAB 跟著同一個 max() 上移，再讓開 ~15px 間隙 */
 .mv2__fab {
-  bottom: 75px;
+  bottom: max(75px, calc(47px + env(safe-area-inset-bottom)));
 }
 
 .mv2__body {

@@ -73,8 +73,8 @@ onBeforeUnmount(() => {
   background: #F1EFE9;
   isolation: isolate;
   padding-top: max(env(safe-area-inset-top), 40px);
-  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* 底部不留 padding：safe-area 改由白色 nav 自己吃（見 Pv2BottomNav）。
+     這裡若留 padding，.dp2__bg(inset:0) 會鋪進去，在 nav 下露出壁紙色帶。 */
 }
 
 .dp2__bg {

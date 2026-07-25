@@ -48,9 +48,11 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  /* 底部由 frame 的 padding-bottom(env safe-area) 讓開 home indicator，
-     這裡不再用假的 40px 佔位，白色 nav 收在 safe-area 之上、底下露 frame #F1EFE9 底色 */
+  /* 白色 nav 自己吃滿 home indicator 區：frame 不再留 padding-bottom，
+     否則 frame 的背景圖(.mp2__bg inset:0)會鋪進那塊 padding、在 nav 下露出壁紙色帶。
+     max() 保底 40px，讓沒有 home indicator 的機型(env=0)仍維持原本視覺高度 */
   padding: 12px 18px;
+  padding-bottom: max(40px, calc(12px + env(safe-area-inset-bottom)));
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }

@@ -46,8 +46,7 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
   overflow: hidden;
   background: #F1EFE9;
   padding-top: max(env(safe-area-inset-top), 40px);
-  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* 底部不留 padding：safe-area 改由白色 nav 自己吃（見 Pv2BottomNav） */
 }
 
 .sp2__content {

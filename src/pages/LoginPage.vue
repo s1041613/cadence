@@ -47,8 +47,6 @@
           <a href="#" @click.prevent>Privacy</a>.
         </p>
         <p v-if="auth.error" class="login__error">{{ auth.error }}</p>
-
-        <div class="login__home-indicator" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -87,18 +85,22 @@ function signInWithApple(): void {
 }
 
 .login {
-  height: 100dvh;
+  /* 用 fixed + inset:0 釘住 visual viewport，不吃 100dvh 在 iOS standalone
+     首繪短算的虧；短算時外層會露出 body 的 #F1EFE9，與 panel 的 #F7F5EF 形成色塊。 */
+  position: fixed;
+  inset: 0;
   width: 100%;
   display: flex;
   justify-content: center;
-  /* 與 panel 同色：frame 高度被 cap 或 viewport 短缺時，露出帶與 panel 無色差 */
+  /* 與 panel 同色：frame 高度被 cap 時，露出帶與 panel 無色差 */
   background: var(--cd-inbox-paper);
 }
 
 .login__frame {
   width: 100%;
   max-width: 420px;
-  height: 100dvh;
+  /* 撐滿已用 fixed 釘住的 .login，不再自己算 100dvh（首繪會短算） */
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -143,8 +145,9 @@ function signInWithApple(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 暖色 panel 延伸進底部 safe-area，避免露出外層 --cd-topbar 的色差帶 */
-  padding: 22px 24px env(safe-area-inset-bottom);
+  /* 暖色 panel 延伸進底部 safe-area，避免露出外層底色的色差帶。
+     保底 22px：假 home indicator 移除後，fineprint 不能貼到 iOS 真實的那條。 */
+  padding: 22px 24px max(22px, env(safe-area-inset-bottom));
 }
 
 .login__label {
@@ -243,12 +246,6 @@ function signInWithApple(): void {
   text-align: center;
 }
 
-.login__home-indicator {
-  margin-top: auto;
-  margin-bottom: 9px;
-  width: 134px;
-  height: 5px;
-  border-radius: var(--cd-radius-pill);
-  background: var(--cd-scrim-strong);
-}
+/* 假 home indicator 已移除：真機 iOS 會自己在 safe-area 畫一條，
+   畫面上再畫一條會變成兩條疊著。底部留白改由 .login__panel 的 padding-bottom 負責。 */
 </style>
