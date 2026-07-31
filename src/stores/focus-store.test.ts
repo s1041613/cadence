@@ -266,6 +266,59 @@ describe('focus-store progress reporting', () => {
   })
 })
 
+describe('focus-store overrun reporting', () => {
+  // T0 is 2023-11-15 06:13 local, so the previous day's morning slot is over and a slot
+  // later the same day is not.
+  const past = makeTask({ date: '2023-11-14', start: '09:00', end: '10:00' })
+  const future = makeTask({ date: '2023-11-15', start: '09:00', end: '10:00' })
+
+  it('flags a session running past the event slot', async () => {
+    const { focus, open } = setup(past)
+    await open()
+    focus.skipBreathing()
+
+    expect(focus.overrunning).toBe(true)
+  })
+
+  it('does not flag a session inside its slot', async () => {
+    const { focus, open } = setup(future)
+    await open()
+    focus.skipBreathing()
+
+    expect(focus.overrunning).toBe(false)
+  })
+
+  it('never flags an all-day task', async () => {
+    const { focus, open } = setup(makeTask({ allDay: true, start: '', end: '' }))
+    await open()
+    focus.skipBreathing()
+
+    expect(focus.overrunning).toBe(false)
+  })
+
+  it('turns on by itself once the clock passes the end time', async () => {
+    const { focus, open } = setup(future)
+    await open()
+    focus.skipBreathing()
+    expect(focus.overrunning).toBe(false)
+
+    vi.setSystemTime(new Date(2023, 10, 15, 10, 30))
+    focus.syncNow()
+
+    expect(focus.overrunning).toBe(true)
+  })
+
+  it('keeps the timer running rather than stopping it', async () => {
+    const { focus, open } = setup(past)
+    await open()
+    focus.skipBreathing()
+
+    expect(focus.overrunning).toBe(true)
+    expect(focus.state).not.toBeNull()
+    expect(focus.view?.remainingMs).toBeGreaterThan(0)
+  })
+})
+
 describe('focus-store rehydration', () => {
   it('resumes a session that still has time left', () => {
     const { focus, ui } = setup()

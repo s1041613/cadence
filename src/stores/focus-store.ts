@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { useUiStore } from './ui-store'
 import { useTasksStore } from './tasks-store'
-import { estPomsOf } from '@/utils/convert-date-time'
+import { estPomsOf, isSlotOver } from '@/utils/convert-date-time'
 import { loadStore, saveStore, removeStore } from '@/utils/save-load-local-storage'
 import { makeFocusChime, type FocusChime } from '@/utils/make-focus-chime'
 import {
@@ -66,6 +66,15 @@ export const useFocusStore = defineStore('focus', () => {
       : false
   )
   const soundUnlocked = computed(() => chime?.unlocked ?? false)
+
+  /** The session has outlived the event's scheduled slot. Purely informational — it never
+   *  stops the timer, because being interrupted mid-pomodoro is worse than running late.
+   *  Recomputes with `now`, so it turns on by itself as the session passes the end time. */
+  const overrunning = computed(() => {
+    const t = task.value
+    if (!t || state.value === null || state.value.phase === 'done') return false
+    return isSlotOver(t, new Date(now.value))
+  })
 
   function ensureChime(): FocusChime {
     chime ??= makeFocusChime()
@@ -254,6 +263,7 @@ export const useFocusStore = defineStore('focus', () => {
     estPoms,
     canAnother,
     soundUnlocked,
+    overrunning,
     start,
     close,
     skipBreathing,
