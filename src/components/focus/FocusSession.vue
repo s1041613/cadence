@@ -531,12 +531,12 @@ onUnmounted(() => {
 
   .fx-fp
     font-size: 11px
-    font-weight: 800
+    font-weight: 700
     color: #ffd9cf
 
   .fk
     font-size: 50px
-    font-weight: 800
+    font-weight: 700
     color: #fff
     line-height: 1
     letter-spacing: .01em
@@ -544,7 +544,7 @@ onUnmounted(() => {
   .fl
     font-size: 13px
     color: rgba(255, 255, 255, .7)
-    font-weight: 600
+    font-weight: 500
     letter-spacing: .08em
 
   .fx-faceTom.pulse
@@ -567,7 +567,7 @@ onUnmounted(() => {
     border-radius: 999px
     padding: 13px 26px
     font-size: 14px
-    font-weight: 800
+    font-weight: 700
     cursor: pointer
 
   .prim
@@ -597,7 +597,7 @@ onUnmounted(() => {
   h4
     margin: 0 0 6px
     font-size: 17px
-    font-weight: 800
+    font-weight: 700
     color: $ink
 
   p
@@ -615,7 +615,7 @@ onUnmounted(() => {
     border: none
     border-radius: 10px
     padding: 12px
-    font-weight: 800
+    font-weight: 700
     font-size: 14px
     cursor: pointer
 

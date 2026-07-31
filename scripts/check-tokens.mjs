@@ -22,6 +22,9 @@ const SCAN_TARGETS = [
   'src/components/ui',
   'src/components/shell',
   'src/components/month',
+  'src/components/week',
+  'src/components/day',
+  'src/components/focus',
   'src/layouts',
   'src/pages/IndexPage.vue',
   'src/pages/LoginPage.vue',
@@ -38,18 +41,23 @@ const SCAN_TARGETS = [
  */
 const RULES = [
   {
-    id: 'accent-rgba',
-    pattern: /rgba\(\s*179\s*,\s*172\s*,\s*145\s*,/gi,
+    // Matches rgb() and rgba(), comma- or space-separated (CSS Color 4), with or
+    // without an alpha channel. Anchoring on the channel triple alone rather than
+    // requiring a trailing comma is what catches the alpha-less rgb() form.
+    id: 'accent-rgb',
+    pattern: /rgba?\(\s*179\s*[,\s]\s*172\s*[,\s]\s*145\s*[,)/\s]/gi,
     hint: 'use rgba(var(--cd-olive-rgb), <alpha>)',
   },
   {
-    id: 'scrim-rgba',
-    pattern: /rgba\(\s*40\s*,\s*38\s*,\s*30\s*,/gi,
+    id: 'scrim-rgb',
+    pattern: /rgba?\(\s*40\s*[,\s]\s*38\s*[,\s]\s*30\s*[,)/\s]/gi,
     hint: 'use rgba(var(--cd-scrim-rgb), <alpha>) or a --cd-shadow-* token',
   },
   {
+    // The optional trailing pair catches 8-digit hex (#B3AC9188), the modern way to
+    // write a translucent accent, which a \b-anchored 6-digit pattern misses.
     id: 'accent-hex',
-    pattern: /#(?:B3AC91|8F8A6E|6E6A52|6E6A54|3f4136)\b/gi,
+    pattern: /#(?:B3AC91|8F8A6E|6E6A52|6E6A54|3F4136)(?:[0-9a-f]{2})?\b/gi,
     hint: 'use --cd-olive, --cd-olive-mix-1, --cd-olive-mix-2 or --cd-olive-ink',
   },
 ]
@@ -74,10 +82,15 @@ function collectFiles(target) {
 /**
  * Comments describe values rather than rendering them, so a literal inside one is a
  * reference, not a leak. Stripping them keeps documentation from failing the check.
+ *
+ * A bare `*` prefix means a JSDoc continuation line, but `*` is also a valid CSS
+ * selector (`* { }`, `.a > * { }`), so requiring that nothing resembling a
+ * declaration or block follows keeps real code from being skipped silently.
  */
 function isCommentLine(line) {
   const t = line.trim()
-  return t.startsWith('//') || t.startsWith('*') || t.startsWith('/*') || t.startsWith('<!--')
+  if (t.startsWith('//') || t.startsWith('/*') || t.startsWith('<!--')) return true
+  return t.startsWith('*') && !t.includes('{') && !/:\s*\S/.test(t)
 }
 
 function findViolations() {

@@ -952,6 +952,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 .cd-settings__micro-label {
   display: block;
   font: 700 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
   padding: 4px 26px 8px;
@@ -960,6 +961,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 .cd-settings__section-label {
   display: block;
   font: 700 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--cd-muted);
@@ -1059,6 +1061,7 @@ button.cd-settings__row:hover {
 .cd-settings__version {
   text-align: center;
   font: 500 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   margin-top: 4px;
   letter-spacing: 0.08em;
@@ -1088,6 +1091,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__scope-chip {
   font: 700 9px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   color: #9a988f;
   border: 1px solid var(--cd-line);
@@ -1220,6 +1224,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-cals-label {
   font: 700 10px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.1em;
   color: var(--cd-muted);
 }
@@ -1386,6 +1391,7 @@ button.cd-settings__row:hover {
 .cd-settings__month-photo-badge {
   align-self: flex-start;
   font: 700 10px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
   color: #fff;
   background: #8a877c;
@@ -1601,6 +1607,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__members-count {
   font: 700 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   color: var(--cd-muted);
 }
@@ -1743,6 +1750,7 @@ button.cd-settings__row:hover {
   white-space: nowrap;
   text-align: left;
   font: 500 13.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
 }
 
@@ -1954,6 +1962,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-sync-tag {
   font: 500 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-3);
 }
 

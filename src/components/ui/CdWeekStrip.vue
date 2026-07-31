@@ -95,6 +95,7 @@ const emit = defineEmits<{
 
 .cd-week-strip__num {
   font: 700 15px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
 }
 

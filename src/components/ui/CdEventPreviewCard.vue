@@ -159,6 +159,7 @@ const eyebrowLabel = computed(() => {
 
 .cd-preview-card__eyebrow {
   font: 700 12px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--cd-olive);
@@ -266,6 +267,7 @@ const eyebrowLabel = computed(() => {
 .cd-preview-card__info-meta {
   margin-left: auto;
   font: 500 12px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
 }
 

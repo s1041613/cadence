@@ -63,6 +63,7 @@ const blockStyle = computed(() => ({
 
 .cd-event-block__time {
   font: 8.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   opacity: 0.7;
 }
 </style>

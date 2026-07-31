@@ -138,6 +138,12 @@
   --cd-font-script: var(--cd-font-ui);
   --cd-font-caveat: var(--cd-font-ui);
 
+  /* Tabular figures for anything that was previously set in a monospaced face.
+   * The UI face is proportional, so digits would otherwise vary in width and
+   * ragged the clock gutter and day-number grids that relied on monospace for
+   * vertical alignment. Applied via the .cd-tnum utility below. */
+  --cd-numeric-aligned: tabular-nums;
+
   /* ---------- Typography: sizes (px scale used across the design) ---------- */
   --cd-fs-8: 8px;
   --cd-fs-8-5: 8.5px;
