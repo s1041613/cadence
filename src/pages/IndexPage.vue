@@ -23,7 +23,6 @@
     <EventComposerOverlay v-if="ui.eventComposerInitialValues || ui.createOpen" />
     <SettingsDrawer />
     <AssistantDrawer />
-    <FocusSession v-if="ui.focusTaskId" />
   </div>
 </template>
 
@@ -40,7 +39,6 @@ import AssistantDrawer from '@/components/shell/AssistantDrawer.vue'
 import DayView from '@/components/day/DayView.vue'
 import WeekView from '@/components/week/WeekView.vue'
 import MonthView from '@/components/month/MonthView.vue'
-import FocusSession from '@/components/focus/FocusSession.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, quickAddTimeRange, formatTime } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, estPomsOf, quickAddTimeRange, formatTime } from './convert-date-time'
 
 describe('pad', () => {
   it('pads single digits', () => {
@@ -120,6 +120,27 @@ describe('autoPoms', () => {
     expect(autoPoms({ allDay: false, start: '09:00', end: '09:30' })).toBe(2)
     expect(autoPoms({ allDay: false, start: '09:00', end: '09:25' })).toBe(1)
     expect(autoPoms({ allDay: false, start: '09:00', end: '10:30' })).toBe(4)
+  })
+})
+
+describe('estPomsOf', () => {
+  // The stored estimate is a snapshot taken at creation; autoPoms recomputes from the
+  // slot. When a user edits an event's times the two diverge, so every consumer must
+  // agree on which wins — otherwise progress stalls or completes early.
+  it('prefers a stored estimate over the slot-derived count', () => {
+    expect(estPomsOf({ estimatedPomodoros: 2, allDay: false, start: '09:00', end: '10:30' })).toBe(2)
+  })
+
+  it('falls back to the slot-derived count when no estimate is stored', () => {
+    expect(estPomsOf({ estimatedPomodoros: 0, allDay: false, start: '09:00', end: '10:30' })).toBe(4)
+  })
+
+  it('falls back for all-day tasks with no stored estimate', () => {
+    expect(estPomsOf({ estimatedPomodoros: 0, allDay: true, start: '', end: '' })).toBe(1)
+  })
+
+  it('ignores a negative stored estimate', () => {
+    expect(estPomsOf({ estimatedPomodoros: -3, allDay: false, start: '09:00', end: '09:30' })).toBe(2)
   })
 })
 

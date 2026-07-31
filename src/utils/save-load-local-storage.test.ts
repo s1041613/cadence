@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { loadStore, saveStore } from './save-load-local-storage'
+import { loadStore, saveStore, removeStore } from './save-load-local-storage'
 
 const KEY = 'test.key'
 
@@ -30,5 +30,15 @@ describe('saveStore / loadStore', () => {
 
   it('returns undefined when the key is missing', () => {
     expect(loadStore('missing.key')).toBeUndefined()
+  })
+
+  it('removes a stored value', () => {
+    saveStore(KEY, { a: 1 })
+    removeStore(KEY)
+    expect(loadStore(KEY)).toBeUndefined()
+  })
+
+  it('tolerates removing a key that was never set', () => {
+    expect(() => removeStore('missing.key')).not.toThrow()
   })
 })

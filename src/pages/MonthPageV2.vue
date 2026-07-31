@@ -31,8 +31,6 @@
     <!-- 新建事件 overlay：FAB 的 ui.createOpen 由它消費（暫用舊皮，能用就好） -->
     <EventComposerOverlay v-if="ui.eventComposerInitialValues || ui.createOpen" variant="v2" />
 
-    <!-- focus session：event-preview 的 start-focus 會設 ui.focusTaskId，這裡要接住才有反應 -->
-    <FocusSession v-if="ui.focusTaskId" />
   </div>
 </template>
 
@@ -46,7 +44,6 @@ import MonthViewV2 from '@/components/v2/month/MonthViewV2.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopoverV2 from '@/components/v2/event/EventPreviewPopoverV2.vue'
 import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
-import FocusSession from '@/components/focus/FocusSession.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
-import { autoPoms } from '@/utils/convert-date-time'
+import { autoPoms, estPomsOf } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
 import { notifySyncError } from '@/lib/notify'
@@ -229,7 +229,7 @@ export const useTasksStore = defineStore('tasks', () => {
     const task = tasks.value.find((t) => t.id === id)
     if (!task) return
 
-    const limit = task.estimatedPomodoros > 0 ? task.estimatedPomodoros : autoPoms(task)
+    const limit = estPomsOf(task)
     const snapshot: Task = { ...task, completedPomodoros: Math.min(task.completedPomodoros + 1, limit) }
 
     const ctx = syncCtx
