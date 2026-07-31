@@ -25,7 +25,6 @@
     </div>
 
     <EventComposerOverlay v-if="ui.eventComposerInitialValues || ui.createOpen" variant="v2" />
-    <FocusSession v-if="ui.focusTaskId" />
   </div>
 </template>
 
@@ -39,7 +38,6 @@ import WeekViewV2 from '@/components/v2/week/WeekViewV2.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopoverV2 from '@/components/v2/event/EventPreviewPopoverV2.vue'
 import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
-import FocusSession from '@/components/focus/FocusSession.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()

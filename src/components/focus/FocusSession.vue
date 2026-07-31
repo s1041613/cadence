@@ -1,9 +1,10 @@
 <template>
-  <div v-if="task" class="fx" :class="{ rest: mode === 'rest' }">
+  <!-- Any click unlocks audio: a session restored by reload has no gesture of its own,
+       and autoplay policy keeps the chime silent until one happens. -->
+  <div v-if="task && focus.state" class="fx" :class="{ rest: mode === 'rest' }" @click="focus.unlockSound()">
     <div class="fx-top">
-      <button v-if="phase === 'breathing'" class="fx-skip" @click="skipBreathing">跳過</button>
-      <button class="fx-mute" @click="onToggleMute">{{ muted ? '開聲' : '靜音' }}</button>
-      <button class="fx-close" aria-label="關閉" @click="close">
+      <button v-if="phase === 'breathing'" class="fx-skip" @click="focus.skipBreathing()">跳過</button>
+      <button class="fx-close" aria-label="關閉" @click="focus.close()">
         <CdIcon name="close" :size="16" color="#fff" />
       </button>
     </div>
@@ -28,7 +29,7 @@
     </template>
 
     <template v-else>
-      <div class="fx-hud">{{ mode === 'focus' ? '正在專注 · 番茄鐘' : `短休息 · ${REST_MIN} 分鐘` }}</div>
+      <div class="fx-hud">{{ mode === 'focus' ? '正在專注 · 番茄鐘' : `短休息 · ${restMinutes} 分鐘` }}</div>
       <svg class="fx-scene" viewBox="0 0 100 190" preserveAspectRatio="xMidYMid slice" style="opacity: .3">
         <defs>
           <linearGradient id="fxbg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123f30" /><stop offset="1" stop-color="#0e3527" /></linearGradient>
@@ -50,11 +51,12 @@
       <div class="fx-face show">
         <div class="ft fx-ft">
           <span class="fx-ft-txt">{{ task.title || '（未命名）' }}</span>
-          <span class="fx-fp mono">{{ doneCount }}/{{ estPoms }}</span>
+          <span class="fx-fp mono">{{ focus.doneCount }}/{{ focus.estPoms }}</span>
         </div>
         <svg class="fx-faceTom" :class="{ pulse: pulseTomato }" width="50" height="50" viewBox="0 0 24 24" v-html="TOMATO_SVG" />
-        <div class="fk fx-fk mono">{{ fmt(Math.max(secondsLeft, 0)) }}</div>
+        <div class="fk fx-fk mono">{{ fmt(secondsLeft) }}</div>
         <div class="fl fx-fl">{{ statusLabel }}</div>
+        <div v-if="!focus.soundUnlocked" class="fx-soundHint">點一下畫面以啟用提示音</div>
       </div>
       <div v-if="mode !== 'done'" class="fx-bar show">
         <template v-if="mode === 'focus'">
@@ -62,12 +64,12 @@
           <button class="prim" @click="openEarlyFinishSheet">完成</button>
         </template>
         <template v-else-if="mode === 'rest'">
-          <button class="sec" @click="skipRest">跳過休息</button>
-          <button class="prim" @click="anotherPomodoro">再一顆番茄</button>
+          <button class="sec" @click="focus.skipRest()">跳過休息</button>
+          <button class="prim" :disabled="!focus.canAnother" @click="focus.anotherPomodoro()">再一顆番茄</button>
         </template>
       </div>
       <div v-if="mode === 'done'" class="fx-bar show">
-        <button class="prim" @click="close">結束</button>
+        <button class="prim" @click="focus.close()">結束</button>
       </div>
     </template>
 
@@ -87,74 +89,54 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
-import { useTasksStore } from '@/stores/tasks-store'
-import { autoPoms } from '@/utils/convert-date-time'
+import { useFocusStore } from '@/stores/focus-store'
 import { makeFocusAudio, type FocusAudio } from '@/utils/make-focus-audio'
+import { breathingGeometry, countCompletedBreaths } from '@/utils/breathing-curve'
 import { TOMATO_SVG } from '@/utils/tomato-icon'
 import CdIcon from '../ui/CdIcon.vue'
 
-const FOCUS_MIN = 25
-const REST_MIN = 5
+// This component is a projection of focus-store. It owns no timer state: only the
+// breathing animation (rAF-driven) and purely visual flags live here.
+
 const BREATHS = 3
-const FOCUS_S = FOCUS_MIN * 60
-const REST_S = REST_MIN * 60
-const VH = 190
-const SIZE = 34
-const CX = 50
-const PERIOD = 100
-const BASE = 118
-const AMP = 20
 const CYCLE = 5000
 const RING_C = 2 * Math.PI * 140
 
 const ui = useUiStore()
-const tasksStore = useTasksStore()
+const focus = useFocusStore()
 
 const task = computed(() => ui.focusTask)
-const estPoms = computed(() => (task.value ? autoPoms(task.value) : 1))
 
-type Phase = 'breathing' | 'timer'
-type Mode = 'focus' | 'rest' | 'done'
+const phase = computed(() => (focus.state?.phase === 'breathing' ? 'breathing' : 'timer'))
+const mode = computed(() => {
+  const p = focus.state?.phase
+  return p === 'rest' || p === 'done' ? p : 'focus'
+})
+const secondsLeft = computed(() => Math.max(0, Math.ceil((focus.view?.remainingMs ?? 0) / 1000)))
+const paused = computed(() => focus.view?.paused ?? false)
+// Derived from the store rather than a local constant, so the label cannot drift away
+// from the duration the timer actually runs for.
+const restMinutes = computed(() => Math.round((focus.config?.restMs ?? 0) / 60_000))
 
-const phase = ref<Phase>('breathing')
-const mode = ref<Mode>('focus')
 const breathsDone = ref(0)
 const rising = ref(true)
 const scroll = ref(Math.PI / 2)
 const wordOpacity = ref('0.22')
-const doneCount = ref(0)
-const secondsLeft = ref(FOCUS_S)
-const paused = ref(false)
-const muted = ref(false)
-const earlyFinishSheetOpen = ref(false)
 const pulseTomato = ref(false)
-const allPomsDone = ref(false)
+const earlyFinishSheetOpen = ref(false)
 
 let audio: FocusAudio | null = null
 let raf: number | null = null
-let intervalId: ReturnType<typeof setInterval> | null = null
-let restTimeoutId: ReturnType<typeof setTimeout> | null = null
 let lastTs: number | null = null
 let wasRising: boolean | undefined
 
-const worldY = (sx: number, s: number) => BASE - AMP * Math.sin((sx / PERIOD) * Math.PI * 2 + s)
-const isRising = (s: number) => Math.cos((CX / PERIOD) * Math.PI * 2 + s) > 0
+const frame = computed(() => breathingGeometry(scroll.value))
+const hillPath = computed(() => frame.value.hillPath)
+const charX = computed(() => frame.value.charX)
+const charY = computed(() => frame.value.charY)
+const charTransform = computed(() => frame.value.charTransform)
 
-const hillPath = computed(() => {
-  const s = scroll.value
-  let d = `M0 ${VH} L0 ${worldY(0, s).toFixed(2)}`
-  for (let x = 1; x <= 100; x++) d += ` L${x} ${worldY(x, s).toFixed(2)}`
-  return d + ` L100 ${VH} Z`
-})
-
-const charY = ref(BASE - SIZE * 0.42 - SIZE / 2)
-const charX = ref(CX - SIZE / 2)
-const charTransform = ref('rotate(0 50 100)')
-
-const ringOffset = computed(() => {
-  const total = mode.value === 'rest' ? REST_S : FOCUS_S
-  return RING_C * (1 - secondsLeft.value / total)
-})
+const ringOffset = computed(() => RING_C * (focus.view?.progress ?? 0))
 const ringCircumference = RING_C
 
 const statusLabel = computed(() => {
@@ -174,206 +156,83 @@ function loop(ts: number): void {
   const dt = ts - lastTs
   lastTs = ts
   scroll.value += (2 * Math.PI) * (dt / CYCLE)
-  const r = isRising(scroll.value)
-  rising.value = r
 
-  const y = worldY(CX, scroll.value)
-  const yL = worldY(CX - 2.5, scroll.value)
-  const yR = worldY(CX + 2.5, scroll.value)
-  const slope = (yR - yL) / 5
-  const angle = (Math.atan(slope) * 180) / Math.PI
-  const cy = y - SIZE * 0.42
-  charX.value = CX - SIZE / 2
-  charY.value = cy - SIZE / 2
-  charTransform.value = `rotate(${angle.toFixed(2)} ${CX} ${cy})`
-
-  const p = (CX / PERIOD) * Math.PI * 2 + scroll.value
-  const breath = (Math.sin(p) + 1) / 2
-  wordOpacity.value = (0.22 + Math.abs(slope) * 0.14).toFixed(2)
-  audio?.mix(r, breath)
+  const f = frame.value
+  rising.value = f.rising
+  wordOpacity.value = f.wordOpacity
+  audio?.mix(f.rising, f.breath)
 
   if (phase.value === 'breathing') {
-    if (wasRising === undefined) wasRising = r
-    if (wasRising && !r) {
-      breathsDone.value++
-      if (breathsDone.value >= BREATHS) {
-        phase.value = 'timer'
-        enterTimer()
-      }
-    }
-    wasRising = r
+    breathsDone.value += countCompletedBreaths(wasRising, f.rising)
+    wasRising = f.rising
+    if (breathsDone.value >= BREATHS) focus.skipBreathing()
   }
 
   raf = requestAnimationFrame(loop)
 }
 
-function enterTimer(): void {
-  audio?.fadeOut()
-  showTimer()
-}
-
-function showTimer(): void {
-  mode.value = 'focus'
-  startCountdown(FOCUS_S, 'focus')
-}
-
-function startCountdown(secs: number, which: 'focus' | 'rest'): void {
-  if (intervalId) clearInterval(intervalId)
-  clearRestTimeout()
-  secondsLeft.value = secs
-  paused.value = false
-  audio?.resume()
-  mode.value = which
-  intervalId = setInterval(() => {
-    if (paused.value) return
-    secondsLeft.value--
-    if (secondsLeft.value <= 0) {
-      if (intervalId) clearInterval(intervalId)
-      intervalId = null
-      if (which === 'focus') completePom()
-      else endRest()
-    }
-  }, 1000)
-}
-
-function completePom(): void {
-  if (!task.value) return
-  audio?.resume()
-  clearRestTimeout()
-  if (doneCount.value < estPoms.value) {
-    doneCount.value = Math.min(estPoms.value, doneCount.value + 1)
-    tasksStore.incrementCompletedPomodoros(task.value.id)
-  }
-  pulseTomato.value = true
-  setTimeout(() => (pulseTomato.value = false), 420)
-  if (doneCount.value >= estPoms.value) {
-    allPomsDone.value = true
-    mode.value = 'done'
-    secondsLeft.value = 0
-    return
-  }
-  restTimeoutId = setTimeout(() => {
-    restTimeoutId = null
-    if (mode.value !== 'done' && task.value) startRest()
-  }, 1600)
-}
-
-function startRest(): void {
-  audio?.enterCalm()
-  startCountdown(REST_S, 'rest')
-}
-
-function endRest(): void {
-  if (doneCount.value >= estPoms.value) {
-    allPomsDone.value = true
-    mode.value = 'done'
-  } else {
-    backToFocus()
-  }
-}
-
-function backToFocus(): void {
-  showTimer()
-}
-
-function skipBreathing(): void {
-  if (phase.value !== 'breathing') return
-  phase.value = 'timer'
-  enterTimer()
-}
-
 function togglePause(): void {
-  paused.value = !paused.value
-  if (paused.value) audio?.pause()
+  focus.togglePause()
+  if (focus.view?.paused) audio?.pause()
   else audio?.resume()
 }
 
+// Remembers whether the session was already paused when the sheet opened, so cancelling
+// restores what the user had rather than always resuming.
+let pausedBeforeSheet = false
+
 function openEarlyFinishSheet(): void {
+  pausedBeforeSheet = paused.value
   earlyFinishSheetOpen.value = true
-  paused.value = true
+  focus.pause()
   audio?.pause()
 }
 
 function confirmEarlyFinish(): void {
   earlyFinishSheetOpen.value = false
-  if (intervalId) clearInterval(intervalId)
-  intervalId = null
-  completePom()
+  focus.finishEarly()
 }
 
 function cancelEarlyFinish(): void {
   earlyFinishSheetOpen.value = false
-  paused.value = false
+  if (pausedBeforeSheet) return
+  focus.resume()
   audio?.resume()
 }
 
-function skipRest(): void {
-  if (intervalId) clearInterval(intervalId)
-  intervalId = null
-  endRest()
+function onVisibilityChange(): void {
+  if (document.visibilityState === 'visible') focus.syncNow()
 }
 
-function anotherPomodoro(): void {
-  if (mode.value === 'done' || allPomsDone.value) return
-  if (intervalId) clearInterval(intervalId)
-  intervalId = null
-  backToFocus()
-}
-
-function onToggleMute(): void {
-  muted.value = audio?.toggleMute() ?? !muted.value
-}
-
-function close(): void {
-  stopAll()
-  ui.focusTaskId = null
-}
-
-function clearRestTimeout(): void {
-  if (restTimeoutId) clearTimeout(restTimeoutId)
-  restTimeoutId = null
-}
-
-function stopAll(): void {
-  if (raf) cancelAnimationFrame(raf)
-  raf = null
-  if (intervalId) clearInterval(intervalId)
-  intervalId = null
-  clearRestTimeout()
-  audio?.stop()
-  audio = null
-}
-
-function syncDoneCountFromTask(): void {
-  if (!task.value) return
-  doneCount.value = Math.min(task.value.completedPomodoros ?? 0, estPoms.value)
-  allPomsDone.value = doneCount.value >= estPoms.value
-  if (allPomsDone.value) {
-    phase.value = 'timer'
-    mode.value = 'done'
-    secondsLeft.value = 0
+// Ambient audio follows the phase: it fades out once the countdown begins, exactly as
+// before. The end-of-phase chime deliberately does NOT go through this graph.
+watch(
+  () => focus.state?.phase,
+  (next, prev) => {
+    if (next === undefined) return
+    if (prev === 'breathing' && next !== 'breathing') audio?.fadeOut()
+    if (next === 'rest') audio?.enterCalm()
+    if (next !== prev && (next === 'rest' || next === 'done')) {
+      pulseTomato.value = true
+      setTimeout(() => (pulseTomato.value = false), 420)
+    }
   }
-}
-
-watch(task, (t) => {
-  if (!t) {
-    stopAll()
-    ui.focusTaskId = null
-    return
-  }
-  syncDoneCountFromTask()
-}, { immediate: true })
+)
 
 onMounted(() => {
-  syncDoneCountFromTask()
   audio = makeFocusAudio()
   audio.start()
   lastTs = null
   raf = requestAnimationFrame(loop)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
 
 onUnmounted(() => {
-  stopAll()
+  if (raf) cancelAnimationFrame(raf)
+  raf = null
+  audio?.stop()
+  audio = null
+  document.removeEventListener('visibilitychange', onVisibilityChange)
 })
 </script>
 
@@ -381,7 +240,11 @@ onUnmounted(() => {
 .fx
   position: fixed
   inset: 0
-  z-index: 200
+  // Focus is a full-screen mode, so it sits above Quasar's drawers (~3000) but stays
+  // below dialogs (~6000) — a confirmation must still be able to appear over it.
+  // Fixed positioning is relative to the viewport, so this stays full-bleed even though
+  // the v2 pages constrain their content to a 393px frame on desktop.
+  z-index: 4000
   overflow: hidden
   background: #0e3527
   transition: background .8s
@@ -541,6 +404,14 @@ onUnmounted(() => {
     line-height: 1
     letter-spacing: .01em
 
+  // Autoplay policy keeps the chime muted until a gesture. A restored session may have
+  // none, so say so quietly rather than failing silently or interrupting with a dialog.
+  .fx-soundHint
+    font-size: 11px
+    letter-spacing: .04em
+    color: rgba(255, 255, 255, .5)
+    margin-top: 2px
+
   .fl
     font-size: 13px
     color: rgba(255, 255, 255, .7)
@@ -569,6 +440,12 @@ onUnmounted(() => {
     font-size: 14px
     font-weight: 700
     cursor: pointer
+
+    // Previously this button silently did nothing once every pomodoro was done; showing
+    // it disabled tells the user it is unavailable rather than broken.
+    &:disabled
+      opacity: .45
+      cursor: not-allowed
 
   .prim
     background: #fff

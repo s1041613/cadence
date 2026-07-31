@@ -2,7 +2,6 @@ export interface FocusAudio {
   start(): void
   mix(rising: boolean, breath: number): void
   enterCalm(): void
-  toggleMute(): boolean
   pause(): void
   resume(): void
   fadeOut(): void
@@ -12,7 +11,6 @@ export interface FocusAudio {
 export function makeFocusAudio(): FocusAudio {
   let ctx: AudioContext | null = null
   let master: GainNode | null = null
-  let muted = false
   let on = false
   let nodes: Array<{ stop?: () => void; disconnect?: () => void }> = []
   let birdTimer: ReturnType<typeof setInterval> | null = null
@@ -41,7 +39,7 @@ export function makeFocusAudio(): FocusAudio {
   }
 
   const chirp = () => {
-    if (!ctx || muted) return
+    if (!ctx) return
     const t = ctx.currentTime + Math.random() * 0.16
     const base = 1400 + Math.random() * 900
     const o = ctx.createOscillator()
@@ -61,7 +59,7 @@ export function makeFocusAudio(): FocusAudio {
   }
 
   const cricket = () => {
-    if (!ctx || muted) return
+    if (!ctx) return
     const t = ctx.currentTime
     const o = ctx.createOscillator()
     o.type = 'triangle'
@@ -139,7 +137,7 @@ export function makeFocusAudio(): FocusAudio {
       birdLP.connect(master!)
       nodes.push(birdGain, birdLP)
 
-      master!.gain.linearRampToValueAtTime(muted ? 0 : 0.85, ctx!.currentTime + 1.2)
+      master!.gain.linearRampToValueAtTime(0.85, ctx!.currentTime + 1.2)
       birdTimer = setInterval(() => {
         if (!rising) return
         if (Math.random() < 0.6) chirp()
@@ -155,9 +153,9 @@ export function makeFocusAudio(): FocusAudio {
       const birdVol = r ? 0.3 + 0.45 * breath : 0.0
       const waveVol = r ? 0.03 : 0.55 + 0.45 * (1 - breath)
       const tc = flip ? 0.05 : 0.18
-      birdGain!.gain.setTargetAtTime(muted ? 0 : birdVol, now, tc)
-      wind!.gain.setTargetAtTime(muted ? 0 : r ? 0.13 : 0.08, now, 0.4)
-      waveGain!.gain.setTargetAtTime(muted ? 0 : 0.32 * waveVol, now, tc)
+      birdGain!.gain.setTargetAtTime(birdVol, now, tc)
+      wind!.gain.setTargetAtTime(r ? 0.13 : 0.08, now, 0.4)
+      waveGain!.gain.setTargetAtTime(0.32 * waveVol, now, tc)
       if (waveFilter) {
         const f = r ? 480 : 420 + 260 * (1 - breath)
         waveFilter.frequency.setTargetAtTime(f, now, flip ? 0.08 : 0.25)
@@ -174,12 +172,6 @@ export function makeFocusAudio(): FocusAudio {
       if (birdGain) birdGain.gain.setTargetAtTime(0, now, 1.2)
       if (waveGain) waveGain.gain.setTargetAtTime(0, now, 1.2)
       if (wind) wind.gain.setTargetAtTime(0.03, now, 1.5)
-    },
-
-    toggleMute() {
-      muted = !muted
-      if (ctx) master!.gain.linearRampToValueAtTime(muted ? 0 : 0.85, ctx.currentTime + 0.4)
-      return muted
     },
 
     pause() {

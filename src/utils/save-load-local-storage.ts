@@ -15,3 +15,11 @@ export function saveStore<T>(key: string, data: T): void {
     // localStorage can throw (quota exceeded, private browsing) — nothing actionable to do here.
   }
 }
+
+export function removeStore(key: string): void {
+  try {
+    localStorage.removeItem(key)
+  } catch {
+    // Same story as saveStore: nothing useful to do if the browser refuses.
+  }
+}

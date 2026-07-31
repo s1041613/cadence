@@ -60,6 +60,14 @@ export const autoPoms = (t: { allDay: boolean; start: string; end: string }): nu
   return Math.max(1, Math.ceil(dur / POM_MIN))
 }
 
+// Single source of truth for "how many pomodoros does this task need". The stored estimate
+// is a snapshot from creation time; autoPoms recomputes from the slot. Consumers that pick
+// differently drift apart once an event's times are edited, which stalls or short-circuits
+// progress. Every caller must go through here.
+export const estPomsOf = (
+  t: { estimatedPomodoros: number; allDay: boolean; start: string; end: string }
+): number => (t.estimatedPomodoros > 0 ? t.estimatedPomodoros : autoPoms(t))
+
 // Quick-Add time-grid click: round down to the nearest 30-minute step, clamp the start into
 // 06:00-22:00, one-hour duration. app-shell spec "Creation entry points seed context from where
 // they are invoked" / Example: rounding and clamping boundaries.

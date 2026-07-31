@@ -149,7 +149,7 @@ import CdRepeatPill from '@/components/ui/CdRepeatPill.vue'
 import CdSegmented from '@/components/ui/CdSegmented.vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
 import CdTimeDropdown from '@/components/ui/CdTimeDropdown.vue'
-import { autoPoms, minutes, type TimeFormatName } from '@/utils/convert-date-time'
+import { estPomsOf, minutes, type TimeFormatName } from '@/utils/convert-date-time'
 import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset } from '@/types/task'
 
@@ -207,7 +207,11 @@ const ICON_NAMES = new Set<string>(['copy', 'pencil', 'trash', 'journal', 'spark
 const iconName = computed<IconName | null>(() => (props.icon && ICON_NAMES.has(props.icon) ? (props.icon as IconName) : null))
 const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.allDay))
 const timeInvalid = computed(() => !effectiveAllDay.value && minutes(props.end) <= minutes(props.start))
-const pomodoroCount = computed(() => props.estimatedPomodoros ?? autoPoms({ allDay: false, start: props.start, end: props.end }))
+// estPomsOf, not `?? autoPoms`: a stored 0 must fall through to the derived count, or the
+// card shows 0 while the focus session shows the real total.
+const pomodoroCount = computed(() =>
+  estPomsOf({ estimatedPomodoros: props.estimatedPomodoros ?? 0, allDay: false, start: props.start, end: props.end })
+)
 
 const matrixOptions = [
   { k: 'do' as const, l: 'Do Now', s: 'Right away', color: 'var(--cd-quad-do)' },

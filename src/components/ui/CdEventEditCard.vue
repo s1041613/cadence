@@ -190,7 +190,7 @@ import CdRepeatPill from './CdRepeatPill.vue'
 import CdReminderPill from './CdReminderPill.vue'
 import CdAppearancePicker from './CdAppearancePicker.vue'
 import CdIcon from './CdIcon.vue'
-import { autoPoms, minutes, type TimeFormatName } from '@/utils/convert-date-time'
+import { estPomsOf, minutes, type TimeFormatName } from '@/utils/convert-date-time'
 import type { IconName } from './icons'
 import type { ReminderPreset } from '@/types/task'
 
@@ -271,7 +271,11 @@ const appearanceOpen = ref(false)
 
 const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.allDay))
 const timeInvalid = computed(() => !effectiveAllDay.value && minutes(props.end) <= minutes(props.start))
-const pomodoroCount = computed(() => props.estimatedPomodoros ?? autoPoms({ allDay: false, start: props.start, end: props.end }))
+// estPomsOf, not `?? autoPoms`: a stored 0 must fall through to the derived count, or the
+// card shows 0 while the focus session shows the real total.
+const pomodoroCount = computed(() =>
+  estPomsOf({ estimatedPomodoros: props.estimatedPomodoros ?? 0, allDay: false, start: props.start, end: props.end })
+)
 const iconName = computed<IconName | null>(() => (props.icon && isIconName(props.icon) ? props.icon : null))
 
 function isIconName(value: string): value is IconName {
