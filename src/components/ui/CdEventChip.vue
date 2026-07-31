@@ -81,7 +81,7 @@ const chipStyle = computed(() => ({
   display: flex;
   align-items: center;
   gap: 3px;
-  font-size: 9.5px;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
   border-radius: var(--cd-radius-xs);
@@ -93,10 +93,12 @@ const chipStyle = computed(() => ({
 
 @media (max-width: 899px) {
   .cd-event-chip {
-    /* Fixed 15px chip height keeps CdMonthGrid's maxChips row math exact on phones; tighter
-       side padding leaves more of the ~50px-wide cell to the title text. */
+    /* Fixed 18px chip height keeps CdMonthGrid's maxChips row math exact on phones; tighter
+       side padding leaves more of the ~50px-wide cell to the title text. Raised from 15px
+       alongside the 12px type: 12px at line-height 1.3 needs ~15.6px before padding.
+       Mirrored in CdMonthGrid's CELL_METRICS.phone.chipH — keep the two in sync. */
     padding: 1px 3px;
-    height: 15px;
+    height: 18px;
     box-sizing: border-box;
   }
 }

@@ -82,8 +82,8 @@ const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.do
 // Per-breakpoint cell chrome sizes (px), mirroring CdMonthCell/CdEventChip CSS: vertical cell
 // padding (both edges), head→events gap, day-number box height, chip height, chip gap.
 const CELL_METRICS = {
-  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 16.5, chipGap: 2 },
-  phone: { cellPad: 6, headGap: 1, headH: 20, chipH: 15, chipGap: 2 }
+  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 17.5, chipGap: 2 },
+  phone: { cellPad: 6, headGap: 1, headH: 22, chipH: 18, chipGap: 2 }
 } as const
 
 const { isDesktop } = useBreakpoint()
