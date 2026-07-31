@@ -110,7 +110,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num {
-  font: 700 19px var(--cd-font-mono);
+  font: 700 20px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   width: 26px;
@@ -169,9 +169,9 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   cursor: pointer;
   padding: 0;
   text-align: left;
-  font: 8px var(--cd-font-mono);
+  font: 500 10px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-2);
 }
 
 @media (max-width: 899px) {
@@ -184,7 +184,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   }
 
   .cd-month-cell__num {
-    font: 700 12px var(--cd-font-mono);
+    font: 700 13px var(--cd-font-mono);
     font-variant-numeric: var(--cd-numeric-aligned);
     width: 20px;
     height: 20px;

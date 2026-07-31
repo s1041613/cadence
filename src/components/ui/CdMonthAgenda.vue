@@ -63,7 +63,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-agenda__label {
-  font: 700 11px var(--cd-font-mono);
+  font: 700 11.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
@@ -120,7 +120,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-agenda__time {
-  font: 500 12px var(--cd-font-mono);
+  font: 500 13px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   flex: none;
