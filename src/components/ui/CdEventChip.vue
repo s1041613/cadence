@@ -23,7 +23,7 @@ import { computed } from 'vue'
 import { QUAD_ICON_SRC } from './icons'
 
 // CdEventChip — month cell event chip. design-research-report.md §3.5:
-//  - fmt='name'/'icon': font 600 9.5px Zen Kaku; radius 6px; padding 1px 5px; border 1px solid quadColor.
+//  - fmt='name'/'icon': font 700 14px; radius --cd-radius-xs; padding 3px 5px; border 1px solid quadColor.
 //  - all-day = solid fill (bg=color, text=white); timed = outline (border+text=color, transparent bg).
 //  - done: line-through + opacity .5.
 //  - fmt='name': title only (no icon — maximizes text room in narrow phone cells).
@@ -86,6 +86,12 @@ const chipStyle = computed(() => ({
   line-height: 1.3;
   border-radius: var(--cd-radius-xs);
   padding: 3px 5px;
+  /* Fixed height with border-box so the rendered chip matches CdMonthGrid's
+     CELL_METRICS.desktop.chipH exactly. Content is 14px at line-height 1.3
+     (18.2px) plus 3px padding and the 1px inline border on each edge. Without
+     this the border sits outside the box and the third chip in a row clips. */
+  height: 26.5px;
+  box-sizing: border-box;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

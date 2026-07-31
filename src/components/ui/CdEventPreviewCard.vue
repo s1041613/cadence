@@ -90,9 +90,9 @@ import CdIcon from './CdIcon.vue'
 
 // CdEventPreviewCard — anchored preview popover (inside CdPopover). CADENCE Handoff.dc.html _eventPreview.
 // desk width 370px. eyebrow: event="Calendar event", task="Auto-scheduled", shared="{owner} · read-only"
-// (800 12px mono uppercase #B3AC91).
+// (700 15px uppercase --cd-olive).
 // Title row: 13x13 quadrant-color swatch (v2: circular, border-radius 50% — was 4px square-ish in v1)
-// + 800 18px Zen Kaku title + when line (600 13px #6E7176).
+// + 700 18px title + when line (700 13px --cd-ink-2).
 // mine=false (shared/read-only calendar) hides copy/edit/delete actions, keeps close button.
 // "Managed by Cadence AI" collapsible: chevron rotates 90deg on expand (.2s ease); event shows guest
 // member stack, task shows "🍅🍅 N/M focus sessions logged" + muted explanatory text.

@@ -40,10 +40,10 @@
 
 <script setup lang="ts">
 // CdMonthCell — single month-grid day cell. design-research-report.md §3.5.
-// Date number: JetBrains Mono 700 19px in a 26x26 circle (desk) / 12px in 20x20 (<899px, kept small
-// so phone rows spend their height on chips), matching CdWeekAgenda's .cd-week-agenda__num type
-// system; weekday default #56585E, Sat #3A6EA5, Sun #C0564B, outside-month rgba(156,158,148,.5);
-// today = 800 weight, circle bg #B3AC91 color #3f4136. "+N more" link: 8px mono, color #9C9E94.
+// Date number: 700 16px in a 26x26 circle (desk) / 15px in 22x22 (<899px, kept smaller so phone
+// rows spend their height on chips), matching CdWeekAgenda's .cd-week-agenda__num type system;
+// weekday default --cd-ink, Sat --cd-sat, Sun --cd-sun, outside-month rgba(156,158,148,.5);
+// today = accent circle with --cd-olive-ink text. "+N more" link: 700 12px, --cd-ink-2.
 // Chip count: `maxChips` (computed by CdMonthGrid from the measured row height) caps how much
 // event density the cell attempts. When events overflow, the last slot is given to the "+N" button,
 // but month cells preserve at least 3 visible events before collapsing the rest.

@@ -26,6 +26,7 @@ const SCAN_TARGETS = [
   'src/components/day',
   'src/components/focus',
   'src/layouts',
+  'src/css/app.css',
   'src/pages/IndexPage.vue',
   'src/pages/LoginPage.vue',
   'src/pages/JoinCalendarPage.vue',
@@ -93,6 +94,15 @@ function isCommentLine(line) {
   return t.startsWith('*') && !t.includes('{') && !/:\s*\S/.test(t)
 }
 
+/**
+ * Tailwind's `@theme` block and Sass variables are compiled at build time and cannot read
+ * a runtime custom property, so they have to restate palette values literally. Those lines
+ * are a documented mirror rather than a leak; everything around them is still checked.
+ */
+function isAllowlisted(file, line) {
+  return file.endsWith('app.css') && /^\s*--color-[a-z0-9-]+:/.test(line)
+}
+
 function findViolations() {
   const files = [...new Set(SCAN_TARGETS.flatMap(collectFiles))]
   const found = []
@@ -100,7 +110,7 @@ function findViolations() {
   for (const file of files) {
     const lines = readFileSync(file, 'utf8').split('\n')
     lines.forEach((line, i) => {
-      if (isCommentLine(line)) return
+      if (isCommentLine(line) || isAllowlisted(file, line)) return
       for (const rule of RULES) {
         rule.pattern.lastIndex = 0
         if (rule.pattern.test(line)) {
