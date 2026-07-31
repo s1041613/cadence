@@ -5,7 +5,7 @@
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
   >
     <div class="cd-event-block__title">{{ title }}</div>
-    <div class="cd-event-block__time">{{ startLabel }}</div>
+    <div v-if="showTime" class="cd-event-block__time">{{ startLabel }}</div>
   </div>
 </template>
 
@@ -32,6 +32,12 @@ const emit = defineEmits<{
   click: [event: MouseEvent]
 }>()
 
+// A 16px title plus the time line needs roughly 40px, but a 30-minute event is only
+// ~20px tall. Rather than force every block taller (which would make short events
+// overlap their neighbours), the time line drops out when the block cannot hold both.
+const MIN_HEIGHT_FOR_TIME = 38
+const showTime = computed(() => props.height >= MIN_HEIGHT_FOR_TIME)
+
 const blockStyle = computed(() => ({
   position: 'absolute' as const,
   top: `${props.top}px`,
@@ -55,7 +61,7 @@ const blockStyle = computed(() => ({
 }
 
 .cd-event-block__title {
-  font: 500 10.5px var(--cd-font-title);
+  font: 500 16px var(--cd-font-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

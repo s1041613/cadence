@@ -110,13 +110,11 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num {
-  font: 700 22px var(--cd-font-mono);
+  font: 700 16px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
-  /* 30px rather than 26px: a two-digit date at 22px measures ~23px wide, which left
-     the today pill visibly cramped once the type scaled up. */
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: grid;
   place-items: center;
