@@ -42,7 +42,7 @@ const emit = defineEmits<{
   border-radius: 8px;
   padding: 7px 14px;
   cursor: pointer;
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink-2);
   transition: background var(--cd-duration-micro-3), box-shadow var(--cd-duration-micro-3);
 }

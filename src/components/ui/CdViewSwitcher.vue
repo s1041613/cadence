@@ -44,7 +44,7 @@ const emit = defineEmits<{
   border-radius: var(--cd-radius-pill);
   padding: 6px 14px;
   cursor: pointer;
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: #9c9e94;
 }
 

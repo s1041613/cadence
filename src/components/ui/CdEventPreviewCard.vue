@@ -220,7 +220,7 @@ const eyebrowLabel = computed(() => {
 }
 
 .cd-preview-card__when {
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink-2);
 }
 
@@ -242,7 +242,7 @@ const eyebrowLabel = computed(() => {
   align-items: center;
   gap: 13px;
   padding: 9px 16px;
-  font: 600 13.5px var(--cd-font-ui);
+  font: 700 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -266,7 +266,7 @@ const eyebrowLabel = computed(() => {
 
 .cd-preview-card__info-meta {
   margin-left: auto;
-  font: 600 15px var(--cd-font-mono);
+  font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
 }
@@ -325,7 +325,7 @@ const eyebrowLabel = computed(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -355,7 +355,7 @@ const eyebrowLabel = computed(() => {
 
 .cd-preview-card__managed-note {
   margin: 0;
-  font: 600 12px var(--cd-font-ui);
+  font: 700 12px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 </style>

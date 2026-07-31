@@ -124,7 +124,7 @@ function signInWithApple(): void {
 
 .login__wordmark {
   font-family: var(--cd-font-script);
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--cd-fs-46);
   line-height: 1;
   color: var(--cd-ink);
@@ -161,7 +161,7 @@ function signInWithApple(): void {
   border-radius: var(--cd-radius-pill);
   padding: 15px 18px;
   margin-bottom: 12px;
-  font: 600 var(--cd-fs-15) var(--cd-font-ui);
+  font: 700 var(--cd-fs-15) var(--cd-font-ui);
   border: 1px solid transparent;
   cursor: pointer;
   transition: background var(--cd-duration-micro-3) var(--cd-ease-standard),

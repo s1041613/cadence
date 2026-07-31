@@ -151,7 +151,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 .cd-copy-card__dow {
   text-align: center;
-  font: 600 11px var(--cd-font-ui);
+  font: 700 11px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 
@@ -197,7 +197,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__num {
-  font: 600 15.5px var(--cd-font-mono);
+  font: 700 15.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
 }
@@ -211,7 +211,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__count {
-  font: 600 12.5px var(--cd-font-ui);
+  font: 700 12.5px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 
