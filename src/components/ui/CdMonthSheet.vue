@@ -181,7 +181,7 @@ function wheelOpacity(i: number, center: number): number {
 }
 
 .cd-month-sheet__num {
-  font: 700 14px var(--cd-font-mono);
+  font: 700 16px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: #3a3a3a;
 }
@@ -194,7 +194,7 @@ function wheelOpacity(i: number, center: number): number {
   color: #fff;
   display: grid;
   place-items: center;
-  font: 700 13px var(--cd-font-mono);
+  font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
 }
 

@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
   background: var(--cd-surface);
   border-radius: 10px;
   padding: 8px 10px;
-  font: 700 13.5px var(--cd-font-mono);
+  font: 700 15.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   cursor: pointer;
@@ -298,7 +298,7 @@ onBeforeUnmount(() => {
 
 .cd-date-picker__dow {
   text-align: center;
-  font: 700 10px var(--cd-font-mono);
+  font: 700 12px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
   color: var(--cd-muted);
@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
   border: none;
   background: transparent;
   border-radius: 50%;
-  font: 500 12px var(--cd-font-mono);
+  font: 500 14px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   cursor: pointer;
