@@ -179,7 +179,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 .cd-copy-card__cell--selected {
   background: var(--cd-topbar);
-  box-shadow: inset 0 0 0 1px rgba(179, 172, 145, 0.42);
+  box-shadow: inset 0 0 0 1px rgba(var(--cd-olive-rgb), 0.42);
 }
 
 .cd-copy-card__cell--selected:hover {
@@ -188,7 +188,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 .cd-copy-card__cell--selected .cd-copy-card__num {
   color: var(--cd-olive-ink);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .cd-copy-card__cell--disabled {
@@ -197,7 +197,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__num {
-  font: 600 12.5px var(--cd-font-mono);
+  font: 500 12.5px var(--cd-font-mono);
   color: var(--cd-ink);
 }
 
@@ -210,7 +210,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__count {
-  font: 600 12.5px var(--cd-font-ui);
+  font: 500 12.5px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 

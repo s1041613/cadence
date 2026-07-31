@@ -83,7 +83,7 @@ const emit = defineEmits<{
 
 .cd-day-list__date {
   display: block;
-  font: 800 22px var(--cd-font-title);
+  font: 700 22px var(--cd-font-title);
   color: var(--cd-ink);
   margin-top: 2px;
 }
@@ -134,7 +134,7 @@ const emit = defineEmits<{
 
 .cd-day-list__row-title {
   flex: 1;
-  font: 600 15px var(--cd-font-title);
+  font: 500 15px var(--cd-font-title);
   color: var(--cd-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -142,7 +142,7 @@ const emit = defineEmits<{
 }
 
 .cd-day-list__row-time {
-  font: 600 12px var(--cd-font-mono);
+  font: 500 12px var(--cd-font-mono);
   color: var(--cd-muted);
   flex: none;
 }

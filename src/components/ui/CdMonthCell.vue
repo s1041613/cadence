@@ -132,9 +132,9 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num--today {
-  font-weight: 800;
+  font-weight: 700;
   background: var(--cd-olive);
-  color: #3f4136;
+  color: var(--cd-olive-ink);
 }
 
 .cd-month-cell__num--selected {

@@ -22,6 +22,11 @@ export interface TaskTheme extends Appearance {
 // Quadrant tasks carry no glyph — the month/week/day views render the quad via the CdEventChip
 // mini-icon (keyed off quad.key, see CdEventChip QUAD_ICON_SRC), never off theme.icon. Only event
 // tasks have a user-picked icon (task.icon). So Appearance.icon stays null for quadrants.
+//
+// This array is the authority for quadrant colors, and the values stay literal hex on purpose:
+// backgroundColor is written onto persisted event records (see completePromotion callers), so a
+// var() reference here would store CSS syntax as data. The same values are mirrored into
+// src/css/cadence-tokens.css as --cd-quad-* / --cd-quad-*-ink for stylesheet use; keep both in sync.
 export const QUADRANTS: Quadrant[] = [
   {
     key: 'do',

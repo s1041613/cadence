@@ -158,7 +158,7 @@ const eyebrowLabel = computed(() => {
 }
 
 .cd-preview-card__eyebrow {
-  font: 800 12px var(--cd-font-mono);
+  font: 700 12px var(--cd-font-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--cd-olive);
@@ -211,7 +211,7 @@ const eyebrowLabel = computed(() => {
 }
 
 .cd-preview-card__title {
-  font: 800 18px var(--cd-font-title);
+  font: 700 18px var(--cd-font-title);
   color: var(--cd-ink);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -219,7 +219,7 @@ const eyebrowLabel = computed(() => {
 }
 
 .cd-preview-card__when {
-  font: 600 13px var(--cd-font-ui);
+  font: 500 13px var(--cd-font-ui);
   color: var(--cd-ink-2);
 }
 
@@ -241,7 +241,7 @@ const eyebrowLabel = computed(() => {
   align-items: center;
   gap: 13px;
   padding: 9px 16px;
-  font: 600 13.5px var(--cd-font-ui);
+  font: 500 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -265,7 +265,7 @@ const eyebrowLabel = computed(() => {
 
 .cd-preview-card__info-meta {
   margin-left: auto;
-  font: 600 12px var(--cd-font-mono);
+  font: 500 12px var(--cd-font-mono);
   color: var(--cd-muted);
 }
 
@@ -323,7 +323,7 @@ const eyebrowLabel = computed(() => {
   display: flex;
   align-items: center;
   gap: 5px;
-  font: 600 13px var(--cd-font-ui);
+  font: 500 13px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 

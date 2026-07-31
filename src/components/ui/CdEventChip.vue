@@ -82,7 +82,7 @@ const chipStyle = computed(() => ({
   align-items: center;
   gap: 3px;
   font-size: 9.5px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.3;
   border-radius: var(--cd-radius-xs);
   padding: 1px 5px;

@@ -55,7 +55,7 @@ function fromSelectValue(value: string): ReminderPreset | null {
 
 .cd-reminder-pill:hover {
   background: var(--cd-topbar);
-  border-color: rgba(179, 172, 145, 0.46);
+  border-color: rgba(var(--cd-olive-rgb), 0.46);
 }
 
 .cd-reminder-pill__text {

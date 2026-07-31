@@ -282,7 +282,7 @@ function startFocus(): void {
   pointer-events: auto;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 30px 64px -22px rgba(40, 38, 30, 0.5);
+  box-shadow: 0 30px 64px -22px rgba(var(--cd-scrim-rgb), 0.5);
 }
 
 .task-editor-dock-root__panel :deep(.cd-edit-card),

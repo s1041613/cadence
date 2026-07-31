@@ -149,7 +149,7 @@ const caretStyle = computed(() => {
   height: 12px;
   background: #fff;
   border: 1px solid #e9e6dd;
-  box-shadow: 0 2px 6px -2px rgba(40, 38, 30, 0.25);
+  box-shadow: 0 2px 6px -2px rgba(var(--cd-scrim-rgb), 0.25);
   transform: rotate(45deg);
   z-index: 1;
 }

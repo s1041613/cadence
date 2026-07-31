@@ -237,7 +237,7 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 -16px 34px -16px rgba(40, 38, 30, 0.42);
+  box-shadow: 0 -16px 34px -16px rgba(var(--cd-scrim-rgb), 0.42);
   padding: 4px;
   /* Teleported to <body>, so this stacks as a sibling of CdPopover (z-index 50) and CdDrawer
      (z-index 70) rather than nesting inside them — must outrank both to stay visible. */
@@ -262,8 +262,8 @@ onBeforeUnmount(() => {
 }
 
 .cd-time-dropdown__item--selected {
-  background: rgba(179, 172, 145, 0.16);
+  background: rgba(var(--cd-olive-rgb), 0.16);
   color: var(--cd-olive-mix-1);
-  font-weight: 800;
+  font-weight: 700;
 }
 </style>

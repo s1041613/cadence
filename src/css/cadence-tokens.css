@@ -37,8 +37,15 @@
   --cd-draft-paper: #EEEBE1;
   --cd-inbox-paper: #F7F5EF;
 
-  /* ---------- Color: olive accent ---------- */
+  /* ---------- Color: olive accent ----------
+   * --cd-olive-rgb is the single input to every translucent accent wash. Components
+   * must compose washes as rgba(var(--cd-olive-rgb), <alpha>) rather than writing the
+   * channels literally: a literal shares no text with the token name, so it survives
+   * a rename unnoticed and stays frozen on the old palette when the accent changes.
+   * Keep it in sync with --cd-olive.
+   */
   --cd-olive: #B3AC91;
+  --cd-olive-rgb: 179, 172, 145;
   --cd-olive-ink: #3f4136;
   --cd-olive-mix-1: #8F8A6E;
   --cd-olive-mix-2: #6E6A52;
@@ -54,6 +61,19 @@
   --cd-quad-quick: #BFA86A;
   --cd-quad-later: #9A988F;
   --cd-event: #E3A75C;
+
+  /* Paired text color for each quadrant fill above. Every fill token has an ink
+   * partner so contrast is stated against a known pairing rather than assumed.
+   *
+   * These four values are also declared in src/composables/use-theme.ts, which is
+   * the authority: quadrant appearance is resolved in JS and its backgroundColor is
+   * persisted onto event records, so those must stay literal hex (a var() reference
+   * would write CSS syntax into stored data). Mirrored here so stylesheets can reach
+   * the same values; keep the two in sync. */
+  --cd-quad-do-ink: #4A3318;
+  --cd-quad-plan-ink: #2A2D27;
+  --cd-quad-quick-ink: #3E3845;
+  --cd-quad-later-ink: #33403A;
 
   /* editor header tint (pale) per quadrant */
   --cd-quad-do-tint: #EFDCD5;
@@ -87,14 +107,36 @@
   --cd-scrim-strong: rgba(40, 38, 30, .34);
   --cd-scrim-heavy: rgba(40, 38, 30, .4);
 
-  /* ---------- Typography: families ---------- */
-  --cd-font-title: 'Zen Kaku Gothic New', sans-serif;
-  --cd-font-ui: 'Inter', sans-serif;
-  --cd-font-mono: 'JetBrains Mono', monospace;
-  --cd-font-draft: 'Helvetica Neue', 'Inter', sans-serif;
-  --cd-font-script: 'Dancing Script', cursive;
-  --cd-font-serif: 'Instrument Serif', serif; /* v2 月曆標題 */
-  --cd-font-caveat: 'Caveat', cursive; /* v2 月曆日期數字 */
+  /* ---------- Typography: families ----------
+   * The product ships exactly two faces (decided 2026-07-31). Fonts are a fixed
+   * passthrough: they are NOT part of the theme, so no palette may override them.
+   *
+   *   --cd-font-display : Instrument Serif, reserved for the month poster title
+   *                       and the bottom-nav letter glyphs. Deliberately narrow
+   *                       usage: it ships a single weight (400) and has no CJK
+   *                       coverage, so any Chinese text set in it would fall back.
+   *   --cd-font-ui      : Zen Kaku Gothic New, everything else.
+   *
+   * Zen Kaku ships 300/400/500/700/900 only. There is NO 600, so `font-weight:600`
+   * would be synthesised by the browser; use 500 or 700 instead.
+   */
+  --cd-font-display: 'Instrument Serif', serif;
+  --cd-font-ui: 'Zen Kaku Gothic New', sans-serif;
+
+  /* Deprecated aliases — resolve onto the two faces above so existing consumers
+   * keep rendering while they are migrated. Delete each once its usage hits zero.
+   *
+   * --cd-font-title maps to the UI face, not the display face, despite its name:
+   * its 60 call sites are body-level chrome (buttons, field labels, settings
+   * rows), not poster titles. Pointing it at Instrument Serif would set the whole
+   * settings drawer in a single-weight serif with no CJK coverage. Sites that
+   * genuinely want the display face reference --cd-font-display directly. */
+  --cd-font-title: var(--cd-font-ui);
+  --cd-font-serif: var(--cd-font-display);
+  --cd-font-mono: var(--cd-font-ui);
+  --cd-font-draft: var(--cd-font-ui);
+  --cd-font-script: var(--cd-font-ui);
+  --cd-font-caveat: var(--cd-font-ui);
 
   /* ---------- Typography: sizes (px scale used across the design) ---------- */
   --cd-fs-8: 8px;

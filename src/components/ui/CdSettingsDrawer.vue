@@ -1020,7 +1020,7 @@ button.cd-settings__row:hover {
 .cd-settings__row-label {
   flex: 1;
   min-width: 0;
-  font: 600 15.5px var(--cd-font-title);
+  font: 500 15.5px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -1036,7 +1036,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__row--bordered .cd-settings__row-label,
 .cd-settings__row-text .cd-settings__row-label {
-  font: 600 15px var(--cd-font-title);
+  font: 500 15px var(--cd-font-title);
 }
 
 .cd-settings__row-text {
@@ -1069,7 +1069,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__label {
-  font: 600 13.5px var(--cd-font-title);
+  font: 500 13.5px var(--cd-font-title);
   color: var(--cd-ink-2);
   margin-bottom: 8px;
 }
@@ -1124,7 +1124,7 @@ button.cd-settings__row:hover {
   display: grid;
   place-items: center;
   box-shadow: 0 1px 2px rgba(86, 88, 94, 0.1);
-  font: 800 20px var(--cd-font-ui);
+  font: 700 20px var(--cd-font-ui);
   color: #4285f4;
 }
 
@@ -1163,7 +1163,7 @@ button.cd-settings__row:hover {
   height: 42px;
   flex: none;
   border-radius: 12px;
-  background: rgba(179, 172, 145, 0.18);
+  background: rgba(var(--cd-olive-rgb), 0.18);
   display: grid;
   place-items: center;
 }
@@ -1203,7 +1203,7 @@ button.cd-settings__row:hover {
   height: 22px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 1px 2px rgba(40, 38, 30, 0.3);
+  box-shadow: 0 1px 2px rgba(var(--cd-scrim-rgb), 0.3);
   transition: left 0.18s;
 }
 
@@ -1237,7 +1237,7 @@ button.cd-settings__row:hover {
   border: 1px solid var(--cd-line);
   border-radius: 999px;
   padding: 4px 10px;
-  font: 600 12px var(--cd-font-title);
+  font: 500 12px var(--cd-font-title);
   color: var(--cd-ink-2);
 }
 
@@ -1423,7 +1423,7 @@ button.cd-settings__row:hover {
   background: transparent;
   cursor: pointer;
   padding: 0;
-  font: 600 11.5px var(--cd-font-title);
+  font: 500 11.5px var(--cd-font-title);
   color: var(--cd-ink-2);
   text-decoration: underline;
 }
@@ -1503,7 +1503,7 @@ button.cd-settings__row:hover {
 .cd-settings__cal-name-label {
   flex: 1;
   min-width: 0;
-  font: 600 15px var(--cd-font-title);
+  font: 500 15px var(--cd-font-title);
   color: var(--cd-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -1570,14 +1570,14 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__cal-cover-btn:hover {
-  background: rgba(179, 172, 145, 0.1);
+  background: rgba(var(--cd-olive-rgb), 0.1);
 }
 
 .cd-settings__cal-cover-remove {
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 600 13px var(--cd-font-title);
+  font: 500 13px var(--cd-font-title);
   color: var(--cd-muted);
   text-align: left;
   padding: 0 4px;
@@ -1632,7 +1632,7 @@ button.cd-settings__row:hover {
 .cd-settings__member-name {
   flex: 1;
   min-width: 0;
-  font: 600 14.5px var(--cd-font-title);
+  font: 500 14.5px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -1658,7 +1658,7 @@ button.cd-settings__row:hover {
   border-radius: 13px;
   padding: 12px;
   cursor: pointer;
-  font: 600 13.5px var(--cd-font-title);
+  font: 500 13.5px var(--cd-font-title);
   color: var(--cd-muted);
 }
 
@@ -1668,7 +1668,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__invite-title {
-  font: 800 19px var(--cd-font-title);
+  font: 700 19px var(--cd-font-title);
   color: var(--cd-ink);
   margin-bottom: 6px;
 }
@@ -1720,7 +1720,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__invite-error {
-  font: 600 13.5px var(--cd-font-ui);
+  font: 500 13.5px var(--cd-font-ui);
   color: var(--cd-danger);
   margin-bottom: 14px;
 }
@@ -1742,7 +1742,7 @@ button.cd-settings__row:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  font: 600 13.5px var(--cd-font-mono);
+  font: 500 13.5px var(--cd-font-mono);
   color: var(--cd-ink-2);
 }
 
@@ -1833,7 +1833,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-modal-title {
   text-align: center;
-  font: 800 18px var(--cd-font-title);
+  font: 700 18px var(--cd-font-title);
   color: var(--cd-ink);
   margin-bottom: 6px;
 }
@@ -1948,12 +1948,12 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__gcal-sync-name--active {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--cd-ink);
 }
 
 .cd-settings__gcal-sync-tag {
-  font: 600 11px var(--cd-font-mono);
+  font: 500 11px var(--cd-font-mono);
   color: var(--cd-ink-3);
 }
 

@@ -73,7 +73,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-agenda__date {
-  font: 600 13px var(--cd-font-ui);
+  font: 500 13px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -111,7 +111,7 @@ const emit = defineEmits<{
 .cd-month-agenda__title {
   flex: 1;
   min-width: 0;
-  font: 600 15px var(--cd-font-title);
+  font: 500 15px var(--cd-font-title);
   color: var(--cd-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -119,7 +119,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-agenda__time {
-  font: 600 12px var(--cd-font-mono);
+  font: 500 12px var(--cd-font-mono);
   color: var(--cd-muted);
   flex: none;
 }

@@ -237,7 +237,7 @@ function hourLabel(h: number): string {
 }
 
 .cd-time-grid__header-dow {
-  font: 600 10.5px var(--cd-font-ui);
+  font: 500 10.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
   color: var(--cd-ink-2);
 }
@@ -257,7 +257,7 @@ function hourLabel(h: number): string {
 
 .cd-time-grid__header-num--today {
   background: var(--cd-olive);
-  color: #3f4136;
+  color: var(--cd-olive-ink);
   border-radius: var(--cd-radius-pill);
   padding: 1px 8px;
 }
@@ -288,7 +288,7 @@ function hourLabel(h: number): string {
 .cd-time-grid__allday-item {
   border-left: 3px solid;
   border-radius: 5px;
-  font: 600 8.5px var(--cd-font-ui);
+  font: 500 8.5px var(--cd-font-ui);
   padding: 2px 6px;
 }
 
