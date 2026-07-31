@@ -38,7 +38,7 @@
 // re-anchors all week-based layouts") — the header derives its labels and Sat/Sun highlight from
 // `cells[0..6].dow` rather than a hardcoded Monday-start array, so this component stays a pure
 // function of the cells it's given instead of duplicating the firstDay concept into a second prop.
-// Weekday header: 10.5px 600 letter-spacing .14em, Sat=#3A6EA5, Sun=#C0564B.
+// Weekday header: 700 10.5px, letter-spacing .14em, Sat=--cd-sat, Sun=--cd-sun.
 // Grid: 7-col; every cell is the same size regardless of event count. Rows use a readable floor
 // and the parent scrolls if the month doesn't fit, which keeps the phone month view grid-first
 // instead of compressing cells to make room for a permanent agenda split. Only border-top divider
@@ -82,7 +82,7 @@ const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.do
 // Per-breakpoint cell chrome sizes (px), mirroring CdMonthCell/CdEventChip CSS: vertical cell
 // padding (both edges), head→events gap, day-number box height, chip height, chip gap.
 const CELL_METRICS = {
-  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 24.5, chipGap: 2 },
+  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 26.5, chipGap: 2 },
   phone: { cellPad: 6, headGap: 1, headH: 22, chipH: 25, chipGap: 2 }
 } as const
 
@@ -145,10 +145,10 @@ const maxChips = computed(() => {
 .cd-month-grid__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  /* 123px: three chips at their current height plus the cell chrome need 122.5px, and
+  /* 129px: three chips at their rendered height plus the cell chrome need 128.5px, and
      CdMonthCell guarantees three visible events before collapsing to "+N". A shorter
-     row would overflow rather than show fewer chips. */
-  grid-auto-rows: 123px;
+     row clips the third chip rather than showing fewer. */
+  grid-auto-rows: 129px;
 }
 
 @media (max-width: 899px) {

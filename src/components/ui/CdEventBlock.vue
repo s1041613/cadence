@@ -1,6 +1,7 @@
 <template>
   <div
     class="cd-event-block"
+    :class="{ 'cd-event-block--compact': compact }"
     :style="blockStyle"
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
   >
@@ -14,7 +15,8 @@ import { computed } from 'vue'
 
 // CdEventBlock — absolutely-positioned time-grid event block. design-research-report.md §3.6.
 // radius 7px, border-left 3px solid color, bg color-mix(color 13%, surface), padding 3px 8px.
-// Title: 600 10.5px Zen Kaku. Start time always shown (8.5px mono, opacity .7).
+// Title: 700 16px. Start time (700 12px, opacity .8) is dropped on blocks shorter than
+// MIN_HEIGHT_FOR_TIME, since a 30-minute event cannot hold both lines.
 // "In progress" (today + now within [start,end)): solid color fill + white text.
 const props = defineProps<{
   title: string
@@ -37,6 +39,12 @@ const emit = defineEmits<{
 // overlap their neighbours), the time line drops out when the block cannot hold both.
 const MIN_HEIGHT_FOR_TIME = 38
 const showTime = computed(() => props.height >= MIN_HEIGHT_FOR_TIME)
+
+// Below this the block cannot fit a 16px title at its natural line height (19.2px plus
+// 6px of padding needs 26px), so the title would be clipped mid-glyph. The compact
+// variant drops it a step and tightens the leading instead of truncating.
+const MIN_HEIGHT_FOR_FULL_TITLE = 26
+const compact = computed(() => props.height < MIN_HEIGHT_FOR_FULL_TITLE)
 
 const blockStyle = computed(() => ({
   position: 'absolute' as const,
@@ -61,10 +69,17 @@ const blockStyle = computed(() => ({
 }
 
 .cd-event-block__title {
-  font: 700 16px var(--cd-font-title);
+  font: 700 16px/1.2 var(--cd-font-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* A 30-minute event is 20px tall, leaving 14px between the 3px paddings, so the
+   compact title has to fit within that rather than merely be smaller. */
+.cd-event-block--compact .cd-event-block__title {
+  font-size: 12px;
+  line-height: 1.15;
 }
 
 .cd-event-block__time {

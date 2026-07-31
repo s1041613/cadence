@@ -308,9 +308,9 @@ function hourLabel(h: number): string {
 .cd-time-grid__hour-label {
   position: absolute;
   right: 8px;
-  /* 11.5px/500 rather than the previous 9.5px/400: the size was tuned for a
-     monospaced face, and the UI face renders smaller at the same px value, so the
-     gutter read faint once the two-face consolidation landed. */
+  /* Enlarged from the original 9.5px/400: that size was tuned for a monospaced face,
+     and the UI face renders smaller at the same px value, so the gutter read faint
+     once the two-face consolidation landed. */
   font: 700 13.5px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);

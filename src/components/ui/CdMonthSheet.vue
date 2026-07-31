@@ -60,7 +60,7 @@
 // CdMonthSheet — bottom-sheet calendar picker with grid<->wheel toggle. CADENCE Handoff §3.17.
 // Grid: Sunday-start, today = 22px ink circle + white number, event dots (max shown per day left to
 // caller-provided `cells`). Grid header title is 700 17px title font, paired with a "Today" pill
-// (bg #EFEDE4, pill radius, 600 12px ui font, ink color) that emits `today`. Wheel: month+year
+// (bg #EFEDE4, pill radius, 700 12px ui font, ink color) that emits `today`. Wheel: month+year
 // columns, opacity gradient by distance from center (1/.55/.32/.16/.08), mask-image fade top/bottom
 // — purely visual, not scrollable (prototype note: "純視覺，不可捲動").
 export interface MonthSheetCell {

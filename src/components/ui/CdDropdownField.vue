@@ -35,10 +35,10 @@ import type { IconName } from './icons'
 // CdDropdownField — settings dropdown (Time Format / First Day / Timezone). CADENCE Handoff
 // §_settingsDrawer `dropdown()` helper (full file, no longer truncated): trigger bg #FBFAF7
 // (var(--cd-surface)), border 1px solid var(--cd-line) (open state olive #B3AC91), radius 13px,
-// padding 13px 15px, optional leading icon (20px, olive #B3AC91), value text 500 15px title font,
+// padding 13px 15px, optional leading icon (20px, olive #B3AC91), value text 700 15px title font,
 // chevron 14px rotating ∓90deg (.18s). Menu opens DOWNWARD: top calc(100% + 6px), bg #fff, border
 // 1px solid var(--cd-line), radius 13px, shadow 0 12px 32px -12px rgba(40,38,30,.4), padding 5px;
-// options padding 11px 13px, radius 9px, font 500 14px (selected 700), selected bg
+// options padding 11px 13px, radius 9px, font 700 14px, selected bg
 // rgba(179,172,145,.16) + trailing 15px olive check, hover rgba(86,88,94,.05). Per-option
 // `disabled` renders color #BEBBB0, opacity .75, cursor not-allowed, and is not selectable —
 // used by the Timezone field (only Asia/Taipei enabled in this beta).

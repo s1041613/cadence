@@ -111,10 +111,11 @@
    * The product ships exactly two faces (decided 2026-07-31). Fonts are a fixed
    * passthrough: they are NOT part of the theme, so no palette may override them.
    *
-   *   --cd-font-display : Instrument Serif, reserved for the month poster title
-   *                       and the bottom-nav letter glyphs. Deliberately narrow
-   *                       usage: it ships a single weight (400) and has no CJK
-   *                       coverage, so any Chinese text set in it would fall back.
+   *   --cd-font-display : Instrument Serif, reserved for the month poster title.
+   *                       That is its only consumer in the legacy layout, which uses
+   *                       SVG icons rather than letter glyphs in its bottom nav.
+   *                       Deliberately narrow usage: it ships a single weight (400)
+   *                       and has no CJK coverage, so Chinese text set in it falls back.
    *   --cd-font-ui      : Zen Kaku Gothic New, everything else.
    *
    * Zen Kaku ships 300/400/500/700/900 only. There is NO 600, so `font-weight:600`
