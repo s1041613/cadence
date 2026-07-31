@@ -101,7 +101,7 @@ function select(opt: DropdownFieldOption): void {
   flex: 1;
   min-width: 0;
   text-align: left;
-  font: 500 15px var(--cd-font-title);
+  font: 600 15px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -142,7 +142,7 @@ function select(opt: DropdownFieldOption): void {
   background: transparent;
   border-radius: 9px;
   padding: 11px 13px;
-  font: 500 14px var(--cd-font-ui);
+  font: 600 14px var(--cd-font-ui);
   color: var(--cd-ink);
   cursor: pointer;
   text-align: left;

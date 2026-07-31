@@ -195,7 +195,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__title {
-  font: 500 16px var(--cd-font-ui);
+  font: 600 16px var(--cd-font-ui);
   color: var(--cd-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -210,7 +210,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__time {
-  font: 500 13.5px var(--cd-font-mono);
+  font: 600 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   flex: none;

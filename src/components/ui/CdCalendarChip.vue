@@ -81,7 +81,7 @@ const emit = defineEmits<{
 }
 
 .cd-cal-chip:not(.cd-cal-chip--on) .cd-cal-chip__label {
-  font-weight: 500;
+  font-weight: 600;
   color: #a6a499;
 }
 </style>

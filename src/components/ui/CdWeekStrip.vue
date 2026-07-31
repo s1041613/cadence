@@ -71,7 +71,7 @@ const emit = defineEmits<{
 }
 
 .cd-week-strip__dow {
-  font: 500 10px var(--cd-font-ui);
+  font: 600 10px var(--cd-font-ui);
   letter-spacing: 0.02em;
   color: var(--cd-ink-2);
 }

@@ -129,7 +129,7 @@ const maxChips = computed(() => {
   /* Centered over its column, matching the handoff mockup (monthPoster dow row uses
      textAlign:center) and CdMonthCell's centered day number below. */
   text-align: center;
-  font: 500 10.5px var(--cd-font-ui);
+  font: 600 10.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
 }

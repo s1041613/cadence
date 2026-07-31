@@ -364,7 +364,7 @@ const matrixOptions = [
 .cd-edit-card__style-label {
   flex: 1;
   min-width: 0;
-  font: 500 13px var(--cd-font-title);
+  font: 600 13px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -466,7 +466,7 @@ const matrixOptions = [
 }
 
 .cd-edit-card__matrix-cell-sub {
-  font: 500 9.5px var(--cd-font-title);
+  font: 600 9.5px var(--cd-font-title);
 }
 
 .cd-edit-card__when-row {
@@ -506,7 +506,7 @@ const matrixOptions = [
 }
 
 .cd-edit-card__label {
-  font: 500 13.5px var(--cd-font-ui);
+  font: 600 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -524,7 +524,7 @@ const matrixOptions = [
 .cd-edit-card__time-label {
   flex: none;
   width: 46px;
-  font: 500 12.5px var(--cd-font-ui);
+  font: 600 12.5px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 
@@ -539,7 +539,7 @@ const matrixOptions = [
 
 .cd-edit-card__time-warning {
   margin: 2px 0 0;
-  font: 500 11.5px var(--cd-font-ui);
+  font: 600 11.5px var(--cd-font-ui);
   color: #c0564b;
 }
 
@@ -551,13 +551,13 @@ const matrixOptions = [
   border: 1px solid rgba(var(--cd-olive-rgb), 0.4);
   border-radius: 10px;
   background: rgba(var(--cd-olive-rgb), 0.14);
-  font: 500 12.5px var(--cd-font-ui);
+  font: 600 12.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
 .cd-edit-card__pomodoro-cycle {
   margin-left: auto;
-  font: 500 13.5px var(--cd-font-mono);
+  font: 600 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
 }
@@ -572,7 +572,7 @@ const matrixOptions = [
   background: transparent;
   cursor: pointer;
   padding: 8px 16px;
-  font: 500 13px var(--cd-font-ui);
+  font: 600 13px var(--cd-font-ui);
   color: var(--cd-ink-2);
 }
 
@@ -618,7 +618,7 @@ const matrixOptions = [
   border-radius: 9px;
   padding: 7px 12px;
   cursor: pointer;
-  font: 500 13px var(--cd-font-title);
+  font: 600 13px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -628,7 +628,7 @@ const matrixOptions = [
   border-radius: 9px;
   padding: 7px 12px;
   cursor: pointer;
-  font: 500 13px var(--cd-font-title);
+  font: 600 13px var(--cd-font-title);
   color: var(--cd-ink);
   max-width: 100%;
 }
@@ -644,7 +644,7 @@ const matrixOptions = [
   border: none;
   outline: none;
   background: transparent;
-  font: 500 13.5px var(--cd-font-ui);
+  font: 600 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
   padding: 2px 0;
 }
@@ -684,7 +684,7 @@ const matrixOptions = [
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 500 13px var(--cd-font-ui);
+  font: 600 13px var(--cd-font-ui);
   color: var(--cd-ink-2);
 }
 
@@ -695,7 +695,7 @@ const matrixOptions = [
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 500 13px var(--cd-font-ui);
+  font: 600 13px var(--cd-font-ui);
   color: var(--cd-danger-2);
   padding: 6px 8px;
   border-radius: 8px;

@@ -169,7 +169,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   cursor: pointer;
   padding: 0;
   text-align: left;
-  font: 500 12px var(--cd-font-ui);
+  font: 600 12px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
 }
