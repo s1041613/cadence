@@ -82,8 +82,8 @@ const dowLabels = computed(() => props.cells.slice(0, 7).map((c) => ({ dow: c.do
 // Per-breakpoint cell chrome sizes (px), mirroring CdMonthCell/CdEventChip CSS: vertical cell
 // padding (both edges), head→events gap, day-number box height, chip height, chip gap.
 const CELL_METRICS = {
-  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 21.5, chipGap: 2 },
-  phone: { cellPad: 6, headGap: 1, headH: 22, chipH: 22, chipGap: 2 }
+  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 24.5, chipGap: 2 },
+  phone: { cellPad: 6, headGap: 1, headH: 22, chipH: 25, chipGap: 2 }
 } as const
 
 const { isDesktop } = useBreakpoint()
@@ -145,10 +145,10 @@ const maxChips = computed(() => {
 .cd-month-grid__grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  /* 114px, not 112px: three chips at their current height plus the cell chrome need
-     113.5px, and CdMonthCell guarantees three visible events before collapsing to
-     "+N". At 112px the row would overflow rather than show fewer chips. */
-  grid-auto-rows: 114px;
+  /* 123px: three chips at their current height plus the cell chrome need 122.5px, and
+     CdMonthCell guarantees three visible events before collapsing to "+N". A shorter
+     row would overflow rather than show fewer chips. */
+  grid-auto-rows: 123px;
 }
 
 @media (max-width: 899px) {
