@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, estPomsOf, quickAddTimeRange, formatTime } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime } from './convert-date-time'
 
 describe('pad', () => {
   it('pads single digits', () => {
@@ -141,6 +141,51 @@ describe('estPomsOf', () => {
 
   it('ignores a negative stored estimate', () => {
     expect(estPomsOf({ estimatedPomodoros: -3, allDay: false, start: '09:00', end: '09:30' })).toBe(2)
+  })
+})
+
+describe('slotEndAt', () => {
+  it('combines the date and the end time into one instant', () => {
+    const at = slotEndAt({ allDay: false, date: '2026-07-31', end: '10:40' })
+    expect(at?.getFullYear()).toBe(2026)
+    expect(at?.getMonth()).toBe(6)
+    expect(at?.getDate()).toBe(31)
+    expect(at?.getHours()).toBe(10)
+    expect(at?.getMinutes()).toBe(40)
+  })
+
+  it('has no end instant for an all-day event', () => {
+    expect(slotEndAt({ allDay: true, date: '2026-07-31', end: '' })).toBeNull()
+  })
+
+  it('has no end instant when the time was never filled in', () => {
+    expect(slotEndAt({ allDay: false, date: '2026-07-31', end: '' })).toBeNull()
+  })
+})
+
+describe('isSlotOver', () => {
+  const event = { allDay: false, date: '2026-07-31', end: '10:00' }
+
+  it('is not over before the end time', () => {
+    expect(isSlotOver(event, new Date(2026, 6, 31, 9, 59))).toBe(false)
+  })
+
+  it('is over from the end time onwards', () => {
+    expect(isSlotOver(event, new Date(2026, 6, 31, 10, 0))).toBe(true)
+    expect(isSlotOver(event, new Date(2026, 6, 31, 18, 0))).toBe(true)
+  })
+
+  // Comparing only HH:MM would make yesterday's morning event look current again today.
+  it('stays over on a later day, whatever the clock says', () => {
+    expect(isSlotOver(event, new Date(2026, 7, 1, 8, 0))).toBe(true)
+  })
+
+  it('is not over on an earlier day', () => {
+    expect(isSlotOver(event, new Date(2026, 6, 30, 23, 59))).toBe(false)
+  })
+
+  it('is never over for an all-day event', () => {
+    expect(isSlotOver({ allDay: true, date: '2026-07-31', end: '' }, new Date(2027, 0, 1))).toBe(false)
   })
 })
 

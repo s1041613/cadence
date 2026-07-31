@@ -68,6 +68,28 @@ export const estPomsOf = (
   t: { estimatedPomodoros: number; allDay: boolean; start: string; end: string }
 ): number => (t.estimatedPomodoros > 0 ? t.estimatedPomodoros : autoPoms(t))
 
+// Wall-clock instant an event's slot ends, or null when it has no bounded slot (all-day
+// events, or times that were never filled in). Date and time are combined deliberately:
+// comparing only HH:MM would make yesterday's 09:00-10:00 event look "not yet over" this
+// morning. `now` is a parameter so callers stay testable.
+export const slotEndAt = (
+  t: { allDay: boolean; date: string; end: string }
+): Date | null => {
+  if (t.allDay || !t.date || !t.end) return null
+  const d = parseISO(t.date)
+  d.setMinutes(minutes(t.end))
+  return d
+}
+
+/** True once an event's scheduled slot has passed. All-day events never count as over. */
+export const isSlotOver = (
+  t: { allDay: boolean; date: string; end: string },
+  now: Date
+): boolean => {
+  const endsAt = slotEndAt(t)
+  return endsAt !== null && now.getTime() >= endsAt.getTime()
+}
+
 // Quick-Add time-grid click: round down to the nearest 30-minute step, clamp the start into
 // 06:00-22:00, one-hour duration. app-shell spec "Creation entry points seed context from where
 // they are invoked" / Example: rounding and clamping boundaries.

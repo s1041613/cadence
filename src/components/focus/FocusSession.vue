@@ -1,7 +1,12 @@
 <template>
   <!-- Any click unlocks audio: a session restored by reload has no gesture of its own,
        and autoplay policy keeps the chime silent until one happens. -->
-  <div v-if="task && focus.state" class="fx" :class="{ rest: mode === 'rest' }" @click="focus.unlockSound()">
+  <div
+    v-if="task && focus.state"
+    class="fx"
+    :class="{ rest: mode === 'rest', overrun: focus.overrunning }"
+    @click="focus.unlockSound()"
+  >
     <div class="fx-top">
       <button v-if="phase === 'breathing'" class="fx-skip" @click="focus.skipBreathing()">跳過</button>
       <button class="fx-close" aria-label="關閉" @click="focus.close()">
@@ -56,6 +61,7 @@
         <svg class="fx-faceTom" :class="{ pulse: pulseTomato }" width="50" height="50" viewBox="0 0 24 24" v-html="TOMATO_SVG" />
         <div class="fk fx-fk mono">{{ fmt(secondsLeft) }}</div>
         <div class="fl fx-fl">{{ statusLabel }}</div>
+        <div v-if="focus.overrunning" class="fx-overrunHint">已超過預定結束時間</div>
         <div v-if="!focus.soundUnlocked" class="fx-soundHint">點一下畫面以啟用提示音</div>
       </div>
       <div v-if="mode !== 'done'" class="fx-bar show">
@@ -250,6 +256,12 @@ onUnmounted(() => {
   transition: background .8s
   animation: fxIn .4s ease
 
+// Running past the event's slot warms the background from green towards dusk. Deliberately
+// gentle: it inherits the .8s background transition above, so it arrives as a slow shift
+// rather than an alarm. Nothing stops — being cut off mid-pomodoro is worse than overrunning.
+.fx.overrun
+  background: #3a2a1c
+
 @keyframes fxIn
   from
     opacity: 0
@@ -410,6 +422,12 @@ onUnmounted(() => {
     font-size: 11px
     letter-spacing: .04em
     color: rgba(255, 255, 255, .5)
+    margin-top: 2px
+
+  .fx-overrunHint
+    font-size: 11px
+    letter-spacing: .06em
+    color: rgba(255, 214, 170, .82)
     margin-top: 2px
 
   .fl
