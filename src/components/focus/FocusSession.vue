@@ -544,7 +544,7 @@ onUnmounted(() => {
   .fl
     font-size: 13px
     color: rgba(255, 255, 255, .7)
-    font-weight: 600
+    font-weight: 700
     letter-spacing: .08em
 
   .fx-faceTom.pulse

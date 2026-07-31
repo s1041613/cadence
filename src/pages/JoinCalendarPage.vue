@@ -157,7 +157,7 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, .72)
   color: #292820
   font-size: 14px
-  font-weight: 600
+  font-weight: 700
   cursor: pointer
   transition: background .15s ease
 

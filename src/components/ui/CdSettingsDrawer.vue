@@ -944,7 +944,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 .cd-settings__account-email {
-  font: 600 13px var(--cd-font-title);
+  font: 700 13px var(--cd-font-title);
   color: var(--cd-muted);
   margin-top: 2px;
 }
@@ -1022,7 +1022,7 @@ button.cd-settings__row:hover {
 .cd-settings__row-label {
   flex: 1;
   min-width: 0;
-  font: 600 15.5px var(--cd-font-title);
+  font: 700 15.5px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -1031,14 +1031,14 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__row--placeholder .cd-settings__row-label {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--cd-muted);
   font-style: italic;
 }
 
 .cd-settings__row--bordered .cd-settings__row-label,
 .cd-settings__row-text .cd-settings__row-label {
-  font: 600 15px var(--cd-font-title);
+  font: 700 15px var(--cd-font-title);
 }
 
 .cd-settings__row-text {
@@ -1047,7 +1047,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__row-sub {
-  font: 600 12.5px var(--cd-font-title);
+  font: 700 12.5px var(--cd-font-title);
   color: var(--cd-muted);
   margin-top: 2px;
 }
@@ -1060,7 +1060,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__version {
   text-align: center;
-  font: 600 13.5px var(--cd-font-mono);
+  font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   margin-top: 4px;
@@ -1072,7 +1072,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__label {
-  font: 600 13.5px var(--cd-font-title);
+  font: 700 13.5px var(--cd-font-title);
   color: var(--cd-ink-2);
   margin-bottom: 8px;
 }
@@ -1173,7 +1173,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__gcal-status {
-  font: 600 13px var(--cd-font-title);
+  font: 700 13px var(--cd-font-title);
   color: var(--cd-muted);
   margin-top: 2px;
 }
@@ -1242,7 +1242,7 @@ button.cd-settings__row:hover {
   border: 1px solid var(--cd-line);
   border-radius: 999px;
   padding: 4px 10px;
-  font: 600 12px var(--cd-font-title);
+  font: 700 12px var(--cd-font-title);
   color: var(--cd-ink-2);
 }
 
@@ -1360,7 +1360,7 @@ button.cd-settings__row:hover {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  font: 600 12.5px var(--cd-font-title);
+  font: 700 12.5px var(--cd-font-title);
   color: var(--cd-muted);
 }
 
@@ -1420,7 +1420,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__month-photo-action {
-  font: 600 11.5px var(--cd-font-title);
+  font: 700 11.5px var(--cd-font-title);
   color: var(--cd-muted);
 }
 
@@ -1429,7 +1429,7 @@ button.cd-settings__row:hover {
   background: transparent;
   cursor: pointer;
   padding: 0;
-  font: 600 11.5px var(--cd-font-title);
+  font: 700 11.5px var(--cd-font-title);
   color: var(--cd-ink-2);
   text-decoration: underline;
 }
@@ -1509,7 +1509,7 @@ button.cd-settings__row:hover {
 .cd-settings__cal-name-label {
   flex: 1;
   min-width: 0;
-  font: 600 15px var(--cd-font-title);
+  font: 700 15px var(--cd-font-title);
   color: var(--cd-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -1583,7 +1583,7 @@ button.cd-settings__row:hover {
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 600 13px var(--cd-font-title);
+  font: 700 13px var(--cd-font-title);
   color: var(--cd-muted);
   text-align: left;
   padding: 0 4px;
@@ -1600,7 +1600,7 @@ button.cd-settings__row:hover {
   background: var(--cd-surface);
   border-radius: 13px;
   padding: 14px 16px;
-  font: 600 15px var(--cd-font-title);
+  font: 700 15px var(--cd-font-title);
   color: var(--cd-ink);
   outline: none;
 }
@@ -1639,7 +1639,7 @@ button.cd-settings__row:hover {
 .cd-settings__member-name {
   flex: 1;
   min-width: 0;
-  font: 600 14.5px var(--cd-font-title);
+  font: 700 14.5px var(--cd-font-title);
   color: var(--cd-ink);
 }
 
@@ -1665,7 +1665,7 @@ button.cd-settings__row:hover {
   border-radius: 13px;
   padding: 12px;
   cursor: pointer;
-  font: 600 13.5px var(--cd-font-title);
+  font: 700 13.5px var(--cd-font-title);
   color: var(--cd-muted);
 }
 
@@ -1681,7 +1681,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__invite-sub {
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink-3);
   margin-bottom: 22px;
 }
@@ -1727,7 +1727,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__invite-error {
-  font: 600 13.5px var(--cd-font-ui);
+  font: 700 13.5px var(--cd-font-ui);
   color: var(--cd-danger);
   margin-bottom: 14px;
 }
@@ -1749,7 +1749,7 @@ button.cd-settings__row:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  font: 600 16.5px var(--cd-font-mono);
+  font: 700 16.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
 }
@@ -1848,7 +1848,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-modal-sub {
   text-align: center;
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink-3);
   margin-bottom: 18px;
   line-height: 1.5;
@@ -1880,7 +1880,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-perm-label {
   flex: 1;
-  font: 600 13.5px var(--cd-font-ui);
+  font: 700 13.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
 
@@ -1951,17 +1951,17 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-sync-name {
   flex: 1;
-  font: 600 14px var(--cd-font-ui);
+  font: 700 14px var(--cd-font-ui);
   color: var(--cd-ink-3);
 }
 
 .cd-settings__gcal-sync-name--active {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--cd-ink);
 }
 
 .cd-settings__gcal-sync-tag {
-  font: 600 13.5px var(--cd-font-mono);
+  font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-3);
 }

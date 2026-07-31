@@ -349,7 +349,7 @@ function highlight(text: string): string {
   background: #e4e1d7;
   border-radius: 999px;
   padding: 10px 16px;
-  font: 600 14px var(--cd-font-ui);
+  font: 700 14px var(--cd-font-ui);
   color: #3a3833;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
 }
@@ -398,7 +398,7 @@ function highlight(text: string): string {
 
 .cd-draft__composer-plus--active {
   color: var(--cd-olive-mix-1);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .cd-draft__composer-input {
@@ -406,7 +406,7 @@ function highlight(text: string): string {
   border: none;
   outline: none;
   background: transparent;
-  font: 600 15px var(--cd-font-title);
+  font: 700 15px var(--cd-font-title);
   color: #3a3a34;
 }
 
@@ -570,7 +570,7 @@ function highlight(text: string): string {
   gap: 10px;
   padding: 60px 20px;
   color: #b0ad9f;
-  font: 600 13px var(--cd-font-ui);
+  font: 700 13px var(--cd-font-ui);
 }
 
 </style>
