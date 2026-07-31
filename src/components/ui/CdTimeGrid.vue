@@ -252,6 +252,7 @@ function hourLabel(h: number): string {
 
 .cd-time-grid__header-num {
   font: 700 18px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
 }
 
@@ -270,6 +271,7 @@ function hourLabel(h: number): string {
 
 .cd-time-grid__gutter-cell--allday {
   font: 8px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   display: flex;
   align-items: center;
@@ -305,6 +307,7 @@ function hourLabel(h: number): string {
   position: absolute;
   right: 8px;
   font: 9.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   text-align: right;
 }

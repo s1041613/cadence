@@ -111,6 +111,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 
 .cd-month-cell__num {
   font: 700 19px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   width: 26px;
   height: 26px;
@@ -169,6 +170,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   padding: 0;
   text-align: left;
   font: 8px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
 }
 
@@ -183,6 +185,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 
   .cd-month-cell__num {
     font: 700 12px var(--cd-font-mono);
+    font-variant-numeric: var(--cd-numeric-aligned);
     width: 20px;
     height: 20px;
   }

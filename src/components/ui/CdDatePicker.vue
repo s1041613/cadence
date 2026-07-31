@@ -239,6 +239,7 @@ onBeforeUnmount(() => {
   border-radius: 10px;
   padding: 8px 10px;
   font: 700 12.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   cursor: pointer;
   transition: border-color var(--cd-duration-micro-3);
@@ -298,6 +299,7 @@ onBeforeUnmount(() => {
 .cd-date-picker__dow {
   text-align: center;
   font: 700 9.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
   color: var(--cd-muted);
 }
@@ -317,6 +319,7 @@ onBeforeUnmount(() => {
   background: transparent;
   border-radius: 50%;
   font: 500 11.5px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   cursor: pointer;
   transition: background var(--cd-duration-micro-3);

@@ -82,6 +82,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 
 .cd-date-poster__year {
   font: 700 14px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
 }
