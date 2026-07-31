@@ -227,7 +227,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 500 12.5px var(--cd-font-ui);
+  font: 600 12.5px var(--cd-font-ui);
   color: var(--cd-ink-2);
   padding: 4px 10px;
   border-radius: 8px;

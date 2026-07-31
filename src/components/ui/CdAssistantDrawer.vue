@@ -147,7 +147,7 @@ function onSwipeDown(): void {
 
 .cd-assistant__greeting p {
   margin: 0;
-  font: 500 19px var(--cd-font-title);
+  font: 600 19px var(--cd-font-title);
   color: var(--cd-ink-2);
   line-height: 1.5;
 }
@@ -165,7 +165,7 @@ function onSwipeDown(): void {
   background: var(--cd-surface);
   border-radius: var(--cd-radius-pill);
   padding: 11px 18px;
-  font: 500 14px var(--cd-font-title);
+  font: 600 14px var(--cd-font-title);
   color: var(--cd-ink);
   cursor: pointer;
   transition: background var(--cd-duration-micro-3);
@@ -199,7 +199,7 @@ function onSwipeDown(): void {
   border: none;
   outline: none;
   background: transparent;
-  font: 500 15px var(--cd-font-title);
+  font: 600 15px var(--cd-font-title);
   color: var(--cd-ink);
 }
 

@@ -61,14 +61,14 @@ const blockStyle = computed(() => ({
 }
 
 .cd-event-block__title {
-  font: 500 16px var(--cd-font-title);
+  font: 600 16px var(--cd-font-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .cd-event-block__time {
-  font: 500 12px var(--cd-font-ui);
+  font: 600 12px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   opacity: 0.8;
 }

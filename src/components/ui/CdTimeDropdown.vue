@@ -252,7 +252,7 @@ onBeforeUnmount(() => {
   background: transparent;
   border-radius: 8px;
   padding: 7px 10px;
-  font: 500 15.5px var(--cd-font-mono);
+  font: 600 15.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
   cursor: pointer;

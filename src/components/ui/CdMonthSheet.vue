@@ -134,7 +134,7 @@ function wheelOpacity(i: number, center: number): number {
   background: #efede4;
   border-radius: var(--cd-radius-pill);
   padding: 6px 12px;
-  font: 500 12px var(--cd-font-ui);
+  font: 600 12px var(--cd-font-ui);
   color: var(--cd-ink);
   cursor: pointer;
 }
@@ -154,7 +154,7 @@ function wheelOpacity(i: number, center: number): number {
 
 .cd-month-sheet__dow {
   text-align: center;
-  font: 500 12px var(--cd-font-ui);
+  font: 600 12px var(--cd-font-ui);
   color: var(--cd-muted);
 }
 
@@ -229,7 +229,7 @@ function wheelOpacity(i: number, center: number): number {
 }
 
 .cd-month-sheet__wheel-item {
-  font: 500 17px var(--cd-font-title);
+  font: 600 17px var(--cd-font-title);
   color: var(--cd-ink);
   white-space: nowrap;
 }

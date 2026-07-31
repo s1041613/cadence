@@ -237,7 +237,7 @@ function hourLabel(h: number): string {
 }
 
 .cd-time-grid__header-dow {
-  font: 500 12.5px var(--cd-font-ui);
+  font: 600 12.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
   color: var(--cd-ink-2);
 }
@@ -272,7 +272,7 @@ function hourLabel(h: number): string {
 .cd-time-grid__gutter-cell--allday {
   /* Held a step below the hour labels: "All-day" is seven characters and the gutter
      is a fixed 50px column, so matching their size would overflow it. */
-  font: 500 11px var(--cd-font-ui);
+  font: 600 11px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
   display: flex;
@@ -292,7 +292,7 @@ function hourLabel(h: number): string {
 .cd-time-grid__allday-item {
   border-left: 3px solid;
   border-radius: 5px;
-  font: 500 8.5px var(--cd-font-ui);
+  font: 600 8.5px var(--cd-font-ui);
   padding: 2px 6px;
 }
 
@@ -311,7 +311,7 @@ function hourLabel(h: number): string {
   /* 11.5px/500 rather than the previous 9.5px/400: the size was tuned for a
      monospaced face, and the UI face renders smaller at the same px value, so the
      gutter read faint once the two-face consolidation landed. */
-  font: 500 13.5px var(--cd-font-ui);
+  font: 600 13.5px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
   text-align: right;
