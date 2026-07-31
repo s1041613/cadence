@@ -125,7 +125,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 
 .cd-week-agenda__num {
   display: block;
-  font: 700 18px var(--cd-font-mono);
+  font: 700 20px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   line-height: 0.9;
   letter-spacing: -0.02em;
@@ -155,7 +155,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 
 .cd-week-agenda__dow {
   display: block;
-  font: 700 9.5px var(--cd-font-mono);
+  font: 700 11.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
@@ -210,7 +210,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__time {
-  font: 500 11.5px var(--cd-font-mono);
+  font: 500 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   flex: none;

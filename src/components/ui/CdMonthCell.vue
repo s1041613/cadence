@@ -110,11 +110,13 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num {
-  font: 700 20px var(--cd-font-mono);
+  font: 700 22px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink);
-  width: 26px;
-  height: 26px;
+  /* 30px rather than 26px: a two-digit date at 22px measures ~23px wide, which left
+     the today pill visibly cramped once the type scaled up. */
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -169,7 +171,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   cursor: pointer;
   padding: 0;
   text-align: left;
-  font: 500 10px var(--cd-font-ui);
+  font: 500 12px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
 }
@@ -184,10 +186,10 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   }
 
   .cd-month-cell__num {
-    font: 700 13px var(--cd-font-mono);
+    font: 700 15px var(--cd-font-mono);
     font-variant-numeric: var(--cd-numeric-aligned);
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 }
 </style>

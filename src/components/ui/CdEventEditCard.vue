@@ -323,7 +323,7 @@ const matrixOptions = [
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 700 13px var(--cd-font-mono);
+  font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   text-transform: uppercase;
   color: var(--cd-ink-2);
@@ -401,7 +401,7 @@ const matrixOptions = [
 .cd-edit-card__matrix-axis-label {
   flex: 1;
   text-align: center;
-  font: 700 9px var(--cd-font-mono);
+  font: 700 11px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.1em;
   color: #b0ad9f;
@@ -557,7 +557,7 @@ const matrixOptions = [
 
 .cd-edit-card__pomodoro-cycle {
   margin-left: auto;
-  font: 500 11.5px var(--cd-font-mono);
+  font: 500 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
 }

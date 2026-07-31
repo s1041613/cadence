@@ -951,7 +951,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 
 .cd-settings__micro-label {
   display: block;
-  font: 700 11.5px var(--cd-font-mono);
+  font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   color: var(--cd-muted);
@@ -960,7 +960,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 
 .cd-settings__section-label {
   display: block;
-  font: 700 11.5px var(--cd-font-mono);
+  font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1060,7 +1060,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__version {
   text-align: center;
-  font: 500 11.5px var(--cd-font-mono);
+  font: 500 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-muted);
   margin-top: 4px;
@@ -1090,7 +1090,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__scope-chip {
-  font: 700 9.5px var(--cd-font-mono);
+  font: 700 11.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   color: #9a988f;
@@ -1223,7 +1223,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__gcal-cals-label {
-  font: 700 10.5px var(--cd-font-mono);
+  font: 700 12.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.1em;
   color: var(--cd-muted);
@@ -1390,7 +1390,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__month-photo-badge {
   align-self: flex-start;
-  font: 700 10.5px var(--cd-font-mono);
+  font: 700 12.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
   color: #fff;
@@ -1606,7 +1606,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__members-count {
-  font: 700 11.5px var(--cd-font-mono);
+  font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   color: var(--cd-muted);
@@ -1749,7 +1749,7 @@ button.cd-settings__row:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  font: 500 14.5px var(--cd-font-mono);
+  font: 500 16.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-2);
 }
@@ -1961,7 +1961,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__gcal-sync-tag {
-  font: 500 11.5px var(--cd-font-mono);
+  font: 500 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--cd-ink-3);
 }
