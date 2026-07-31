@@ -55,7 +55,7 @@ const blockStyle = computed(() => ({
 }
 
 .cd-event-block__title {
-  font: 600 10.5px var(--cd-font-title);
+  font: 500 10.5px var(--cd-font-title);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

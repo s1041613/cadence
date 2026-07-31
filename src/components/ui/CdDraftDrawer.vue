@@ -97,7 +97,7 @@
                     <span class="cd-draft__ai-chip-label" :style="{ color: item.aiSuggestion.color }">{{ item.aiSuggestion.tag }}</span>
                   </button>
                   <button type="button" class="cd-draft__row-btn" aria-label="Schedule" @click="emit('openSchedule', item.id)">
-                    <CdIcon name="calendar" :size="16" color="#8F8A6E" />
+                    <CdIcon name="calendar" :size="16" color="var(--cd-olive-mix-1)" />
                   </button>
                   <button type="button" class="cd-draft__row-btn" aria-label="Remove" @click="emit('removeItem', item.id)">
                     <CdIcon name="x-small" :size="12" color="#8F8C7E" />
@@ -314,7 +314,7 @@ function highlight(text: string): string {
 
 .cd-draft__title {
   flex: 1;
-  font: 800 20px var(--cd-font-title);
+  font: 700 20px var(--cd-font-title);
   letter-spacing: -0.01em;
   color: #3a3833;
 }
@@ -397,7 +397,7 @@ function highlight(text: string): string {
 }
 
 .cd-draft__composer-plus--active {
-  color: #8f8a6e;
+  color: var(--cd-olive-mix-1);
   font-weight: 500;
 }
 
@@ -473,7 +473,7 @@ function highlight(text: string): string {
 }
 
 .cd-draft__swipe-btn--schedule {
-  background: #8f8a6e;
+  background: var(--cd-olive-mix-1);
 }
 
 .cd-draft__swipe-btn--remove {

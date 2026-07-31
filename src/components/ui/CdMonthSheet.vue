@@ -134,7 +134,7 @@ function wheelOpacity(i: number, center: number): number {
   background: #efede4;
   border-radius: var(--cd-radius-pill);
   padding: 6px 12px;
-  font: 600 12px var(--cd-font-ui);
+  font: 500 12px var(--cd-font-ui);
   color: var(--cd-ink);
   cursor: pointer;
 }

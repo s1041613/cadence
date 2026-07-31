@@ -242,7 +242,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 .gallery__swatch {
   padding: 12px 20px;
   border-radius: var(--cd-radius-chip, 7px);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .gallery__shell-frame {

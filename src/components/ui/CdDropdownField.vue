@@ -125,7 +125,7 @@ function select(opt: DropdownFieldOption): void {
   background: #fff;
   border: 1px solid var(--cd-line);
   border-radius: 13px;
-  box-shadow: 0 12px 32px -12px rgba(40, 38, 30, 0.4);
+  box-shadow: 0 12px 32px -12px rgba(var(--cd-scrim-rgb), 0.4);
   padding: 5px;
   z-index: 30;
   display: flex;
@@ -153,12 +153,12 @@ function select(opt: DropdownFieldOption): void {
 }
 
 .cd-dropdown-field__item--selected {
-  background: rgba(179, 172, 145, 0.16);
+  background: rgba(var(--cd-olive-rgb), 0.16);
   font-weight: 700;
 }
 
 .cd-dropdown-field__item--selected:hover {
-  background: rgba(179, 172, 145, 0.16);
+  background: rgba(var(--cd-olive-rgb), 0.16);
 }
 
 .cd-dropdown-field__item--disabled {

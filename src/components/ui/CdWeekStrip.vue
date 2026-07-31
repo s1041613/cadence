@@ -17,7 +17,7 @@
           v-for="(color, i) in day.dots.slice(0, 4)"
           :key="i"
           class="cd-week-strip__dot"
-          :style="{ background: day.date === selected ? '#3f4136' : color }"
+          :style="{ background: day.date === selected ? 'var(--cd-olive-ink)' : color }"
         />
       </span>
     </button>
@@ -71,13 +71,13 @@ const emit = defineEmits<{
 }
 
 .cd-week-strip__dow {
-  font: 600 10px var(--cd-font-ui);
+  font: 500 10px var(--cd-font-ui);
   letter-spacing: 0.02em;
   color: var(--cd-ink-2);
 }
 
 .cd-week-strip__pill--selected .cd-week-strip__dow {
-  color: #3f4136;
+  color: var(--cd-olive-ink);
 }
 
 .cd-week-strip__dow--sat {
@@ -90,7 +90,7 @@ const emit = defineEmits<{
 
 .cd-week-strip__pill--selected .cd-week-strip__dow--sat,
 .cd-week-strip__pill--selected .cd-week-strip__dow--sun {
-  color: #3f4136;
+  color: var(--cd-olive-ink);
 }
 
 .cd-week-strip__num {
@@ -99,7 +99,7 @@ const emit = defineEmits<{
 }
 
 .cd-week-strip__pill--selected .cd-week-strip__num {
-  color: #3f4136;
+  color: var(--cd-olive-ink);
 }
 
 .cd-week-strip__dots {

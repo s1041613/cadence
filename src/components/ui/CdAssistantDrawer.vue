@@ -165,14 +165,14 @@ function onSwipeDown(): void {
   background: var(--cd-surface);
   border-radius: var(--cd-radius-pill);
   padding: 11px 18px;
-  font: 600 14px var(--cd-font-title);
+  font: 500 14px var(--cd-font-title);
   color: var(--cd-ink);
   cursor: pointer;
   transition: background var(--cd-duration-micro-3);
 }
 
 .cd-assistant__chip:hover {
-  background: rgba(179, 172, 145, 0.12);
+  background: rgba(var(--cd-olive-rgb), 0.12);
 }
 
 .cd-assistant__input-bar {

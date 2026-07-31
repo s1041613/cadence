@@ -52,6 +52,6 @@ const emit = defineEmits<{
   background: var(--cd-olive);
   box-shadow: var(--cd-shadow-pill-active);
   font-weight: 700;
-  color: #3f4136;
+  color: var(--cd-olive-ink);
 }
 </style>

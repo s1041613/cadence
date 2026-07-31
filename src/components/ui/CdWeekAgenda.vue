@@ -116,11 +116,11 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__badge:hover {
-  background: rgba(179, 172, 145, 0.12);
+  background: rgba(var(--cd-olive-rgb), 0.12);
 }
 
 .cd-week-agenda__badge:active {
-  background: rgba(179, 172, 145, 0.3);
+  background: rgba(var(--cd-olive-rgb), 0.3);
 }
 
 .cd-week-agenda__num {
@@ -140,7 +140,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__num--today {
-  font-weight: 800;
+  font-weight: 700;
   background: var(--cd-olive);
   color: var(--cd-olive-ink);
   border-radius: 50%;
@@ -208,7 +208,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__time {
-  font: 600 11px var(--cd-font-mono);
+  font: 500 11px var(--cd-font-mono);
   color: var(--cd-muted);
   flex: none;
 }

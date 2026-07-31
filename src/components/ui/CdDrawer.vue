@@ -88,7 +88,7 @@ const emit = defineEmits<{
 .cd-drawer--left {
   right: auto;
   left: 14px;
-  box-shadow: 22px 0 52px -22px rgba(40, 38, 30, 0.42);
+  box-shadow: 22px 0 52px -22px rgba(var(--cd-scrim-rgb), 0.42);
   animation-name: cd-drawerInLeft;
 }
 </style>

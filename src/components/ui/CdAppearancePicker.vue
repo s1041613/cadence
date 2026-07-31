@@ -199,13 +199,13 @@ const IconTile = defineComponent({
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 600 15px var(--cd-font-title);
+  font: 500 15px var(--cd-font-title);
   color: var(--cd-muted);
   padding: 6px 1px 8px;
 }
 
 .cd-appearance-subview__tab--on {
-  font-weight: 800;
+  font-weight: 700;
   color: var(--cd-ink);
 }
 
@@ -225,7 +225,7 @@ const IconTile = defineComponent({
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 600 14px var(--cd-font-title);
+  font: 500 14px var(--cd-font-title);
   color: #8a8779;
   padding: 6px 4px;
 }
@@ -321,7 +321,7 @@ const IconTile = defineComponent({
   align-items: center;
   gap: 9px;
   margin-top: 22px;
-  font: 800 14px var(--cd-font-title);
+  font: 700 14px var(--cd-font-title);
   color: var(--cd-ink-2);
 }
 
@@ -347,7 +347,7 @@ const IconTile = defineComponent({
 
 .cd-appearance-subview__empty {
   padding: 16px 2px;
-  font: 600 13px var(--cd-font-title);
+  font: 500 13px var(--cd-font-title);
   color: var(--cd-muted);
 }
 

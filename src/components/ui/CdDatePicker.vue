@@ -258,7 +258,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border: 1px solid var(--cd-line-4);
   border-radius: 14px;
-  box-shadow: 0 20px 44px -18px rgba(40, 38, 30, 0.42);
+  box-shadow: 0 20px 44px -18px rgba(var(--cd-scrim-rgb), 0.42);
   padding: 12px;
 }
 
@@ -316,7 +316,7 @@ onBeforeUnmount(() => {
   border: none;
   background: transparent;
   border-radius: 50%;
-  font: 600 11.5px var(--cd-font-mono);
+  font: 500 11.5px var(--cd-font-mono);
   color: var(--cd-ink);
   cursor: pointer;
   transition: background var(--cd-duration-micro-3);
@@ -333,12 +333,12 @@ onBeforeUnmount(() => {
 
 .cd-date-picker__cell--today {
   color: var(--cd-olive);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .cd-date-picker__cell--selected {
   background: var(--cd-olive-mix-1);
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
 }
 </style>

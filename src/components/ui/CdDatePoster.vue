@@ -96,7 +96,10 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   padding: 2px 4px;
   margin: 2px -4px 0;
   border-radius: 10px;
-  font: 800 44px var(--cd-font-title);
+  /* Display face: the month poster is the one place in legacy that uses it.
+     Instrument Serif ships a single weight (400), so the former 800 is dropped
+     rather than synthesised. */
+  font: italic 400 44px var(--cd-font-display);
   letter-spacing: -0.01em;
   line-height: 0.95;
   color: var(--cd-ink);
@@ -223,7 +226,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   border: none;
   background: transparent;
   cursor: pointer;
-  font: 600 12.5px var(--cd-font-ui);
+  font: 500 12.5px var(--cd-font-ui);
   color: var(--cd-ink-2);
   padding: 4px 10px;
   border-radius: 8px;

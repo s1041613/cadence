@@ -105,7 +105,7 @@ const initials = computed(() =>
   border-radius: 50%;
   background: var(--cd-surface);
   border: 1.6px solid var(--cd-line-4);
-  box-shadow: 0 4px 12px -6px rgba(40, 38, 30, 0.22);
+  box-shadow: 0 4px 12px -6px rgba(var(--cd-scrim-rgb), 0.22);
   transform: translateY(-10px);
 }
 
