@@ -205,7 +205,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 .cd-week-agenda__leader {
   flex: 1;
   min-width: 8px;
-  border-bottom: 1px dotted rgba(86, 88, 94, 0.3);
+  border-bottom: 1px dotted rgba(var(--cd-ink-rgb), 0.3);
   transform: translateY(-3px);
 }
 

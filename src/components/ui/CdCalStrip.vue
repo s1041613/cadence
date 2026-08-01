@@ -22,7 +22,7 @@
       aria-label="Toggle calendar strip overflow"
       @click="expanded = !expanded"
     >
-      <CdIcon name="chevron-right" :size="15" color="#9C9E94" />
+      <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
     </button>
   </div>
 </template>
@@ -131,7 +131,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-cal-strip__chevron:hover {
-  background: rgba(86, 88, 94, 0.06);
+  background: rgba(var(--cd-ink-rgb), 0.06);
 }
 
 .cd-cal-strip__chevron--expanded {

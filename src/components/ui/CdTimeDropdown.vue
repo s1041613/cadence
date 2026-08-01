@@ -260,7 +260,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-time-dropdown__item:hover {
-  background: rgba(86, 88, 94, 0.05);
+  background: rgba(var(--cd-ink-rgb), 0.05);
 }
 
 .cd-time-dropdown__item--selected {

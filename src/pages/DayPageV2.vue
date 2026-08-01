@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #9c9e94;
+  color: var(--cd-ink-muted);
   font: 500 14px var(--cd-font-ui);
 }
 </style>

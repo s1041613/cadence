@@ -28,7 +28,7 @@
           type="button"
           class="cd-appearance-subview__swatch"
           :aria-label="c"
-          :style="{ background: c, boxShadow: color === c ? `0 0 0 3px #F1EFE8, 0 0 0 5px ${c}` : 'none' }"
+          :style="{ background: c, boxShadow: color === c ? `0 0 0 3px var(--cd-surface-inset), 0 0 0 5px ${c}` : 'none' }"
           @click="emit('pickColor', c)"
         />
       </div>
@@ -36,7 +36,7 @@
 
     <div v-else class="cd-appearance-subview__body cd-appearance-subview__body--icons">
       <label class="cd-appearance-subview__search">
-        <CdIcon name="search" :size="18" color="#9C9E94" />
+        <CdIcon name="search" :size="18" color="var(--cd-ink-muted)" />
         <input v-model="query" placeholder="Search Icons" />
       </label>
 
@@ -50,7 +50,7 @@
           :aria-label="cat.label"
           @click="activeCategory = cat.key; query = ''"
         >
-          <CdIcon :name="cat.icon" :size="22" :color="activeCategory === cat.key && !query.trim() ? '#8F7A3E' : '#9C9E94'" />
+          <CdIcon :name="cat.icon" :size="22" :color="activeCategory === cat.key && !query.trim() ? '#8F7A3E' : 'var(--cd-ink-muted)'" />
         </button>
       </div>
 
@@ -64,7 +64,7 @@
       <template v-else>
         <template v-if="recentIcons.length">
           <div class="cd-appearance-subview__section">
-            <CdIcon name="clock" :size="17" color="#9C9E94" />
+            <CdIcon name="clock" :size="17" color="var(--cd-ink-muted)" />
             <span>Recently Used</span>
           </div>
           <div class="cd-appearance-subview__icon-row">
@@ -73,7 +73,7 @@
         </template>
 
         <div class="cd-appearance-subview__section">
-          <CdIcon :name="activeCategoryInfo.icon" :size="17" color="#9C9E94" />
+          <CdIcon :name="activeCategoryInfo.icon" :size="17" color="var(--cd-ink-muted)" />
           <span>{{ activeCategoryInfo.label }}</span>
         </div>
         <div class="cd-appearance-subview__icon-grid">
@@ -148,7 +148,7 @@ const IconTile = defineComponent({
           style: tileProps.selected ? { borderColor: tileProps.color, background: tileProps.color } : undefined,
           onClick: () => tileEmit('pick')
         },
-        [h(CdIcon, { name: tileProps.name as IconName, size: 24, color: tileProps.selected ? '#fff' : '#56585E' })]
+        [h(CdIcon, { name: tileProps.name as IconName, size: 24, color: tileProps.selected ? '#fff' : 'var(--cd-ink)' })]
       )
   }
 })
@@ -257,7 +257,7 @@ const IconTile = defineComponent({
   flex-wrap: wrap;
   gap: 18px;
   align-items: center;
-  background: #f1efe8;
+  background: var(--cd-surface-inset);
   border-radius: 18px;
   padding: 18px;
 }
@@ -278,7 +278,7 @@ const IconTile = defineComponent({
   gap: 12px;
   border: 1px solid var(--cd-line);
   border-radius: 14px;
-  background: #fbfaf7;
+  background: var(--cd-surface-raised);
   padding: 12px 14px;
 }
 

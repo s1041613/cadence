@@ -184,7 +184,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 .gallery {
   padding: 32px;
   font-family: var(--cd-font-ui, sans-serif);
-  color: var(--cd-ink, #56585e);
+  color: var(--cd-ink);
 }
 
 .gallery__title {
@@ -193,7 +193,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 }
 
 .gallery__note {
-  color: var(--cd-ink-muted, #9c9e94);
+  color: var(--cd-ink-muted);
   margin: 0 0 32px;
 }
 
@@ -205,7 +205,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--cd-ink-secondary, #6e7176);
+  color: var(--cd-ink-secondary);
   margin: 0 0 16px;
 }
 
@@ -228,13 +228,13 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
   align-items: center;
   gap: 6px;
   padding: 12px;
-  border: 1px solid var(--cd-line, #e5e3db);
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-sm, 9px);
 }
 
 .gallery__icon-label {
   font-size: 10px;
-  color: var(--cd-ink-muted, #9c9e94);
+  color: var(--cd-ink-muted);
   text-align: center;
   word-break: break-word;
 }
@@ -248,7 +248,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 .gallery__shell-frame {
   position: relative;
   min-height: 140px;
-  border: 1px dashed var(--cd-line, #e5e3db);
+  border: 1px dashed var(--cd-line);
   border-radius: var(--cd-radius-sm, 9px);
   overflow: hidden;
 }
@@ -267,7 +267,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
   max-width: 420px;
   height: 720px;
   overflow: hidden;
-  border: 1px dashed var(--cd-line, #e5e3db);
+  border: 1px dashed var(--cd-line);
   border-radius: var(--cd-radius-sm, 9px);
 }
 
@@ -280,8 +280,8 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 }
 
 .gallery__demo-btn {
-  border: 1px solid var(--cd-line, #e5e3db);
-  background: var(--cd-surface-raised, #fbfaf7);
+  border: 1px solid var(--cd-line);
+  background: var(--cd-surface-raised);
   border-radius: var(--cd-radius-chip, 7px);
   padding: 8px 14px;
   cursor: pointer;

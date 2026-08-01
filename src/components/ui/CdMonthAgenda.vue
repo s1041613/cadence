@@ -99,7 +99,7 @@ const emit = defineEmits<{
 }
 
 .cd-month-agenda__row:hover {
-  background: rgba(86, 88, 94, 0.05);
+  background: rgba(var(--cd-ink-rgb), 0.05);
 }
 
 .cd-month-agenda__dot {

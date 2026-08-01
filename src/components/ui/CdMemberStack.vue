@@ -52,6 +52,6 @@ const overflow = computed(() => Math.max(0, props.members.length - props.max))
 .cd-member-stack__more {
   margin-left: 4px;
   font: 700 11px var(--cd-font-ui);
-  color: #9c9e94;
+  color: var(--cd-ink-muted);
 }
 </style>

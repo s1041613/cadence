@@ -95,11 +95,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="sass">
+// Kept in step with JoinCalendarPage: both interstitials sit on the app's page surface.
 .auth-callback
   min-height: 100dvh
   display: grid
   place-items: center
-  background: #eeebe1
+  background: var(--cd-surface-page)
   color: #292820
 
 .auth-callback__panel

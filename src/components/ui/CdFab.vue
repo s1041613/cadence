@@ -27,7 +27,7 @@ const emit = defineEmits<{
   height: 56px;
   border-radius: 50%;
   border: 1px solid rgba(var(--cd-accent-rgb), 0.5);
-  background: #e7e4d6;
+  background: var(--cd-accent-subtle);
   color: var(--cd-accent-strong);
   cursor: pointer;
   display: grid;

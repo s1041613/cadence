@@ -39,7 +39,7 @@ import type { IconName } from './icons'
 // chevron 14px rotating ∓90deg (.18s). Menu opens DOWNWARD: top calc(100% + 6px), bg #fff, border
 // 1px solid var(--cd-line), radius 13px, shadow 0 12px 32px -12px rgba(40,38,30,.4), padding 5px;
 // options padding 11px 13px, radius 9px, font 700 14px, selected bg
-// rgba(179,172,145,.16) + trailing 15px olive check, hover rgba(86,88,94,.05). Per-option
+// rgba(179,172,145,.16) + trailing 15px olive check, hover rgba(var(--cd-ink-rgb), .05). Per-option
 // `disabled` renders color #BEBBB0, opacity .75, cursor not-allowed, and is not selectable —
 // used by the Timezone field (only Asia/Taipei enabled in this beta).
 export interface DropdownFieldOption {
@@ -149,7 +149,7 @@ function select(opt: DropdownFieldOption): void {
 }
 
 .cd-dropdown-field__item:hover {
-  background: rgba(86, 88, 94, 0.05);
+  background: rgba(var(--cd-ink-rgb), 0.05);
 }
 
 .cd-dropdown-field__item--selected {
