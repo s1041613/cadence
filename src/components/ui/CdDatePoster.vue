@@ -36,7 +36,7 @@ import { computed } from 'vue'
 import CdIcon from './CdIcon.vue'
 
 // CdDatePoster — big date navigation header, 3 variants (month/week/day). design-research-report.md §3.3.
-// Year row: 700 17px, ls .14em, --cd-muted. Title: italic 400 44px --cd-font-display (Instrument
+// Year row: 700 17px, ls .14em, --cd-ink-muted. Title: italic 400 44px --cd-font-display (Instrument
 // Serif, the one place in legacy that uses the display face), ls -.01em, lh .95.
 // Month variant has an olive caret next to the title that opens the calendar bottom-sheet (not a dropdown).
 // Chevron sizes differ per variant (month footer 30x28, day 24x28, week 30x28) but are visually identical here;

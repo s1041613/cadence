@@ -4,8 +4,8 @@
 
 <script setup lang="ts">
 // CdScrim — backdrop for drawers/sheets/modals/popovers. design-research-report.md §4.11.
-// Fades in via cd-scrimIn (opacity 0->1, .2s ease). Opacity varies by context (.28/.3/.32/.34/.4);
-// caller passes the exact rgba via `color`.
+// Fades in via cd-scrimIn (opacity 0->1, .2s ease). Two levels only: --cd-scrim (.32) for sheets,
+// popovers and most drawers, --cd-scrim-heavy (.4) for the side drawer. Caller passes one via `color`.
 withDefaults(
   defineProps<{
     color?: string

@@ -38,7 +38,7 @@
 // re-anchors all week-based layouts") — the header derives its labels and Sat/Sun highlight from
 // `cells[0..6].dow` rather than a hardcoded Monday-start array, so this component stays a pure
 // function of the cells it's given instead of duplicating the firstDay concept into a second prop.
-// Weekday header: 700 10.5px, letter-spacing .14em, Sat=--cd-sat, Sun=--cd-sun.
+// Weekday header: 700 10.5px, letter-spacing .14em, Sat=--cd-weekday-saturday, Sun=--cd-weekday-sunday.
 // Grid: 7-col; every cell is the same size regardless of event count. Rows use a readable floor
 // and the parent scrolls if the month doesn't fit, which keeps the phone month view grid-first
 // instead of compressing cells to make room for a permanent agenda split. Only border-top divider
