@@ -43,7 +43,7 @@ const emit = defineEmits<{
 }
 
 .cd-icon-btn:hover {
-  background: rgba(86, 88, 94, 0.07);
+  background: rgba(var(--cd-ink-rgb), 0.07);
 }
 
 .cd-icon-btn--danger:hover {

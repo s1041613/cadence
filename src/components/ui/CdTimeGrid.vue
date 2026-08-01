@@ -85,8 +85,8 @@ import { assignLanes } from '@/utils/timeline-lanes'
 import { formatTime, type TimeFormatName } from '@/utils/convert-date-time'
 
 // CdTimeGrid — shared Week/Day time grid. design-research-report.md §3.6.
-// Range 6:00-23:00 (START=6, END=23). Gutter 50px. Hour lines rgba(86,88,94,.08); column dividers
-// rgba(86,88,94,.08); header underline rgba(86,88,94,.12). Sticky header z-index 6, all-day bar always
+// Range 6:00-23:00 (START=6, END=23). Gutter 50px. Hour lines rgba(var(--cd-ink-rgb), .08); column dividers
+// rgba(var(--cd-ink-rgb), .08); header underline rgba(var(--cd-ink-rgb), .12). Sticky header z-index 6, all-day bar always
 // shown. Now line: 1.5px solid #C0564B + 7px dot, z-index 5. Overlap lanes via timeline-lanes.ts.
 export interface TimeGridEvent {
   id: string
@@ -221,7 +221,7 @@ function hourLabel(h: number): string {
   top: 0;
   z-index: 6;
   background: var(--cd-surface-raised);
-  border-bottom: 1px solid rgba(86, 88, 94, 0.12);
+  border-bottom: 1px solid rgba(var(--cd-ink-rgb), 0.12);
 }
 
 .cd-time-grid__gutter-cell {
@@ -266,7 +266,7 @@ function hourLabel(h: number): string {
 .cd-time-grid__allday {
   display: grid;
   min-height: 24px;
-  border-bottom: 1px solid rgba(86, 88, 94, 0.12);
+  border-bottom: 1px solid rgba(var(--cd-ink-rgb), 0.12);
 }
 
 .cd-time-grid__gutter-cell--allday {
@@ -286,7 +286,7 @@ function hourLabel(h: number): string {
   flex-direction: column;
   gap: 2px;
   padding: 4px 4px 3px;
-  border-left: 1px solid rgba(86, 88, 94, 0.08);
+  border-left: 1px solid rgba(var(--cd-ink-rgb), 0.08);
 }
 
 .cd-time-grid__allday-item {
@@ -319,14 +319,14 @@ function hourLabel(h: number): string {
 
 .cd-time-grid__column {
   position: relative;
-  border-left: 1px solid rgba(86, 88, 94, 0.08);
+  border-left: 1px solid rgba(var(--cd-ink-rgb), 0.08);
 }
 
 .cd-time-grid__hour-line {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px solid rgba(86, 88, 94, 0.08);
+  border-top: 1px solid rgba(var(--cd-ink-rgb), 0.08);
 }
 
 .cd-time-grid__now-line {

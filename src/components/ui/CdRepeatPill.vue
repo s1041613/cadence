@@ -29,6 +29,6 @@ const emit = defineEmits<{
 }
 
 .cd-repeat-pill:hover {
-  background: rgba(86, 88, 94, 0.05);
+  background: rgba(var(--cd-ink-rgb), 0.05);
 }
 </style>

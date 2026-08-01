@@ -282,7 +282,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-date-picker__nav:hover {
-  background: rgba(86, 88, 94, 0.06);
+  background: rgba(var(--cd-ink-rgb), 0.06);
 }
 
 .cd-date-picker__month-label {
@@ -326,7 +326,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-date-picker__cell:hover {
-  background: rgba(86, 88, 94, 0.06);
+  background: rgba(var(--cd-ink-rgb), 0.06);
 }
 
 .cd-date-picker__cell--outside {

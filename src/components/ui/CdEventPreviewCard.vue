@@ -5,10 +5,10 @@
       <div class="cd-preview-card__actions">
         <template v-if="mine">
           <CdIconButton class="cd-preview-card__action-btn" :size="30" ariaLabel="Copy" @click="emit('copy')">
-            <CdIcon name="copy" :size="16" color="#6E7176" />
+            <CdIcon name="copy" :size="16" color="var(--cd-ink-secondary)" />
           </CdIconButton>
           <CdIconButton class="cd-preview-card__action-btn" :size="30" ariaLabel="Edit" @click="emit('edit')">
-            <CdIcon name="pencil" :size="16" color="#6E7176" />
+            <CdIcon name="pencil" :size="16" color="var(--cd-ink-secondary)" />
           </CdIconButton>
           <CdIconButton class="cd-preview-card__action-btn" :size="30" danger ariaLabel="Delete" @click="emit('delete')">
             <CdIcon name="trash" :size="16" color="#C0564B" />
@@ -30,11 +30,11 @@
 
     <div class="cd-preview-card__info">
       <div class="cd-preview-card__info-row">
-        <CdIcon name="bell" :size="18" color="#9C9E94" />
+        <CdIcon name="bell" :size="18" color="var(--cd-ink-muted)" />
         <span>{{ alertLabel }}</span>
       </div>
       <div class="cd-preview-card__info-row">
-        <CdIcon name="target" :size="18" color="#9C9E94" />
+        <CdIcon name="target" :size="18" color="var(--cd-ink-muted)" />
         <span>{{ quadLabel }}</span>
       </div>
       <div v-if="isTask" class="cd-preview-card__info-row">
@@ -43,10 +43,10 @@
         <span class="cd-preview-card__info-meta">{{ completedPomodoros }}/{{ estimatedPomodoros }} done</span>
       </div>
       <div class="cd-preview-card__info-row cd-preview-card__info-row--muted">
-        <CdIcon name="info" :size="18" color="#9C9E94" />
+        <CdIcon name="info" :size="18" color="var(--cd-ink-muted)" />
         <span class="cd-preview-card__info-text">Add context to get better suggestions</span>
         <button type="button" class="cd-preview-card__info-edit" aria-label="Add context">
-          <CdIcon name="pencil" :size="15" color="#9C9E94" />
+          <CdIcon name="pencil" :size="15" color="var(--cd-ink-muted)" />
         </button>
       </div>
     </div>
@@ -56,7 +56,7 @@
         <span class="cd-preview-card__managed-icon" />
         <span class="cd-preview-card__managed-label">Managed by Cadence AI</span>
         <span class="cd-preview-card__managed-chevron" :class="{ 'cd-preview-card__managed-chevron--open': expanded }">
-          <CdIcon name="chevron-right" :size="14" color="#56585E" />
+          <CdIcon name="chevron-right" :size="14" color="var(--cd-ink)" />
         </span>
       </button>
       <div v-if="expanded" class="cd-preview-card__managed-body">
@@ -340,7 +340,7 @@ const eyebrowLabel = computed(() => {
   border-radius: 12px;
   padding: 12px;
   font: 700 14px var(--cd-font-ui);
-  color: #fbfaf7;
+  color: var(--cd-surface-raised);
   cursor: pointer;
   transition: background var(--cd-duration-micro-3);
 }

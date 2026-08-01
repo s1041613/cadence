@@ -45,7 +45,7 @@ const emit = defineEmits<{
   padding: 6px 14px;
   cursor: pointer;
   font: 700 13px var(--cd-font-ui);
-  color: #9c9e94;
+  color: var(--cd-ink-muted);
 }
 
 .cd-view-switcher__btn--active {

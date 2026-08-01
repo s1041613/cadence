@@ -55,11 +55,32 @@ const RULES = [
     hint: 'use rgba(var(--cd-scrim-rgb), <alpha>) or a --cd-shadow-* token',
   },
   {
+    // The ink triple. This was hand-written at 34 sites before --cd-ink-rgb existed,
+    // and it is the most-used colour in the app, so it is the costliest leak of the
+    // three: a rename reports success while every wash stays on the old palette.
+    id: 'ink-rgb',
+    pattern: /rgba?\(\s*86\s*[,\s]\s*88\s*[,\s]\s*94\s*[,)/\s]/gi,
+    hint: 'use rgba(var(--cd-ink-rgb), <alpha>)',
+  },
+  {
     // The optional trailing pair catches 8-digit hex (#B3AC9188), the modern way to
     // write a translucent accent, which a \b-anchored 6-digit pattern misses.
     id: 'accent-hex',
-    pattern: /#(?:B3AC91|8F8A6E|6E6A52|6E6A54|3F4136)(?:[0-9a-f]{2})?\b/gi,
-    hint: 'use --cd-olive, --cd-olive-mix-1, --cd-olive-mix-2 or --cd-olive-ink',
+    pattern: /#(?:B3AC91|8F8A6E|6E6A52|6E6A54|3F4136|E7E4D6)(?:[0-9a-f]{2})?\b/gi,
+    hint: 'use --cd-accent, --cd-accent-mid, --cd-accent-strong, --cd-on-accent or --cd-accent-subtle',
+  },
+  {
+    // Surface and ink roles. Added once each had exactly one token to point at —
+    // before the convergence these values were spread across near-duplicate tokens,
+    // so a rule here would have had no single correct fix to suggest.
+    id: 'surface-hex',
+    pattern: /#(?:F2F1EC|FBFAF7|F1EFE8|EEEBE1|E5E3DB|D7D4CB)(?:[0-9a-f]{2})?\b/gi,
+    hint: 'use --cd-surface-page, --cd-surface-raised, --cd-surface-inset, --cd-surface-textured, --cd-line or --cd-control-off',
+  },
+  {
+    id: 'ink-hex',
+    pattern: /#(?:56585E|6E7176|9C9E94)(?:[0-9a-f]{2})?\b/gi,
+    hint: 'use --cd-ink, --cd-ink-secondary or --cd-ink-muted',
   },
 ]
 

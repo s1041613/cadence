@@ -25,14 +25,14 @@
 
     <div v-if="type === 'event'" class="cd-edit-card__style-row">
       <span class="cd-edit-card__field-icon">
-        <CdIcon name="brush" :size="18" color="#9C9E94" />
+        <CdIcon name="brush" :size="18" color="var(--cd-ink-muted)" />
       </span>
       <span class="cd-edit-card__style-label">Style</span>
       <button type="button" class="cd-edit-card__style-trigger" aria-label="Edit style" @click="appearanceOpen = true">
         <span class="cd-edit-card__style-dot" :style="{ background: color }">
           <CdIcon v-if="iconName" :name="iconName" :size="11" color="#fff" />
         </span>
-        <CdIcon name="chevron-right" :size="14" color="#9C9E94" />
+        <CdIcon name="chevron-right" :size="14" color="var(--cd-ink-muted)" />
       </button>
     </div>
 
@@ -65,7 +65,7 @@
 
     <div class="cd-edit-card__when-row">
       <span class="cd-edit-card__field-icon">
-        <CdIcon name="calendar" :size="18" color="#9C9E94" />
+        <CdIcon name="calendar" :size="18" color="var(--cd-ink-muted)" />
       </span>
       <div class="cd-edit-card__when-content">
         <div v-if="type === 'event'" class="cd-edit-card__allday-row">
@@ -103,7 +103,7 @@
            (single-calendar users see no picker noise). -->
       <div v-if="calendarOptions && calendarOptions.length > 1" class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
-          <CdIcon name="calendar" :size="18" color="#9C9E94" />
+          <CdIcon name="calendar" :size="18" color="var(--cd-ink-muted)" />
         </span>
         <select
           class="cd-edit-card__calendar-select"
@@ -115,19 +115,19 @@
       </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
-          <CdIcon name="bell" :size="18" color="#9C9E94" />
+          <CdIcon name="bell" :size="18" color="var(--cd-ink-muted)" />
         </span>
         <CdReminderPill :model-value="reminder" @update:model-value="(v) => emit('update:reminder', v)" />
       </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
-          <CdIcon name="repeat" :size="18" color="#9C9E94" />
+          <CdIcon name="repeat" :size="18" color="var(--cd-ink-muted)" />
         </span>
         <CdRepeatPill :label="repeatLabel" @cycle="emit('cycleRepeat')" />
       </div>
       <div class="cd-edit-card__field-row">
         <span class="cd-edit-card__field-icon">
-          <CdIcon name="globe" :size="18" color="#9C9E94" />
+          <CdIcon name="globe" :size="18" color="var(--cd-ink-muted)" />
         </span>
         <input
           class="cd-edit-card__input"
@@ -139,7 +139,7 @@
       <div class="cd-edit-card__divider" />
       <div class="cd-edit-card__field-row cd-edit-card__field-row--top">
         <span class="cd-edit-card__field-icon" style="margin-top: 2px">
-          <CdIcon name="notes" :size="18" color="#9C9E94" />
+          <CdIcon name="notes" :size="18" color="var(--cd-ink-muted)" />
         </span>
         <textarea
           class="cd-edit-card__textarea"
@@ -634,7 +634,7 @@ const matrixOptions = [
 }
 
 .cd-edit-card__pill-btn:hover {
-  background: rgba(86, 88, 94, 0.04);
+  background: rgba(var(--cd-ink-rgb), 0.04);
 }
 
 .cd-edit-card__input,

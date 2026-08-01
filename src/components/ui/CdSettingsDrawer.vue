@@ -176,7 +176,7 @@
                   <span
                     class="cd-settings__theme-preview"
                     :class="{ 'cd-settings__theme-preview--diagonal': tile.diagonal }"
-                    :style="{ background: tile.diagonal ? '#FBFAF7' : tile.bg }"
+                    :style="{ background: tile.diagonal ? 'var(--cd-surface-raised)' : tile.bg }"
                   >
                     <span v-if="tile.diagonal" class="cd-settings__theme-preview-dark" />
                     <span class="cd-settings__theme-bars">
@@ -516,8 +516,8 @@ const TIMEZONE_OPTIONS = [
 ]
 
 const THEME_TILES = [
-  { key: 'Light' as const, bg: '#FBFAF7', barColor: '#D5D2C8', diagonal: false },
-  { key: 'Auto' as const, bg: '#FBFAF7', barColor: '#CFCCC1', diagonal: true },
+  { key: 'Light' as const, bg: 'var(--cd-surface-raised)', barColor: '#D5D2C8', diagonal: false },
+  { key: 'Auto' as const, bg: 'var(--cd-surface-raised)', barColor: '#CFCCC1', diagonal: true },
   { key: 'Dark' as const, bg: '#2E2C28', barColor: 'rgba(255,255,255,.4)', diagonal: false }
 ]
 
@@ -675,7 +675,7 @@ function isCalendarVisible(id: string): boolean {
 // Icon tile tint mirrors the handoff's `color-mix(in srgb, ${col} 18%, #F1EFE8)` background /
 // `color-mix(in srgb, ${col} 60%, #7A776C)` icon formula (§_calendarsPane, §_addCalPane).
 function calTint(color: string): string {
-  return `color-mix(in srgb, ${color} 18%, #F1EFE8)`
+  return `color-mix(in srgb, ${color} 18%, var(--cd-surface-inset))`
 }
 
 function calIconColor(color: string): string {
@@ -883,7 +883,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 .cd-settings__icon-btn:hover {
-  background: rgba(86, 88, 94, 0.06);
+  background: rgba(var(--cd-ink-rgb), 0.06);
 }
 
 /* Sheet mode's header carries the only close gesture (swipe down), so it needs touch-action:none
@@ -930,7 +930,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 .cd-settings__account-row:hover {
-  background: rgba(86, 88, 94, 0.045);
+  background: rgba(var(--cd-ink-rgb), 0.045);
 }
 
 .cd-settings__account-meta {
@@ -970,7 +970,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 
 .cd-settings__group {
   margin: 0 16px 14px;
-  background: #fbfaf7;
+  background: var(--cd-surface-raised);
   border: 1px solid var(--cd-line);
   border-radius: 16px;
   overflow: hidden;
@@ -991,7 +991,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 button.cd-settings__row:hover {
-  background: rgba(86, 88, 94, 0.045);
+  background: rgba(var(--cd-ink-rgb), 0.045);
 }
 
 .cd-settings__row--danger {
@@ -1127,7 +1127,7 @@ button.cd-settings__row:hover {
   border: 1px solid var(--cd-line);
   display: grid;
   place-items: center;
-  box-shadow: 0 1px 2px rgba(86, 88, 94, 0.1);
+  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.1);
   font: 700 20px var(--cd-font-ui);
   color: #4285f4;
 }
@@ -1272,12 +1272,12 @@ button.cd-settings__row:hover {
   font: 700 14px var(--cd-font-title);
   color: #3a3833;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(86, 88, 94, 0.08);
+  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.08);
   transition: background var(--cd-duration-micro-3);
 }
 
 .cd-settings__gcal-connect-btn:hover {
-  background: rgba(86, 88, 94, 0.03);
+  background: rgba(var(--cd-ink-rgb), 0.03);
 }
 
 /* Customization pane — theme tiles */
@@ -1466,7 +1466,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__cal-row:hover {
-  background: rgba(86, 88, 94, 0.045);
+  background: rgba(var(--cd-ink-rgb), 0.045);
 }
 
 .cd-settings__cal-grip {

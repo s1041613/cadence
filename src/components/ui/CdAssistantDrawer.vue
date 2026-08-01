@@ -28,7 +28,7 @@
 
     <div class="cd-assistant__input-bar">
       <span class="cd-assistant__input-icon">
-        <CdIcon name="image" :size="22" color="#9C9E94" />
+        <CdIcon name="image" :size="22" color="var(--cd-ink-muted)" />
       </span>
       <input class="cd-assistant__input" placeholder="Ask, or attach an image…" :value="inputValue" @input="emit('update:inputValue', ($event.target as HTMLInputElement).value)" />
       <button type="button" class="cd-assistant__send" aria-label="Send" @click="emit('send')">
@@ -136,7 +136,7 @@ function onSwipeDown(): void {
 }
 
 .cd-assistant__close:hover {
-  background: rgba(86, 88, 94, 0.06);
+  background: rgba(var(--cd-ink-rgb), 0.06);
 }
 
 .cd-assistant__greeting {

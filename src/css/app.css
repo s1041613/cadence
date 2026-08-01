@@ -34,7 +34,7 @@ body,
 
 body {
   overflow-x: hidden;
-  color: #56585E;
+  color: var(--cd-ink);
   font-family: 'Zen Kaku Gothic New', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;

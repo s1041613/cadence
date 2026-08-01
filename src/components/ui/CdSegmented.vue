@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 // CdSegmented — generic 2-3 option segmented control (Event|Task, Shared|Public, Name|Time|Dots…).
-// design-research-report.md §3.9: base #F1EFE8, radius 11px, pad 3px; active #fff + shadow 0 1px 2px rgba(86,88,94,.16), 700 weight.
+// design-research-report.md §3.9: base #F1EFE8, radius 11px, pad 3px; active #fff + shadow 0 1px 2px rgba(var(--cd-ink-rgb), .16), 700 weight.
 defineProps<{
   modelValue: string
   options: Array<{ value: string; label: string }>
@@ -29,7 +29,7 @@ const emit = defineEmits<{
 <style scoped>
 .cd-segmented {
   display: flex;
-  background: #f1efe8;
+  background: var(--cd-surface-inset);
   border-radius: var(--cd-radius-matrix);
   padding: 3px;
   gap: 2px;
@@ -49,7 +49,7 @@ const emit = defineEmits<{
 
 .cd-segmented__btn--active {
   background: #fff;
-  box-shadow: 0 1px 2px rgba(86, 88, 94, 0.16);
+  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.16);
   font-weight: 700;
   color: var(--cd-ink);
 }

@@ -116,13 +116,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="sass">
-// Mirrors AuthCallbackPage's panel styling — both are full-screen interstitials on the same
-// parchment background.
+// Mirrors AuthCallbackPage's panel styling — both are full-screen interstitials sharing the
+// app's page surface. They used to sit on their own slightly warmer "parchment" colour; that
+// was dropped because a distinct interstitial surface is not worth a palette role for two
+// screens a user never sees beside the main UI.
 .join-calendar
   min-height: 100dvh
   display: grid
   place-items: center
-  background: #eeebe1
+  background: var(--cd-surface-page)
   color: #292820
 
 .join-calendar__panel
