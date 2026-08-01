@@ -33,7 +33,7 @@ const emit = defineEmits<{
 .cd-view-switcher {
   display: flex;
   background: rgba(251, 250, 247, 0.5);
-  border: 1px solid #eeece4;
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-pill);
   padding: 4px;
 }

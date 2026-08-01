@@ -540,7 +540,7 @@ const matrixOptions = [
 .cd-edit-card__time-warning {
   margin: 2px 0 0;
   font: 700 11.5px var(--cd-font-ui);
-  color: #c0564b;
+  color: var(--cd-danger);
 }
 
 .cd-edit-card__pomodoro-estimate {

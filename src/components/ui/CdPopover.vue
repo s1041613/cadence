@@ -32,7 +32,7 @@
 // `var(--cd-scrim)` to `transparent`. Callers that want a visible scrim (e.g. `fromCreate` centered
 // modal reuse) pass an explicit color.
 // CADENCE Handoff §6.2: optional `caret` — a 12x12 square rotated 45deg, background #fff, with the
-// two anchor-facing edges bordered 1px solid #E9E6DD and a soft shadow, sitting on the card edge that
+// two anchor-facing edges bordered 1px solid --cd-line and a soft shadow, sitting on the card edge that
 // faces the anchor (top edge when the card is below the anchor, bottom edge when flipped above),
 // horizontally positioned at the anchor's x and clamped to stay inside the card bounds minus 12px.
 import { computed, onMounted, ref } from 'vue'
@@ -137,7 +137,7 @@ const caretStyle = computed(() => {
 
 .cd-popover {
   background: #fff;
-  border: 1px solid #e9e6dd;
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-preview);
   box-shadow: var(--cd-shadow-overlay);
   overflow: hidden;
@@ -148,7 +148,7 @@ const caretStyle = computed(() => {
   width: 12px;
   height: 12px;
   background: #fff;
-  border: 1px solid #e9e6dd;
+  border: 1px solid var(--cd-line);
   box-shadow: 0 2px 6px -2px rgba(var(--cd-scrim-rgb), 0.25);
   transform: rotate(45deg);
   z-index: 1;

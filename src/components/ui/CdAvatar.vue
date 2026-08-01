@@ -67,7 +67,7 @@ const initials = computed(() =>
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: #c0564b;
+  background: var(--cd-danger);
   border: 2px solid var(--cd-surface-page);
 }
 </style>

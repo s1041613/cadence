@@ -6,7 +6,7 @@
       v-touch-swipe.down.mouse="onSwipeDown"
     >
       <span class="cd-assistant__icon">
-        <CdIcon name="spark-mono" :size="20" color="#3A6EA5" />
+        <CdIcon name="spark-mono" :size="20" color="var(--cd-weekday-saturday)" />
       </span>
       <span class="cd-assistant__title">Assistant</span>
       <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
@@ -208,7 +208,7 @@ function onSwipeDown(): void {
   height: 38px;
   flex: none;
   border: none;
-  background: #3a6ea5;
+  background: var(--cd-weekday-saturday);
   border-radius: 50%;
   cursor: pointer;
   display: grid;

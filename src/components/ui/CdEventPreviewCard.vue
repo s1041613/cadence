@@ -11,7 +11,7 @@
             <CdIcon name="pencil" :size="16" color="var(--cd-ink-secondary)" />
           </CdIconButton>
           <CdIconButton class="cd-preview-card__action-btn" :size="30" danger ariaLabel="Delete" @click="emit('delete')">
-            <CdIcon name="trash" :size="16" color="#C0564B" />
+            <CdIcon name="trash" :size="16" color="var(--cd-danger)" />
           </CdIconButton>
         </template>
         <!-- <button type="button" class="cd-preview-card__close" aria-label="Close" @click="emit('close')">✕</button> -->
