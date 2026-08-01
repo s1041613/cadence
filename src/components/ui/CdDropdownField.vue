@@ -1,7 +1,7 @@
 <template>
   <div class="cd-dropdown-field" :class="{ 'cd-dropdown-field--open': open }">
     <button type="button" class="cd-dropdown-field__trigger" @click="toggle">
-      <CdIcon v-if="icon" :name="icon" :size="20" color="var(--cd-olive)" />
+      <CdIcon v-if="icon" :name="icon" :size="20" color="var(--cd-accent)" />
       <span class="cd-dropdown-field__value">{{ selectedLabel }}</span>
       <span class="cd-dropdown-field__chevron" :class="{ 'cd-dropdown-field__chevron--open': open }">
         <CdIcon name="chevron-down" :size="14" />
@@ -21,7 +21,7 @@
         @click="select(opt)"
       >
         <span>{{ opt.label }}</span>
-        <CdIcon v-if="opt.value === modelValue" name="check" :size="15" color="var(--cd-olive)" :stroke-width="2.4" />
+        <CdIcon v-if="opt.value === modelValue" name="check" :size="15" color="var(--cd-accent)" :stroke-width="2.4" />
       </button>
     </div>
   </div>
@@ -34,7 +34,7 @@ import type { IconName } from './icons'
 
 // CdDropdownField — settings dropdown (Time Format / First Day / Timezone). CADENCE Handoff
 // §_settingsDrawer `dropdown()` helper (full file, no longer truncated): trigger bg #FBFAF7
-// (var(--cd-surface)), border 1px solid var(--cd-line) (open state olive #B3AC91), radius 13px,
+// (var(--cd-surface-raised)), border 1px solid var(--cd-line) (open state olive #B3AC91), radius 13px,
 // padding 13px 15px, optional leading icon (20px, olive #B3AC91), value text 700 15px title font,
 // chevron 14px rotating ∓90deg (.18s). Menu opens DOWNWARD: top calc(100% + 6px), bg #fff, border
 // 1px solid var(--cd-line), radius 13px, shadow 0 12px 32px -12px rgba(40,38,30,.4), padding 5px;
@@ -86,7 +86,7 @@ function select(opt: DropdownFieldOption): void {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: 13px;
   padding: 13px 15px;
   cursor: pointer;
@@ -94,7 +94,7 @@ function select(opt: DropdownFieldOption): void {
 }
 
 .cd-dropdown-field--open .cd-dropdown-field__trigger {
-  border-color: var(--cd-olive);
+  border-color: var(--cd-accent);
 }
 
 .cd-dropdown-field__value {
@@ -108,7 +108,7 @@ function select(opt: DropdownFieldOption): void {
 .cd-dropdown-field__chevron {
   display: flex;
   flex: none;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   transform: rotate(90deg);
   transition: transform var(--cd-duration-micro-4);
 }
@@ -153,12 +153,12 @@ function select(opt: DropdownFieldOption): void {
 }
 
 .cd-dropdown-field__item--selected {
-  background: rgba(var(--cd-olive-rgb), 0.16);
+  background: rgba(var(--cd-accent-rgb), 0.16);
   font-weight: 700;
 }
 
 .cd-dropdown-field__item--selected:hover {
-  background: rgba(var(--cd-olive-rgb), 0.16);
+  background: rgba(var(--cd-accent-rgb), 0.16);
 }
 
 .cd-dropdown-field__item--disabled {

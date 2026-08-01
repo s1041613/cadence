@@ -210,15 +210,15 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   width: 72px;
-  border: 1px solid var(--cd-line-2);
-  background: var(--cd-surface);
+  border: 1px solid var(--cd-control-off);
+  background: var(--cd-surface-raised);
   border-radius: 10px;
   padding: 8px 10px;
   transition: border-color var(--cd-duration-micro-3);
 }
 
 .cd-time-dropdown__field--open {
-  border-color: var(--cd-olive);
+  border-color: var(--cd-accent);
 }
 
 .cd-time-dropdown__input {
@@ -264,8 +264,8 @@ onBeforeUnmount(() => {
 }
 
 .cd-time-dropdown__item--selected {
-  background: rgba(var(--cd-olive-rgb), 0.16);
-  color: var(--cd-olive-mix-1);
+  background: rgba(var(--cd-accent-rgb), 0.16);
+  color: var(--cd-accent-mid);
   font-weight: 700;
 }
 </style>

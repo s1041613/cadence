@@ -52,7 +52,7 @@ const emit = defineEmits<{
   align-items: center;
   gap: 4px;
   padding: 14px 20px;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   border-bottom: 0.1px solid var(--cd-line);
 }
 

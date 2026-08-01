@@ -38,7 +38,7 @@ const emit = defineEmits<{
 
 .cd-cal-chip--on {
   border-color: #d2ccbb;
-  background: rgba(var(--cd-olive-rgb), 0.11);
+  background: rgba(var(--cd-accent-rgb), 0.11);
 }
 
 .cd-cal-chip__icon {
@@ -75,7 +75,7 @@ const emit = defineEmits<{
 
 .cd-cal-chip__label {
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-olive-mix-3);
+  color: var(--cd-accent-strong);
   white-space: nowrap;
   transition: color var(--cd-duration-micro-3);
 }

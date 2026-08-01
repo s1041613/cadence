@@ -119,7 +119,7 @@
     <div class="pv2-edit-card__footer">
       <button v-if="isNew" type="button" class="pv2-edit-card__delete" @click="emit('cancel')">CANCEL</button>
       <button v-else type="button" class="pv2-edit-card__delete" @click="emit('delete')">
-        <CdIcon name="trash" :size="14" color="var(--cd-danger-2)" />
+        <CdIcon name="trash" :size="14" color="var(--cd-danger-hover)" />
         DELETE
       </button>
       <button type="button" class="pv2-edit-card__save" :disabled="timeInvalid" @click="!timeInvalid && emit('save')">
@@ -716,7 +716,7 @@ const matrixOptions = [
   padding: 0 4px;
   border: none;
   background: transparent;
-  color: var(--cd-danger-2);
+  color: var(--cd-danger-hover);
   letter-spacing: 0.04em;
 }
 

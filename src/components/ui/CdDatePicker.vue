@@ -8,7 +8,7 @@
       aria-label="Change date"
       @click="toggle"
     >
-      <CdIcon name="calendar" :size="14" color="var(--cd-muted)" />
+      <CdIcon name="calendar" :size="14" color="var(--cd-ink-muted)" />
       <span>{{ triggerLabel }}</span>
     </button>
 
@@ -234,8 +234,8 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--cd-line-2);
-  background: var(--cd-surface);
+  border: 1px solid var(--cd-control-off);
+  background: var(--cd-surface-raised);
   border-radius: 10px;
   padding: 8px 10px;
   font: 700 15.5px var(--cd-font-mono);
@@ -246,7 +246,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-date-picker__trigger--open {
-  border-color: var(--cd-olive);
+  border-color: var(--cd-accent);
 }
 
 .cd-date-picker__popover {
@@ -257,7 +257,7 @@ onBeforeUnmount(() => {
   width: 236px;
   max-width: calc(100vw - 16px);
   background: #fff;
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   border-radius: 14px;
   box-shadow: 0 20px 44px -18px rgba(var(--cd-scrim-rgb), 0.42);
   padding: 12px;
@@ -273,7 +273,7 @@ onBeforeUnmount(() => {
 .cd-date-picker__nav {
   border: none;
   background: transparent;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   font-size: 16px;
   line-height: 1;
   padding: 4px 8px;
@@ -301,7 +301,7 @@ onBeforeUnmount(() => {
   font: 700 12px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-date-picker__grid {
@@ -330,17 +330,17 @@ onBeforeUnmount(() => {
 }
 
 .cd-date-picker__cell--outside {
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   opacity: 0.55;
 }
 
 .cd-date-picker__cell--today {
-  color: var(--cd-olive);
+  color: var(--cd-accent);
   font-weight: 700;
 }
 
 .cd-date-picker__cell--selected {
-  background: var(--cd-olive-mix-1);
+  background: var(--cd-accent-mid);
   color: #fff;
   font-weight: 700;
 }

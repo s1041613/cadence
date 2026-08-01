@@ -12,7 +12,7 @@
       <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
            swipe-down dismisses instead. -->
       <button v-if="!sheetMode" type="button" class="cd-assistant__close" aria-label="Close" @click="emit('close')">
-        <CdIcon name="close" :size="18" color="var(--cd-muted)" />
+        <CdIcon name="close" :size="18" color="var(--cd-ink-muted)" />
       </button>
     </div>
 
@@ -89,7 +89,7 @@ function onSwipeDown(): void {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--cd-editor-card);
+  background: var(--cd-surface-inset);
 }
 
 .cd-assistant__header {
@@ -112,7 +112,7 @@ function onSwipeDown(): void {
   width: 38px;
   height: 38px;
   border-radius: 11px;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   display: grid;
   place-items: center;
 }
@@ -148,7 +148,7 @@ function onSwipeDown(): void {
 .cd-assistant__greeting p {
   margin: 0;
   font: 700 19px var(--cd-font-title);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   line-height: 1.5;
 }
 
@@ -162,7 +162,7 @@ function onSwipeDown(): void {
 
 .cd-assistant__chip {
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: var(--cd-radius-pill);
   padding: 11px 18px;
   font: 700 14px var(--cd-font-title);
@@ -172,7 +172,7 @@ function onSwipeDown(): void {
 }
 
 .cd-assistant__chip:hover {
-  background: rgba(var(--cd-olive-rgb), 0.12);
+  background: rgba(var(--cd-accent-rgb), 0.12);
 }
 
 .cd-assistant__input-bar {
@@ -181,7 +181,7 @@ function onSwipeDown(): void {
   gap: 10px;
   margin: 0 16px 18px;
   padding: 10px 10px 10px 16px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border: 1px solid var(--cd-line);
   border-radius: 18px;
   flex: none;

@@ -22,7 +22,7 @@
           :key="ev.id"
           class="cd-time-grid__allday-item"
           :style="{
-            background: `color-mix(in srgb, ${ev.color} 16%, var(--cd-surface))`,
+            background: `color-mix(in srgb, ${ev.color} 16%, var(--cd-surface-raised))`,
             color: `color-mix(in srgb, ${ev.color} 70%, var(--cd-ink))`,
             borderLeftColor: ev.color
           }"
@@ -212,7 +212,7 @@ function hourLabel(h: number): string {
 .cd-time-grid {
   display: flex;
   flex-direction: column;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
 }
 
 .cd-time-grid__header {
@@ -220,7 +220,7 @@ function hourLabel(h: number): string {
   position: sticky;
   top: 0;
   z-index: 6;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-bottom: 1px solid rgba(86, 88, 94, 0.12);
 }
 
@@ -239,15 +239,15 @@ function hourLabel(h: number): string {
 .cd-time-grid__header-dow {
   font: 700 12.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-time-grid__header-dow--sat {
-  color: var(--cd-sat);
+  color: var(--cd-weekday-saturday);
 }
 
 .cd-time-grid__header-dow--sun {
-  color: var(--cd-sun);
+  color: var(--cd-weekday-sunday);
 }
 
 .cd-time-grid__header-num {
@@ -257,8 +257,8 @@ function hourLabel(h: number): string {
 }
 
 .cd-time-grid__header-num--today {
-  background: var(--cd-olive);
-  color: var(--cd-olive-ink);
+  background: var(--cd-accent);
+  color: var(--cd-on-accent);
   border-radius: var(--cd-radius-pill);
   padding: 1px 8px;
 }
@@ -274,7 +274,7 @@ function hourLabel(h: number): string {
      is a fixed 50px column, so matching their size would overflow it. */
   font: 700 11px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -313,7 +313,7 @@ function hourLabel(h: number): string {
      once the two-face consolidation landed. */
   font: 700 13.5px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   text-align: right;
 }
 
@@ -333,7 +333,7 @@ function hourLabel(h: number): string {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1.5px solid var(--cd-sun);
+  border-top: 1.5px solid var(--cd-weekday-sunday);
   z-index: 5;
 }
 
@@ -344,6 +344,6 @@ function hourLabel(h: number): string {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--cd-sun);
+  background: var(--cd-weekday-sunday);
 }
 </style>

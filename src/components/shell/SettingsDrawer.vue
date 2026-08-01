@@ -4,7 +4,7 @@
     :presentation="isDesktop ? 'drawer' : 'sheet'"
     side="left"
     width="min(440px, 46%)"
-    scrim-color="var(--cd-scrim-light)"
+    scrim-color="var(--cd-scrim)"
     sheet-fullscreen
     @scrim-click="close"
     @dismiss="close"

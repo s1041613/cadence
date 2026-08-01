@@ -97,7 +97,7 @@
                     <span class="cd-draft__ai-chip-label" :style="{ color: item.aiSuggestion.color }">{{ item.aiSuggestion.tag }}</span>
                   </button>
                   <button type="button" class="cd-draft__row-btn" aria-label="Schedule" @click="emit('openSchedule', item.id)">
-                    <CdIcon name="calendar" :size="16" color="var(--cd-olive-mix-1)" />
+                    <CdIcon name="calendar" :size="16" color="var(--cd-accent-mid)" />
                   </button>
                   <button type="button" class="cd-draft__row-btn" aria-label="Remove" @click="emit('removeItem', item.id)">
                     <CdIcon name="x-small" :size="12" color="#8F8C7E" />
@@ -262,7 +262,7 @@ function highlight(text: string): string {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--cd-draft-paper);
+  background: var(--cd-surface-textured);
   background-image: radial-gradient(#c9c6b8 1.2px, transparent 1.2px);
   background-size: 22px 22px;
   background-position: 11px 11px;
@@ -280,7 +280,7 @@ function highlight(text: string): string {
   width: 13px;
   height: 23px;
   border-radius: 999px;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   box-shadow: inset 0 2.5px 3px rgba(74, 70, 52, 0.3), inset 0 -1.5px 1.5px rgba(255, 255, 255, 0.55);
   flex: none;
 }
@@ -361,7 +361,7 @@ function highlight(text: string): string {
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 2px solid var(--cd-line-5);
+  border: 2px solid var(--cd-line);
   background: #f4f2ea;
   border-radius: 999px;
   padding: 0 20px 0 14px;
@@ -397,7 +397,7 @@ function highlight(text: string): string {
 }
 
 .cd-draft__composer-plus--active {
-  color: var(--cd-olive-mix-1);
+  color: var(--cd-accent-mid);
   font-weight: 700;
 }
 
@@ -473,7 +473,7 @@ function highlight(text: string): string {
 }
 
 .cd-draft__swipe-btn--schedule {
-  background: var(--cd-olive-mix-1);
+  background: var(--cd-accent-mid);
 }
 
 .cd-draft__swipe-btn--remove {

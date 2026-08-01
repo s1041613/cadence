@@ -116,7 +116,7 @@ const maxChips = computed(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
 }
 
 .cd-month-grid__dow-row {
@@ -131,15 +131,15 @@ const maxChips = computed(() => {
   text-align: center;
   font: 700 10.5px var(--cd-font-ui);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-month-grid__dow--sat {
-  color: var(--cd-sat);
+  color: var(--cd-weekday-saturday);
 }
 
 .cd-month-grid__dow--sun {
-  color: var(--cd-sun);
+  color: var(--cd-weekday-sunday);
 }
 
 .cd-month-grid__grid {

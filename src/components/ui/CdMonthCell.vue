@@ -121,11 +121,11 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num--sat {
-  color: var(--cd-sat);
+  color: var(--cd-weekday-saturday);
 }
 
 .cd-month-cell__num--sun {
-  color: var(--cd-sun);
+  color: var(--cd-weekday-sunday);
 }
 
 .cd-month-cell__num--outside {
@@ -134,8 +134,8 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 
 .cd-month-cell__num--today {
   font-weight: 700;
-  background: var(--cd-olive);
-  color: var(--cd-olive-ink);
+  background: var(--cd-accent);
+  color: var(--cd-on-accent);
 }
 
 .cd-month-cell__num--selected {
@@ -171,7 +171,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   text-align: left;
   font: 700 12px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 @media (max-width: 899px) {

@@ -36,7 +36,7 @@ const dims = computed(() => DIMS[props.size])
 const trackStyle = computed(() => ({
   width: `${dims.value.w}px`,
   height: `${dims.value.h}px`,
-  background: props.modelValue ? 'var(--cd-olive)' : '#D7D4CB',
+  background: props.modelValue ? 'var(--cd-accent)' : '#D7D4CB',
   transition: `background ${dims.value.duration}`
 }))
 

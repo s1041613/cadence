@@ -38,7 +38,7 @@ const props = withDefaults(
     // fullscreen sheet's edge-to-edge background matches the drawer content, not white).
     surface?: string
   }>(),
-  { scrimColor: 'var(--cd-scrim-mid)', duration: '.3s', showHandle: true, fullscreen: false, raised: false }
+  { scrimColor: 'var(--cd-scrim)', duration: '.3s', showHandle: true, fullscreen: false, raised: false }
 )
 
 const emit = defineEmits<{

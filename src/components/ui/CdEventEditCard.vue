@@ -2,7 +2,7 @@
   <div class="cd-edit-card">
     <div class="cd-edit-card__head">
       <button v-if="!isNew" type="button" class="cd-edit-card__back" @click="emit('back')">
-        <CdIcon name="chevron-left" :size="14" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-left" :size="14" color="var(--cd-ink-secondary)" />
         Edit
       </button>
     </div>
@@ -57,7 +57,7 @@
             @click="emit('update:quad', q.k)"
           >
             <span class="cd-edit-card__matrix-cell-label" :style="{ color: quad === q.k ? '#fff' : quadColor(q.k) }">{{ q.l }}</span>
-            <span class="cd-edit-card__matrix-cell-sub" :style="{ color: quad === q.k ? 'rgba(255,255,255,.82)' : 'var(--cd-muted)' }">{{ q.s }}</span>
+            <span class="cd-edit-card__matrix-cell-sub" :style="{ color: quad === q.k ? 'rgba(255,255,255,.82)' : 'var(--cd-ink-muted)' }">{{ q.s }}</span>
           </button>
         </div>
       </div>
@@ -292,7 +292,7 @@ const matrixOptions = [
 .cd-edit-card {
   width: 388px;
   background: #fff;
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-preview);
   display: flex;
   flex-direction: column;
@@ -326,7 +326,7 @@ const matrixOptions = [
   font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   text-transform: uppercase;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-edit-card__title {
@@ -525,7 +525,7 @@ const matrixOptions = [
   flex: none;
   width: 46px;
   font: 700 12.5px var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-edit-card__time-row > .cd-date-picker {
@@ -548,9 +548,9 @@ const matrixOptions = [
   align-items: center;
   gap: 8px;
   padding: 8px 11px;
-  border: 1px solid rgba(var(--cd-olive-rgb), 0.4);
+  border: 1px solid rgba(var(--cd-accent-rgb), 0.4);
   border-radius: 10px;
-  background: rgba(var(--cd-olive-rgb), 0.14);
+  background: rgba(var(--cd-accent-rgb), 0.14);
   font: 700 12.5px var(--cd-font-ui);
   color: var(--cd-ink);
 }
@@ -559,7 +559,7 @@ const matrixOptions = [
   margin-left: auto;
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-edit-card__more-toggle {
@@ -573,7 +573,7 @@ const matrixOptions = [
   cursor: pointer;
   padding: 8px 16px;
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-edit-card__more-chevron {
@@ -685,7 +685,7 @@ const matrixOptions = [
   background: transparent;
   cursor: pointer;
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-edit-card__delete {
@@ -696,7 +696,7 @@ const matrixOptions = [
   background: transparent;
   cursor: pointer;
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-danger-2);
+  color: var(--cd-danger-hover);
   padding: 6px 8px;
   border-radius: 8px;
 }
@@ -707,7 +707,7 @@ const matrixOptions = [
 
 .cd-edit-card__save {
   margin-left: auto;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   color: #fff;
   font: 700 13px var(--cd-font-ui);
   border: none;

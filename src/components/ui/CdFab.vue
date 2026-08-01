@@ -1,6 +1,6 @@
 <template>
   <button type="button" class="cd-fab" aria-label="Create" @click="emit('click', $event)">
-    <CdIcon name="plus" :size="26" color="var(--cd-olive-mix-2)" />
+    <CdIcon name="plus" :size="26" color="var(--cd-accent-strong)" />
   </button>
 </template>
 
@@ -26,9 +26,9 @@ const emit = defineEmits<{
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  border: 1px solid rgba(var(--cd-olive-rgb), 0.5);
+  border: 1px solid rgba(var(--cd-accent-rgb), 0.5);
   background: #e7e4d6;
-  color: var(--cd-olive-mix-2);
+  color: var(--cd-accent-strong);
   cursor: pointer;
   display: grid;
   place-items: center;

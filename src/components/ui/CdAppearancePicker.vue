@@ -2,7 +2,7 @@
   <div class="cd-appearance-subview">
     <div class="cd-appearance-subview__head">
       <button type="button" class="cd-appearance-subview__back" aria-label="Back" @click="emit('close')">
-        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-secondary)" />
       </button>
       <div class="cd-appearance-subview__tabs">
         <button
@@ -183,7 +183,7 @@ const IconTile = defineComponent({
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   cursor: pointer;
   font-size: 24px;
   line-height: 1;
@@ -200,7 +200,7 @@ const IconTile = defineComponent({
   background: transparent;
   cursor: pointer;
   font: 700 15px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   padding: 6px 1px 8px;
 }
 
@@ -248,7 +248,7 @@ const IconTile = defineComponent({
 
 .cd-appearance-subview__label {
   font: 700 14px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin: 0 2px 14px;
 }
 
@@ -322,7 +322,7 @@ const IconTile = defineComponent({
   gap: 9px;
   margin-top: 22px;
   font: 700 14px var(--cd-font-title);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-appearance-subview__icon-row,
@@ -348,7 +348,7 @@ const IconTile = defineComponent({
 .cd-appearance-subview__empty {
   padding: 16px 2px;
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 @keyframes cd-appearance-in {

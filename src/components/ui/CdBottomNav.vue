@@ -77,7 +77,7 @@ const initials = computed(() =>
 .cd-bottom-nav {
   display: flex;
   align-items: center;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   border-top: 1px solid var(--cd-line);
   padding: 6px 8px 35px;
 }
@@ -103,8 +103,8 @@ const initials = computed(() =>
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: var(--cd-surface);
-  border: 1.6px solid var(--cd-line-4);
+  background: var(--cd-surface-raised);
+  border: 1.6px solid var(--cd-line);
   box-shadow: 0 4px 12px -6px rgba(var(--cd-scrim-rgb), 0.22);
   transform: translateY(-10px);
 }
@@ -142,7 +142,7 @@ const initials = computed(() =>
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   border: 1px solid var(--cd-line);
   font: 700 12px var(--cd-font-ui);
   color: var(--cd-ink);
