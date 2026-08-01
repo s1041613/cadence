@@ -338,7 +338,7 @@ const IconTile = defineComponent({
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1.5px solid #eeece4;
+  border: 1.5px solid var(--cd-line);
   background: #fff;
   cursor: pointer;
   display: grid;

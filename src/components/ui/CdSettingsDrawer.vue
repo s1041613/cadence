@@ -857,7 +857,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: #f4f2ec;
+  background: var(--cd-surface-inset);
 }
 
 .cd-settings__header {
@@ -1933,7 +1933,7 @@ button.cd-settings__row:hover {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 2px solid #e4e1d6;
+  border: 2px solid var(--cd-line);
   border-top-color: var(--cd-accent);
   box-sizing: border-box;
   animation: cd-gcal-spin 0.7s linear infinite;

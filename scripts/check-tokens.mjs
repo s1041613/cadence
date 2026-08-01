@@ -82,6 +82,22 @@ const RULES = [
     pattern: /#(?:56585E|6E7176|9C9E94)(?:[0-9a-f]{2})?\b/gi,
     hint: 'use --cd-ink, --cd-ink-secondary or --cd-ink-muted',
   },
+  {
+    // Semantic family. Added after an audit found five sites holding these exact values
+    // as literals — the rules above covered accent, surface and ink, so a #C0564B could
+    // sit next to a correctly-tokenised sibling and the check still passed.
+    id: 'semantic-hex',
+    pattern: /#(?:3A6EA5|C0564B|B4655C|C98A2E)(?:[0-9a-f]{2})?\b/gi,
+    hint: 'use --cd-weekday-saturday, --cd-weekday-sunday, --cd-danger, --cd-danger-hover or --cd-warn',
+  },
+  {
+    // Values whose tokens were deleted during the role convergence. Without a rule they
+    // are indistinguishable from any other unknown colour, so the orphans left behind by
+    // that convergence would never surface.
+    id: 'retired-hex',
+    pattern: /#(?:F4F2EC|EEECE4|E9E6DD|E4E1D6|F7F5EF|F1F2EC)(?:[0-9a-f]{2})?\b/gi,
+    hint: 'these were merged: #F4F2EC → --cd-surface-inset, #F7F5EF → --cd-surface-raised, the rest → --cd-line',
+  },
 ]
 
 function collectFiles(target) {
