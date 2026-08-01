@@ -169,6 +169,25 @@ What merged into what, so a reviewer can check the decisions rather than re-deri
 - The draft drawer's search field loses its recessed appearance: the gap between field and paper narrows from ~10 to ~3, so the dot texture becomes more prominent than the inset itself. To be redesigned with the drawer.
 - Every screen except the pomodoro and home screens shifts warmer, as the page background moves from `#fafaf9` to `#F2F1EC`.
 
+### Complete list of visual changes
+
+Convergence necessarily moves pixels — merging two near-identical values means one of them changes. Every such change is listed here. A Codex review found that earlier commit messages had understated this as "two exceptions", so this is the corrected record.
+
+| Change | Δ | Sites |
+|---|---|---|
+| Page background `#fafaf9` → `#F2F1EC` | 8 | Every screen except the pomodoro and home screens |
+| Interstitials `#eeebe1` → `surface-page` | 7 | `JoinCalendarPage`, `AuthCallbackPage` |
+| `inbox-paper` `#F7F5EF` → `surface-raised` | 8 | `LoginPage` ×3 |
+| `editor-card` `#F4F2EC` → `surface-inset` | 4 | `CdAssistantDrawer`, `CdDrawer` |
+| Draft search field `#e4e1d7` → `surface-inset` | 13 | `CdDraftDrawer` |
+| `line-4` `#E9E6DD` / `line-5` `#E4E1D6` → `line` | 4–5 | 11 border sites |
+| Scrim `.28` / `.30` / `.34` → `.32` | 4–8 | 8 overlay backdrops |
+| Week agenda dotted rule `.3` → `.12` | — | `CdWeekAgenda` |
+| Shadows removed (level 1) | — | `LoginPage`, `CdViewSwitcher`, `CdSegmented`, `CdSettingsDrawer` ×2 |
+| Overlay shadow geometry unified | — | 8 overlay panels |
+
+Everything else is an exact-value substitution and renders identically.
+
 ---
 
 ## Role count
