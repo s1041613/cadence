@@ -32,3 +32,8 @@ yarn-error.log*
 
 .claude/*
 openspec/*
+
+# Token working notes and font samples — local only.
+# The app loads fonts from the @fontsource packages, not from here; these copies exist
+# so the comparison pages render standalone in a browser. Nothing here affects the build.
+docs/v2-tokens/
