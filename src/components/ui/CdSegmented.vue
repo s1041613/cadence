@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 // CdSegmented — generic 2-3 option segmented control (Event|Task, Shared|Public, Name|Time|Dots…).
-// design-research-report.md §3.9: base #F1EFE8, radius 11px, pad 3px; active #fff + shadow 0 1px 2px rgba(var(--cd-ink-rgb), .16), 700 weight.
+// design-research-report.md §3.9: base #F1EFE8, radius 11px, pad 3px; active #fff + shadow 0 1px 2px var(--cd-ink-wash-strong), 700 weight.
 defineProps<{
   modelValue: string
   options: Array<{ value: string; label: string }>

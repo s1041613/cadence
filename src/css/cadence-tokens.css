@@ -53,6 +53,18 @@
   --cd-ink-secondary: #6E7176;
   --cd-ink-muted: #9C9E94;
 
+  /* ---------- Ink washes ----------
+   * Translucent ink, for the three jobs it actually does. These replace 18 distinct
+   * alphas that were each tuned by eye — .045 and .04 and .03 all meant "hover", and
+   * nothing distinguished them but who wrote the component.
+   *
+   * Compose as var(--cd-ink-wash-hover), not rgba(var(--cd-ink-rgb), .06): the alpha
+   * belongs to the role, so a component cannot invent a nineteenth step.
+   */
+  --cd-ink-wash-hover: rgba(var(--cd-ink-rgb), .06);   /* pointer feedback on rows and buttons */
+  --cd-ink-wash-line: rgba(var(--cd-ink-rgb), .08);    /* grid rules and column dividers */
+  --cd-ink-wash-strong: rgba(var(--cd-ink-rgb), .12);  /* selected state, section underlines */
+
   /* ---------- Accent ----------
    * --cd-on-accent is a PAIRED role: its 4.57:1 contract is against --cd-accent,
    * not against the page. Any palette that redefines the accent must re-check it.

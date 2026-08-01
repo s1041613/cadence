@@ -139,7 +139,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
 }
 
 .cd-month-cell__num--selected {
-  background: rgba(var(--cd-ink-rgb), 0.12);
+  background: var(--cd-ink-wash-strong);
 }
 
 .cd-month-cell__events {

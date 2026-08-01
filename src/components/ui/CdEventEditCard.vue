@@ -634,7 +634,7 @@ const matrixOptions = [
 }
 
 .cd-edit-card__pill-btn:hover {
-  background: rgba(var(--cd-ink-rgb), 0.04);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-edit-card__input,

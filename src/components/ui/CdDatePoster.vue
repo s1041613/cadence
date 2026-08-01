@@ -113,7 +113,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster__title:hover {
-  background: rgba(var(--cd-ink-rgb), 0.06);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-date-poster__caret {
@@ -221,7 +221,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster__chev:hover {
-  background: rgba(var(--cd-ink-rgb), 0.07);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-date-poster__today {
@@ -236,7 +236,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster__today:hover {
-  background: rgba(var(--cd-ink-rgb), 0.07);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-date-poster__extra {
