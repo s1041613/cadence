@@ -17,7 +17,7 @@ import { computed } from 'vue'
 
 // CdMemberStack — overlapping 22px member avatars, used in Calendars pane & event preview guests.
 // CADENCE Handoff §3.15: 22px circle, border 2px #F4F2EC, margin-left -8px; >max overflow renders as
-// plain text "+N" (700 11px ui font, --cd-muted) after the stack, not a filled circle badge.
+// plain text "+N" (700 11px ui font, --cd-ink-muted) after the stack, not a filled circle badge.
 const props = withDefaults(
   defineProps<{
     members: Array<{ id: string; name: string; avatar: string }>

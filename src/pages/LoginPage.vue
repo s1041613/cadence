@@ -143,7 +143,7 @@ function signInWithApple(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 暖色 panel 延伸進底部 safe-area，避免露出外層 --cd-topbar 的色差帶 */
+  /* 暖色 panel 延伸進底部 safe-area，避免露出外層 --cd-surface-page 的色差帶 */
   padding: 22px 24px env(safe-area-inset-bottom);
 }
 

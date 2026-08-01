@@ -47,7 +47,7 @@ const RULES = [
     // requiring a trailing comma is what catches the alpha-less rgb() form.
     id: 'accent-rgb',
     pattern: /rgba?\(\s*179\s*[,\s]\s*172\s*[,\s]\s*145\s*[,)/\s]/gi,
-    hint: 'use rgba(var(--cd-olive-rgb), <alpha>)',
+    hint: 'use rgba(var(--cd-accent-rgb), <alpha>)',
   },
   {
     id: 'scrim-rgb',
@@ -116,12 +116,33 @@ function isCommentLine(line) {
 }
 
 /**
- * Tailwind's `@theme` block and Sass variables are compiled at build time and cannot read
- * a runtime custom property, so they have to restate palette values literally. Those lines
- * are a documented mirror rather than a leak; everything around them is still checked.
+ * Tailwind's `@theme` block is compiled at build time and cannot read a runtime custom
+ * property, so it has to restate palette values literally. Those lines are a documented
+ * mirror rather than a leak; everything around them is still checked.
+ *
+ * The allowlist tracks the block's actual extent rather than matching `--color-*:` on any
+ * line: a palette value assigned to a `--color-*` custom property OUTSIDE `@theme` would
+ * be a real leak, and a line-shaped test cannot tell the two apart.
  */
-function isAllowlisted(file, line) {
-  return file.endsWith('app.css') && /^\s*--color-[a-z0-9-]+:/.test(line)
+function allowlistedLines(file, lines) {
+  const allowed = new Set()
+  if (!file.endsWith('app.css')) return allowed
+
+  let depth = 0
+  let inTheme = false
+  lines.forEach((line, i) => {
+    if (!inTheme && /^\s*@theme\b/.test(line)) {
+      inTheme = true
+      depth = 0
+    }
+    if (inTheme) {
+      allowed.add(i)
+      depth += (line.match(/\{/g) || []).length
+      depth -= (line.match(/\}/g) || []).length
+      if (depth <= 0 && line.includes('}')) inTheme = false
+    }
+  })
+  return allowed
 }
 
 function findViolations() {
@@ -130,8 +151,9 @@ function findViolations() {
 
   for (const file of files) {
     const lines = readFileSync(file, 'utf8').split('\n')
+    const allowed = allowlistedLines(file, lines)
     lines.forEach((line, i) => {
-      if (isCommentLine(line) || isAllowlisted(file, line)) return
+      if (isCommentLine(line) || allowed.has(i)) return
       for (const rule of RULES) {
         rule.pattern.lastIndex = 0
         if (rule.pattern.test(line)) {

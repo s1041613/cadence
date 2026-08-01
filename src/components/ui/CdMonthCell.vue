@@ -42,8 +42,9 @@
 // CdMonthCell — single month-grid day cell. design-research-report.md §3.5.
 // Date number: 700 16px in a 26x26 circle (desk) / 15px in 22x22 (<899px, kept smaller so phone
 // rows spend their height on chips), matching CdWeekAgenda's .cd-week-agenda__num type system;
-// weekday default --cd-ink, Sat --cd-sat, Sun --cd-sun, outside-month rgba(156,158,148,.5);
-// today = accent circle with --cd-olive-ink text. "+N more" link: 700 12px, --cd-ink-2.
+// weekday default --cd-ink, Sat --cd-weekday-saturday, Sun --cd-weekday-sunday, outside-month
+// --cd-ink-muted at 50%; today = accent circle with --cd-on-accent text. "+N more" link:
+// 700 12px, --cd-ink-secondary.
 // Chip count: `maxChips` (computed by CdMonthGrid from the measured row height) caps how much
 // event density the cell attempts. When events overflow, the last slot is given to the "+N" button,
 // but month cells preserve at least 3 visible events before collapsing the rest.
