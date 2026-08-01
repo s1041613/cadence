@@ -123,7 +123,7 @@ const emit = defineEmits<{
 }
 
 .cd-day-list__row:hover {
-  background: rgba(var(--cd-ink-rgb), 0.05);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-day-list__dot {

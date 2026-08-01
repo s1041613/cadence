@@ -136,7 +136,7 @@ function onSwipeDown(): void {
 }
 
 .cd-assistant__close:hover {
-  background: rgba(var(--cd-ink-rgb), 0.06);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-assistant__greeting {

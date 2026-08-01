@@ -131,7 +131,7 @@ onBeforeUnmount(() => {
 }
 
 .cd-cal-strip__chevron:hover {
-  background: rgba(var(--cd-ink-rgb), 0.06);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-cal-strip__chevron--expanded {

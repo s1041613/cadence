@@ -883,7 +883,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 .cd-settings__icon-btn:hover {
-  background: rgba(var(--cd-ink-rgb), 0.06);
+  background: var(--cd-ink-wash-hover);
 }
 
 /* Sheet mode's header carries the only close gesture (swipe down), so it needs touch-action:none
@@ -930,7 +930,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 .cd-settings__account-row:hover {
-  background: rgba(var(--cd-ink-rgb), 0.045);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-settings__account-meta {
@@ -991,7 +991,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 }
 
 button.cd-settings__row:hover {
-  background: rgba(var(--cd-ink-rgb), 0.045);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-settings__row--danger {
@@ -1275,7 +1275,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__gcal-connect-btn:hover {
-  background: rgba(var(--cd-ink-rgb), 0.03);
+  background: var(--cd-ink-wash-hover);
 }
 
 /* Customization pane — theme tiles */
@@ -1464,7 +1464,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__cal-row:hover {
-  background: rgba(var(--cd-ink-rgb), 0.045);
+  background: var(--cd-ink-wash-hover);
 }
 
 .cd-settings__cal-grip {
