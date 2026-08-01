@@ -78,9 +78,17 @@ Composed as `rgba(var(--cd-ink-rgb), <alpha>)`.
 
 | Role | Alpha | Purpose | Currently |
 |---|---|---|---|
-| `ink-wash-hover` | `0.06` | Hover background on buttons and list rows | 22 sites, alphas .03–.08 |
-| `ink-wash-line` | `0.08` | Grid lines and column dividers | 3 sites, all in the time grid |
-| `ink-wash-strong` | `0.12` | Emphasis underlines, selected cells | 10 sites, alphas .1–.3 |
+| `ink-wash-hover` | `0.06` | Pointer feedback on rows and buttons | 22 sites (was .03–.08) |
+| `ink-wash-line` | `0.08` | Grid rules and column dividers | 3 sites (unchanged) |
+| `ink-wash-strong` | `0.12` | Selected state, section underlines | 5 sites (was .1–.3) |
+
+**The alpha belongs to the role, not the call site.** Components compose
+`var(--cd-ink-wash-hover)`, never `rgba(var(--cd-ink-rgb), .06)`, so a nineteenth step
+cannot be invented without adding a token.
+
+**Classification is by what the declaration does, not by its alpha.** An `.08` on a border
+is a grid rule; an `.08` on a background is hover feedback. The time grid proves the point —
+its column dividers and its header underline were both hand-tuned and land in different roles.
 
 **A palette MUST supply an RGB triple for every role used translucently:**
 
@@ -94,7 +102,7 @@ Composed as `rgba(var(--cd-ink-rgb), <alpha>)`.
 
 **Done:** the triple is added, all 34 sites reference it, and `check-tokens` now fails on the literal.
 
-**Still open:** the three alphas above are the *intended* scale, not the current state — 18 distinct alphas remain in use. Collapsing them changes rendering visibly (the week agenda's dotted rule is `.3`) and needs per-site review, so it was deliberately not bundled with the zero-pixel work.
+**Also done:** the 18 alphas are collapsed to the 3 roles above. One visible change was accepted — the week agenda's dotted rule moved from `.3` to `.12` and reads lighter; every other site moved by at most `.03`.
 
 ---
 
