@@ -1,7 +1,7 @@
 # v1 Palette Schema
 
-**Status:** draft for review
-**Written:** 2026-07-31
+**Status:** implemented on `feat/v2-tokens`
+**Written:** 2026-07-31 · **Implemented:** 2026-08-01
 **Purpose:** the complete list of colour roles a Cadence palette must define. v1's values are filled in; a second palette is authored by supplying a value for every role in this document.
 
 ---
@@ -25,12 +25,12 @@ Converged from 17 distinct hardcoded values. See "Convergence record" below for 
 | `surface-page` | `#F2F1EC` | The base. Every text role's contrast is measured against this. | Page background, topbar, bottom nav, calendar strip, day-list header. 17 sites. |
 | `surface-raised` | `#FBFAF7` | Lighter than `surface-page`. Separation is intentionally subtle (1.08:1) — it reads as a lift, not a border. | Month cells, cards, popovers. 25 sites. |
 | `surface-inset` | `#f1efe8` | Darker than `surface-page`. Pairs with an `inset` box-shadow to read as recessed. | Segmented control track, search fields, text inputs. |
-| `surface-textured` | `#EEEBE1` | Carries a dot-pattern overlay (`#c9c6b8`, 22px pitch). **Provisional** — see note. | Draft drawer sheet. Also two auth pages that arguably should use `surface-page`. |
+| `surface-textured` | `#EEEBE1` | Carries a dot-pattern overlay (`#c9c6b8`, 22px pitch). **Provisional** — see note. | Draft drawer sheet only. |
 | `line` | `#E5E3DB` | Divider. 1.14:1 against `surface-page` — decorative only, below the 3:1 non-text guideline. | Borders, dividers, grid lines. 56 sites — the most-used token in the app. |
 
 **`surface-textured` is provisional.** It exists only because the draft drawer's dot texture needs a carrier surface. Zoe has scheduled a draft-drawer redesign; if the texture does not survive it, this role folds into `surface-page`. Do not build a v2 value for it without checking whether the texture still exists.
 
-**Note on the two auth pages.** `JoinCalendarPage` and `AuthCallbackPage` currently consume the token behind `surface-textured` (named `--cd-draft-paper`), despite having nothing to do with drafts and no texture. This is a misapplication, not a role. They should move to `surface-page`.
+**The two interstitial pages were moved to `surface-page`.** `JoinCalendarPage` and `AuthCallbackPage` hardcoded `#eeebe1` — the same value, not a token reference — under a comment calling it a "parchment" background. A distinct interstitial surface is not worth a palette role for two screens a user never sees beside the main UI, so they now share the page colour.
 
 ---
 
@@ -51,7 +51,7 @@ Converged from 17 distinct hardcoded values. See "Convergence record" below for 
 
 ---
 
-## 3. Accent — 5 roles
+## 3. Accent — 6 roles
 
 | Role | v1 value | Contrast vs page | Contract | Usage |
 |---|---|---|---|---|
@@ -62,9 +62,9 @@ Converged from 17 distinct hardcoded values. See "Convergence record" below for 
 | `accent-subtle` | `#e7e4d6` | 1.06:1 | A **tinted surface** in the accent family, not a neutral. Must stay warm enough to carry an accent-tinted border. | FAB background (hover `#dfdbcb`). |
 | `control-off` | `#D7D4CB` | 1.29:1 | The **unset state** of a binary control. Must read as "not yet chosen" without reading as disabled. Pairs with `accent` as the on-state. | Switch track (off), checkbox border (unchecked), dropdown borders. |
 
-**`control-off` was found late and is not yet consistently applied.** Three components express the same state with three different values: `CdSwitch.vue:39` hardcodes `#D7D4CB` (which *is* `--cd-line-2`, just not referenced), while `CdCheckCircle.vue` uses `#c4c1b4` for its unchecked border, `#8f8c7e` on hover, and `rgba(107,107,96,.12)` for its hover ring. None of the latter three matches any token; `#8f8c7e` is 16 steps from `accent-mid` (`#8F8A6E`) and was probably meant to be it.
+**`control-off` is not yet consistently applied.** `CdSwitch` now references it, but `CdCheckCircle` still hardcodes three values of its own: `#c4c1b4` unchecked, `#8f8c7e` on hover, and `rgba(107,107,96,.12)` for its hover ring. None matches a token; `#8f8c7e` sits 16 steps from `accent-mid` and was probably meant to be it.
 
-Consolidating these needs a per-site look, since the check circle's three values form a hover progression rather than a single state. The role itself is real and belongs in the schema regardless.
+Consolidating those needs a per-site look, since they form a hover progression rather than a single state.
 
 **`accent-subtle` is deliberately not merged into `surface-inset`,** despite being numerically close. The FAB composes it with an accent-tinted border (`rgba(accent-rgb, .5)`) and an `accent-strong` icon; on a neutral background that border loses its footing. Zoe reviewed this and chose to keep it separate.
 
@@ -78,21 +78,23 @@ Composed as `rgba(var(--cd-ink-rgb), <alpha>)`.
 
 | Role | Alpha | Purpose | Currently |
 |---|---|---|---|
-| `ink-wash-hover` | `0.06` | Hover background on buttons and list rows | 22 sites across alphas .03–.08 |
+| `ink-wash-hover` | `0.06` | Hover background on buttons and list rows | 22 sites, alphas .03–.08 |
 | `ink-wash-line` | `0.08` | Grid lines and column dividers | 3 sites, all in the time grid |
-| `ink-wash-strong` | `0.12` | Emphasis underlines, selected cells, small shadows | 10 sites across alphas .1–.3 |
+| `ink-wash-strong` | `0.12` | Emphasis underlines, selected cells | 10 sites, alphas .1–.3 |
 
-**A palette MUST supply an RGB triple for every role used translucently.** v1 needs:
+**A palette MUST supply an RGB triple for every role used translucently:**
 
 ```
---cd-ink-rgb:    86, 88, 94      /* MISSING TODAY — must be added */
---cd-olive-rgb:  179, 172, 145   /* exists */
---cd-scrim-rgb:  40, 38, 30      /* exists */
+--cd-ink-rgb:     86, 88, 94
+--cd-accent-rgb:  179, 172, 145
+--cd-scrim-rgb:   40, 38, 30
 ```
 
-**This is the single most important line in this document.** `rgba(86, 88, 94, α)` is hand-written at **29 sites across 16 files** because no `--cd-ink-rgb` exists. Those literals share no text with any token name, so a rename reports success while the value stays frozen on the old palette. This is the exact failure the token work exists to prevent, and it is currently unprevented for the most-used colour in the app.
+**This is the most important rule in this document.** `rgba(86, 88, 94, α)` was hand-written at 34 sites across 16 files because `--cd-ink-rgb` did not exist. Such literals share no text with any token name, so a rename reports success while every wash stays frozen on the old palette — the exact failure this work exists to prevent, and it was unguarded for the app's most-used colour.
 
-**Adopt in two steps.** Adding `--cd-ink-rgb` and pointing the 29 literals at it is a zero-pixel change and should land first. Collapsing 18 alphas to 3 changes rendering visibly (the week agenda's dotted rule is `.3`, the segmented shadow `.16`) and needs per-site review.
+**Done:** the triple is added, all 34 sites reference it, and `check-tokens` now fails on the literal.
+
+**Still open:** the three alphas above are the *intended* scale, not the current state — 18 distinct alphas remain in use. Collapsing them changes rendering visibly (the week agenda's dotted rule is `.3`) and needs per-site review, so it was deliberately not bundled with the zero-pixel work.
 
 ---
 
@@ -171,19 +173,20 @@ What merged into what, so a reviewer can check the decisions rather than re-deri
 | Translucent channels | 3 (+3 RGB triples) |
 | Semantic | 4 (+`warn`, unused) |
 | Scrim | 2 |
-| **Total** | **23** |
+| Elevation | 1 |
+| **Total** | **24** |
 
-Shadows contribute no new roles — they reuse `--cd-ink-rgb` and `--cd-scrim-rgb` as tint, with fixed geometry.
+Elevation contributes one role, `--cd-shadow-overlay`; its tint reuses `--cd-scrim-rgb` and its geometry is fixed across palettes.
 
-Against 53 colour tokens today, 23 of which have zero consumers. **A palette author fills in 22 values plus 3 RGB triples.**
+Against 53 colour tokens today, 23 of which have zero consumers. **A palette author fills in 24 values plus 3 RGB triples.**
 
 ### Tokens to delete
 
-30 in total, none of which can ever gain a consumer:
+36 in total:
 
 - 12 quadrant tokens (`--cd-quad-*`, `-ink`, `-tint`) — real source is `use-theme.ts`
 - 7 event-colour tokens (`--cd-swatch-1..6`, `--cd-event`) — real source is `CdAppearancePicker.vue`
-- 6 dead shadow tokens (`pill-active-2`, `picker`, `settings`, `dropdown`, `dropdown-2`, `matrix-selected`)
+- 11 shadow tokens — 6 that were already dead, plus `frame`, `pill-active`, `drawer`, `sheet`, `modal` and `menu`, all replaced by the single overlay token
 - 3 scrim steps (`light`, base, `strong`) — imperceptible from `mid`
 - `--cd-olive-mix-3` — one channel step from `mix-2`
 - `--cd-danger-3`, `--cd-month-paper`, `--cd-line-3` — zero consumers
@@ -208,33 +211,24 @@ That each alpha had its own consumer is not evidence of intent: different compon
 
 ---
 
-## 8. Shadow — tint is themeable, geometry is not
+## 8. Shadow — one token, tint themeable
 
-**Geometry stays fixed across palettes.** Elevation should read the same regardless of colour, so a palette overrides the tint channels only, never the offset, blur, or spread.
+`--cd-shadow-overlay` is the only shadow token. See "Elevation" below for the two-level model and why a ramp is unnecessary.
 
-Two tint channels cover every shadow in the app:
+Its tint comes from `--cd-scrim-rgb`, so a palette changes shadow colour without touching geometry.
 
-| Channel | v1 value | Used by |
-|---|---|---|
-| `--cd-ink-rgb` | `86, 88, 94` | Small separator shadows (1–3px) |
-| `--cd-scrim-rgb` | `40, 38, 30` | Overlay shadows (drawer, sheet, modal, menu) |
+**Remaining hardcoded shadows, all kept deliberately** — none is elevation:
 
-**Current state:** 12 shadow tokens exist, **6 of which have zero consumers** (`pill-active-2`, `picker`, `settings`, `dropdown`, `dropdown-2`, `matrix-selected`). Delete those. The remaining 6 are consumed once each.
-
-**Nine hardcoded shadows remain in legacy scope.** Three of them use `rgba(86, 88, 94, α)` — the same untokenised ink triple as §4, and they leak identically on a palette swap:
-
-| Site | Value | Note |
-|---|---|---|
-| `CdSegmented.vue:52` | `0 1px 2px rgba(86,88,94,.16)` | **Must tokenise** — ink triple |
-| `CdSettingsDrawer.vue:1130` | `0 1px 2px rgba(86,88,94,.1)` | **Must tokenise** — ink triple |
-| `CdSettingsDrawer.vue:1275` | `0 1px 2px rgba(86,88,94,.08)` | **Must tokenise** — ink triple |
-| `CdCheckCircle.vue:45` | `0 0 0 4px rgba(107,107,96,.12)` | Focus ring in the accent family — needs its own decision |
-| `CdDraftDrawer.vue:284` | double `inset` with white highlight | Texture lighting; tied to `surface-textured` |
-| `CdDraftDrawer.vue:354` | `inset 0 1px 2px rgba(0,0,0,.06)` | Neutral black — safe to leave |
-| `CdDraftDrawer.vue:368` | `0 3px 10px -5px rgba(60,58,48,.22)` | Bespoke tint, no matching token |
-| `CdSwitch.vue:77` | `0 1px 2px rgba(0,0,0,.18)` | Neutral black — safe to leave |
-
-An elevation scale (how many steps exist) is still undesigned and is out of scope for this schema.
+| Site | Purpose |
+|---|---|
+| `CdDraftDrawer.vue:284` | Double `inset` with a white highlight — texture lighting, tied to `surface-textured` |
+| `CdDraftDrawer.vue:354` | `inset` — recession, not elevation |
+| `CdDraftDrawer.vue:368` | Bespoke tint; will be revisited with the draft-drawer redesign |
+| `CdSwitch.vue:77`, `CdSettingsDrawer.vue:1210` | Switch thumb — depth within a control |
+| `CdFab.vue:35` | FAB — depth within a control |
+| `CdPopover.vue:152` | Caret — edge decoration |
+| `CdCheckCircle.vue:45` | Hover ring in the accent family; see `control-off` in §3 |
+| `CdCopyToDaysCard.vue:182` | `inset` ring used as a border |
 
 ---
 
@@ -256,29 +250,28 @@ A deliberately cool band (teal → green → indigo → violet → plum → near
 
 ---
 
-## Still to define
+## Elevation — 2 levels, decided
 
-Only one item remains open, and it is a design decision rather than an implementation one.
+**Level 1 is "no shadow".** Anything sitting on the page — cards, month cells, event chips, segmented controls, buttons — separates via `line` and the surface roles. A shadow on something that is not actually floating is decoration, and it competes with the only real elevation signal in the app.
 
-**An elevation scale — how many levels of "raised" this product has.**
+**Level 2 is `--cd-shadow-overlay`**, one value for everything that floats over the page and covers it: drawers, sheets, modals, menus, dropdowns, the date picker, the event composer.
 
-No such definition exists today. The 12 shadow tokens were hand-rolled per component, so they describe *where* a shadow is used (drawer, sheet, modal, picker, dropdown, menu) rather than *how high* the thing is. Six already have zero consumers, which is what happens when tokens are named after call sites instead of a scale.
+This follows Carbon's rule, the only explicitly documented shadow-versus-border criterion found across eight surveyed design systems: flat-plane content gets a border if it needs to look interactive, and elevation is reserved for things that genuinely float.
 
-What the current values suggest, if a scale were derived from them:
+**Why one overlay value rather than a ramp.** Every overlay in this app pairs with `scrim`, and the scrim is what communicates "this covers the page". The shadow only defines the panel's edge, and that job does not vary by component. The previous `drawer` / `sheet` / `modal` / `menu` tokens differed by geometry alone, with nothing distinguishing them semantically — which is how twelve tokens accumulated and six went unused.
 
-| Apparent level | Blur / spread | Currently |
-|---|---|---|
-| Separator | 1–3px | `frame`, `pill-active`, and 3 hardcoded shadows |
-| Floating | 10–16px | `menu`, `dropdown` |
-| Overlay | 30–70px | `drawer`, `sheet`, `modal`, `picker`, `settings` |
+**The value carries no vertical offset on purpose.** One shadow serves panels anchored to different edges; the bottom sheet is flush with the viewport, so a downward cast would be clipped and the sheet would read as having no shadow at all.
 
-Three levels would cover every existing shadow. **This is an observation, not a decision** — the question of how many levels the design *should* have is Zoe's, and the answer determines whether the outlying values get pulled onto the scale or the scale gains a step.
+**Geometry is not themeable.** A palette overrides the tint channel only — elevation must read the same across palettes, or the same drawer would appear to float at different heights in different palettes.
 
-Until it is decided, the safe subset is: delete the 6 dead tokens, and tokenise the 3 hardcoded shadows that use the ink triple (see §8) since those leak on a palette swap regardless of what the scale turns out to be.
+**Kept outside the scale deliberately:** inset shadows (recession, not elevation), the switch thumb and FAB (depth *within* a control), and the popover caret (edge decoration).
 
 ---
 
-## Resolved since the first draft
+## Nothing is open
 
-- **`--cd-btn-primary`** (`#2F3033`) — **removed from this schema.** Zero consumers, and its own annotation marks it as belonging to v2. A v1 palette should not define it; it is added to the delete list.
-- **`CdCheckCircle`'s hover ring** — investigated. It is a hover ring, not a focus ring, and it turned out to be one of three untokenised accent-family values in that component. Handled as part of the new `control-off` role in §3 rather than as a standalone item.
+All items from earlier drafts are resolved:
+
+- **Elevation scale** — decided above. Two levels, the first being none.
+- **`--cd-btn-primary`** (`#2F3033`) — removed. Zero consumers, and its own annotation marks it as belonging to v2. A v1 palette should not define it.
+- **`CdCheckCircle`'s hover ring** — investigated. It is a hover ring rather than a focus ring, and one of three untokenised accent-family values in that component. Folded into the `control-off` role in §3.
