@@ -16,96 +16,101 @@
    */
   --cd-bp-desktop: 900px;
 
-  /* ---------- Color: neutrals / ink ---------- */
-  --cd-ink: #56585E;
-  --cd-ink-2: #6E7176;
-  --cd-muted: #9C9E94;
-  --cd-ink-3: #9C9E94;
-
-  /* ---------- Color: lines ---------- */
-  --cd-line: #E5E3DB;
-  --cd-line-2: #D7D4CB;
-  --cd-line-3: #EEECE4;
-  --cd-line-4: #E9E6DD;
-  --cd-line-5: #E4E1D6;
-
-  /* ---------- Color: surfaces ---------- */
-  --cd-surface: #FBFAF7;
-  --cd-topbar: #F2F1EC;
-  --cd-editor-card: #F4F2EC;
-  --cd-month-paper: #F1F2EC;
-  --cd-draft-paper: #EEEBE1;
-  --cd-inbox-paper: #F7F5EF;
-
-  /* ---------- Color: olive accent ----------
-   * --cd-olive-rgb is the single input to every translucent accent wash. Components
-   * must compose washes as rgba(var(--cd-olive-rgb), <alpha>) rather than writing the
-   * channels literally: a literal shares no text with the token name, so it survives
-   * a rename unnoticed and stays frozen on the old palette when the accent changes.
-   * Keep it in sync with --cd-olive.
-   */
-  --cd-olive: #B3AC91;
-  --cd-olive-rgb: 179, 172, 145;
-  --cd-olive-ink: #3f4136;
-  --cd-olive-mix-1: #8F8A6E;
-  --cd-olive-mix-2: #6E6A52;
-  --cd-olive-mix-3: #6E6A54;
-
-  /* ---------- Color: weekday accents ---------- */
-  --cd-sat: #3A6EA5;
-  --cd-sun: #C0564B;
-
-  /* ---------- Color: quadrants (prototype-authoritative, see decision log) ---------- */
-  --cd-quad-plan: #6E839B;
-  --cd-quad-do: #C56A5E;
-  --cd-quad-quick: #BFA86A;
-  --cd-quad-later: #9A988F;
-  --cd-event: #E3A75C;
-
-  /* Paired text color for each quadrant fill above. Every fill token has an ink
-   * partner so contrast is stated against a known pairing rather than assumed.
+  /* ==========================================================================
+   * COLOUR ROLES
    *
-   * These four values are also declared in src/composables/use-theme.ts, which is
-   * the authority: quadrant appearance is resolved in JS and its backgroundColor is
-   * persisted onto event records, so those must stay literal hex (a var() reference
-   * would write CSS syntax into stored data). Mirrored here so stylesheets can reach
-   * the same values; keep the two in sync. */
-  --cd-quad-do-ink: #4A3318;
-  --cd-quad-plan-ink: #2A2D27;
-  --cd-quad-quick-ink: #3E3845;
-  --cd-quad-later-ink: #33403A;
+   * These are the roles a palette defines. Full contract for each — what it must
+   * be true of, and its measured contrast — is in docs/v2-tokens/SCHEMA-v1-palette.md.
+   *
+   * Two rules that are not obvious from the values:
+   *
+   * 1. Any role used translucently MUST expose an -rgb channel triple, and
+   *    components MUST compose washes as rgba(var(--cd-x-rgb), <alpha>). A literal
+   *    like rgba(86, 88, 94, .06) shares no text with any token name, so it
+   *    survives a rename unnoticed and stays frozen on the old palette.
+   * 2. Names describe the ROLE, never the material or the call site. If the palette
+   *    or the layout changed, would the name still be true?
+   * ========================================================================== */
 
-  /* editor header tint (pale) per quadrant */
-  --cd-quad-do-tint: #EFDCD5;
-  --cd-quad-plan-tint: #D9E0E7;
-  --cd-quad-quick-tint: #EAE4D0;
-  --cd-quad-later-tint: #E4E2DC;
+  /* ---------- Surfaces ---------- */
+  --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
+  --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
+  --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
+  --cd-surface-textured: #EEEBE1;  /* carries the draft drawer's dot pattern; provisional */
 
-  /* event custom color palette — handoff eColorOpts: cool band (teal→green→indigo→violet→plum→near-black),
-     deliberately excludes every quadrant hue so events and quadrants stay visually distinct */
-  --cd-swatch-1: #4A8B85;
-  --cd-swatch-2: #63996B;
-  --cd-swatch-3: #6863B0;
-  --cd-swatch-4: #8E6FB0;
-  --cd-swatch-5: #A56D91;
-  --cd-swatch-6: #4C4E57;
+  /* ---------- Lines ---------- */
+  --cd-line: #E5E3DB;
 
-  /* ---------- Color: v2 edit-card primary CTA ---------- */
-  --cd-btn-primary: #2F3033; /* near-black CTA fill, softer than pure #1b1b1b */
+  /* ---------- Ink (text) ----------
+   * --cd-ink-secondary measures 4.33:1 against --cd-surface-page and therefore does
+   * NOT meet WCAG AA; it cleared the bar against the previous, cooler page colour.
+   * --cd-ink-muted is 2.40:1 and is for non-essential information only — it must
+   * never carry meaning that is unavailable elsewhere. Both are recorded rather than
+   * corrected here: changing either moves ~40 and ~60 render sites respectively.
+   */
+  --cd-ink: #56585E;
+  --cd-ink-rgb: 86, 88, 94;
+  --cd-ink-secondary: #6E7176;
+  --cd-ink-muted: #9C9E94;
 
-  /* ---------- Color: danger / warn ---------- */
+  /* ---------- Accent ----------
+   * --cd-on-accent is a PAIRED role: its 4.57:1 contract is against --cd-accent,
+   * not against the page. Any palette that redefines the accent must re-check it.
+   * --cd-accent-subtle is a tinted surface in this family, deliberately not merged
+   * into --cd-surface-inset: it has to stay warm enough to carry an accent border.
+   */
+  --cd-accent: #B3AC91;
+  --cd-accent-rgb: 179, 172, 145;
+  --cd-on-accent: #3f4136;
+  --cd-accent-mid: #8F8A6E;
+  --cd-accent-strong: #6E6A52;
+  --cd-accent-subtle: #e7e4d6;
+
+  /* ---------- Controls ----------
+   * The unset state of a binary control. Must read as "not yet chosen" rather than
+   * "disabled". Pairs with --cd-accent as the on-state.
+   */
+  --cd-control-off: #D7D4CB;
+
+  /* ---------- Weekday accents ---------- */
+  --cd-weekday-saturday: #3A6EA5;
+  --cd-weekday-sunday: #C0564B;
+
+  /* ---------- Danger / warn ----------
+   * --cd-danger holds the same value as --cd-weekday-sunday in this palette but is a
+   * separate role on purpose: a palette may well want a distinct destructive colour.
+   * --cd-warn has no consumer today and is kept deliberately — a semantic set without
+   * a warning colour is incomplete, and an author who never sees the role won't define it.
+   */
   --cd-danger: #C0564B;
-  --cd-danger-2: #B4655C;
-  --cd-danger-3: #D9483C;
+  --cd-danger-hover: #B4655C;
   --cd-warn: #C98A2E;
 
-  /* ---------- Scrim opacities (used with rgba(40,38,30, N)) ---------- */
+  /* ---------- Scrim ----------
+   * Two levels, not five. Composited over --cd-surface-page the former .28/.30/.32/.34
+   * steps render four channel-steps apart, which is below the threshold of perception;
+   * only .4 is a genuine second level. That each alpha had its own consumer was not
+   * evidence of intent — different components picked similar-looking numbers.
+   */
   --cd-scrim-rgb: 40, 38, 30;
-  --cd-scrim-light: rgba(40, 38, 30, .28);
-  --cd-scrim: rgba(40, 38, 30, .3);
-  --cd-scrim-mid: rgba(40, 38, 30, .32);
-  --cd-scrim-strong: rgba(40, 38, 30, .34);
+  --cd-scrim: rgba(40, 38, 30, .32);
   --cd-scrim-heavy: rgba(40, 38, 30, .4);
+
+  /* ---------- NOT part of the palette ----------
+   * Quadrant colours and event colours are USER DATA, not theme values. They are
+   * resolved in JS and persisted onto event records, so they must stay literal hex —
+   * a var() reference would write CSS syntax into stored data.
+   *
+   *   Quadrants     → src/composables/use-theme.ts (authoritative)
+   *   Event presets → src/components/ui/CdAppearancePicker.vue (COLOR_SWATCHES)
+   *
+   * The tokens that used to mirror them here (--cd-quad-*, --cd-swatch-*, --cd-event)
+   * were deleted: they had zero var() consumers and could never gain one.
+   *
+   * Known consequence: existing event records hold the old hex values, so changing a
+   * quadrant or preset does not update them retroactively. That is a data-migration
+   * problem, not a token problem.
+   */
 
   /* ---------- Typography: families ----------
    * The product ships exactly two faces (decided 2026-07-31). Fonts are a fixed
@@ -185,19 +190,22 @@
   --cd-radius-chip: 7px;
   --cd-radius-xs: 6px;
 
-  /* ---------- Shadows ---------- */
-  --cd-shadow-frame: 0 1px 3px rgba(86, 88, 94, .06);
-  --cd-shadow-pill-active: 0 1px 2px rgba(86, 88, 94, .12);
-  --cd-shadow-pill-active-2: 0 1px 2px rgba(86, 88, 94, .18);
-  --cd-shadow-drawer: -22px 0 52px -22px rgba(40, 38, 30, .42);
-  --cd-shadow-sheet: 0 -18px 42px -20px rgba(40, 38, 30, .4);
-  --cd-shadow-modal: 0 34px 70px -26px rgba(40, 38, 30, .55);
-  --cd-shadow-picker: 0 30px 60px -24px rgba(40, 38, 30, .5);
-  --cd-shadow-settings: 0 24px 60px -30px rgba(40, 38, 30, .5);
-  --cd-shadow-dropdown: 0 12px 32px -12px rgba(40, 38, 30, .32);
-  --cd-shadow-dropdown-2: 0 16px 34px -16px rgba(40, 38, 30, .36);
-  --cd-shadow-menu: 0 10px 26px -14px rgba(40, 38, 30, .42);
-  --cd-shadow-matrix-selected: 0 5px 12px -7px;
+  /* ---------- Shadows ----------
+   * Geometry is NOT themeable: elevation should read the same across palettes, so a
+   * palette overrides only the tint channels (--cd-ink-rgb / --cd-scrim-rgb) and never
+   * the offset, blur or spread.
+   *
+   * Six tokens were deleted here for having zero consumers (pill-active-2, picker,
+   * settings, dropdown, dropdown-2, matrix-selected). That is what happens when tokens
+   * are named after call sites rather than elevation steps — an elevation scale is
+   * still undesigned; see SCHEMA-v1-palette.md.
+   */
+  --cd-shadow-frame: 0 1px 3px rgba(var(--cd-ink-rgb), .06);
+  --cd-shadow-pill-active: 0 1px 2px rgba(var(--cd-ink-rgb), .12);
+  --cd-shadow-drawer: -22px 0 52px -22px rgba(var(--cd-scrim-rgb), .42);
+  --cd-shadow-sheet: 0 -18px 42px -20px rgba(var(--cd-scrim-rgb), .4);
+  --cd-shadow-modal: 0 34px 70px -26px rgba(var(--cd-scrim-rgb), .55);
+  --cd-shadow-menu: 0 10px 26px -14px rgba(var(--cd-scrim-rgb), .42);
 
   /* ---------- Motion: durations / easings ---------- */
   --cd-ease-standard: cubic-bezier(.22, 1, .36, 1);
@@ -214,6 +222,40 @@
   --cd-duration-micro-5: .2s;
   --cd-duration-micro-6: .22s;
   --cd-duration-spin: .8s;
+
+  /* ==========================================================================
+   * DEPRECATED COLOUR ALIASES — temporary, delete on sight
+   *
+   * These resolve onto the roles above so components keep rendering while their
+   * var() references are migrated. The value lives in exactly one place (the role);
+   * these are pointers, so there is nothing to keep in sync.
+   *
+   * This block's line count IS the migration progress bar. When it reaches zero,
+   * delete the block. Do not add to it.
+   * ========================================================================== */
+  --cd-topbar: var(--cd-surface-page);
+  --cd-surface: var(--cd-surface-raised);
+  --cd-inbox-paper: var(--cd-surface-raised);
+  --cd-editor-card: var(--cd-surface-inset);
+  --cd-draft-paper: var(--cd-surface-textured);
+  --cd-line-2: var(--cd-control-off);
+  --cd-line-4: var(--cd-line);
+  --cd-line-5: var(--cd-line);
+  --cd-ink-2: var(--cd-ink-secondary);
+  --cd-ink-3: var(--cd-ink-muted);
+  --cd-muted: var(--cd-ink-muted);
+  --cd-olive: var(--cd-accent);
+  --cd-olive-rgb: var(--cd-accent-rgb);
+  --cd-olive-ink: var(--cd-on-accent);
+  --cd-olive-mix-1: var(--cd-accent-mid);
+  --cd-olive-mix-2: var(--cd-accent-strong);
+  --cd-olive-mix-3: var(--cd-accent-strong);
+  --cd-sat: var(--cd-weekday-saturday);
+  --cd-sun: var(--cd-weekday-sunday);
+  --cd-danger-2: var(--cd-danger-hover);
+  --cd-scrim-light: var(--cd-scrim);
+  --cd-scrim-mid: var(--cd-scrim);
+  --cd-scrim-strong: var(--cd-scrim);
 }
 
 /* ---------- Keyframes ---------- */

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design Token 文件格式：業界做法與建議</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC",sans-serif;color:#1a1a1a;background:#fff;display:flex;min-height:100vh}
+#sb{width:230px;flex:0 0 230px;background:#fafafa;border-right:1px solid #e5e5e5;padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+#sb h2{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#999;margin:0 0 12px;padding:0 18px;font-weight:700}
+#sb a{display:block;padding:7px 18px;font-size:13px;color:#444;text-decoration:none;border-left:3px solid transparent;line-height:1.4}
+#sb a:hover{background:#f0f0f0;color:#000}
+#sb a.on{border-left-color:#2b6cb0;background:#eef4fb;color:#1a4e8a;font-weight:700}
+#sb ul{margin:0;padding:0;list-style:none}
+#sb .gap{margin-top:14px}
+main{flex:1;padding:36px 44px 90px;max-width:1060px;overflow-x:hidden}
+h1{font-size:24px;margin:0 0 5px;letter-spacing:-.01em}
+.sub{color:#777;font-size:13px;margin-bottom:24px;line-height:1.65}
+h2{font-size:17px;margin:34px 0 8px;padding-bottom:7px;border-bottom:2px solid #1a1a1a}
+h3{font-size:14.5px;margin:22px 0 7px}
+p,li{line-height:1.78;font-size:14px}
+code{background:#f4f4f4;border-radius:4px;padding:2px 6px;font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+pre{background:#f7f7f7;border-radius:8px;padding:13px 15px;overflow-x:auto;font-size:12px;line-height:1.65}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:12px 0;display:block;overflow-x:auto}
+th,td{padding:7px 9px;text-align:left;border-bottom:1px solid #eee;vertical-align:top}
+th{background:#fafafa;font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:#666}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cal{border-radius:8px;padding:12px 15px;margin:14px 0;font-size:13.5px;line-height:1.75}
+.warn{background:#fff8e6;border-left:3px solid #d99e00}
+.info{background:#eef4fb;border-left:3px solid #2b6cb0}
+.ok{background:#eefaf7;border-left:3px solid #2e9e8f}
+.bad{background:#fdeeec;border-left:3px solid #c0564b}
+.fail{color:#c0564b;font-weight:700}
+.pass{color:#2e9e8f;font-weight:700}
+.rank{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-top:1px solid #f0f0f0}
+.rank:first-of-type{border-top:none}
+.rank .no{flex:none;width:26px;height:26px;border-radius:50%;background:#1a1a1a;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+.rank .no.dim{background:#ccc}
+.rank .bd{flex:1}
+.rank .t{font-weight:700;font-size:14px;margin-bottom:3px}
+.rank .d{font-size:13px;color:#555;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.card{border:1px solid #eaeaea;border-radius:9px;padding:13px 15px}
+.card .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:4px}
+.card .big{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.card .sm{font-size:11.5px;color:#999;margin-top:3px;line-height:1.5}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.18);vertical-align:-2px;margin-right:5px}
+article{display:none}article.on{display:block}
+.good{background:#eefaf7;border-radius:6px;padding:9px 12px;margin:8px 0;font-size:12.5px;line-height:1.7}
+.bad2{background:#fdeeec;border-radius:6px;padding:9px 12px;margin:8px 0;font-size:12.5px;line-height:1.7}
+@media(max-width:880px){body{display:block}#sb{width:auto;height:auto;position:static;flex:none;border-right:none;border-bottom:1px solid #e5e5e5}main{padding:22px 16px 60px}}
+</style></head><body>
+
+<nav id="sb"><h2>Token 文件格式</h2><ul>
+<li><a href="#" data-t="s-1" class="on">結論與建議</a></li>
+<li><a href="#" data-t="s-0">先修的資料問題</a></li>
+<li class="gap"><a href="#" data-t="s-2">業界格式概覽</a></li>
+<li><a href="#" data-t="s-3">什麼讓 AI 讀得懂</a></li>
+<li><a href="#" data-t="s-4">起始範本</a></li>
+<li class="gap"><a href="#" data-t="s-5">AI 推不出來的事</a></li>
+<li><a href="#" data-t="s-6">執行順序</a></li>
+</ul></nav>
+
+<main>
+
+<!-- ===== 結論 ===== -->
+<article id="s-1" class="on">
+<h1>Design Token 文件：業界做法與建議</h1>
+<div class="sub">
+回答「一般 design token 文件長怎樣」以及「怎麼定義才能讓 AI 或工程師讀懂並套用」<br>
+所有數字都經過實測驗證，非估計
+</div>
+
+<div class="cal bad">
+<b>研究過程中發現一件比格式選擇更急迫的事：你的四個顏色來源已經不同步了，不是「將來可能會」。</b>
+<br><br>
+細節見「先修的資料問題」節。建議先解那個，再談工具。
+</div>
+
+<h2>建議：DTCG JSON 當唯一來源 + Style Dictionary 產生四個輸出</h2>
+
+<p>用 DTCG JSON 作為唯一手寫來源，由 Style Dictionary 產生 CSS custom properties、Tailwind <code>@theme</code>、Sass 變數。<b>分兩階段做，第一階段的價值就已超過成本。</b></p>
+
+<div class="grid">
+<div class="card"><div class="lbl">一次性成本</div><div class="big">2–4 小時</div><div class="sm">104 個 token 翻成 JSON，<code>$description</code> 要人寫</div></div>
+<div class="card"><div class="lbl">新增依賴</div><div class="big">1 個</div><div class="sm">style-dictionary，devDependency，不進 bundle</div></div>
+<div class="card"><div class="lbl">每次改 token</div><div class="big pass">淨省時間</div><div class="sm">從改 1–4 個檔變成改 1 個 JSON</div></div>
+</div>
+
+<h3>為什麼不是其他選項</h3>
+<table><thead><tr><th>方案</th><th>為什麼不選</th></tr></thead><tbody>
+<tr><td><b>維持現狀</b><br>純 CSS 手動同步</td><td>今天能跑，但已經分歧了（見下節），證明人類 review 抓不到。真正的成本轉折點是換色盤那天 —— 同步成本會從四個地方變成八個。</td></tr>
+<tr><td><b>CSS 當源頭</b><br>寫 script 產生其他三個</td><td>解決同步問題，但<b>不解決可讀性問題</b>。CSS 沒地方掛 <code>$description</code>、<code>$type</code>、對比契約、「不要直接引用」標記 —— 而這些正是你要的核心。CSS 也表達不了 composite type（一個 shadow 是四個可分別驗證的數值，不是一個字串）。</td></tr>
+<tr><td><b>Tokens Studio</b><br>Figma plugin 當源頭</td><td>它解決的是<b>設計師與工程師的交接問題</b>，你是一個人，設計決策在你腦裡。多一個 plugin 只是多一層要同步的東西。除非哪天有設計師加入。</td></tr>
+<tr><td><b>Style Dictionary 但用舊格式</b></td><td>少一層規格包袱，但 <b>DTCG 是 AI agent 最可能認得的格式</b>，而「讓 AI 讀懂」是你的明確需求。DTCG 並沒有比較難寫。</td></tr>
+</tbody></table>
+
+<h3>分兩階段</h3>
+<div class="cal ok">
+<b>Phase 1（現在做）：JSON 當來源，只產生 CSS + Tailwind + Sass。</b>
+<ul style="margin:8px 0 0">
+<li><code>use-theme.ts</code> 的四象限色<b>先不動</b>，維持手寫 hex（理由見「AI 推不出來的事」）。JSON 裡標註它是 mirror，用 lint 檢查兩邊一致，而不是產生它。</li>
+<li>產出檔標上 <code>DO NOT EDIT</code> 並<b>進 git</b> —— solo 專案不該讓 <code>npm run dev</code> 依賴額外步驟才看得到顏色。</li>
+<li>這一階段解決的是<b>已經壞掉的東西</b>。</li>
+</ul>
+</div>
+
+<div class="cal info">
+<b>Phase 2（等 rename 和 <code>data-theme</code> 要做時再做）：</b>semantic tier、role-based 命名、第二套 palette。
+<b>不要現在做</b> —— rename 本來就還沒定案，把兩件事綁一起會讓兩件都做不完。
+</div>
+
+<h3>什麼情況我會改口說不要做</h3>
+<p>如果四個來源只有一個（純 CSS），而且沒有換色盤計畫，那 DTCG 就是過度工程，寫一份 markdown 說明就夠了。<b>但你不是這個情況。</b></p>
+</article>
+
+<!-- ===== 資料問題 ===== -->
+<article id="s-0">
+<h1>先修的資料問題</h1>
+<div class="sub">這比工具選擇更急迫，而且早於任何格式決定</div>
+
+<div class="cal bad">
+<b><code>bg</code> 這個概念在三個地方是三個不同的值，而 token 檔裡根本沒有它。</b>
+</div>
+
+<table><thead><tr><th>來源</th><th>變數名</th><th>值</th></tr></thead><tbody>
+<tr><td><code>quasar.variables.sass:4</code></td><td><code>$bg</code></td><td><span class="sw" style="background:#F2F1EC"></span><code>#F2F1EC</code></td></tr>
+<tr><td><code>app.css:51</code>（Tailwind）</td><td><code>--color-bg</code></td><td><span class="sw" style="background:#fafaf9"></span><code>#fafaf9</code></td></tr>
+<tr><td><code>app.css:32</code>（硬寫在 body）</td><td>—</td><td><span class="sw" style="background:#fafaf9"></span><code>#fafaf9</code></td></tr>
+<tr><td><code>cadence-tokens.css</code></td><td class="fail">不存在</td><td class="fail">—</td></tr>
+</tbody></table>
+
+<p><code>app.css:37</code> 的 <code>color: #56585E</code> 也是硬寫的，和 <code>--cd-ink</code> 同值但無連結。</p>
+
+<div class="cal warn">
+<b>同一個概念有四個名字：</b><code>--cd-muted</code> / <code>--cd-ink-3</code> / <code>--color-ink-3</code> / <code>$ink-3</code>，
+其中兩個還在<b>同一個檔案裡</b>指向同一個值。
+<br><br>
+這不是理論風險，是已發生的 bug。四來源同步問題是 generator 最強的論據，而它已經開票了。
+</div>
+
+<h2>其他已驗證的既存問題</h2>
+<table><thead><tr><th>問題</th><th class="n">數量</th><th>說明</th></tr></thead><tbody>
+<tr><td><code>font-weight: 600</code></td><td class="n fail">123</td><td>Zen Kaku 沒有這一階，全部是瀏覽器合成的假粗體</td></tr>
+<tr><td><code>font-weight: 800</code></td><td class="n fail">11</td><td>同上</td></tr>
+<tr><td><code>--cd-bp-desktop</code> 是假 token</td><td class="n">1</td><td>CSS 變數不能用在 <code>@media</code>，真正生效的在 <code>breakpoints.sass</code></td></tr>
+<tr><td><code>--cd-olive-mix-2/-3</code> 重複</td><td class="n">2</td><td>差 2 個藍階，肉眼不可分，非設計意圖</td></tr>
+</tbody></table>
+
+<div class="cal info">
+<b>第一步該做的不是建 token 檔，是決定 <code>bg</code> 到底該是哪個值。</b>
+這是資料問題，早於任何工具選擇 —— 如果帶著分歧去建 JSON，只是把錯的值固化成「唯一真實來源」。
+</div>
+</article>
+
+<!-- ===== 格式概覽 ===== -->
+<article id="s-2">
+<h1>業界格式概覽</h1>
+<div class="sub">三個你會遇到的名字，以及它們的關係</div>
+
+<h2>DTCG（Design Tokens Community Group）JSON</h2>
+
+<div class="cal warn">
+<b>規格狀態要講清楚：它是 Community Group Draft Report，不是 W3C Recommendation</b>，也沒走 W3C 標準流程。
+實務上已是事實標準（Style Dictionary、Tokens Studio、Figma Variables export 都支援），但規格仍在演進。
+</div>
+
+<pre><code>{
+  "color": {
+    "ink": {
+      "$type": "color",              // 型別，可在 group 層宣告並被子節點繼承
+      "$value": "#56585E",
+      "$description": "…",           // 人類與 AI 讀的說明
+      "$extensions": {               // 自訂 metadata，規格保證不干涉
+        "com.cadence.tier": "primitive"
+      }
+    },
+    "body": {
+      "$value": "{color.ink}",       // alias：大括號 + 點分路徑
+      "$type": "color"
+    }
+  }
+}</code></pre>
+
+<h3>要點</h3>
+<ul>
+<li><code>$</code> 前綴是規格保留字。沒有 <code>$</code> 的 key 一律視為 group 或 token 名。</li>
+<li><b><code>$type</code> 可繼承</b> —— 在 group 上寫一次，底下全部適用。對可讀性幫助很大。</li>
+<li>Alias 是 <code>{group.token}</code>，<b>整個 <code>$value</code> 就是那個字串</b>，不能做 <code>"{color.ink} 2px"</code> 這種內插。</li>
+<li><b>Composite types</b>：<code>shadow</code>、<code>typography</code>、<code>border</code>、<code>gradient</code>、<code>transition</code>、<code>strokeStyle</code>。<code>$value</code> 是物件而非純量 —— 這是 CSS 做不到的表達力。</li>
+</ul>
+
+<div class="cal warn">
+<b>一個要自己驗證的細節：</b>2025.10 draft 的 <code>dimension</code> 是物件形式 <code>{ "value": 8, "unit": "px" }</code>。
+純字串 <code>"8px"</code> 在該版是否仍合法，<b>研究時無法確定</b> —— 實作時請對照 Style Dictionary 5.5.0 的實際 parser 行為，不要照抄範本。
+</div>
+
+<h2>Style Dictionary</h2>
+<p>Node build tool。讀 token 檔（JSON / JSON5 / YAML），跑 transform，輸出任意格式。</p>
+<table><thead><tr><th>項目</th><th>說明</th></tr></thead><tbody>
+<tr><td>版本</td><td>v5.5.0（2026-06-21 發布）</td></tr>
+<tr><td>DTCG 支援</td><td>2025.10 的 color / dimension 支援落在 5.3.0 / 5.4.0（2026 年 2–3 月）</td></tr>
+<tr><td>啟用方式</td><td><code>usesDtcg: true</code> —— 開了才會讀 <code>$value</code>/<code>$type</code> 而非舊格式的 <code>value</code>/<code>type</code></td></tr>
+<tr><td>內建 format</td><td><code>css/variables</code>、<code>scss/variables</code>、<code>javascript/es6</code> 等</td></tr>
+<tr><td>自訂 format</td><td>一個回傳字串的函式。寫 Tailwind <code>@theme</code> block 大概二十行</td></tr>
+</tbody></table>
+
+<h2>Tokens Studio</h2>
+<p>Figma plugin，把 token 存在 Figma 裡，可 export 成 DTCG JSON 或 sync 到 git。</p>
+<div class="cal info">
+它的定位是<b>設計師端的編輯介面</b>，不是 build tool —— 和 Style Dictionary 是<b>上下游關係，不是替代關係</b>。
+原生格式和 DTCG 有出入（歷史上用 <code>value</code>/<code>type</code>，並有 <code>$themes.json</code> 這類自有檔案），需要轉換。
+<br><br>
+<b>對這個專案：不要用。</b>
+</div>
+</article>
+
+<!-- ===== 可讀性 ===== -->
+<article id="s-3">
+<h1>什麼讓 token 文件對 AI 和新工程師可讀</h1>
+<div class="sub">這是你問題的核心。以下依權重排序，前三項貢獻了大部分價值</div>
+
+<div class="rank"><div class="no">1</div><div class="bd">
+<div class="t">單一真實來源，其餘皆為產物且標記為產物</div>
+<div class="d">
+其他所有事都建立在這之上。如果有四個手寫來源，<code>$description</code> 寫得再好，AI 讀了其中一份仍然會改錯地方。
+產出檔第一行必須是 <code>/* AUTO-GENERATED … DO NOT EDIT. */</code>。
+<br><br>
+<b>AI agent 對 <code>DO NOT EDIT</code> 的遵從度很高，這一行的投報率是全部裡最高的。</b>
+反過來說，<b>沒有這一行的產出檔比手寫檔更危險</b> —— 它看起來可以改。
+</div></div></div>
+
+<div class="rank"><div class="no">2</div><div class="bd">
+<div class="t"><code>$description</code> 寫「何時用」而非「這是什麼」</div>
+<div class="d">
+最常被寫壞的欄位，也是新工程師與 AI 唯一能讀到「意圖」的地方。
+<div class="bad2">✗ <b>沒有資訊量</b>（重述了 <code>$value</code> 已說過的事）<br>
+<code>"The olive accent color, #B3AC91"</code></div>
+<div class="good">✓ <b>有資訊量</b>（適用場景、邊界、誤用後果）<br>
+<code>"Primary accent. Use for interactive affordances that are not the primary CTA. Do NOT compose translucent washes from this token — use olive-rgb inside rgba() instead, so the wash follows a palette swap."</code></div>
+<b>判準：把 <code>$value</code> 遮住，這段描述還能讓人知道該不該用它嗎？</b>不能的話就是廢話。
+好的描述要有：適用場景、<b>不適用場景</b>（負面資訊常比正面更有用）、誤用的後果。
+</div></div></div>
+
+<div class="rank"><div class="no">3</div><div class="bd">
+<div class="t">明確的 <code>$type</code>，包含 composite type</div>
+<div class="d">
+<code>"0 1px 3px rgba(86,88,94,.06)"</code> 對機器是<b>一個字串</b>；標上 <code>$type: "shadow"</code> 加結構化 <code>$value</code> 之後，它是<b>四個可分別驗證、可分別 transform 的欄位</b>。
+<br><br>
+AI 要改「陰影再淡一點」時，前者要做字串解析（容易改壞），後者只改 <code>color.alpha</code>。
+你有 12 個 shadow token 全是字串形式 —— 這是 composite type 最直接的收益處。
+</div></div></div>
+
+<div class="rank"><div class="no">4</div><div class="bd">
+<div class="t">機器可檢查的約束（要能執行，不能只是散文）</div>
+<div class="d">
+寫在註解裡的規則會被無視；寫成<b>能 fail build</b> 的檢查才會被遵守。
+你的 <code>check-tokens.mjs</code> 已經證明這模式有效。
+<br><br>
+把約束放進 <code>$extensions</code> 讓 lint 讀它，<b>而不是把規則 hardcode 在 lint script 裡</b> ——
+否則你只是把四來源同步問題搬到 lint 上。
+<pre style="margin:8px 0 0"><code>"$extensions": {
+  "com.cadence.forbid-literal": ["#B3AC91", "rgba(179, 172, 145"],
+  "com.cadence.contrast": { "against": "{color.surface.default}", "min": 4.5 }
+}</code></pre>
+</div></div></div>
+
+<div class="rank"><div class="no">5</div><div class="bd">
+<div class="t">明確的 tier 標記與「不要直接引用」</div>
+<div class="d">
+<b>AI 特別需要這個。</b>給它一份平坦的 104 個 token 清單，它會挑名字看起來最像的那個，而不管 tier。
+明確寫 <code>"direct-use": "forbidden"</code> 加上指出替代品，命中率會顯著提高。
+<br><br>
+<b>注意：</b>Phase 1 還沒有 semantic tier（命名仍是 material-bound），所以現在全部標 <code>primitive</code> 並誠實註明「semantic tier 尚未建立」。
+<b>不要假裝有 tier 制度 —— 假的結構比沒有結構更糟</b>，AI 會照著假結構推論。
+</div></div></div>
+
+<div class="rank"><div class="no dim">6</div><div class="bd">
+<div class="t">對比契約寫明配對</div>
+<div class="d">
+「這個顏色對比夠嗎」沒有答案，「這個顏色配 <code>surface.default</code> 是 4.8:1」才有。
+你的 token 檔已經有這個直覺（每個象限 fill 都有 ink 夥伴）。把它從註解升級成機器可讀欄位就能自動驗證。
+</div></div></div>
+
+<div class="rank"><div class="no dim">7</div><div class="bd">
+<div class="t">穩定的命名結構</div>
+<div class="d">
+重要，但排最後 —— rename 尚未定案，而且前六項不依賴命名就有價值。
+<b>不要為了做 token 檔而順手改名</b>，那是兩個獨立的變更。
+</div></div></div>
+</article>
+
+<!-- ===== 範本 ===== -->
+<article id="s-4">
+<h1>起始範本</h1>
+<div class="sub">真實語法、你專案的真實值，不是 pseudocode</div>
+
+<pre><code>tokens/
+  _meta.json           # 專案層級的 agent 指令
+  primitive.color.json
+  semantic.shadow.json
+  typography.json</code></pre>
+
+<h2>primitive.color.json（節選）</h2>
+<pre><code>{
+  "color": {
+    "$type": "color",
+    "$description": "Primitive colour tier. Semantic tier is NOT YET BUILT — the planned
+      role-based rename has not happened, so components currently reference these
+      directly. Treat that as debt, not as the intended pattern.",
+
+    "ink": {
+      "primary": {
+        "$value": { "colorSpace": "srgb", "hex": "#56585E" },
+        "$description": "Default body text. The only ink that meets 4.5:1 against every
+          surface in this palette; use it whenever a contrast requirement is unknown.",
+        "$extensions": {
+          "com.cadence.legacy-css-var": "--cd-ink",
+          "com.cadence.contrast": [{ "against": "{color.surface.default}", "min": 4.5 }]
+        }
+      },
+      "tertiary": {
+        "$value": { "colorSpace": "srgb", "hex": "#9C9E94" },
+        "$description": "De-emphasised labels and disabled states. This is the lightest
+          readable ink and it does NOT reach 4.5:1 on every surface — verify before
+          using it below 12px or on a paper surface.",
+        "$extensions": { "com.cadence.legacy-css-var": "--cd-ink-3" }
+      },
+      "muted": {
+        "$value": "{color.ink.tertiary}",
+        "$description": "DEPRECATED alias, kept only so existing --cd-muted call sites
+          keep rendering. Do not reference in new code. Delete once usage hits zero.",
+        "$extensions": { "com.cadence.deprecated": true }
+      }
+    },
+
+    "accent": {
+      "olive": {
+        "$value": { "colorSpace": "srgb", "hex": "#B3AC91" },
+        "$description": "Solid accent fill and accent borders. For any TRANSLUCENT accent
+          wash use olive-rgb inside rgba() instead — writing rgba(179, 172, 145, a)
+          literally shares no text with this token name, so it survives a rename
+          unnoticed and stays frozen on the old palette when the accent changes.
+          scripts/check-tokens.mjs fails the build on that literal.",
+        "$extensions": {
+          "com.cadence.legacy-css-var": "--cd-olive",
+          "com.cadence.forbid-literal": ["#B3AC91", "rgba(179, 172, 145"]
+        }
+      },
+      "olive-rgb": {
+        "$type": "string",
+        "$value": "179, 172, 145",
+        "$description": "Bare sRGB channel triple, and the SINGLE input to every
+          translucent accent wash. Compose as rgba(var(--cd-olive-rgb), &lt;alpha&gt;).
+          This is NOT a colour token and must never be used where a colour is expected —
+          it has no alpha and no colour space, and CSS will not accept it as a colour.",
+        "$extensions": {
+          "com.cadence.derived-from": "{color.accent.olive}",
+          "com.cadence.invariant": "Must equal the sRGB channels of accent.olive.
+            Generated, not hand-written — the build derives it so the two cannot drift."
+        }
+      }
+    }
+  }
+}</code></pre>
+
+<h2>semantic.shadow.json（composite type 示範）</h2>
+<pre><code>{
+  "shadow": {
+    "$type": "shadow",
+    "drawer": {
+      "$value": {
+        "color": "#2826206B",
+        "offsetX": { "value": -22, "unit": "px" },
+        "offsetY": { "value": 0,   "unit": "px" },
+        "blur":    { "value": 52,  "unit": "px" },
+        "spread":  { "value": -22, "unit": "px" }
+      },
+      "$description": "Cast leftward by the right-hand drawer onto the page beneath it.
+        The negative X offset is directional and intentional: this token is only correct
+        for a panel entering from the right. A left-entering panel needs a mirrored
+        token, which does not exist yet."
+    }
+  }
+}</code></pre>
+
+<h2>typography.json（字體的固定 passthrough 性質）</h2>
+<pre><code>{
+  "font": {
+    "$type": "fontFamily",
+    "$description": "The product ships exactly two faces (decided 2026-07-31). Fonts are
+      a FIXED PASSTHROUGH: deliberately NOT themeable, and no palette or data-theme may
+      override them. Do not add a font token to a theme file.",
+
+    "ui": {
+      "$value": ["Zen Kaku Gothic New", "sans-serif"],
+      "$description": "Everything that is not the month poster title. Ships
+        300/400/500/700/900 ONLY. There is NO 600 and NO 800 — those weights are
+        synthesised by the browser and render as a smeared fake bold. Use 500 or 700
+        instead of 600, and 700 or 900 instead of 800.",
+      "$extensions": {
+        "com.cadence.available-weights": [300, 400, 500, 700, 900],
+        "com.cadence.forbidden-weights": [100, 200, 600, 800],
+        "com.cadence.themeable": false
+      }
+    },
+
+    "title": {
+      "$value": "{font.ui}",
+      "$description": "DEPRECATED alias. Despite the name it maps to the UI face, NOT the
+        display face: its ~60 call sites are body-level chrome (buttons, field labels,
+        settings rows), not poster titles. Pointing it at the display face would set the
+        entire settings drawer in a single-weight serif with no CJK coverage.
+        Do NOT 'fix' this alias — migrate call sites instead.",
+      "$extensions": { "com.cadence.deprecated": true }
+    }
+  }
+}</code></pre>
+
+<div class="cal ok">
+<b>注意最後那個 description。</b>它不重述值，而是說明何時用、邊界在哪、<b>以及為什麼看起來像 bug 的東西其實是對的</b>。
+這種描述對 AI 的價值遠高於「這是 Zen Kaku 字體」。
+</div>
+</article>
+
+<!-- ===== 推不出來的事 ===== -->
+<article id="s-5">
+<h1>AI 光讀 token 檔推不出來的事</h1>
+<div class="sub">這一節防止「AI 讀完 token 檔就動手，然後全做錯」</div>
+
+<div class="cal warn">
+建議放在 <code>tokens/_meta.json</code>，<b>並在 <code>CLAUDE.md</code> 放一份對應段落</b> ——
+因為 AI agent 讀 <code>CLAUDE.md</code> 的機率高於讀 token 檔。
+</div>
+
+<h2>1. <code>CdMonthGrid.vue</code> 的 JS 鏡像</h2>
+<pre><code>const CELL_METRICS = {
+  desktop: { cellPad: 16, headGap: 3, headH: 26, chipH: 24.5, chipGap: 2 },
+  phone:   { cellPad: 6,  headGap: 1, headH: 22, chipH: 25,   chipGap: 2 }
+} as const</code></pre>
+<p>用來算一格月曆塞得下幾個事件晶片。<b>改 CSS 而不改這裡不會壞、不會報錯、不會有 type error —— 只會安靜地算錯排版。</b></p>
+<div class="cal bad">
+機器讀 token 檔<b>完全看不到這層耦合</b>，因為這些數字在 CSS 裡根本不是 token（<code>padding: 16px</code>、<code>height: 26px</code> 散在 style block 裡）。
+<br><br>
+<b>必須寫下：</b>這些值是 token 的 consumer。若把它們 tokenise，<code>CELL_METRICS</code> 必須從產生的 JS token 匯入，不能繼續手抄。在那之前，任何改動 month cell 幾何的 PR 都必須同時檢查這個常數。
+</div>
+
+<h2>2. 象限色會 persist 到資料庫</h2>
+<p><code>use-theme.ts</code> 的四個 <code>backgroundColor</code> <b>會被寫進 event record 存進資料庫</b>。</p>
+<div class="cal bad">
+<b>必須寫下：</b>這四個值必須維持 literal hex。放 <code>var(--cd-olive)</code> 會把 CSS 語法當資料存進 DB，讀回來是壞掉的字串。
+<br><br>
+<b>還有一個更隱蔽的：</b>已經存進 DB 的舊記錄帶著舊 hex，所以改這四個值<b>不會回溯更新既有資料</b> —— 換色盤會讓新舊 event 顏色不一致。這是 migration 問題，不是 token 問題。
+</div>
+<p>因此 Phase 1 <b>不要</b>由 generator 產生 <code>use-theme.ts</code>。正確做法是 lint：檢查 <code>QUADRANTS</code> 的 hex 與 token 檔一致，不一致就 fail。保住同步性又不動 persist 契約。</p>
+
+<h2>3. Tailwind 與 Sass 的 build-time 天花板</h2>
+<p>兩者<b>都不能讀 runtime CSS custom property</b>。Tailwind v4 的 <code>@theme</code> 需要 build 時的具體值；Sass 變數在編譯期就消失了。</p>
+<div class="cal bad">
+<b>必須寫下：</b>這兩個檔案是 <code>data-theme</code> 切換的天花板。未來加第二套 palette 時，
+<code>var(--cd-*)</code> 會跟著換，但<b>任何 Tailwind utility class 和任何 Sass 變數會凍結在 build 時那套值上</b>。
+<br><br>
+機器讀 token 檔完全看不出這個限制 —— 只會看到三個檔案有相同的值，以為它們等價。
+</div>
+
+<h2>4. Zen Kaku 沒有 600 也沒有 800</h2>
+<table><thead><tr><th>字重</th><th class="n">目前用量</th><th>狀態</th></tr></thead><tbody>
+<tr><td>600</td><td class="n fail">123 處</td><td class="fail">字體沒有，瀏覽器合成</td></tr>
+<tr><td>800</td><td class="n fail">11 處</td><td class="fail">字體沒有，瀏覽器合成</td></tr>
+</tbody></table>
+<div class="cal bad">
+<b>這已經是實際的 bug，不是預防性提醒。</b>合法 weight 只有 300/400/500/700/900。
+<br><br>
+AI 讀 token 檔看到 <code>--cd-font-ui: 'Zen Kaku Gothic New'</code> <b>完全不會知道這件事</b> ——
+font family token 不帶 weight 資訊。這正是 <code>$extensions.available-weights</code> 存在的理由，
+而且應該有一條 lint 規則掃 <code>font-weight: 600|800</code>。
+</div>
+
+<h2>5. 兩個額外發現</h2>
+<ul>
+<li><b><code>--cd-bp-desktop: 900px</code> 是假 token。</b>CSS 變數不能用在 <code>@media</code> query，真正生效的值在 <code>breakpoints.sass</code>。<b>機器會以為改它就能改斷點。</b></li>
+<li><b><code>--cd-olive-mix-2</code>（<code>#6E6A52</code>）與 <code>-mix-3</code>（<code>#6E6A54</code>）差 2 個藍階</b>，肉眼不可分。這是未解決的重複，不是設計意圖 —— 要標註，否則 AI 會嘗試為兩者發明不同的語意角色。</li>
+</ul>
+</article>
+
+<!-- ===== 順序 ===== -->
+<article id="s-6">
+<h1>執行順序</h1>
+<div class="sub">依相依性排序，第 1 步早於任何工具決定</div>
+
+<table><thead><tr><th class="n">#</th><th>步驟</th><th>為什麼是這個順序</th></tr></thead><tbody>
+<tr><td class="n">1</td><td><b>決定 <code>bg</code> 到底是哪個值</b><br><code>#FBFAF7</code> / <code>#F2F1EC</code> / <code>#fafaf9</code></td><td class="fail">資料問題，早於工具選擇。帶著分歧建 JSON 只是把錯的值固化成「唯一真實來源」</td></tr>
+<tr><td class="n">2</td><td>建 <code>tokens/</code> 與 DTCG JSON，從 colour 開始</td><td>最痛的一段，而且無法自動化 —— <code>$description</code> 要人寫</td></tr>
+<tr><td class="n">3</td><td>加 <code>style-dictionary</code> + <code>build:tokens</code> script，產生三個檔並標 <code>DO NOT EDIT</code></td><td>解決已經發生的分歧</td></tr>
+<tr><td class="n">4</td><td>擴充 <code>check-tokens.mjs</code> 讀 <code>$extensions.forbid-literal</code>，加象限 hex 一致性檢查與 <code>font-weight: 600\|800</code> 檢查</td><td>把約束從散文變成能 fail build 的東西</td></tr>
+<tr><td class="n">5</td><td>把「AI 推不出來的事」四項寫進 <code>CLAUDE.md</code></td><td>AI 讀 <code>CLAUDE.md</code> 的機率高於讀 token 檔</td></tr>
+<tr><td class="n">6</td><td>Phase 2 另案：semantic tier、rename、<code>data-theme</code></td><td>rename 尚未定案，綁一起會兩件都做不完</td></tr>
+</tbody></table>
+
+<h2>相關檔案</h2>
+<pre><code>src/css/cadence-tokens.css        唯一 :root，104 個 token
+src/css/app.css                   Tailwind @theme（第二來源）+ 硬寫 body 色
+src/css/quasar.variables.sass     Sass 變數（第三來源）
+src/composables/use-theme.ts      四象限色（第四來源，且 persist 到 DB）
+scripts/check-tokens.mjs          既有的 lint，要擴充
+src/components/ui/CdMonthGrid.vue CELL_METRICS 的 JS 鏡像
+src/css/breakpoints.sass          真正生效的斷點值</code></pre>
+</article>
+
+</main>
+
+<script>
+document.querySelectorAll('#sb a').forEach(function (a) {
+  a.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.querySelectorAll('#sb a').forEach(function (x) { x.classList.remove('on') });
+    document.querySelectorAll('article').forEach(function (x) { x.classList.remove('on') });
+    a.classList.add('on');
+    document.getElementById(a.dataset.t).classList.add('on');
+    window.scrollTo(0, 0);
+  });
+});
+</script>
+</body></html>
