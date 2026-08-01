@@ -48,9 +48,11 @@ const emit = defineEmits<{
   color: var(--cd-ink-muted);
 }
 
+/* Level 1 (flat): no shadow. The accent fill already carries the selected state against
+   a transparent track; a lift on a control that sits flat on the page competes with the
+   overlay shadow, which is the only real elevation signal in the app. */
 .cd-view-switcher__btn--active {
   background: var(--cd-accent);
-  box-shadow: var(--cd-shadow-pill-active);
   font-weight: 700;
   color: var(--cd-on-accent);
 }

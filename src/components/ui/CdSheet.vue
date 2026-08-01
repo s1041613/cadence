@@ -84,7 +84,7 @@ function onSwipeDown(): void {
      `surface` prop; this is just the default every sheet gets. */
   background: #fafaf9;
   border-radius: 22px 22px 0 0;
-  box-shadow: var(--cd-shadow-sheet);
+  box-shadow: var(--cd-shadow-overlay);
   animation-name: cd-sheetUp;
   animation-timing-function: var(--cd-ease-standard);
   display: flex;

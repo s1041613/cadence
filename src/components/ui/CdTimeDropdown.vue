@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 -16px 34px -16px rgba(var(--cd-scrim-rgb), 0.42);
+  box-shadow: var(--cd-shadow-overlay);
   padding: 4px;
   /* Teleported to <body>, so this stacks as a sibling of CdPopover (z-index 50) and CdDrawer
      (z-index 70) rather than nesting inside them — must outrank both to stay visible. */

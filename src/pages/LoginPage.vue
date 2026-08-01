@@ -197,11 +197,12 @@ function signInWithApple(): void {
   width: 20px;
 }
 
+/* Level 1 (flat): no shadow. The border already separates the white button from the
+   page, so the shadow was decoration on something that does not float. */
 .login__oauth-btn--google {
   background: #ffffff;
   color: var(--cd-ink);
   border-color: var(--cd-control-off);
-  box-shadow: var(--cd-shadow-frame);
 }
 
 .login__oauth-btn--google:hover {
