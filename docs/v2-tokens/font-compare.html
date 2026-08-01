@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字體組合比較</title>
+<style>
+@font-face{font-family:'Instrument Serif';src:url('fonts/instrument-serif-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
+@font-face{font-family:'Instrument Serif';src:url('fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:block}
+@font-face{font-family:'JetBrains Mono';src:url('fonts/jetbrains-mono-latin-800-normal.woff2') format('woff2');font-weight:800;font-display:block}
+@font-face{font-family:'Zen Kaku Gothic New';src:url('fonts/zen-kaku-gothic-new-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Zen Kaku Gothic New';src:url('fonts/zen-kaku-gothic-new-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+@font-face{font-family:'Zen Kaku Gothic New';src:url('fonts/zen-kaku-gothic-new-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:block}
+@font-face{font-family:'Inter';src:url('fonts/inter-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:block}
+@font-face{font-family:'Inter';src:url('fonts/inter-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:block}
+@font-face{font-family:'Inter';src:url('fonts/inter-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:block}
+@font-face{font-family:'Inter';src:url('fonts/inter-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:block}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"Segoe UI","Noto Sans TC",sans-serif;color:#1a1a1a;background:#f0f0ee}
+header{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e0e0e0;padding:13px 26px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+h1{font-size:16px;margin:0;letter-spacing:-.01em}
+.hint{font-size:12px;color:#888}
+.ctl{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.ctl label{font-size:11px;color:#777;font-weight:600}
+.sw{display:flex;background:#f0f0f0;border-radius:7px;padding:3px}
+.sw button{border:none;background:none;padding:6px 12px;border-radius:5px;font-size:12px;cursor:pointer;color:#666;font-weight:600;font-family:inherit}
+.sw button.on{background:#fff;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.13)}
+
+main{padding:24px 26px 80px}
+.panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:22px;max-width:1240px}
+.panel{background:#fff;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.phead{margin-bottom:14px}
+.ptitle{font-size:15px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.badge{font:600 9.5px 'JetBrains Mono',monospace;letter-spacing:.09em;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:#eee;color:#666}
+.badge.a{background:#e7f0fa;color:#2b6cb0}
+.badge.b{background:#eaf5f2;color:#2e8a7d}
+.badge.now{background:#f5efe2;color:#8a7040}
+.psub{font-size:12px;color:#888;margin-top:5px;line-height:1.6}
+.fonts{font-size:11px;color:#999;margin-top:7px;font-family:ui-monospace,Menlo,monospace;line-height:1.7}
+.fonts b{color:#555}
+
+/* ---------- phone ---------- */
+.phone{background:#FBFAF7;border:1px solid #E5E3DB;border-radius:16px;overflow:hidden;margin-top:14px}
+.chips{display:flex;gap:9px;padding:14px 15px 0}
+.chip{background:#B3AC91;color:#3f4136;border-radius:999px;padding:8px 14px;font-weight:700;font-size:11px;letter-spacing:.06em}
+.chip.off{background:#EEECE4;color:#6E7176}
+.poster{display:flex;flex-direction:column;align-items:center;padding:14px 0 6px}
+.pmonth{font-style:italic;font-weight:400;font-size:52px;line-height:.9;color:#56585E;-webkit-text-stroke:.6px #56585E}
+.pyear{margin-top:9px;font-weight:600;font-size:12px;letter-spacing:.16em;color:#9C9E94}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);padding:8px 12px 6px;border-bottom:1.5px solid #56585E;margin:0 8px}
+.dow span{font-weight:600;font-size:9.5px;letter-spacing:.03em;color:#9C9E94}
+.dow span:first-child{color:#C0564B}
+.dow span:last-child{color:#3A6EA5}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);margin:0 8px 8px;border-left:1px solid #EEECE4;border-top:1px solid #EEECE4}
+.cell{border-right:1px solid #EEECE4;border-bottom:1px solid #EEECE4;min-height:76px;padding:4px 3px 5px}
+.num{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 4px;border-radius:999px;font-weight:700;font-size:14px;color:#56585E}
+.num.today{background:#B3AC91;color:#3f4136}
+.num.sat{color:#3A6EA5}
+.num.sun{color:#C0564B}
+.num.out{color:#C9C8BE}
+.ev{display:block;margin-top:2px;border:1px solid;border-radius:5px;padding:1px 4px;font-weight:600;font-size:9.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev.solid{color:#fff!important}
+.more{font-weight:500;font-size:9px;color:#9C9E94;margin-top:2px;display:block;padding-left:3px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);background:#F2F1EC;border-top:1px solid #E5E3DB;padding:11px 0 13px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px}
+.nav .g{width:30px;height:30px;display:grid;place-items:center;font-size:17px;border-radius:50%;color:#6E7176}
+.nav .g.on{background:#B3AC91;color:#3f4136}
+.nav .l{font-weight:600;font-size:8.5px;letter-spacing:.1em;color:#9C9E94}
+.nav .l.on{color:#56585E}
+
+/* ---------- 字體指派：A 組（Serif + Mono） ---------- */
+.fa .pmonth{font-family:'Instrument Serif',serif}
+.fa .pyear,.fa .dow span,.fa .num,.fa .more,.fa .chip,.fa .nav .l{font-family:'JetBrains Mono',monospace}
+.fa .ev{font-family:'JetBrains Mono',monospace}
+.fa .nav .g{font-family:'Instrument Serif',serif;font-style:italic}
+
+/* ---------- 字體指派：B 組（Serif + Zen Kaku） ---------- */
+.fb .pmonth{font-family:'Instrument Serif',serif}
+.fb .pyear,.fb .dow span,.fb .num,.fb .more,.fb .chip,.fb .nav .l{font-family:'Zen Kaku Gothic New',sans-serif}
+.fb .ev{font-family:'Zen Kaku Gothic New',sans-serif}
+.fb .nav .g{font-family:'Instrument Serif',serif;font-style:italic}
+
+/* ---------- 現況參考：三種混用 ---------- */
+.fc .pmonth{font-family:'Instrument Serif',serif}
+.fc .pyear,.fc .dow span,.fc .num,.fc .more,.fc .chip,.fc .nav .l{font-family:'JetBrains Mono',monospace}
+.fc .ev{font-family:'Zen Kaku Gothic New',sans-serif}
+.fc .nav .g{font-family:'Instrument Serif',serif;font-style:italic}
+
+/* ---------- 放大檢視 ---------- */
+.zoom{background:#fff;border-radius:14px;padding:20px 22px;margin-top:24px;box-shadow:0 2px 10px rgba(0,0,0,.06);max-width:1240px}
+.zoom h2{font-size:15px;margin:0 0 4px}
+.zoom .zs{font-size:12.5px;color:#888;margin:0 0 16px;line-height:1.65}
+.zrow{display:grid;grid-template-columns:88px 1fr 1fr;gap:16px;align-items:center;padding:13px 0;border-top:1px solid #f0f0f0}
+.zrow:first-of-type{border-top:none}
+.zlbl{font-size:11px;color:#888;font-weight:600;line-height:1.5}
+.zlbl i{display:block;font-style:normal;font-size:10px;color:#bbb;font-family:ui-monospace,Menlo,monospace;margin-top:2px}
+.za,.zb{padding:9px 12px;border-radius:8px;background:#FBFAF7;border:1px solid #EEECE4}
+.zbig{font-size:30px;line-height:1.1;color:#56585E}
+.zmid{font-size:17px;color:#56585E}
+.zsm{font-size:12px;color:#56585E}
+.ztag{font:600 9px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#aaa;display:block;margin-bottom:6px}
+
+.cal{border-radius:8px;padding:12px 15px;margin:18px 0 0;font-size:13.5px;line-height:1.75;max-width:1240px}
+.info{background:#eef4fb;border-left:3px solid #2b6cb0}
+.warn{background:#fff8e6;border-left:3px solid #d99e00}
+@media(max-width:760px){.zrow{grid-template-columns:1fr}main{padding:18px 14px 60px}header{padding:11px 14px}}
+</style></head>
+<body>
+
+<header>
+  <h1>字體組合比較</h1>
+  <span class="hint">同一個版型、同一組 v1 顏色，只有字體不同</span>
+  <div class="ctl">
+    <label>事件字重</label>
+    <div class="sw" id="w">
+      <button data-w="500">500</button>
+      <button data-w="600" class="on">600</button>
+      <button data-w="700">700</button>
+    </div>
+    <label>日期字重</label>
+    <div class="sw" id="n">
+      <button data-n="600">600</button>
+      <button data-n="700" class="on">700</button>
+      <button data-n="800">800</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<div class="panels" id="panels"></div>
+
+<div class="zoom">
+  <h2>放大對照</h2>
+  <p class="zs">同樣的內容，左邊 JetBrains Mono、右邊 Zen Kaku Gothic New。標題（Instrument Serif）兩組相同，所以不列。</p>
+  <div id="zoomrows"></div>
+</div>
+
+<div class="cal info">
+<b>兩組的實際差別在哪。</b>標題都是 Instrument Serif，所以差異全在「數字和小字」這一層：
+<br><br>
+<b>A 組（Mono）</b>的數字等寬，日期在格子裡會嚴格對齊，1 和 7 佔一樣寬。小寫字母帶點技術感，星期列和底部標籤讀起來像標籤而非文字。
+<br><br>
+<b>B 組（Zen Kaku）</b>的數字是比例寬度，1 比 8 窄，日期對齊會鬆一些。整體更接近一般 UI 字體，中日文字形支援完整（Zen Kaku 本來就是日文字體）。
+</div>
+
+<div class="cal warn">
+<b>一個要注意的：Zen Kaku 沒有 600 字重。</b>它只有 300/400/500/700/900。設 600 會由瀏覽器合成，或直接落到 500 或 700。
+上面切到 600 時 B 組看起來會跟 500 或 700 一樣 —— 這不是渲染錯誤，是字體本身就沒有那一階。A 組的 JetBrains Mono 則 400 到 800 都有。
+</div>
+
+</main>
+
+<script>
+var EV = {plan:'#6E839B', do:'#C56A5E', quick:'#BFA86A', later:'#9A988F', ev:'#4A8B85'};
+var CELLS = [
+  {n:28,out:1},{n:29,out:1},{n:30,out:1},
+  {n:1,e:[['Standup','plan']]},
+  {n:2,e:[['Design review','do'],['Gym','later']]},
+  {n:3,e:[['Ship v2 nav','do']]},
+  {n:4,sat:1},
+  {n:5,sun:1},
+  {n:6,e:[['1:1 Priya','plan'],['Groceries','quick']]},
+  {n:7},
+  {n:8,e:[['Offsite','quick',1],['Retro','plan']],more:2},
+  {n:9,e:[['Offsite','quick',1]]},
+  {n:10},{n:11,sat:1},
+  {n:12,sun:1},
+  {n:13,e:[['Token audit','do']]},
+  {n:14},
+  {n:15,today:1,e:[['Release 2.1','quick',1],['QA pass','do']]},
+  {n:16},
+  {n:17,e:[['Flight LHR','ev',1]]},
+  {n:18,sat:1}
+];
+
+function cellHtml(c){
+  var cls = 'num' + (c.today?' today':'') + (c.sat?' sat':'') + (c.sun?' sun':'') + (c.out?' out':'');
+  var h = '<div class="cell"><span class="'+cls+'">'+c.n+'</span>';
+  (c.e||[]).forEach(function(e){
+    var col = EV[e[1]];
+    var st = e[2] ? 'background:'+col+';border-color:'+col+';' : 'color:'+col+';border-color:'+col+';background:transparent;';
+    h += '<span class="ev'+(e[2]?' solid':'')+'" style="'+st+'">'+e[0]+'</span>';
+  });
+  if(c.more) h += '<span class="more">+'+c.more+'</span>';
+  return h+'</div>';
+}
+
+function phone(fcls){
+  var g = CELLS.map(cellHtml).join('');
+  return '<div class="phone '+fcls+'">'+
+    '<div class="chips"><span class="chip">#My Calendar</span><span class="chip off">#Share</span></div>'+
+    '<div class="poster"><span class="pmonth">July</span><span class="pyear">2026</span></div>'+
+    '<div class="dow"><span>sun</span><span>mon</span><span>tue</span><span>wed</span><span>thu</span><span>fri</span><span>sat</span></div>'+
+    '<div class="grid">'+g+'</div>'+
+    '<div class="nav">'+
+      '<div><span class="g on">m</span><span class="l on">MONTH</span></div>'+
+      '<div><span class="g">w</span><span class="l">WEEK</span></div>'+
+      '<div><span class="g">d</span><span class="l">DRAFT</span></div>'+
+      '<div><span class="g">s</span><span class="l">SETTING</span></div>'+
+    '</div></div>';
+}
+
+var PANELS = [
+  {cls:'fa', badge:'a', tag:'A 組', title:'Serif + Mono',
+   sub:'標題用 Instrument Serif，其餘全部 JetBrains Mono（含事件文字）。',
+   fonts:'<b>標題</b> Instrument Serif italic<br><b>其他全部</b> JetBrains Mono'},
+  {cls:'fb', badge:'b', tag:'B 組', title:'Serif + Zen Kaku',
+   sub:'標題用 Instrument Serif，其餘全部 Zen Kaku Gothic New（含日期數字）。',
+   fonts:'<b>標題</b> Instrument Serif italic<br><b>其他全部</b> Zen Kaku Gothic New'},
+  {cls:'fc', badge:'now', tag:'參考', title:'現況（三種混用）',
+   sub:'目前 mockup 的樣子：數字用 Mono、事件用 Zen Kaku。放這裡當基準比較。',
+   fonts:'<b>標題</b> Instrument Serif italic<br><b>數字/標籤</b> JetBrains Mono<br><b>事件</b> Zen Kaku Gothic New'}
+];
+
+document.getElementById('panels').innerHTML = PANELS.map(function(p){
+  return '<div class="panel"><div class="phead">'+
+    '<div class="ptitle">'+p.title+' <span class="badge '+p.badge+'">'+p.tag+'</span></div>'+
+    '<div class="psub">'+p.sub+'</div>'+
+    '<div class="fonts">'+p.fonts+'</div></div>'+
+    phone(p.cls)+'</div>';
+}).join('');
+
+var ZR = [
+  {l:'日期數字', i:'700 · 21px', c:'zbig', a:'12 18 30', b:'12 18 30'},
+  {l:'年份', i:'600 · 17px<br>letter-spacing .16em', c:'zmid', a:'<span style="letter-spacing:.16em">2026</span>', b:'<span style="letter-spacing:.16em">2026</span>'},
+  {l:'星期列', i:'600 · 17px', c:'zmid', a:'sun mon tue wed', b:'sun mon tue wed'},
+  {l:'事件文字', i:'600 · 12px', c:'zsm', a:'Design review · Ship v2 nav', b:'Design review · Ship v2 nav'},
+  {l:'導覽標籤', i:'600 · 12px<br>letter-spacing .1em', c:'zsm', a:'<span style="letter-spacing:.1em">MONTH WEEK DRAFT</span>', b:'<span style="letter-spacing:.1em">MONTH WEEK DRAFT</span>'},
+  {l:'中日文', i:'600 · 17px', c:'zmid', a:'行事曆 七月 週一', b:'行事曆 七月 週一'}
+];
+document.getElementById('zoomrows').innerHTML = ZR.map(function(r){
+  return '<div class="zrow"><div class="zlbl">'+r.l+'<i>'+r.i+'</i></div>'+
+    '<div class="za"><span class="ztag">JetBrains Mono</span><div class="'+r.c+'" style="font-family:\'JetBrains Mono\',monospace;font-weight:600">'+r.a+'</div></div>'+
+    '<div class="zb"><span class="ztag">Zen Kaku Gothic New</span><div class="'+r.c+'" style="font-family:\'Zen Kaku Gothic New\',sans-serif;font-weight:600">'+r.b+'</div></div></div>';
+}).join('');
+
+function bind(id, prop, apply){
+  document.querySelectorAll('#'+id+' button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#'+id+' button').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on');
+      apply(b.dataset[prop]);
+    });
+  });
+}
+bind('w','w',function(v){
+  document.querySelectorAll('.ev').forEach(function(e){e.style.fontWeight=v});
+});
+bind('n','n',function(v){
+  document.querySelectorAll('.num').forEach(function(e){e.style.fontWeight=v});
+});
+</script>
+</body></html>
