@@ -8,21 +8,21 @@
       </button>
       <div v-if="variant !== 'month'" class="cd-date-poster__nav cd-date-poster__nav--inline">
         <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">
-          <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+          <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-secondary)" />
         </button>
         <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
         <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">
-          <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-2)" />
+          <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-secondary)" />
         </button>
       </div>
     </div>
     <div class="cd-date-poster__nav" :class="{ 'cd-date-poster__nav--phone-only': variant !== 'month' }">
       <button type="button" class="cd-date-poster__chev" aria-label="Previous" @click="emit('prev')">
-        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-secondary)" />
       </button>
       <button type="button" class="cd-date-poster__today" @click="emit('today')">{{ todayLabel }}</button>
       <button type="button" class="cd-date-poster__chev" aria-label="Next" @click="emit('next')">
-        <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-right" :size="17" color="var(--cd-ink-secondary)" />
       </button>
     </div>
     <div v-if="$slots.extra" class="cd-date-poster__extra">
@@ -72,7 +72,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 
 .cd-date-poster--week,
 .cd-date-poster--day {
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
 }
 
 .cd-date-poster__left {
@@ -85,7 +85,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   font: 700 17px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-date-poster__title {
@@ -117,7 +117,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster__caret {
-  color: var(--cd-olive);
+  color: var(--cd-accent);
   font-size: 22px;
   transform: translateY(-2px);
 }
@@ -210,7 +210,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   background: transparent;
   border-radius: 8px;
   cursor: pointer;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   font-size: 17px;
   line-height: 1;
   transition: background var(--cd-duration-micro-3);
@@ -229,7 +229,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   background: transparent;
   cursor: pointer;
   font: 700 12.5px var(--cd-font-ui);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   padding: 4px 10px;
   border-radius: 8px;
   transition: background var(--cd-duration-micro-3);

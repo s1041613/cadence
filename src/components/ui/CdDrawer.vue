@@ -71,7 +71,7 @@ const emit = defineEmits<{
   top: 14px;
   right: 14px;
   bottom: 14px;
-  background: var(--cd-editor-card);
+  background: var(--cd-surface-inset);
   border-radius: var(--cd-radius-drawer);
   box-shadow: var(--cd-shadow-drawer);
   animation: cd-drawerIn var(--cd-duration-drawer) var(--cd-ease-standard);
@@ -81,7 +81,7 @@ const emit = defineEmits<{
 }
 
 .cd-drawer--non-modal {
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   pointer-events: auto;
 }
 

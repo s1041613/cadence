@@ -48,7 +48,7 @@
     v-else-if="draft"
     :presentation="isDesktop ? 'drawer' : 'sheet'"
     :width="editorWidth"
-    scrim-color="var(--cd-scrim-strong)"
+    scrim-color="var(--cd-scrim)"
     :raised="!!ui.draftConv"
     @scrim-click="close"
     @dismiss="close"

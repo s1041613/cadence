@@ -54,7 +54,7 @@ const blockStyle = computed(() => ({
   right: props.right,
   zIndex: 3 + props.lane,
   borderLeft: `3px solid ${props.color}`,
-  background: props.active ? props.color : `color-mix(in srgb, ${props.color} 13%, var(--cd-surface))`,
+  background: props.active ? props.color : `color-mix(in srgb, ${props.color} 13%, var(--cd-surface-raised))`,
   color: props.active ? '#fff' : 'var(--cd-ink)'
 }))
 </script>

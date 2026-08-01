@@ -68,7 +68,7 @@
       @start-focus="startFocus"
     />
   </CdPopover>
-  <CdDrawerOrSheet v-else-if="ui.eventPreview && task" presentation="sheet" scrim-color="var(--cd-scrim-mid)" @scrim-click="close" @dismiss="close">
+  <CdDrawerOrSheet v-else-if="ui.eventPreview && task" presentation="sheet" scrim-color="var(--cd-scrim)" @scrim-click="close" @dismiss="close">
     <CdCopyToDaysCard
       v-if="copyMode"
       :month-label="copyMonthLabel"

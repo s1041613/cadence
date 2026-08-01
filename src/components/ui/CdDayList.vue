@@ -58,7 +58,7 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
 }
 
 .cd-day-list__header {
@@ -79,7 +79,7 @@ const emit = defineEmits<{
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-day-list__date {
@@ -95,7 +95,7 @@ const emit = defineEmits<{
   border: none;
   background: transparent;
   cursor: pointer;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   border-radius: var(--cd-radius-pill);
   display: grid;
   place-items: center;
@@ -145,13 +145,13 @@ const emit = defineEmits<{
 .cd-day-list__row-time {
   font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   flex: none;
 }
 
 .cd-day-list__empty {
   font: 700 14px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   font-style: italic;
   padding: 14px 10px;
 }

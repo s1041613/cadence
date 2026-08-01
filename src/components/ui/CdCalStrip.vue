@@ -80,7 +80,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   padding: 11px 10px 11px 18px;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
 }
 
 @media (max-width: 899px) {

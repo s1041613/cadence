@@ -79,7 +79,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 <style scoped>
 .cd-week-agenda {
   padding: 6px 18px 18px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -116,11 +116,11 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__badge:hover {
-  background: rgba(var(--cd-olive-rgb), 0.12);
+  background: rgba(var(--cd-accent-rgb), 0.12);
 }
 
 .cd-week-agenda__badge:active {
-  background: rgba(var(--cd-olive-rgb), 0.3);
+  background: rgba(var(--cd-accent-rgb), 0.3);
 }
 
 .cd-week-agenda__num {
@@ -133,17 +133,17 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 }
 
 .cd-week-agenda__num--sat {
-  color: var(--cd-sat);
+  color: var(--cd-weekday-saturday);
 }
 
 .cd-week-agenda__num--sun {
-  color: var(--cd-sun);
+  color: var(--cd-weekday-sunday);
 }
 
 .cd-week-agenda__num--today {
   font-weight: 700;
-  background: var(--cd-olive);
-  color: var(--cd-olive-ink);
+  background: var(--cd-accent);
+  color: var(--cd-on-accent);
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -158,7 +158,7 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
   font: 700 11.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin-top: 5px;
 }
 
@@ -212,17 +212,17 @@ function sortedEvents(events: MonthAgendaEvent[]): MonthAgendaEvent[] {
 .cd-week-agenda__time {
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   flex: none;
 }
 
 .cd-week-agenda__time--allday {
-  color: var(--cd-sun);
+  color: var(--cd-weekday-sunday);
 }
 
 .cd-week-agenda__empty {
   font: 400 12px var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   font-style: italic;
   padding: 5px 0;
 }

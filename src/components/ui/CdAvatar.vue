@@ -43,7 +43,7 @@ const initials = computed(() =>
   cursor: pointer;
   display: grid;
   place-items: center;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   overflow: visible;
 }
 
@@ -68,6 +68,6 @@ const initials = computed(() =>
   height: 11px;
   border-radius: 50%;
   background: #c0564b;
-  border: 2px solid var(--cd-topbar);
+  border: 2px solid var(--cd-surface-page);
 }
 </style>

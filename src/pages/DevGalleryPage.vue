@@ -193,7 +193,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 }
 
 .gallery__note {
-  color: var(--cd-muted, #9c9e94);
+  color: var(--cd-ink-muted, #9c9e94);
   margin: 0 0 32px;
 }
 
@@ -205,7 +205,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--cd-ink-2, #6e7176);
+  color: var(--cd-ink-secondary, #6e7176);
   margin: 0 0 16px;
 }
 
@@ -234,7 +234,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 
 .gallery__icon-label {
   font-size: 10px;
-  color: var(--cd-muted, #9c9e94);
+  color: var(--cd-ink-muted, #9c9e94);
   text-align: center;
   word-break: break-word;
 }
@@ -281,7 +281,7 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
 
 .gallery__demo-btn {
   border: 1px solid var(--cd-line, #e5e3db);
-  background: var(--cd-surface, #fbfaf7);
+  background: var(--cd-surface-raised, #fbfaf7);
   border-radius: var(--cd-radius-chip, 7px);
   padding: 8px 14px;
   cursor: pointer;

@@ -133,7 +133,7 @@ const eyebrowLabel = computed(() => {
 .cd-preview-card {
   width: 370px;
   background: #fff;
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-preview);
   overflow: hidden;
   display: flex;
@@ -162,7 +162,7 @@ const eyebrowLabel = computed(() => {
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--cd-olive);
+  color: var(--cd-accent);
 }
 
 .cd-preview-card__actions {
@@ -180,14 +180,14 @@ const eyebrowLabel = computed(() => {
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   cursor: pointer;
   color: var(--cd-ink);
   transition: background var(--cd-duration-micro-3);
 }
 
 .cd-preview-card__close:hover {
-  background: var(--cd-line-4);
+  background: var(--cd-line);
 }
 
 .cd-preview-card__title-row {
@@ -221,7 +221,7 @@ const eyebrowLabel = computed(() => {
 
 .cd-preview-card__when {
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-preview-card__divider {
@@ -268,15 +268,15 @@ const eyebrowLabel = computed(() => {
   margin-left: auto;
   font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-preview-card__info-row--muted {
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-preview-card__managed {
-  border-top: 1px solid var(--cd-line-4);
+  border-top: 1px solid var(--cd-line);
 }
 
 .cd-preview-card__managed-head {
@@ -294,7 +294,7 @@ const eyebrowLabel = computed(() => {
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   flex: none;
 }
 
@@ -356,6 +356,6 @@ const eyebrowLabel = computed(() => {
 .cd-preview-card__managed-note {
   margin: 0;
   font: 700 12px var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 </style>

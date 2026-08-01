@@ -9,11 +9,11 @@
 
     <div class="cd-copy-card__month-row">
       <button type="button" class="cd-copy-card__nav" aria-label="Previous month" @click="emit('prevMonth')">
-        <CdIcon name="chevron-left" :size="16" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-left" :size="16" color="var(--cd-ink-secondary)" />
       </button>
       <span class="cd-copy-card__month-label">{{ monthLabel }}</span>
       <button type="button" class="cd-copy-card__nav" aria-label="Next month" @click="emit('nextMonth')">
-        <CdIcon name="chevron-right" :size="16" color="var(--cd-ink-2)" />
+        <CdIcon name="chevron-right" :size="16" color="var(--cd-ink-secondary)" />
       </button>
     </div>
 
@@ -76,7 +76,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 .cd-copy-card {
   width: 320px;
   background: #fff;
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   border-radius: var(--cd-radius-preview);
   padding: 16px 18px 18px;
   display: flex;
@@ -109,7 +109,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   height: 26px;
   border-radius: 50%;
   border: none;
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   cursor: pointer;
   color: var(--cd-ink);
   display: flex;
@@ -129,7 +129,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   background: transparent;
   cursor: pointer;
   font-size: 16px;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   width: 24px;
   height: 24px;
   display: flex;
@@ -152,7 +152,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 .cd-copy-card__dow {
   text-align: center;
   font: 700 11px var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-copy-card__grid {
@@ -178,16 +178,16 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 }
 
 .cd-copy-card__cell--selected {
-  background: var(--cd-topbar);
-  box-shadow: inset 0 0 0 1px rgba(var(--cd-olive-rgb), 0.42);
+  background: var(--cd-surface-page);
+  box-shadow: inset 0 0 0 1px rgba(var(--cd-accent-rgb), 0.42);
 }
 
 .cd-copy-card__cell--selected:hover {
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
 }
 
 .cd-copy-card__cell--selected .cd-copy-card__num {
-  color: var(--cd-olive-ink);
+  color: var(--cd-on-accent);
   font-weight: 700;
 }
 
@@ -207,17 +207,17 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   align-items: center;
   justify-content: space-between;
   padding-top: 6px;
-  border-top: 1px solid var(--cd-line-4);
+  border-top: 1px solid var(--cd-line);
 }
 
 .cd-copy-card__count {
   font: 700 12.5px var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-copy-card__confirm {
   border: none;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   color: #fff;
   font: 700 13px var(--cd-font-ui);
   border-radius: 10px;

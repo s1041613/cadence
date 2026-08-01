@@ -83,7 +83,7 @@ function signInWithApple(): void {
 /* 首繪 viewport 短缺（iOS standalone 少算 status bar）露出的是 body 底色；
    在登入頁把 body 染成 panel 同色，讓任何 viewport 抖動的露出帶隱形 */
 :global(body:has(.login)) {
-  background: var(--cd-inbox-paper);
+  background: var(--cd-surface-raised);
 }
 
 .login {
@@ -92,7 +92,7 @@ function signInWithApple(): void {
   display: flex;
   justify-content: center;
   /* 與 panel 同色：frame 高度被 cap 或 viewport 短缺時，露出帶與 panel 無色差 */
-  background: var(--cd-inbox-paper);
+  background: var(--cd-surface-raised);
 }
 
 .login__frame {
@@ -133,13 +133,13 @@ function signInWithApple(): void {
 .login__subtitle {
   margin-top: 10px;
   font: 400 var(--cd-fs-15) var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 /* ---------- Panel ---------- */
 .login__panel {
   flex: 3;
-  background: var(--cd-inbox-paper);
+  background: var(--cd-surface-raised);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -150,7 +150,7 @@ function signInWithApple(): void {
 .login__label {
   margin: 0 0 16px;
   font: 400 var(--cd-fs-12) var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 /* ---------- OAuth buttons ---------- */
@@ -200,7 +200,7 @@ function signInWithApple(): void {
 .login__oauth-btn--google {
   background: #ffffff;
   color: var(--cd-ink);
-  border-color: var(--cd-line-2);
+  border-color: var(--cd-control-off);
   box-shadow: var(--cd-shadow-frame);
 }
 
@@ -226,12 +226,12 @@ function signInWithApple(): void {
 .login__fineprint {
   margin: 6px 0 0;
   font: 400 var(--cd-fs-11) var(--cd-font-ui);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   text-align: center;
 }
 
 .login__fineprint a {
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   text-decoration: underline;
 }
 
@@ -249,6 +249,6 @@ function signInWithApple(): void {
   width: 134px;
   height: 5px;
   border-radius: var(--cd-radius-pill);
-  background: var(--cd-scrim-strong);
+  background: var(--cd-scrim);
 }
 </style>

@@ -49,9 +49,9 @@ const emit = defineEmits<{
 }
 
 .cd-view-switcher__btn--active {
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   box-shadow: var(--cd-shadow-pill-active);
   font-weight: 700;
-  color: var(--cd-olive-ink);
+  color: var(--cd-on-accent);
 }
 </style>

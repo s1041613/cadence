@@ -43,7 +43,7 @@ function fromSelectValue(value: string): ReminderPreset | null {
   align-items: center;
   min-height: 30px;
   max-width: 100%;
-  border: 1px solid var(--cd-line-4);
+  border: 1px solid var(--cd-line);
   border-radius: 999px;
   background: #fff;
   color: var(--cd-ink);
@@ -54,8 +54,8 @@ function fromSelectValue(value: string): ReminderPreset | null {
 }
 
 .cd-reminder-pill:hover {
-  background: var(--cd-topbar);
-  border-color: rgba(var(--cd-olive-rgb), 0.46);
+  background: var(--cd-surface-page);
+  border-color: rgba(var(--cd-accent-rgb), 0.46);
 }
 
 .cd-reminder-pill__text {

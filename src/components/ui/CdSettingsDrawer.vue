@@ -12,13 +12,13 @@
           aria-label="Back"
           @click="emit('back')"
         >
-          <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-2)" />
+          <CdIcon name="chevron-left" :size="17" color="var(--cd-ink-secondary)" />
         </button>
         <span class="cd-settings__title" :class="{ 'cd-settings__title--root': activePane === 'root' }">{{ paneTitle }}</span>
         <!-- Zoe's 2026-07-11 correction: mobile-first — no close button on phone sheets, header
              swipe-down dismisses instead. -->
         <button v-if="!sheetMode" type="button" class="cd-settings__icon-btn" aria-label="Close" @click="emit('close')">
-          <CdIcon name="close" :size="17" color="var(--cd-muted)" />
+          <CdIcon name="close" :size="17" color="var(--cd-ink-muted)" />
         </button>
       </div>
 
@@ -32,42 +32,42 @@
                 <div class="cd-settings__account-name">{{ accountName }}</div>
                 <div class="cd-settings__account-email">{{ email }}</div>
               </div>
-              <CdIcon name="chevron-right" :size="16" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="16" color="var(--cd-ink-muted)" />
             </button>
           </div>
 
           <span class="cd-settings__micro-label">PREFERENCES</span>
           <div class="cd-settings__group">
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'calendars')">
-              <span class="cd-settings__row-icon"><CdIcon name="calendar" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="calendar" :size="20" color="var(--cd-ink-secondary)" /></span>
               <span class="cd-settings__row-label">Calendars</span>
-              <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
             </button>
             <div class="cd-settings__divider" />
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'time')">
-              <span class="cd-settings__row-icon"><CdIcon name="clock" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="clock" :size="20" color="var(--cd-ink-secondary)" /></span>
               <span class="cd-settings__row-label">Time</span>
-              <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
             </button>
             <div class="cd-settings__divider" />
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'customization')">
-              <span class="cd-settings__row-icon"><CdIcon name="image" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="image" :size="20" color="var(--cd-ink-secondary)" /></span>
               <span class="cd-settings__row-label">Customization</span>
-              <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
             </button>
             <div class="cd-settings__divider" />
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'notifications')">
-              <span class="cd-settings__row-icon"><CdIcon name="bell" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="bell" :size="20" color="var(--cd-ink-secondary)" /></span>
               <span class="cd-settings__row-label">Notifications</span>
-              <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
             </button>
           </div>
 
           <div class="cd-settings__group">
             <button type="button" class="cd-settings__row" @click="emit('navigate', 'privacy')">
-              <span class="cd-settings__row-icon"><CdIcon name="shield" :size="20" color="var(--cd-ink-2)" /></span>
+              <span class="cd-settings__row-icon"><CdIcon name="shield" :size="20" color="var(--cd-ink-secondary)" /></span>
               <span class="cd-settings__row-label">Privacy</span>
-              <CdIcon name="chevron-right" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="chevron-right" :size="15" color="var(--cd-ink-muted)" />
             </button>
             <div class="cd-settings__divider" />
             <button type="button" class="cd-settings__row cd-settings__row--danger" @click="emit('logout')">
@@ -126,7 +126,7 @@
           <p v-if="gcalConnected" class="cd-settings__note">Cadence reads and writes events on these calendars. Turn off to stop syncing.</p>
           <div v-else class="cd-settings__gcal-connect-wrap">
             <button type="button" class="cd-settings__gcal-connect-btn" @click="gcalStep = 'consent'">
-              <CdIcon name="calendar" :size="18" color="var(--cd-olive)" />
+              <CdIcon name="calendar" :size="18" color="var(--cd-accent)" />
               Connect Google Calendar
             </button>
           </div>
@@ -187,7 +187,7 @@
                   </span>
                 </span>
                 <span class="cd-settings__theme-tile-label" :class="{ 'cd-settings__theme-tile-label--selected': theme === tile.key }">
-                  <CdIcon v-if="theme === tile.key" name="check" :size="13" color="var(--cd-olive)" :stroke-width="2.4" />
+                  <CdIcon v-if="theme === tile.key" name="check" :size="13" color="var(--cd-accent)" :stroke-width="2.4" />
                   {{ tile.key }}
                 </span>
               </button>
@@ -227,7 +227,7 @@
                 <span class="cd-settings__month-photo-badge">{{ label }}</span>
                 <button type="button" class="cd-settings__month-photo-drop" @click="monthPhotoInputs[i]?.click()">
                   <img v-if="props.monthlyPhotos[i]" :src="props.monthlyPhotos[i]!" alt="" class="cd-settings__month-photo-img" />
-                  <CdIcon v-else name="image" :size="18" color="var(--cd-muted)" />
+                  <CdIcon v-else name="image" :size="18" color="var(--cd-ink-muted)" />
                 </button>
                 <div class="cd-settings__month-photo-action">
                   or
@@ -350,7 +350,7 @@
             </span>
             <div v-if="isDraftOwner" class="cd-settings__cal-cover-actions">
               <button type="button" class="cd-settings__cal-cover-btn" @click="coverInput?.click()">
-                <CdIcon name="image" :size="16" color="var(--cd-muted)" />
+                <CdIcon name="image" :size="16" color="var(--cd-ink-muted)" />
                 {{ draftCover ? 'Change photo' : 'Choose file' }}
               </button>
               <button v-if="draftCover" type="button" class="cd-settings__cal-cover-remove" @click="draftCover = null">Remove</button>
@@ -376,7 +376,7 @@
               </div>
             </div>
             <button v-if="draftEditId && isDraftOwner" type="button" class="cd-settings__member-invite-btn" @click="openInvite">
-              <CdIcon name="plus" :size="15" color="var(--cd-muted)" />
+              <CdIcon name="plus" :size="15" color="var(--cd-ink-muted)" />
               Invite friends
             </button>
           </div>
@@ -409,14 +409,14 @@
       </div>
 
       <div v-if="gcalStep === 'consent'" class="cd-settings__gcal-overlay">
-        <CdScrim color="var(--cd-scrim-strong)" @click="gcalStep = 'idle'" />
+        <CdScrim color="var(--cd-scrim)" @click="gcalStep = 'idle'" />
         <div class="cd-settings__gcal-modal">
           <div class="cd-settings__gcal-modal-badge"><span class="cd-settings__g-badge cd-settings__g-badge--48">G</span></div>
           <div class="cd-settings__gcal-modal-title">Connect Google Calendar</div>
           <div class="cd-settings__gcal-modal-sub">Use &ldquo;{{ email }}&rdquo; to let Cadence:</div>
           <div class="cd-settings__gcal-perms">
             <div v-for="perm in GCAL_PERMISSIONS" :key="perm.label" class="cd-settings__gcal-perm">
-              <span class="cd-settings__gcal-perm-icon"><CdIcon :name="perm.icon" :size="16" color="var(--cd-olive)" /></span>
+              <span class="cd-settings__gcal-perm-icon"><CdIcon :name="perm.icon" :size="16" color="var(--cd-accent)" /></span>
               <span class="cd-settings__gcal-perm-label">{{ perm.label }}</span>
             </div>
           </div>
@@ -428,7 +428,7 @@
       </div>
 
       <div v-if="gcalStep === 'syncing'" class="cd-settings__gcal-overlay">
-        <CdScrim color="var(--cd-scrim-strong)" @click="gcalStep = 'idle'" />
+        <CdScrim color="var(--cd-scrim)" @click="gcalStep = 'idle'" />
         <div class="cd-settings__gcal-modal">
           <div class="cd-settings__gcal-modal-badge"><span class="cd-settings__g-badge cd-settings__g-badge--48">G</span></div>
           <div class="cd-settings__gcal-modal-title">Syncing your calendars</div>
@@ -945,7 +945,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
 
 .cd-settings__account-email {
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin-top: 2px;
 }
 
@@ -954,7 +954,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   padding: 4px 26px 8px;
 }
 
@@ -964,7 +964,7 @@ const gcalStep = ref<'idle' | 'consent' | 'syncing'>('idle')
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   padding: 20px 20px 8px;
 }
 
@@ -1032,7 +1032,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__row--placeholder .cd-settings__row-label {
   font-weight: 700;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   font-style: italic;
 }
 
@@ -1048,7 +1048,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__row-sub {
   font: 700 12.5px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin-top: 2px;
 }
 
@@ -1062,7 +1062,7 @@ button.cd-settings__row:hover {
   text-align: center;
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin-top: 4px;
   letter-spacing: 0.08em;
 }
@@ -1073,7 +1073,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__label {
   font: 700 13.5px var(--cd-font-title);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   margin-bottom: 8px;
 }
 
@@ -1097,13 +1097,13 @@ button.cd-settings__row:hover {
   border: 1px solid var(--cd-line);
   border-radius: 5px;
   padding: 2px 6px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
 }
 
 .cd-settings__note {
   margin: 2px 20px 6px;
   font: 400 12.5px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   line-height: 1.5;
 }
 
@@ -1114,7 +1114,7 @@ button.cd-settings__row:hover {
   align-items: center;
   gap: 13px;
   margin: 2px 20px 8px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border: 1px solid var(--cd-line);
   border-radius: 14px;
   padding: 14px 15px;
@@ -1141,7 +1141,7 @@ button.cd-settings__row:hover {
   flex: none;
   font: 700 10px var(--cd-font-ui);
   letter-spacing: 0.06em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   border: 1px solid var(--cd-line);
   border-radius: 999px;
   padding: 3px 9px;
@@ -1149,7 +1149,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-card {
   margin: 2px 20px 6px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border: 1px solid var(--cd-line);
   border-radius: 14px;
   overflow: hidden;
@@ -1167,14 +1167,14 @@ button.cd-settings__row:hover {
   height: 42px;
   flex: none;
   border-radius: 12px;
-  background: rgba(var(--cd-olive-rgb), 0.18);
+  background: rgba(var(--cd-accent-rgb), 0.18);
   display: grid;
   place-items: center;
 }
 
 .cd-settings__gcal-status {
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   margin-top: 2px;
 }
 
@@ -1226,7 +1226,7 @@ button.cd-settings__row:hover {
   font: 700 12.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.1em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__gcal-chips {
@@ -1243,7 +1243,7 @@ button.cd-settings__row:hover {
   border-radius: 999px;
   padding: 4px 10px;
   font: 700 12px var(--cd-font-title);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-settings__gcal-chip-dot {
@@ -1307,7 +1307,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__theme-preview-wrap--selected {
-  border-color: var(--cd-olive);
+  border-color: var(--cd-accent);
 }
 
 .cd-settings__theme-preview {
@@ -1352,7 +1352,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__theme-bar--3 {
   width: 42%;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
 }
 
 .cd-settings__theme-tile-label {
@@ -1361,7 +1361,7 @@ button.cd-settings__row:hover {
   justify-content: center;
   gap: 5px;
   font: 700 12.5px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__theme-tile-label--selected {
@@ -1403,7 +1403,7 @@ button.cd-settings__row:hover {
   width: 36px;
   height: 36px;
   border: none;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: 10px;
   cursor: pointer;
   display: grid;
@@ -1421,7 +1421,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__month-photo-action {
   font: 700 11.5px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__month-photo-browse {
@@ -1430,7 +1430,7 @@ button.cd-settings__row:hover {
   cursor: pointer;
   padding: 0;
   font: 700 11.5px var(--cd-font-title);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
   text-decoration: underline;
 }
 
@@ -1447,7 +1447,7 @@ button.cd-settings__row:hover {
   background: transparent;
   cursor: pointer;
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-olive);
+  color: var(--cd-accent);
   padding: 4px 2px;
 }
 
@@ -1476,7 +1476,7 @@ button.cd-settings__row:hover {
   place-items: center;
   width: 20px;
   letter-spacing: -2px;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   font-size: 13px;
 }
 
@@ -1496,7 +1496,7 @@ button.cd-settings__row:hover {
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
 }
 
 .cd-settings__cal-cover-thumb-img {
@@ -1538,7 +1538,7 @@ button.cd-settings__row:hover {
   overflow: hidden;
   border: 1px solid var(--cd-line);
   display: block;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
 }
 
 .cd-settings__cal-cover-img {
@@ -1566,7 +1566,7 @@ button.cd-settings__row:hover {
   align-items: center;
   gap: 10px;
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: 12px;
   padding: 12px 16px;
   cursor: pointer;
@@ -1576,7 +1576,7 @@ button.cd-settings__row:hover {
 }
 
 .cd-settings__cal-cover-btn:hover {
-  background: rgba(var(--cd-olive-rgb), 0.1);
+  background: rgba(var(--cd-accent-rgb), 0.1);
 }
 
 .cd-settings__cal-cover-remove {
@@ -1584,7 +1584,7 @@ button.cd-settings__row:hover {
   background: transparent;
   cursor: pointer;
   font: 700 13px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   text-align: left;
   padding: 0 4px;
 }
@@ -1597,7 +1597,7 @@ button.cd-settings__row:hover {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: 13px;
   padding: 14px 16px;
   font: 700 15px var(--cd-font-title);
@@ -1609,7 +1609,7 @@ button.cd-settings__row:hover {
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.06em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__members-list {
@@ -1647,7 +1647,7 @@ button.cd-settings__row:hover {
   flex: none;
   font: 700 10px var(--cd-font-ui);
   letter-spacing: 0.04em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   border: 1px solid var(--cd-line);
   border-radius: 999px;
   padding: 3px 9px;
@@ -1666,7 +1666,7 @@ button.cd-settings__row:hover {
   padding: 12px;
   cursor: pointer;
   font: 700 13.5px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__invite-sheet {
@@ -1682,7 +1682,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__invite-sub {
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-ink-3);
+  color: var(--cd-ink-muted);
   margin-bottom: 22px;
 }
 
@@ -1737,7 +1737,7 @@ button.cd-settings__row:hover {
   align-items: center;
   gap: 8px;
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border-radius: 13px;
   padding: 6px 6px 6px 16px;
 }
@@ -1751,13 +1751,13 @@ button.cd-settings__row:hover {
   text-align: left;
   font: 700 16.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-settings__invite-copy-btn {
   flex: none;
   border: none;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   color: #fff;
   border-radius: 9px;
   padding: 10px 16px;
@@ -1781,13 +1781,13 @@ button.cd-settings__row:hover {
 
 .cd-settings__cal-detail-btn--cancel {
   border: 1px solid var(--cd-line);
-  background: var(--cd-surface);
-  color: var(--cd-ink-2);
+  background: var(--cd-surface-raised);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-settings__cal-detail-btn--save {
   border: none;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   color: #fff;
 }
 
@@ -1849,7 +1849,7 @@ button.cd-settings__row:hover {
 .cd-settings__gcal-modal-sub {
   text-align: center;
   font: 700 13px var(--cd-font-ui);
-  color: var(--cd-ink-3);
+  color: var(--cd-ink-muted);
   margin-bottom: 18px;
   line-height: 1.5;
 }
@@ -1872,7 +1872,7 @@ button.cd-settings__row:hover {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: var(--cd-surface);
+  background: var(--cd-surface-raised);
   border: 1px solid var(--cd-line);
   display: grid;
   place-items: center;
@@ -1900,12 +1900,12 @@ button.cd-settings__row:hover {
 .cd-settings__gcal-modal-btn--cancel {
   border: 1px solid var(--cd-line);
   background: transparent;
-  color: var(--cd-ink-2);
+  color: var(--cd-ink-secondary);
 }
 
 .cd-settings__gcal-modal-btn--allow {
   border: none;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   color: #fff;
 }
 
@@ -1936,7 +1936,7 @@ button.cd-settings__row:hover {
   height: 16px;
   border-radius: 50%;
   border: 2px solid #e4e1d6;
-  border-top-color: var(--cd-olive);
+  border-top-color: var(--cd-accent);
   box-sizing: border-box;
   animation: cd-gcal-spin 0.7s linear infinite;
 }
@@ -1952,7 +1952,7 @@ button.cd-settings__row:hover {
 .cd-settings__gcal-sync-name {
   flex: 1;
   font: 700 14px var(--cd-font-ui);
-  color: var(--cd-ink-3);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__gcal-sync-name--active {
@@ -1963,7 +1963,7 @@ button.cd-settings__row:hover {
 .cd-settings__gcal-sync-tag {
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-ink-3);
+  color: var(--cd-ink-muted);
 }
 
 .cd-settings__gcal-sync-tag--done {
@@ -1979,7 +1979,7 @@ button.cd-settings__row:hover {
 
 .cd-settings__gcal-progress-fill {
   height: 100%;
-  background: var(--cd-olive);
+  background: var(--cd-accent);
   border-radius: 999px;
   transition: width 0.5s var(--cd-ease-standard);
 }

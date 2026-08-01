@@ -3,7 +3,7 @@
     v-if="ui.assistantOpen"
     :presentation="isDesktop ? 'drawer' : 'sheet'"
     width="min(440px, 46%)"
-    scrim-color="var(--cd-scrim-strong)"
+    scrim-color="var(--cd-scrim)"
     sheet-fullscreen
     @scrim-click="close"
     @dismiss="close"

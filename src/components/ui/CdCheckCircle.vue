@@ -46,7 +46,7 @@ const emit = defineEmits<{
 }
 
 .cd-check-circle--done {
-  background: var(--cd-olive);
-  border-color: var(--cd-olive);
+  background: var(--cd-accent);
+  border-color: var(--cd-accent);
 }
 </style>

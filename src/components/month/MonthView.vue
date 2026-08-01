@@ -407,7 +407,7 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
 }
 
 .month-view__phone :deep(.cd-date-poster--month) {
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
 }
 
 .month-view__top-scroll {
@@ -429,7 +429,7 @@ function onDayListEventClick(event: DayListEvent, e: MouseEvent): void {
   justify-content: center;
   width: 100%;
   border-radius: var(--cd-radius-lg, 16px);
-  background: var(--cd-topbar);
+  background: var(--cd-surface-page);
   overflow: hidden;
   box-sizing: border-box;
 }

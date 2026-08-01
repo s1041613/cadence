@@ -66,11 +66,11 @@ const emit = defineEmits<{
   font: 700 13.5px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.14em;
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
 }
 
 .cd-month-agenda__label--today {
-  color: var(--cd-olive);
+  color: var(--cd-accent);
 }
 
 .cd-month-agenda__date {
@@ -122,13 +122,13 @@ const emit = defineEmits<{
 .cd-month-agenda__time {
   font: 700 15px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   flex: none;
 }
 
 .cd-month-agenda__empty {
   font: 700 14px var(--cd-font-title);
-  color: var(--cd-muted);
+  color: var(--cd-ink-muted);
   font-style: italic;
   padding: 10px 8px;
 }
