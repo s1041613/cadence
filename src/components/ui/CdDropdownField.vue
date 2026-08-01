@@ -125,7 +125,7 @@ function select(opt: DropdownFieldOption): void {
   background: #fff;
   border: 1px solid var(--cd-line);
   border-radius: 13px;
-  box-shadow: 0 12px 32px -12px rgba(var(--cd-scrim-rgb), 0.4);
+  box-shadow: var(--cd-shadow-overlay);
   padding: 5px;
   z-index: 30;
   display: flex;

@@ -44,12 +44,11 @@ const emit = defineEmits<{
   cursor: pointer;
   font: 700 13px var(--cd-font-ui);
   color: var(--cd-ink-secondary);
-  transition: background var(--cd-duration-micro-3), box-shadow var(--cd-duration-micro-3);
+  transition: background var(--cd-duration-micro-3);
 }
 
 .cd-segmented__btn--active {
   background: #fff;
-  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.16);
   font-weight: 700;
   color: var(--cd-ink);
 }

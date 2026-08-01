@@ -190,22 +190,35 @@
   --cd-radius-chip: 7px;
   --cd-radius-xs: 6px;
 
-  /* ---------- Shadows ----------
-   * Geometry is NOT themeable: elevation should read the same across palettes, so a
-   * palette overrides only the tint channels (--cd-ink-rgb / --cd-scrim-rgb) and never
-   * the offset, blur or spread.
+  /* ---------- Elevation ----------
+   * TWO levels, and the first one is "no shadow at all".
    *
-   * Six tokens were deleted here for having zero consumers (pill-active-2, picker,
-   * settings, dropdown, dropdown-2, matrix-selected). That is what happens when tokens
-   * are named after call sites rather than elevation steps — an elevation scale is
-   * still undesigned; see SCHEMA-v1-palette.md.
+   *   Level 1 — flat. Anything sitting ON the page: cards, month cells, event chips,
+   *             segmented controls, buttons. Separation comes from --cd-line and the
+   *             surface roles, never from a shadow.
+   *   Level 2 — overlay. Anything floating OVER the page and covering it: drawers,
+   *             sheets, modals, menus, dropdowns. One value for all of them.
+   *
+   * Why level 1 is "none" rather than a faint shadow: a shadow on something that is
+   * not actually floating is decoration, and it competes with the real overlay signal.
+   * Follows Carbon's rule — flat-plane content gets a border if it needs to look
+   * interactive, and elevation is reserved for things that genuinely float.
+   *
+   * Why one overlay value rather than a ramp: every overlay in this app pairs with
+   * --cd-scrim, and the scrim is what actually communicates "this covers the page".
+   * The shadow only defines the panel's edge, and that job does not vary by component.
+   * The previous drawer/sheet/modal/menu values differed by geometry alone, which is
+   * how six tokens accumulated with nothing distinguishing them semantically.
+   *
+   * Geometry is NOT themeable — elevation must read the same across palettes — so a
+   * palette overrides only the tint channel, never the offset, blur or spread.
+   *
+   * The value has no vertical offset on purpose. One shadow has to serve panels
+   * anchored to different edges: the bottom sheet is flush with the bottom of the
+   * viewport, so a downward cast would be clipped and the sheet would read as having
+   * no shadow at all. A centred, spread shadow defines the edge from every side.
    */
-  --cd-shadow-frame: 0 1px 3px rgba(var(--cd-ink-rgb), .06);
-  --cd-shadow-pill-active: 0 1px 2px rgba(var(--cd-ink-rgb), .12);
-  --cd-shadow-drawer: -22px 0 52px -22px rgba(var(--cd-scrim-rgb), .42);
-  --cd-shadow-sheet: 0 -18px 42px -20px rgba(var(--cd-scrim-rgb), .4);
-  --cd-shadow-modal: 0 34px 70px -26px rgba(var(--cd-scrim-rgb), .55);
-  --cd-shadow-menu: 0 10px 26px -14px rgba(var(--cd-scrim-rgb), .42);
+  --cd-shadow-overlay: 0 0 40px -12px rgba(var(--cd-scrim-rgb), .44);
 
   /* ---------- Motion: durations / easings ---------- */
   --cd-ease-standard: cubic-bezier(.22, 1, .36, 1);

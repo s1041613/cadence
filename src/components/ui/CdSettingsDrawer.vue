@@ -1127,7 +1127,6 @@ button.cd-settings__row:hover {
   border: 1px solid var(--cd-line);
   display: grid;
   place-items: center;
-  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.1);
   font: 700 20px var(--cd-font-ui);
   color: #4285f4;
 }
@@ -1272,7 +1271,6 @@ button.cd-settings__row:hover {
   font: 700 14px var(--cd-font-title);
   color: #3a3833;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(var(--cd-ink-rgb), 0.08);
   transition: background var(--cd-duration-micro-3);
 }
 
@@ -1822,7 +1820,7 @@ button.cd-settings__row:hover {
   width: min(360px, 100%);
   background: #fff;
   border-radius: var(--cd-radius-picker);
-  box-shadow: var(--cd-shadow-modal);
+  box-shadow: var(--cd-shadow-overlay);
   padding: 22px 22px 18px;
   animation: cd-popIn var(--cd-duration-pop) var(--cd-ease-standard);
 }

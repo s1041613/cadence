@@ -73,7 +73,7 @@ const emit = defineEmits<{
   bottom: 14px;
   background: var(--cd-surface-inset);
   border-radius: var(--cd-radius-drawer);
-  box-shadow: var(--cd-shadow-drawer);
+  box-shadow: var(--cd-shadow-overlay);
   animation: cd-drawerIn var(--cd-duration-drawer) var(--cd-ease-standard);
   display: flex;
   flex-direction: column;
@@ -88,7 +88,6 @@ const emit = defineEmits<{
 .cd-drawer--left {
   right: auto;
   left: 14px;
-  box-shadow: 22px 0 52px -22px rgba(var(--cd-scrim-rgb), 0.42);
   animation-name: cd-drawerInLeft;
 }
 </style>

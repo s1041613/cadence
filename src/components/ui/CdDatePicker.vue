@@ -259,7 +259,7 @@ onBeforeUnmount(() => {
   background: #fff;
   border: 1px solid var(--cd-line);
   border-radius: 14px;
-  box-shadow: 0 20px 44px -18px rgba(var(--cd-scrim-rgb), 0.42);
+  box-shadow: var(--cd-shadow-overlay);
   padding: 12px;
 }
 
