@@ -28,7 +28,7 @@
             :key="h"
             class="pv2-grid__hour-label"
             :class="{ 'pv2-grid__hour-label--now': isCurrentHour(h) }"
-            :style="{ top: `${top(h * 60) - 9}px` }"
+            :style="{ top: `${top(h * 60) - HOUR_LABEL_H / 2}px` }"
           >
             {{ hourLabel(h) }}
           </span>
@@ -93,6 +93,11 @@ export interface Pv2GridAllDayEvent {
 
 const START_HOUR = 6
 const END_HOUR = 23
+
+// Hour label line box, kept in sync with .pv2-grid__hour-label's line-height. The label is
+// absolutely positioned, so it is shifted up by half this to sit centred on its hour line;
+// hardcoding the offset silently mis-centres the text whenever the font size changes.
+const HOUR_LABEL_H = 14
 
 // Opening position. The axis is 06:00-23:00 so an unscrolled grid would open on three empty
 // early-morning hours; 08:00 puts the working day at the top while leaving the earlier hours
@@ -295,7 +300,8 @@ function tint(hex: string): string {
 .pv2-grid__hour-label {
   position: absolute;
   left: 0;
-  font: 500 15px var(--cd-font-mono);
+  /* line-height pinned so HOUR_LABEL_H can centre the label on its hour line */
+  font: 500 12px/14px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.02em;
   color: #9c9c9c;

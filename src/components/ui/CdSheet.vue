@@ -90,14 +90,20 @@ function onSwipeDown(): void {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Clears the home indicator so a sheet's last row / footer button isn't hard against the
+     screen edge. Applies to every bottom sheet (composer, settings, draft, assistant). */
+  padding-bottom: 30px;
 }
 
+/* Fullscreen fills the frame and its root is already inset from the bottom, so the
+   home-indicator padding above would only shrink the content area. */
 .cd-sheet--fullscreen {
   max-height: 100%;
   height: 100%;
   border-radius: 0;
   box-shadow: none;
   animation-name: none;
+  padding-bottom: 0;
 }
 
 /* Zone is taller than the 4px pill so the swipe target is actually hittable; the pill's former

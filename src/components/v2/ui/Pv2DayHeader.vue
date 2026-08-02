@@ -76,23 +76,25 @@ const emit = defineEmits<{
 }
 
 /* Weekday and month-year read as one metadata cluster beside the serif day number, so they
-   share a colour rather than splitting into a dark/light pair. */
+   share a colour rather than splitting into a dark/light pair. Both sit at the day number's
+   ink: #9c9c9c was ~2.6:1 over the photo background and read as washed out. */
 .pv2-dh__dow {
-  font: 700 14px var(--cd-font-mono);
-  letter-spacing: 0.16em;
-  color: #9c9c9c;
+  font: 700 14px var(--cd-font-ui);
+  letter-spacing: 0.12em;
+  color: #1b1b1b;
 }
 
 .pv2-dh__my {
-  font: 600 11px var(--cd-font-mono);
-  letter-spacing: 0.16em;
-  color: #9c9c9c;
+  font: 500 11px var(--cd-font-ui);
+  letter-spacing: 0.12em;
+  color: #1b1b1b;
 }
 
+/* No bottom padding here: it made the arrows 38px tall against the week header's 32px and
+   sat them lower than week's. Matches .pv2-wh__nav exactly. */
 .pv2-dh__nav {
   display: flex;
   gap: 12px;
-  padding-bottom: 6px;
 }
 
 /* 白底圓框 + 淡陰影 + 深色 chevron（抄週檢視 header 箭頭） */

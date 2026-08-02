@@ -9,8 +9,6 @@
 
       <!-- PANEL — warm paper surface, sign-in affordances -->
       <div class="login__panel">
-        <p class="login__label">Sign in to get started</p>
-
         <button
           type="button"
           class="login__oauth-btn login__oauth-btn--google"
@@ -41,11 +39,6 @@
           <span class="login__oauth-spacer" aria-hidden="true"></span>
         </button>
 
-        <p class="login__fineprint">
-          By continuing you agree to our
-          <a href="#" @click.prevent>Terms</a> &amp;
-          <a href="#" @click.prevent>Privacy</a>.
-        </p>
         <p v-if="auth.error" class="login__error">{{ auth.error }}</p>
       </div>
     </div>
@@ -113,9 +106,13 @@ function signInWithApple(): void {
   padding-bottom: 30px;
 }
 
+/* Instrument Serif italic, the same face as the month poster headline — the wordmark and
+   the month title are the two places the brand serif appears. --cd-font-script resolved to
+   Zen Kaku, so the mark read as plain UI sans. */
 .login__wordmark {
-  font-family: var(--cd-font-script);
-  font-weight: 700;
+  font-family: var(--cd-font-serif);
+  font-style: italic;
+  font-weight: 400;
   font-size: var(--cd-fs-46);
   line-height: 1;
   color: var(--cd-ink);
@@ -134,13 +131,9 @@ function signInWithApple(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 22px 24px 0;
-}
-
-.login__label {
-  margin: 0 0 16px;
-  font: 400 var(--cd-fs-12) var(--cd-font-ui);
-  color: var(--cd-ink-muted);
+  /* Real bottom padding now that the fineprint was removed — it used to be the only thing
+     keeping the Apple button off the panel's edge. */
+  padding: 22px 24px;
 }
 
 /* ---------- OAuth buttons ---------- */
@@ -214,18 +207,6 @@ function signInWithApple(): void {
 }
 
 /* ---------- Fine print + home indicator ---------- */
-.login__fineprint {
-  margin: 6px 0 0;
-  font: 400 var(--cd-fs-11) var(--cd-font-ui);
-  color: var(--cd-ink-muted);
-  text-align: center;
-}
-
-.login__fineprint a {
-  color: var(--cd-ink-muted);
-  text-decoration: underline;
-}
-
 .login__error {
   width: 100%;
   margin: 10px 0 0;
