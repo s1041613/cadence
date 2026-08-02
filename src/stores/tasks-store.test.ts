@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useTasksStore, mkTask } from './tasks-store'
 import * as eventsService from '@/services/events-service'
+import * as subtasksService from '@/services/subtasks-service'
 import { notifySyncError } from '@/lib/notify'
 import type { Task } from '@/types/task'
 
@@ -11,6 +12,11 @@ vi.mock('@/services/events-service', () => ({
   insertTasks: vi.fn(),
   deleteTask: vi.fn()
 }))
+vi.mock('@/services/subtasks-service', () => ({
+  fetchSubtasks: vi.fn(),
+  upsertSubtask: vi.fn(),
+  deleteSubtask: vi.fn()
+}))
 vi.mock('@/lib/notify', () => ({
   notifySyncError: vi.fn()
 }))
@@ -19,6 +25,9 @@ const fetchTasksMock = vi.mocked(eventsService.fetchTasks)
 const upsertTaskMock = vi.mocked(eventsService.upsertTask)
 const insertTasksMock = vi.mocked(eventsService.insertTasks)
 const deleteTaskMock = vi.mocked(eventsService.deleteTask)
+const fetchSubtasksMock = vi.mocked(subtasksService.fetchSubtasks)
+const upsertSubtaskMock = vi.mocked(subtasksService.upsertSubtask)
+const deleteSubtaskMock = vi.mocked(subtasksService.deleteSubtask)
 const notifySyncErrorMock = vi.mocked(notifySyncError)
 
 const DEFAULT_CALENDAR_UUID = 'cal-uuid-1'
@@ -61,6 +70,9 @@ describe('tasks-store', () => {
     upsertTaskMock.mockResolvedValue(undefined)
     insertTasksMock.mockResolvedValue(undefined)
     deleteTaskMock.mockResolvedValue(undefined)
+    fetchSubtasksMock.mockResolvedValue([])
+    upsertSubtaskMock.mockResolvedValue(undefined)
+    deleteSubtaskMock.mockResolvedValue(undefined)
   })
 
   describe('mkTask default pomodoro estimate', () => {
@@ -509,6 +521,336 @@ describe('tasks-store', () => {
       await flush()
       expect(upsertTaskMock).not.toHaveBeenCalled()
       expect(notifySyncErrorMock.mock.calls[0]![0]).toBe('尚未完成同步，請稍後再試')
+    })
+  })
+
+  // focus-subtasks spec: subtasks are a checklist on the parent timebox — a title, a done
+  // flag and a parent, mutated through the same optimistic-write path as the task itself.
+  describe('subtasks', () => {
+    async function storeWithTask(): Promise<{ store: ReturnType<typeof useTasksStore>; task: Task }> {
+      const store = await signedInStore()
+      const task = mkTask({ date: '2026-07-10', calendarId: DEFAULT_CALENDAR_UUID, start: '09:00', end: '10:00' })
+      store.saveTask(task)
+      await flush()
+      upsertTaskMock.mockClear()
+      return { store, task }
+    }
+
+    describe('adding', () => {
+      it('shows a new subtask immediately, before the write settles', async () => {
+        const { store, task } = await storeWithTask()
+        const pending = deferred<void>()
+        upsertSubtaskMock.mockReturnValue(pending.promise)
+
+        store.addSubtask(task.id, 'Read chapter three')
+
+        expect(store.subtasksFor(task.id).map((s) => s.title)).toEqual(['Read chapter three'])
+        pending.resolve()
+        await flush()
+      })
+
+      it('keeps insertion order rather than reordering, so the list does not move under the finger', async () => {
+        const { store, task } = await storeWithTask()
+
+        store.addSubtask(task.id, 'first')
+        store.addSubtask(task.id, 'second')
+        store.addSubtask(task.id, 'third')
+        await flush()
+
+        expect(store.subtasksFor(task.id).map((s) => s.title)).toEqual(['first', 'second', 'third'])
+      })
+
+      it('refuses a whitespace-only title, since the title is the only thing identifying a row', async () => {
+        const { store, task } = await storeWithTask()
+
+        store.addSubtask(task.id, '   ')
+        await flush()
+
+        expect(store.subtasksFor(task.id)).toEqual([])
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+      })
+
+      it('trims the stored title so leading and trailing space never reaches the database', async () => {
+        const { store, task } = await storeWithTask()
+
+        store.addSubtask(task.id, '  Take notes  ')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.title).toBe('Take notes')
+      })
+
+      // A subtask is a dependent row reached only through its parent; issuing an insert
+      // against a parent that does not exist locally would write an orphan.
+      it('refuses to add against a parent the store does not hold', async () => {
+        const store = await signedInStore()
+
+        store.addSubtask('no-such-task', 'orphan')
+        await flush()
+
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+      })
+    })
+
+    // focus-subtasks spec: "viewing an event shared by someone else, I want the same read-only
+    // treatment subtasks that the rest of the card already has". RLS rejects these writes
+    // server-side, so without a local guard the optimistic update flips, the write fails and
+    // the value silently reverts — the exact failure the spec warns about.
+    describe('a shared event owned by someone else', () => {
+      async function storeWithForeignTask() {
+        const store = await signedInStore()
+        const task: Task = {
+          ...mkTask({ date: '2026-07-10', calendarId: DEFAULT_CALENDAR_UUID, start: '09:00', end: '10:00' }),
+          ownerId: 'someone-else'
+        }
+        store.saveTask(task)
+        await flush()
+        upsertSubtaskMock.mockClear()
+        return { store, task }
+      }
+
+      it('refuses to add a subtask', async () => {
+        const { store, task } = await storeWithForeignTask()
+
+        store.addSubtask(task.id, 'not mine')
+        await flush()
+
+        expect(store.subtasksFor(task.id)).toEqual([])
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+      })
+
+      it('refuses to toggle, rename or delete an existing subtask', async () => {
+        const { store, task } = await storeWithForeignTask()
+        // Seeded as though it arrived from the remote load, which is the only way a foreign
+        // event's subtasks reach the store.
+        store.subtasks = [{ id: 'sub-1', parentId: task.id, title: 'theirs', done: false, position: 0 }]
+
+        store.toggleSubtaskDone('sub-1')
+        store.renameSubtask('sub-1', 'mine now')
+        store.deleteSubtask('sub-1')
+        await flush()
+
+        expect(store.subtasksFor(task.id)).toEqual([
+          { id: 'sub-1', parentId: task.id, title: 'theirs', done: false, position: 0 }
+        ])
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+        expect(deleteSubtaskMock).not.toHaveBeenCalled()
+      })
+
+      it('rolls the subtask back out of the list when the write fails', async () => {
+        const { store, task } = await storeWithTask()
+        upsertSubtaskMock.mockRejectedValue(new Error('offline'))
+
+        store.addSubtask(task.id, 'doomed')
+        await flush()
+
+        expect(store.subtasksFor(task.id)).toEqual([])
+        expect(notifySyncErrorMock).toHaveBeenCalled()
+      })
+    })
+
+    describe('toggling done', () => {
+      it('flips done optimistically and persists the new value', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        upsertSubtaskMock.mockClear()
+        const id = store.subtasksFor(task.id)[0]!.id
+
+        store.toggleSubtaskDone(id)
+
+        expect(store.subtasksFor(task.id)[0]!.done).toBe(true)
+        await flush()
+        expect(upsertSubtaskMock.mock.calls[0]![0]).toMatchObject({ id, done: true })
+      })
+
+      // Checking settles an item, but the checkbox itself always stays live: uncheck,
+      // correct, re-check is the only path back and it must never be a dead end.
+      it('unchecks a checked subtask', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        store.toggleSubtaskDone(id)
+        await flush()
+
+        store.toggleSubtaskDone(id)
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.done).toBe(false)
+      })
+
+      it('leaves completed subtasks in place rather than reordering them', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'first')
+        store.addSubtask(task.id, 'second')
+        store.addSubtask(task.id, 'third')
+        await flush()
+        const first = store.subtasksFor(task.id)[0]!.id
+
+        store.toggleSubtaskDone(first)
+        await flush()
+
+        expect(store.subtasksFor(task.id).map((s) => s.title)).toEqual(['first', 'second', 'third'])
+      })
+
+      it('restores the previous done value when the write fails', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        upsertSubtaskMock.mockRejectedValue(new Error('offline'))
+
+        store.toggleSubtaskDone(id)
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.done).toBe(false)
+        expect(notifySyncErrorMock).toHaveBeenCalled()
+      })
+    })
+
+    describe('renaming', () => {
+      it('renames in place, keeping the row identity and its done state', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Reed chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+
+        store.renameSubtask(id, 'Read chapter three')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]).toMatchObject({ id, title: 'Read chapter three', done: false })
+      })
+
+      // Refusing means keeping the previous title, not deleting the row: a nameless row
+      // could not be told apart from its neighbours.
+      it('refuses an empty rename and keeps the previous title', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        upsertSubtaskMock.mockClear()
+
+        store.renameSubtask(id, '   ')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.title).toBe('Read chapter three')
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+      })
+
+      // The strike-through has to be an honest signal rather than decoration: struck text
+      // is not editable text.
+      it('refuses to rename a checked subtask', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        store.toggleSubtaskDone(id)
+        await flush()
+        upsertSubtaskMock.mockClear()
+
+        store.renameSubtask(id, 'Something else')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.title).toBe('Read chapter three')
+        expect(upsertSubtaskMock).not.toHaveBeenCalled()
+      })
+
+      it('permits the rename again once the subtask is unchecked', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        store.toggleSubtaskDone(id)
+        await flush()
+        store.toggleSubtaskDone(id)
+        await flush()
+
+        store.renameSubtask(id, 'Read chapter four')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.title).toBe('Read chapter four')
+      })
+
+      it('restores the previous title when the write fails', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+        upsertSubtaskMock.mockRejectedValue(new Error('offline'))
+
+        store.renameSubtask(id, 'Read chapter four')
+        await flush()
+
+        expect(store.subtasksFor(task.id)[0]!.title).toBe('Read chapter three')
+        expect(notifySyncErrorMock).toHaveBeenCalled()
+      })
+    })
+
+    describe('deleting', () => {
+      it('removes the subtask immediately and persists the delete', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'Read chapter three')
+        await flush()
+        const id = store.subtasksFor(task.id)[0]!.id
+
+        store.deleteSubtask(id)
+
+        expect(store.subtasksFor(task.id)).toEqual([])
+        await flush()
+        expect(deleteSubtaskMock).toHaveBeenCalledWith(id)
+      })
+
+      it('puts the subtask back in its original position when the delete fails', async () => {
+        const { store, task } = await storeWithTask()
+        store.addSubtask(task.id, 'first')
+        store.addSubtask(task.id, 'second')
+        store.addSubtask(task.id, 'third')
+        await flush()
+        const second = store.subtasksFor(task.id)[1]!.id
+        deleteSubtaskMock.mockRejectedValue(new Error('offline'))
+
+        store.deleteSubtask(second)
+        await flush()
+
+        expect(store.subtasksFor(task.id).map((s) => s.title)).toEqual(['first', 'second', 'third'])
+        expect(notifySyncErrorMock).toHaveBeenCalled()
+      })
+    })
+
+    // The database cascades on the parent reference; the local mirror has to match, or a
+    // deleted event's checklist would linger in memory until the next full load.
+    it("drops a parent's subtasks when the parent is deleted", async () => {
+      const { store, task } = await storeWithTask()
+      store.addSubtask(task.id, 'Read chapter three')
+      await flush()
+
+      store.deleteTask(task.id)
+      await flush()
+
+      expect(store.subtasksFor(task.id)).toEqual([])
+    })
+
+    it('loads subtasks alongside tasks on sign-in', async () => {
+      const task = mkTask({ date: '2026-07-10', calendarId: DEFAULT_CALENDAR_UUID, start: '09:00', end: '10:00' })
+      fetchTasksMock.mockResolvedValue([task])
+      fetchSubtasksMock.mockResolvedValue([
+        { id: 'sub-1', parentId: task.id, title: 'Read chapter three', done: false, position: 0 }
+      ])
+      const store = useTasksStore()
+
+      await store.loadFromRemote('user-1', DEFAULT_CALENDAR_UUID, [DEFAULT_CALENDAR_UUID])
+
+      expect(store.subtasksFor(task.id).map((s) => s.title)).toEqual(['Read chapter three'])
+    })
+
+    it('clears subtasks on resetLocal so they do not survive a sign-out', async () => {
+      const { store, task } = await storeWithTask()
+      store.addSubtask(task.id, 'Read chapter three')
+      await flush()
+
+      store.resetLocal()
+
+      expect(store.subtasksFor(task.id)).toEqual([])
     })
   })
 })

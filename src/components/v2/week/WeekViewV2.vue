@@ -84,13 +84,26 @@ const rangeLabel = computed(() => {
   return `${mon(s)} ${s.getDate()} — ${mon(e)} ${e.getDate()}`
 })
 
+// How many subtask names one row reveals. Seven rows have to stay readable at a glance,
+// so the rest is carried by the done/total count rather than by more lines.
+const WEEK_SUBTASK_PREVIEW = 3
+
 // 某日事件（過濾隱藏日曆），色點取 themeOf，時間標籤 all-day / HH:MM / —
 function eventsForDate(date: string): Pv2WeekEvent[] {
   return tasksStore.tasks
     .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
     .map((t) => {
       const timeLabel = t.allDay ? 'all-day' : t.start ? formatTime(t.start, settings.timeFormat) : '—'
-      return { id: t.id, title: t.title, color: themeOf(t).backgroundColor, timeLabel }
+      const subtasks = tasksStore.subtasksFor(t.id)
+      return {
+        id: t.id,
+        title: t.title,
+        color: themeOf(t).backgroundColor,
+        timeLabel,
+        subtaskTitles: subtasks.slice(0, WEEK_SUBTASK_PREVIEW).map((s) => s.title),
+        subtaskDone: subtasks.filter((s) => s.done).length,
+        subtaskTotal: subtasks.length
+      }
     })
 }
 

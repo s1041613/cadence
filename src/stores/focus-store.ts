@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { useUiStore } from './ui-store'
 import { useTasksStore } from './tasks-store'
-import { estPomsOf, isSlotOver } from '@/utils/convert-date-time'
+import { estPomsOf, isSlotOver, slotEndAt } from '@/utils/convert-date-time'
 import { loadStore, saveStore, removeStore } from '@/utils/save-load-local-storage'
 import { makeFocusChime, type FocusChime } from '@/utils/make-focus-chime'
 import {
@@ -30,6 +30,9 @@ import {
  *  deadline rather than counted — sampling quickly keeps the digits from visibly jumping. */
 const TICK_MS = 250
 
+/** How much of the slot must remain for the wind-down warning to arrive. */
+const SLOT_WARNING_MS = 10 * 60_000
+
 export const useFocusStore = defineStore('focus', () => {
   const ui = useUiStore()
   const tasksStore = useTasksStore()
@@ -40,6 +43,9 @@ export const useFocusStore = defineStore('focus', () => {
 
   let intervalId: ReturnType<typeof setInterval> | null = null
   let chime: FocusChime | null = null
+  /** Latches the ten-minute warning to once per session. Reset when a session is torn down,
+   *  not when the window is left, so re-entering it cannot re-fire the chime. */
+  let slotWarningFired = false
 
   const task = computed(() => ui.focusTask)
 
@@ -77,6 +83,35 @@ export const useFocusStore = defineStore('focus', () => {
     if (!t || state.value === null || state.value.phase === 'done') return false
     return isSlotOver(t, new Date(now.value))
   })
+
+  /** How much of the *timebox* is left — a different and more important clock than the ring,
+   *  which counts down only the current pomodoro. null when the event has no bounded slot.
+   *  Goes negative past the end rather than clamping: the context bar says how far over the
+   *  session is, and freezing at zero would imply the slot had only just run out. */
+  const slotRemainingMs = computed<number | null>(() => {
+    const t = task.value
+    if (!t) return null
+    const endsAt = slotEndAt(t)
+    if (endsAt === null) return null
+    return endsAt.getTime() - now.value
+  })
+
+  /** The timebox is nearly up. Stands down once the slot is actually over, where the overrun
+   *  treatment takes over — two escalating states, never both at once. Withheld during the
+   *  breathing intro, which is animation-driven: a wind-down warning before the first pomodoro
+   *  has even started would spend the once-per-session latch on the least useful moment. */
+  const slotEndingSoon = computed(() => {
+    const remaining = slotRemainingMs.value
+    if (remaining === null || state.value === null) return false
+    if (state.value.phase === 'breathing') return false
+    return remaining > 0 && remaining <= SLOT_WARNING_MS
+  })
+
+  /** Read-only inside the session: the list is there for orientation, and mid-session
+   *  fiddling with checkboxes is exactly what the settle-up prompt exists to avoid. */
+  const subtasks = computed(() =>
+    task.value ? tasksStore.subtasksFor(task.value.id) : []
+  )
 
   function ensureChime(): FocusChime {
     chime ??= makeFocusChime()
@@ -134,6 +169,7 @@ export const useFocusStore = defineStore('focus', () => {
     removeStore(FOCUS_STATE_KEY)
     chime?.dispose()
     chime = null
+    slotWarningFired = false
   }
 
   /** User-facing close: tear down first, then clear the entry intent. The watcher fires
@@ -248,6 +284,17 @@ export const useFocusStore = defineStore('focus', () => {
     }
   )
 
+  // Fires the wind-down chime once and never again for this session. Latched rather than
+  // driven by the boolean's edge because the window can be entered more than once — a paused
+  // session resumed inside it, or a rehydrated one restored straight into it — and a warning
+  // that repeats stops being a nudge and becomes nagging. Deliberately emits no state change:
+  // nothing stops or pauses.
+  watch(slotEndingSoon, (soon) => {
+    if (!soon || slotWarningFired) return
+    slotWarningFired = true
+    ensureChime().play('slotEndingSoon')
+  })
+
   // ui.focusTaskId is the entry intent; state is the lifecycle. One-way link only.
   watch(
     () => ui.focusTaskId,
@@ -266,6 +313,9 @@ export const useFocusStore = defineStore('focus', () => {
     canAnother,
     soundUnlocked,
     overrunning,
+    slotRemainingMs,
+    slotEndingSoon,
+    subtasks,
     start,
     close,
     skipBreathing,

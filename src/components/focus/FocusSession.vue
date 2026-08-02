@@ -4,12 +4,12 @@
   <div
     v-if="task && focus.state"
     class="fx"
-    :class="{ rest: mode === 'rest', overrun: focus.overrunning }"
+    :class="{ rest: mode === 'rest', overrun: focus.overrunning, 'ending-soon': focus.slotEndingSoon }"
     @click="focus.unlockSound()"
   >
     <div class="fx-top">
       <button v-if="phase === 'breathing'" class="fx-skip" @click="focus.skipBreathing()">Skip</button>
-      <button class="fx-close" aria-label="Close" @click="focus.close()">
+      <button class="fx-close" aria-label="Close" @click="leaveSession">
         <CdIcon name="close" :size="16" color="#fff" />
       </button>
     </div>
@@ -35,6 +35,21 @@
 
     <template v-else>
       <div class="fx-hud">{{ mode === 'focus' ? 'Focus · Pomodoro' : `Short break · ${restMinutes} min` }}</div>
+
+      <!-- The ring counts down this pomodoro; how much of the timebox is left is a different
+           and more important clock that the screen never showed. Independent of subtasks:
+           it appears whether or not the event has any. Visual hierarchy carries the
+           distinction — the fixed slot is dimmest, the moving figure brightest. -->
+      <div class="fx-ctx">
+        <i class="fx-ctx-dot" />
+        <span class="fx-ctx-main">
+          <span class="fx-ctx-name">{{ task.title || 'Untitled' }}</span>
+          <!-- An all-day task has no bounded slot, so the times and the remaining figure have
+               no source. The bar itself stays: the name is what it is mostly for. -->
+          <span v-if="slotLabel" class="fx-ctx-slot">{{ slotLabel }}</span>
+        </span>
+        <span v-if="slotRemainingLabel" class="fx-ctx-left">{{ slotRemainingLabel }}</span>
+      </div>
       <svg class="fx-scene" viewBox="0 0 100 190" preserveAspectRatio="xMidYMid slice" style="opacity: .3">
         <defs>
           <linearGradient id="fxbg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123f30" /><stop offset="1" stop-color="#0e3527" /></linearGradient>
@@ -64,6 +79,17 @@
         <div v-if="focus.overrunning" class="fx-overrunHint">Past scheduled end time</div>
         <div v-if="!focus.soundUnlocked" class="fx-soundHint">Tap anywhere to enable sound</div>
       </div>
+      <!-- Present for orientation, not interaction: these are <div>s with dots rather than
+           checkboxes so it is visible at a glance that they cannot be ticked. Mid-session
+           fiddling is exactly what the settle-up prompt at the end exists to avoid. -->
+      <div v-if="focus.subtasks.length" class="fx-list">
+        <p class="fx-list-h">SUBTASKS</p>
+        <div v-for="subtask in focus.subtasks" :key="subtask.id" class="fx-sub" :data-done="subtask.done">
+          <i />
+          <span>{{ subtask.title }}</span>
+        </div>
+      </div>
+
       <div v-if="mode !== 'done'" class="fx-bar show">
         <template v-if="mode === 'focus'">
           <button class="sec" @click="togglePause">{{ paused ? 'Resume' : 'Pause' }}</button>
@@ -77,11 +103,13 @@
       <!-- The milestone is stated, not enforced: the planned pomodoros are finished, but the
            estimate is a reference, so leaving and continuing are offered side by side. -->
       <div v-if="mode === 'done'" class="fx-bar show">
-        <button class="sec" @click="focus.close()">Done</button>
+        <button class="sec" @click="leaveSession">Done</button>
         <button class="prim" @click="focus.anotherPomodoro()">Start another pomodoro</button>
       </div>
     </template>
 
+    <!-- Pomodoro-level: ends this one, and another may follow. Asks nothing about subtasks,
+         which is why it never co-occurs with the session-level sheet below. -->
     <div v-if="earlyFinishSheetOpen" class="fx-sheet">
       <div class="box">
         <h4>Finish early?</h4>
@@ -92,6 +120,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Session-level: ✕ and the milestone Done are the same act — leaving — so they share
+         one exit path, one gate and one sheet. Recording progress is never mandatory. -->
+    <div v-if="settleUpOpen" class="fx-sheet">
+      <div class="box box--settle">
+        <p class="settle-eyebrow">FOCUS ENDED</p>
+        <h4>What did you get done?</h4>
+        <p class="settle-meta">{{ settleMetaLabel }}</p>
+        <ul v-if="focus.subtasks.length" class="settle-list">
+          <li v-for="subtask in focus.subtasks" :key="subtask.id" class="settle-sub" :data-done="subtask.done">
+            <button
+              type="button"
+              class="settle-chk"
+              :data-on="subtask.done"
+              :aria-label="`${subtask.done ? 'Uncheck' : 'Check'} ${subtask.title}`"
+              @click="tasksStore.toggleSubtaskDone(subtask.id)"
+            >
+              <CdIcon v-if="subtask.done" name="check" :size="11" :stroke-width="3.4" color="#fff" />
+            </button>
+            <span>{{ subtask.title }}</span>
+          </li>
+        </ul>
+        <div class="r">
+          <button class="no" @click="closeSession">Skip</button>
+          <button class="yes" @click="closeSession">Done</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -99,8 +155,12 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useFocusStore } from '@/stores/focus-store'
+import { useTasksStore } from '@/stores/tasks-store'
+import { useSettingsStore } from '@/stores/settings-store'
 import { makeFocusAudio, type FocusAudio } from '@/utils/make-focus-audio'
 import { breathingGeometry, countCompletedBreaths } from '@/utils/breathing-curve'
+import { formatTime } from '@/utils/convert-date-time'
+import { shouldAskWhatGotDone } from '@/utils/focus-timer'
 import { TOMATO_SVG } from '@/utils/tomato-icon'
 import CdIcon from '../ui/CdIcon.vue'
 
@@ -113,8 +173,27 @@ const RING_C = 2 * Math.PI * 140
 
 const ui = useUiStore()
 const focus = useFocusStore()
+const tasksStore = useTasksStore()
+const settings = useSettingsStore()
 
 const task = computed(() => ui.focusTask)
+
+// Empty for an all-day task, which has no bounded slot — the whole bar is withheld rather
+// than shown with a blank where the times belong.
+const slotLabel = computed(() => {
+  const t = task.value
+  if (!t || t.allDay || !t.start || !t.end) return ''
+  return `${formatTime(t.start, settings.timeFormat)}–${formatTime(t.end, settings.timeFormat)}`
+})
+
+const slotRemainingLabel = computed(() => {
+  const remaining = focus.slotRemainingMs
+  if (remaining === null) return ''
+  // Rounded up while time remains so the figure only reads "0 min left" once the slot is
+  // genuinely spent, and reported as an overrun past the end rather than a negative number.
+  if (remaining < 0) return `${Math.floor(-remaining / 60_000)} min over`
+  return `${Math.ceil(remaining / 60_000)} min left`
+})
 
 const phase = computed(() => (focus.state?.phase === 'breathing' ? 'breathing' : 'timer'))
 const mode = computed(() => {
@@ -133,6 +212,7 @@ const scroll = ref(Math.PI / 2)
 const wordOpacity = ref('0.22')
 const pulseTomato = ref(false)
 const earlyFinishSheetOpen = ref(false)
+const settleUpOpen = ref(false)
 
 let audio: FocusAudio | null = null
 let raf: number | null = null
@@ -211,6 +291,31 @@ function cancelEarlyFinish(): void {
   audio?.resume()
 }
 
+// ✕ and the milestone Done are the same act — leaving the session — so they share this one
+// path. The prompt is gated on pomodoros completed in THIS session, not the task's cumulative
+// total: a task already at 3/3 from another day would otherwise make an untouched session
+// prompt on the way out, and opening a timer by mistake should cost one tap.
+function leaveSession(): void {
+  if (focus.state !== null && shouldAskWhatGotDone(focus.state)) {
+    focus.pause()
+    audio?.pause()
+    settleUpOpen.value = true
+    return
+  }
+  focus.close()
+}
+
+function closeSession(): void {
+  settleUpOpen.value = false
+  focus.close()
+}
+
+const settleMetaLabel = computed(() => {
+  const poms = focus.state?.sessionPoms ?? 0
+  const title = task.value?.title || 'Untitled'
+  return `${title} · ${poms} pomodoro${poms === 1 ? '' : 's'} this session`
+})
+
 function onVisibilityChange(): void {
   if (document.visibilityState === 'visible') focus.syncNow()
 }
@@ -267,6 +372,11 @@ onUnmounted(() => {
 .fx.overrun
   background: #3a2a1c
 
+// Ten minutes of the timebox left. Warmer than the focus green but cooler than the overrun
+// dusk, so the three states read as one escalating scale. Like overrun, nothing stops.
+.fx.ending-soon
+  background: #4a3a1c
+
 @keyframes fxIn
   from
     opacity: 0
@@ -305,6 +415,129 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, .7)
   text-transform: uppercase
   font-weight: 700
+
+// Three pieces of information separated by weight and brightness rather than by line, so the
+// bar stays one object: the name says what, the slot says when, the remaining figure is the
+// only number that moves on its own and is therefore the brightest.
+.fx .fx-ctx
+  position: absolute
+  top: 56px
+  left: 26px
+  right: 26px
+  z-index: 7
+  display: flex
+  align-items: center
+  gap: 9px
+  padding: 10px 14px
+  border-radius: 11px
+  background: rgba(255, 255, 255, .09)
+  border: 1px solid rgba(255, 255, 255, .14)
+  transition: background .5s, border-color .5s
+
+  .fx-ctx-dot
+    flex: none
+    width: 7px
+    height: 7px
+    border-radius: 50%
+    background: #6fbf95
+    transition: background .5s
+
+  .fx-ctx-main
+    flex: 1
+    min-width: 0
+    display: flex
+    align-items: baseline
+    gap: 8px
+
+  .fx-ctx-name
+    font-size: 12.5px
+    font-weight: 700
+    color: #fff
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  // Fixed for the whole session, so it is the dimmest thing in the bar.
+  .fx-ctx-slot
+    font-size: 11px
+    font-weight: 700
+    color: rgba(255, 255, 255, .5)
+    white-space: nowrap
+
+  .fx-ctx-left
+    flex: none
+    font-size: 11.5px
+    font-weight: 700
+    color: rgba(255, 255, 255, .72)
+
+.fx.ending-soon .fx-ctx
+  background: rgba(255, 255, 255, .15)
+  border-color: rgba(246, 217, 168, .5)
+
+  .fx-ctx-dot
+    background: #c98a2e
+
+  .fx-ctx-name,
+  .fx-ctx-left
+    color: #f6d9a8
+
+  .fx-ctx-slot
+    color: rgba(246, 217, 168, .55)
+
+.fx.overrun .fx-ctx
+  background: rgba(255, 255, 255, .13)
+  border-color: rgba(255, 255, 255, .28)
+
+  .fx-ctx-dot
+    background: #e8a888
+
+  .fx-ctx-name,
+  .fx-ctx-left
+    color: #f5cdb4
+
+  .fx-ctx-slot
+    color: rgba(245, 205, 180, .55)
+
+// Read-only by construction: dots instead of checkboxes, and no interactive elements at all.
+.fx .fx-list
+  position: absolute
+  left: 18px
+  right: 18px
+  bottom: 108px
+  z-index: 7
+  max-height: 132px
+  overflow-y: auto
+
+  .fx-list-h
+    margin: 0 0 4px
+    font-size: 9.5px
+    font-weight: 800
+    letter-spacing: .14em
+    color: rgba(255, 255, 255, .4)
+
+  .fx-sub
+    display: flex
+    align-items: center
+    gap: 10px
+    padding: 7px 0
+
+    i
+      flex: none
+      width: 4px
+      height: 4px
+      border-radius: 50%
+      background: rgba(255, 255, 255, .34)
+
+    span
+      flex: 1
+      min-width: 0
+      font-size: 14px
+      font-weight: 600
+      color: rgba(255, 255, 255, .82)
+
+    &[data-done="true"] span
+      color: rgba(255, 255, 255, .38)
+      text-decoration: line-through
 
 .fx .fx-dots
   position: absolute
@@ -527,4 +760,72 @@ onUnmounted(() => {
     background: $bg
     border: 1px solid $line-2
     color: $ink-2
+
+  // The settle-up sheet carries a list, so it aligns left rather than centring like the
+  // one-question early-finish box.
+  .box--settle
+    text-align: left
+
+  .settle-eyebrow
+    margin: 0
+    font-size: 10px
+    font-weight: 800
+    letter-spacing: .13em
+    color: $ink-2
+
+  // The eyebrow sits directly above the heading, so the heading's default bottom margin
+  // (sized for the centred one-question box) would separate it from its own meta line.
+  .box--settle h4
+    margin: 8px 0 4px
+
+  .settle-meta
+    margin: 4px 0 0
+    font-size: 11.5px
+    font-weight: 700
+    color: $ink-2
+
+  .settle-list
+    list-style: none
+    margin: 14px 0 0
+    padding: 0
+    max-height: 208px
+    overflow-y: auto
+
+  .settle-sub
+    display: grid
+    grid-template-columns: 22px minmax(0, 1fr)
+    align-items: center
+    gap: 12px
+    min-height: 44px
+    border-bottom: 1px solid $line-2
+
+    span
+      min-width: 0
+      font-size: 14px
+      font-weight: 600
+      color: $ink
+
+    &[data-done="true"] span
+      color: $ink-2
+      text-decoration: line-through
+      font-weight: 500
+
+  .settle-chk
+    flex: none
+    width: 20px
+    height: 20px
+    padding: 0
+    border: 1.5px solid $line-2
+    border-radius: 5px
+    background: transparent
+    cursor: pointer
+    display: grid
+    place-items: center
+
+    &[data-on="true"]
+      background: $ink
+      border-color: $ink
+
+  .box--settle .r
+    margin-top: 16px
 </style>

@@ -497,3 +497,158 @@ describe('focus-store pause semantics', () => {
     expect(increment).toHaveBeenCalledTimes(1)
   })
 })
+
+// focus-subtasks spec "The context bar is independent of subtasks": the ring counts down the
+// current pomodoro, but how much of the *timebox* is left is a different and more important
+// clock that the screen never showed.
+describe('focus-store slot remaining', () => {
+  const slot = makeTask({ date: '2023-11-15', start: '09:00', end: '10:00' })
+
+  it('reports the milliseconds left in the timebox, not in the pomodoro', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 17))
+    focus.syncNow()
+
+    expect(focus.slotRemainingMs).toBe(43 * 60_000)
+  })
+
+  it('reports null for an all-day task, which has no bounded slot to measure', async () => {
+    const { focus, open } = setup(makeTask({ allDay: true, start: '', end: '' }))
+    await open()
+    focus.skipBreathing()
+
+    expect(focus.slotRemainingMs).toBeNull()
+  })
+
+  // Past the end the figure keeps counting, negative, so the bar can say how far over it is
+  // rather than freezing at zero and implying the slot just ended.
+  it('goes negative once the slot has passed', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 10, 8))
+    focus.syncNow()
+
+    expect(focus.slotRemainingMs).toBe(-8 * 60_000)
+  })
+})
+
+// focus-subtasks spec "Chimes" / user stories 32-34: a gentle warning at ten minutes that
+// fires once and never stops the pomodoro.
+describe('focus-store ten-minute slot warning', () => {
+  const slot = makeTask({ date: '2023-11-15', start: '09:00', end: '10:00' })
+
+  it('is off with more than ten minutes left', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 45))
+    focus.syncNow()
+
+    expect(focus.slotEndingSoon).toBe(false)
+  })
+
+  it('turns on and chimes once as the slot drops to ten minutes', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+    playChime.mockClear()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 50))
+    focus.syncNow()
+    await nextTick()
+
+    expect(focus.slotEndingSoon).toBe(true)
+    expect(playChime).toHaveBeenCalledWith('slotEndingSoon')
+  })
+
+  it('does not chime again on later ticks inside the window', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 50))
+    focus.syncNow()
+    await nextTick()
+    playChime.mockClear()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 55))
+    focus.syncNow()
+    await nextTick()
+    vi.setSystemTime(new Date(2023, 10, 15, 9, 58))
+    focus.syncNow()
+    await nextTick()
+
+    expect(playChime).not.toHaveBeenCalledWith('slotEndingSoon')
+  })
+
+  // The warning is information, not an interruption: being cut off mid-pomodoro is worse
+  // than running over. Stepped in small increments so the pomodoro itself has not expired —
+  // what is asserted is that crossing the threshold changes nothing about the timer.
+  it('leaves the pomodoro running', async () => {
+    const slotStartingNow = makeTask({ date: '2023-11-15', start: '06:00', end: '06:30' })
+    const { focus, open } = setup(slotStartingNow)
+    await open()
+    focus.skipBreathing()
+    expect(focus.state?.phase).toBe('focus')
+
+    // 06:21 leaves nine minutes of the slot, well inside the warning window, while the
+    // 25-minute pomodoro opened at 06:13 still has time on it.
+    vi.setSystemTime(new Date(2023, 10, 15, 6, 21))
+    focus.syncNow()
+    await nextTick()
+
+    expect(focus.slotEndingSoon).toBe(true)
+    expect(focus.state?.phase).toBe('focus')
+    expect(focus.view?.paused).toBe(false)
+    expect(focus.view?.remainingMs).toBeGreaterThan(0)
+  })
+
+  // Past the end the screen escalates to the overrun treatment, so the amber warning state
+  // stands down rather than competing with it.
+  it('stands down once the slot is actually over', async () => {
+    const { focus, open } = setup(slot)
+    await open()
+    focus.skipBreathing()
+
+    vi.setSystemTime(new Date(2023, 10, 15, 10, 5))
+    focus.syncNow()
+    await nextTick()
+
+    expect(focus.slotEndingSoon).toBe(false)
+    expect(focus.overrunning).toBe(true)
+  })
+
+  // The breathing intro is animation-driven and precedes the first pomodoro. Warning there
+  // would spend the once-per-session latch before the session has really begun.
+  it('holds the warning until the breathing intro is over', async () => {
+    const almostOver = makeTask({ date: '2023-11-15', start: '06:00', end: '06:20' })
+    const { focus, open } = setup(almostOver)
+
+    await open()
+    await nextTick()
+    expect(focus.state?.phase).toBe('breathing')
+    expect(focus.slotEndingSoon).toBe(false)
+    expect(playChime).not.toHaveBeenCalledWith('slotEndingSoon')
+
+    focus.skipBreathing()
+    await nextTick()
+
+    expect(focus.slotEndingSoon).toBe(true)
+    expect(playChime).toHaveBeenCalledWith('slotEndingSoon')
+  })
+
+  it('never warns for an all-day task', async () => {
+    const { focus, open } = setup(makeTask({ allDay: true, start: '', end: '' }))
+    await open()
+    focus.skipBreathing()
+    await nextTick()
+
+    expect(focus.slotEndingSoon).toBe(false)
+    expect(playChime).not.toHaveBeenCalledWith('slotEndingSoon')
+  })
+})

@@ -58,6 +58,7 @@
             :lane="block.lane"
             :start-label="block.startLabel"
             :active="block.active"
+            :subtasks="block.subtasks"
             @click="(e) => emit('eventClick', block.id, e)"
           />
         </div>
@@ -71,6 +72,7 @@ import { computed, onMounted, ref } from 'vue'
 import Pv2EventBlock from './Pv2EventBlock.vue'
 import { assignLanes } from '@/utils/timeline-lanes'
 import { formatTime, type TimeFormatName } from '@/utils/convert-date-time'
+import type { Subtask } from '@/types/subtask'
 
 // Pv2TimeGrid — v2 day time grid, copied from the shared CdTimeGrid (which Week still uses).
 // The geometry is carried over verbatim: same 06:00-23:00 range, same top()/height maths, same
@@ -83,6 +85,9 @@ export interface Pv2GridEvent {
   color: string
   start: number // minutes from midnight
   end: number
+  /** Rendered inline so a block's intent is readable without opening it. Optional: callers
+   *  that have no checklist to show simply omit it. */
+  subtasks?: Subtask[]
 }
 
 export interface Pv2GridAllDayEvent {
@@ -169,6 +174,7 @@ interface LaidOutBlock {
   lane: number
   startLabel: string
   active: boolean
+  subtasks: Subtask[]
 }
 
 const laidOutBlocks = computed<LaidOutBlock[]>(() => {
@@ -191,7 +197,8 @@ const laidOutBlocks = computed<LaidOutBlock[]>(() => {
       right,
       lane: l.lane,
       startLabel: `${minutesToLabel(ev.start)} – ${minutesToLabel(ev.end)}`,
-      active
+      active,
+      subtasks: ev.subtasks ?? []
     }
   })
 })

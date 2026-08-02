@@ -56,7 +56,8 @@ const timedEvents = computed<Pv2GridEvent[]>(() =>
       title: t.title,
       color: themeOf(t).backgroundColor,
       start: minutes(t.start),
-      end: minutes(t.end)
+      end: minutes(t.end),
+      subtasks: tasksStore.subtasksFor(t.id)
     }))
 )
 
