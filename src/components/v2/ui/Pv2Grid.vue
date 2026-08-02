@@ -1,6 +1,7 @@
 <template>
   <!--
-    7 欄月曆格。只畫水平線：容器 top 邊 + cell 各自 bottom 邊，欄與欄之間不分隔。
+    7 欄月曆格。只畫水平線：容器 top 邊 + cell 各自 bottom 邊（最後一列除外），
+    欄與欄之間不分隔。
     grid-auto-rows:1fr 讓 5/6 週月份都撐滿可用高度（不同月 row 數不同，避免固定 density 破版）。
     maxChips 依實測 row 高度算（ResizeObserver），Caveat 載入後高度變也會重算。
   -->
@@ -73,5 +74,12 @@ const maxChips = computed(() => {
   grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: 1fr;
   border-top: 1px solid #e2e2e2;
+}
+
+/* 最後一列不收底線，月曆下緣開放。cell 是扁平 v-for，最後一列＝最後 7 個子元素；
+   從尾端數所以 5 週與 6 週的月份都適用。border-bottom 定義在 Pv2Cell 的 scoped
+   style，需 :deep() 才能覆寫。 */
+.pv2-grid :deep(.pv2-cell:nth-last-child(-n + 7)) {
+  border-bottom: none;
 }
 </style>
