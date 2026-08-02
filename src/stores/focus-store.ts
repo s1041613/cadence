@@ -50,7 +50,9 @@ export const useFocusStore = defineStore('focus', () => {
       focusMs: DEFAULT_FOCUS_MS,
       restMs: DEFAULT_REST_MS,
       estPoms: estPomsOf(t),
-      doneCount: Math.min(t.completedPomodoros ?? 0, estPomsOf(t))
+      // Unclamped, so the ring can read 4/3. The denominator stays at the original estimate:
+      // a numerator past it is itself the signal that the plan has been exceeded.
+      doneCount: t.completedPomodoros ?? 0
     }
   })
 

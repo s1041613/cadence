@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, pomsInSlot, defaultPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime } from './convert-date-time'
+import { DEFAULT_FOCUS_MS, DEFAULT_REST_MS } from './focus-timer'
 
 describe('pad', () => {
   it('pads single digits', () => {
@@ -186,6 +187,62 @@ describe('isSlotOver', () => {
 
   it('is never over for an all-day event', () => {
     expect(isSlotOver({ allDay: true, date: '2026-07-31', end: '' }, new Date(2027, 0, 1))).toBe(false)
+  })
+})
+
+describe('pomsInSlot', () => {
+  // focus-subtasks spec "A new slot-to-pomodoro function supplies the default for newly
+  // created events only". Unlike autoPoms this counts the breaks between pomodoros, so the
+  // answer is what actually fits: a 2-hour slot holds 4 (115 min), not 5 (145 min).
+  const FOCUS = 25 * 60_000
+  const REST = 5 * 60_000
+  const slot = (min: number) => ({ allDay: false, start: '10:00', end: toHM(minutes('10:00') + min) })
+
+  it.each([
+    [120, 4, 'the worked example: 5 would need 145 min and overrun the slot'],
+    [25, 1, 'exactly one pomodoro, no break needed'],
+    [55, 2, 'two pomodoros plus the break between them'],
+    [60, 2, 'the spare 5 min cannot hold a third'],
+    [85, 3, 'three pomodoros and two breaks']
+  ])('a %i-minute slot holds %i pomodoros (%s)', (min, expected) => {
+    expect(pomsInSlot(slot(min), FOCUS, REST)).toBe(expected)
+  })
+
+  // The boundary the spec calls out: one more minute must not silently admit another pomodoro.
+  it('admits another pomodoro only once the slot genuinely grows to fit it', () => {
+    expect(pomsInSlot(slot(54), FOCUS, REST)).toBe(1)
+    expect(pomsInSlot(slot(55), FOCUS, REST)).toBe(2)
+  })
+
+  // A slot too short for even one pomodoro still offers one: the estimate is a reference,
+  // and zero would render as "0 sessions" on the card.
+  it('never returns less than one', () => {
+    expect(pomsInSlot(slot(10), FOCUS, REST)).toBe(1)
+  })
+
+  it('gives an all-day event one pomodoro, matching autoPoms', () => {
+    expect(pomsInSlot({ allDay: true, start: '', end: '' }, FOCUS, REST)).toBe(1)
+  })
+
+  // The distinction from autoPoms is the whole point of the function existing.
+  it('is more conservative than autoPoms wherever breaks change the answer', () => {
+    const twoHours = slot(120)
+    expect(autoPoms(twoHours)).toBe(5)
+    expect(pomsInSlot(twoHours, FOCUS, REST)).toBe(4)
+  })
+})
+
+describe('defaultPoms', () => {
+  // The creation-time wrapper. It restates the pomodoro lengths rather than importing them,
+  // so that this module stays independent of focus-timer — this test is what stops the two
+  // copies drifting apart unnoticed.
+  it('uses the same focus and rest lengths as the focus timer', () => {
+    const twoHours = { allDay: false, start: '10:00', end: '12:00' }
+    expect(defaultPoms(twoHours)).toBe(pomsInSlot(twoHours, DEFAULT_FOCUS_MS, DEFAULT_REST_MS))
+  })
+
+  it('gives an all-day task one', () => {
+    expect(defaultPoms({ allDay: true, start: '', end: '' })).toBe(1)
   })
 })
 

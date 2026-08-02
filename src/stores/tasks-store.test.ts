@@ -63,6 +63,31 @@ describe('tasks-store', () => {
     deleteTaskMock.mockResolvedValue(undefined)
   })
 
+  describe('mkTask default pomodoro estimate', () => {
+    // focus-subtasks spec "A new slot-to-pomodoro function supplies the default for newly
+    // created events only": a fresh task's estimate must be achievable within its slot.
+    // The old count ignored breaks, so a 2-hour slot was seeded with 5 — 145 minutes of work
+    // in a 120-minute block, an overrun guaranteed before the user starts.
+    it('seeds a two-hour slot with a count that fits', () => {
+      expect(mkTask({ date: '2026-08-02', start: '10:00', end: '12:00', calendarId: DEFAULT_CALENDAR_UUID }).estimatedPomodoros).toBe(4)
+    })
+
+    it('seeds a one-hour slot with two', () => {
+      expect(mkTask({ date: '2026-08-02', start: '10:00', end: '11:00', calendarId: DEFAULT_CALENDAR_UUID }).estimatedPomodoros).toBe(2)
+    })
+
+    it('seeds an all-day task with one', () => {
+      expect(mkTask({ date: '2026-08-02', allDay: true, start: '', end: '', calendarId: DEFAULT_CALENDAR_UUID }).estimatedPomodoros).toBe(1)
+    })
+
+    // An explicit override still wins: the derived count is only a default.
+    it('lets an explicit estimate override the derived default', () => {
+      expect(
+        mkTask({ date: '2026-08-02', start: '10:00', end: '12:00', estimatedPomodoros: 7, calendarId: DEFAULT_CALENDAR_UUID }).estimatedPomodoros
+      ).toBe(7)
+    })
+  })
+
   describe('copyToDays', () => {
     it('copies to every date even when the slot conflicts with an existing task', async () => {
       const store = await signedInStore()
@@ -136,7 +161,10 @@ describe('tasks-store', () => {
       expect(store.tasks[0]!.completedPomodoros).toBe(1)
     })
 
-    it('does not increase beyond the estimated pomodoro count', async () => {
+    // focus-subtasks spec "The estimate ceases to be an upper bound": a user in flow at the
+    // estimate can record a further pomodoro. Previously this silently did nothing — the
+    // Math.min meant the button worked but the count never moved.
+    it('increases past the estimated pomodoro count', async () => {
       const store = await signedInStore()
       const task = mkTask({
         date: '2026-07-10',
@@ -150,10 +178,10 @@ describe('tasks-store', () => {
 
       store.incrementCompletedPomodoros(task.id)
 
-      expect(store.tasks[0]!.completedPomodoros).toBe(2)
+      expect(store.tasks[0]!.completedPomodoros).toBe(3)
     })
 
-    it('falls back to auto pomodoro count when the estimate is invalid', async () => {
+    it('keeps counting when the estimate is zero', async () => {
       const store = await signedInStore()
       const task = mkTask({
         date: '2026-07-10',
@@ -167,7 +195,7 @@ describe('tasks-store', () => {
 
       store.incrementCompletedPomodoros(task.id)
 
-      expect(store.tasks[0]!.completedPomodoros).toBe(3)
+      expect(store.tasks[0]!.completedPomodoros).toBe(4)
     })
   })
 

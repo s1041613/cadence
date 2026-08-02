@@ -129,8 +129,10 @@ export function taskToRow(task: Task, ctx: MapContext): EventRow {
     repeat_mode: task.repeat,
     done: task.done,
     estimated_pomodoros: estimated,
-    // completed_pomodoros_within_estimate: clamp only when an estimate exists.
-    completed_pomodoros: estimated > 0 ? Math.min(task.completedPomodoros, estimated) : task.completedPomodoros
+    // Not clamped to the estimate: the estimate is derived from the slot length, so it is a
+    // reference rather than a limit, and a count past it is displayed as 4/3. The DB
+    // constraint that used to enforce the ceiling was dropped in the same change.
+    completed_pomodoros: task.completedPomodoros
   }
 }
 

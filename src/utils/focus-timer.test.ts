@@ -15,6 +15,7 @@ import {
   resume,
   parseFocusState,
   decideRehydrate,
+  shouldAskWhatGotDone,
   type FocusConfig,
   type FocusState
 } from './focus-timer'
@@ -39,6 +40,7 @@ function focusState(over: Partial<FocusState> = {}): FocusState {
     phase: 'focus',
     durationMs: DEFAULT_FOCUS_MS,
     segment: { status: 'running', endsAt: T0 + DEFAULT_FOCUS_MS },
+    sessionPoms: 0,
     updatedAt: T0,
     ...over
   }
@@ -219,13 +221,101 @@ describe('session actions', () => {
     expect(anotherPomodoro(rest, cfg({ doneCount: 1 }), T0).state!.phase).toBe('focus')
   })
 
-  // Previously this silently no-opped, leaving the user with a dead button.
-  it('refuses another pomodoro once every one is done', () => {
+  // focus-subtasks spec "The completed phase becomes a fork, not a terminus". The milestone
+  // screen states that the planned pomodoros are done and offers a way onward; the estimate is
+  // a reference, so reaching it must not disable the button.
+  it('allows another pomodoro from the milestone screen', () => {
+    const done = focusState({ phase: 'done' })
+    const full = cfg({ doneCount: 4, estPoms: 4 })
+
+    expect(canStartAnotherPomodoro(done, full)).toBe(true)
+    expect(anotherPomodoro(done, full, T0).state!.phase).toBe('focus')
+  })
+
+  it('allows another pomodoro during rest even once the estimate is reached', () => {
     const rest = focusState({ phase: 'rest' })
     const full = cfg({ doneCount: 4, estPoms: 4 })
 
-    expect(canStartAnotherPomodoro(rest, full)).toBe(false)
-    expect(anotherPomodoro(rest, full, T0).state!.phase).toBe('rest')
+    expect(canStartAnotherPomodoro(rest, full)).toBe(true)
+  })
+
+  // Each pomodoro past the estimate returns here, so the count keeps climbing against a fixed
+  // denominator — 5/4, 6/4 — rather than the screen becoming a dead end.
+  it('still allows another pomodoro once past the estimate', () => {
+    const done = focusState({ phase: 'done' })
+    expect(canStartAnotherPomodoro(done, cfg({ doneCount: 6, estPoms: 4 }))).toBe(true)
+  })
+
+  // The guard is about phase, not count: mid-pomodoro there is nothing to start.
+  it('refuses another pomodoro while a pomodoro is running', () => {
+    const focus = focusState({ phase: 'focus' })
+    expect(canStartAnotherPomodoro(focus, cfg({ doneCount: 1, estPoms: 4 }))).toBe(false)
+  })
+})
+
+describe('session pomodoro counter', () => {
+  // focus-subtasks spec "The settle-up prompt is gated on pomodoros completed in this session".
+  // The task's stored completedPomodoros is a cumulative DB total, so a task already at 3/3
+  // from yesterday would wrongly satisfy the gate. This counter belongs to the session.
+  it('starts a session at zero', () => {
+    expect(startSession('task-1', T0).sessionPoms).toBe(0)
+  })
+
+  it('is unchanged by breathing being skipped', () => {
+    const s = startSession('task-1', T0)
+    expect(skipBreathing(s, cfg(), T0).sessionPoms).toBe(0)
+  })
+
+  it('counts a pomodoro that runs to its end', () => {
+    const focus = focusState({ segment: { status: 'running', endsAt: T0 } })
+    expect(advanceExpired(focus, cfg({ doneCount: 0 }), T0).state!.sessionPoms).toBe(1)
+  })
+
+  it('counts a pomodoro finished early', () => {
+    const focus = focusState()
+    expect(finishEarly(focus, cfg({ doneCount: 0 }), T0).state!.sessionPoms).toBe(1)
+  })
+
+  it('accumulates across several pomodoros', () => {
+    let state = focusState({ sessionPoms: 2 })
+    state = finishEarly(state, cfg({ doneCount: 2 }), T0).state!
+    expect(state.sessionPoms).toBe(3)
+  })
+
+  // A break is not work: only completing focus increments the count.
+  it('does not count a completed rest', () => {
+    const rest = focusState({ phase: 'rest', sessionPoms: 1, segment: { status: 'running', endsAt: T0 } })
+    expect(advanceExpired(rest, cfg({ doneCount: 1 }), T0).state!.sessionPoms).toBe(1)
+  })
+
+  it('carries the count through starting another pomodoro', () => {
+    const done = focusState({ phase: 'done', sessionPoms: 4 })
+    expect(anotherPomodoro(done, cfg({ doneCount: 4 }), T0).state!.sessionPoms).toBe(4)
+  })
+
+  it('carries the count through a pause and resume', () => {
+    const focus = focusState({ sessionPoms: 2 })
+    const paused = pause(focus, cfg(), T0).state!
+    expect(paused.sessionPoms).toBe(2)
+    expect(resume(paused, T0).sessionPoms).toBe(2)
+  })
+})
+
+describe('shouldAskWhatGotDone', () => {
+  // The gate for the settle-up prompt. Pure so the rule is testable without a store: leaving
+  // is worth a question only when something was actually completed to report.
+  it('does not ask when no pomodoro was completed this session', () => {
+    expect(shouldAskWhatGotDone(focusState({ sessionPoms: 0 }))).toBe(false)
+  })
+
+  it('asks once a pomodoro has been completed', () => {
+    expect(shouldAskWhatGotDone(focusState({ sessionPoms: 1 }))).toBe(true)
+  })
+
+  // The distinction the spec calls out: the task's lifetime total is irrelevant here.
+  it('ignores pomodoros completed in earlier sessions', () => {
+    const freshSessionOnAWellWorkedTask = focusState({ sessionPoms: 0 })
+    expect(shouldAskWhatGotDone(freshSessionOnAWellWorkedTask)).toBe(false)
   })
 })
 
@@ -240,6 +330,12 @@ describe('parseFocusState', () => {
     ['null', null],
     ['a string', 'nope'],
     ['a wrong version', { ...valid, version: 99 }],
+    // The concrete migration case the version bump exists for: a v1 payload is well-formed in
+    // every field it has, but has no record of how much of the session was worked. Reading it
+    // as zero would silently skip the settle-up prompt after real work.
+    ['a session persisted before sessionPoms existed', { ...valid, version: 1, sessionPoms: undefined }],
+    ['a negative session count', { ...valid, sessionPoms: -1 }],
+    ['a fractional session count', { ...valid, sessionPoms: 1.5 }],
     ['an empty taskId', { ...valid, taskId: '' }],
     ['a non-string taskId', { ...valid, taskId: 42 }],
     ['an unknown phase', { ...valid, phase: 'sprinting' }],

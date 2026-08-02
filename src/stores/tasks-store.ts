@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
-import { autoPoms, estPomsOf } from '@/utils/convert-date-time'
+import { defaultPoms, estPomsOf } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
 import { notifySyncError } from '@/lib/notify'
@@ -26,7 +26,7 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
     important: false,
     urgent: false,
     done: false,
-    estimatedPomodoros: autoPoms({ allDay, start, end }),
+    estimatedPomodoros: defaultPoms({ allDay, start, end }),
     completedPomodoros: 0,
     type: 'quadrant',
     backgroundColor: null,
@@ -229,8 +229,9 @@ export const useTasksStore = defineStore('tasks', () => {
     const task = tasks.value.find((t) => t.id === id)
     if (!task) return
 
-    const limit = estPomsOf(task)
-    const snapshot: Task = { ...task, completedPomodoros: Math.min(task.completedPomodoros + 1, limit) }
+    // Uncapped: the estimate is a reference, so a pomodoro past it still counts. Clamping
+    // here made the "start another pomodoro" button appear to work while the count stood still.
+    const snapshot: Task = { ...task, completedPomodoros: task.completedPomodoros + 1 }
 
     const ctx = syncCtx
     if (ctx === null) {
