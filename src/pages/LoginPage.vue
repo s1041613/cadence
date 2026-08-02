@@ -78,18 +78,11 @@ function signInWithApple(): void {
 </script>
 
 <style scoped>
-/* 首繪 viewport 短缺（iOS standalone 少算 status bar）露出的是 body 底色；
-   在登入頁把 body 染成 panel 同色，讓任何 viewport 抖動的露出帶隱形 */
-:global(body:has(.login)) {
-  background: var(--cd-surface-raised);
-}
-
 .login {
   height: 100dvh;
   width: 100%;
   display: flex;
   justify-content: center;
-  /* 與 panel 同色：frame 高度被 cap 或 viewport 短缺時，露出帶與 panel 無色差 */
   background: var(--cd-surface-raised);
 }
 
@@ -239,14 +232,5 @@ function signInWithApple(): void {
   font: 400 var(--cd-fs-12) var(--cd-font-ui);
   color: #9a3328;
   text-align: center;
-}
-
-.login__home-indicator {
-  margin-top: auto;
-  margin-bottom: 9px;
-  width: 134px;
-  height: 5px;
-  border-radius: var(--cd-radius-pill);
-  background: var(--cd-scrim);
 }
 </style>

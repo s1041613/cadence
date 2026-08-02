@@ -25,5 +25,5 @@ onMounted(() => {
 .app-layout,
 .app-page-container
   width: 100%
-  min-height: 100dvh
+  height: 100dvh
 </style>
