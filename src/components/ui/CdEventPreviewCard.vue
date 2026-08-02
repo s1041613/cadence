@@ -72,8 +72,10 @@
     </div>
 
     <!-- Focus sessions write completed_pomodoros back to the event row, which RLS only allows for
-         the author — hidden alongside the other write actions on foreign events. -->
-    <div v-if="isTask && mine" class="cd-preview-card__focus-wrap">
+         the author — hidden alongside the other write actions on foreign events.
+         All-day tasks are excluded: a pomodoro measures a bounded slot, and an all-day task has
+         none to measure against. -->
+    <div v-if="isTask && mine && !allDay" class="cd-preview-card__focus-wrap">
       <button type="button" class="cd-preview-card__focus-start" @click="emit('startFocus')">
         <CdIcon name="tomato" :size="19" />
         Start focus session
@@ -102,6 +104,7 @@ const props = withDefaults(
     color: string
     whenLabel: string
     isTask: boolean
+    allDay?: boolean
     alertLabel: string
     quadLabel: string
     guests?: Array<{ id: string; name: string; avatar: string }>
@@ -110,7 +113,7 @@ const props = withDefaults(
     mine?: boolean
     owner?: string
   }>(),
-  { mine: true }
+  { mine: true, allDay: false }
 )
 
 const emit = defineEmits<{
