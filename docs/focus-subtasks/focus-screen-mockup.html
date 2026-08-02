@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Focus 畫面 — 現況 vs 設計稿</title>
+<style>
+  :root{
+    --ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+    --serif:'Instrument Serif',Georgia,serif;
+  }
+  body{margin:0;background:#efeeea;color:#1b1b1b;font-family:var(--ui);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 24px 80px;}
+  .eyebrow{font:800 11px var(--mono);letter-spacing:.16em;color:#9c9c9c;margin:0 0 10px;}
+  h1{font:500 32px/1.15 var(--serif);margin:0 0 10px;}
+  .lede{margin:0 0 22px;max-width:64ch;font-size:15px;line-height:1.6;color:#6e6e6e;}
+  .toggle{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 10px;padding:5px;background:#fff;
+    border:1px solid #e2e2e2;border-radius:10px;width:fit-content;}
+  .toggle button{border:0;background:transparent;color:#6e6e6e;font:600 13px var(--ui);
+    padding:8px 14px;border-radius:7px;cursor:pointer;}
+  .toggle button[aria-selected="true"]{background:#1b1b1b;color:#fff;}
+  .tabnote{font-size:13px;color:#9c9c9c;margin:0 0 22px;min-height:1.4em;max-width:62ch;line-height:1.55;}
+  .stage{display:grid;grid-template-columns:393px 1fr;gap:32px;align-items:start;}
+  @media(max-width:900px){.stage{grid-template-columns:1fr;}}
+  .panel-label{font:800 10px var(--mono);letter-spacing:.14em;color:#9c9c9c;margin:0 0 10px;}
+
+  /* ---------- phone shell: colours lifted from FocusSession.vue ---------- */
+  .fx{
+    position:relative;width:393px;max-width:100%;height:700px;border-radius:26px;overflow:hidden;
+    background:#0e3527;color:#fff;display:flex;flex-direction:column;align-items:center;
+    transition:background .8s ease;border:1px solid rgba(0,0,0,.14);
+  }
+  .fx[data-s="soon"]{background:#4a3a1c;}
+  .fx[data-s="over"]{background:#3a2a1c;}   /* the real .fx.overrun value */
+
+  .fx-top{display:flex;justify-content:flex-end;align-items:center;gap:9px;
+    width:100%;padding:16px 16px 0;flex:none;}
+  .fx-close{background:rgba(255,255,255,.14);color:#fff;border:0;width:36px;height:36px;
+    border-radius:999px;cursor:pointer;font-size:15px;line-height:1;}
+  .fx-close:hover{background:rgba(255,255,255,.26);}
+  .fx-hud{font:700 12px var(--ui);letter-spacing:.08em;color:rgba(255,255,255,.7);
+    text-transform:uppercase;margin-top:14px;flex:none;}
+
+  /* ---------- NEW: context bar ---------- */
+  .ctx{
+    display:flex;align-items:center;gap:9px;width:calc(100% - 52px);margin:20px 26px 0;
+    padding:10px 14px;border-radius:11px;flex:none;
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);
+    transition:background .5s,border-color .5s;
+  }
+  .ctx[hidden]{display:none;}
+  .fx[data-s="soon"] .ctx{background:rgba(255,255,255,.15);border-color:rgba(246,217,168,.5);}
+  .fx[data-s="over"] .ctx{background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.28);}
+  .ctx i{flex:none;width:7px;height:7px;border-radius:50%;background:#6fbf95;transition:background .5s;}
+  .fx[data-s="soon"] .ctx i{background:#C98A2E;}
+  .fx[data-s="over"] .ctx i{background:#e8a888;}
+  .ctx-main{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;}
+  .ctx-name{font:700 12.5px var(--ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ctx-slot{font:700 11px var(--mono);color:rgba(255,255,255,.5);white-space:nowrap;}
+  /* The only number that moves on its own — kept brighter than the fixed slot. */
+  .ctx-left{flex:none;font:700 11.5px var(--mono);color:rgba(255,255,255,.72);}
+  .fx[data-s="soon"] .ctx-name,.fx[data-s="soon"] .ctx-left{color:#f6d9a8;}
+  .fx[data-s="soon"] .ctx-slot{color:rgba(246,217,168,.55);}
+  .fx[data-s="over"] .ctx-name,.fx[data-s="over"] .ctx-left{color:#f5cdb4;}
+  .fx[data-s="over"] .ctx-slot{color:rgba(245,205,180,.55);}
+
+  /* ---------- ring ---------- */
+  .ring{position:relative;width:248px;height:248px;margin:14px auto 0;flex:none;}
+  .ring svg{display:block;transform:rotate(-90deg);}
+  .rt{fill:none;stroke:rgba(255,255,255,.16);stroke-width:5;}
+  .rp{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;
+    transition:stroke-dashoffset .6s ease,stroke .5s;}
+  .fx[data-s="soon"] .rp{stroke:#f6d9a8;}
+  .fx[data-s="over"] .rp{stroke:#f0bda0;}
+  .ring-face{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;}
+  .ft{display:flex;align-items:center;gap:7px;font:700 15px var(--ui);color:#ffd9cf;}
+  .fp{font:700 11px var(--mono);color:#ffd9cf;}
+  .tom{font-size:34px;line-height:1;}
+  .fk{font:700 50px/1 var(--mono);color:#fff;font-variant-numeric:tabular-nums;}
+  .fl{font:700 11px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);}
+  .hintline{font:700 11px var(--ui);color:rgba(255,214,170,.82);margin-top:2px;}
+
+  /* ---------- NEW: read-only subtask checklist ---------- */
+  .fx-list{width:calc(100% - 36px);margin:14px 18px 0;flex:1;min-height:0;overflow-y:auto;}
+  .fx-list-h{font:800 9.5px var(--mono);letter-spacing:.14em;color:rgba(255,255,255,.4);margin:0 0 4px;}
+  .fx-sub{display:flex;align-items:center;gap:10px;padding:7px 0;}
+  .fx-sub i{flex:none;width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.34);}
+  .fx-sub span{flex:1;min-width:0;font:600 14px var(--ui);color:rgba(255,255,255,.82);}
+  .fx-sub[data-done="true"] span{color:rgba(255,255,255,.38);text-decoration:line-through;}
+
+  .fx-bar{display:flex;gap:12px;width:100%;padding:16px 26px 34px;flex:none;margin-top:auto;}
+  /* display:flex above out-specifies the hidden attribute — without this the two bars stack. */
+  .fx-bar[hidden]{display:none;}
+  .fx-bar button{flex:1;border:0;border-radius:999px;padding:13px 26px;
+    font:700 14px var(--ui);cursor:pointer;}
+  .sec{background:rgba(255,255,255,.14);color:#fff;}
+  .prim{background:#fff;color:#0e3527;transition:color .5s;}
+  .fx[data-s="soon"] .prim{color:#4a3a1c;}
+  .fx[data-s="over"] .prim{color:#3a2a1c;}
+
+  /* ---------- end sheet ---------- */
+  .scrim{position:absolute;inset:0;background:rgba(20,18,14,.55);}
+  .esheet{position:absolute;left:0;right:0;bottom:0;background:#fafaf9;color:#1b1b1b;
+    border-radius:20px 20px 0 0;padding:8px 18px 20px;display:flex;flex-direction:column;}
+  .grab{width:36px;height:4px;border-radius:2px;background:#d8d8d6;margin:4px auto 14px;}
+  .es-eyebrow{font:800 10px var(--mono);letter-spacing:.13em;color:#6e6e6e;}
+  .es-title{font:500 26px/1.2 var(--serif);margin:8px 0 4px;}
+  .es-meta{font:700 11.5px var(--mono);color:#6e6e6e;margin:0;font-variant-numeric:tabular-nums;}
+  .es-list{list-style:none;margin:14px 0 0;padding:0;}
+  .es-sub{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:12px;
+    min-height:44px;border-bottom:1px solid #e2e2e2;}
+  .es-chk{width:20px;height:20px;border:1.5px solid #b2b2b2;border-radius:5px;background:transparent;
+    cursor:pointer;padding:0;display:grid;place-items:center;}
+  .es-chk[data-on="true"]{background:#1b1b1b;border-color:#1b1b1b;}
+  .es-sub span{min-width:0;font:600 14px var(--ui);}
+  .es-sub[data-done="true"] span{color:#b2b2b2;text-decoration:line-through;font-weight:500;}
+  .es-bar{display:flex;gap:10px;margin-top:16px;}
+  .es-bar button{flex:1;border:0;border-radius:6px;padding:14px;font:800 13px var(--ui);cursor:pointer;}
+  .es-skip{background:transparent;color:#6e6e6e;}
+  .es-done{background:#1b1b1b;color:#fff;}
+
+  /* ---------- notes ---------- */
+  .notes{display:flex;flex-direction:column;gap:13px;}
+  .note{background:#fff;border:1px solid #e2e2e2;border-radius:10px;padding:16px 18px;}
+  .note h3{margin:0 0 8px;font:800 11px var(--mono);letter-spacing:.11em;color:#9c9c9c;}
+  .note p{margin:0 0 8px;font-size:13.5px;line-height:1.6;color:#6e6e6e;}
+  .note p:last-child{margin-bottom:0;}
+  .note strong{color:#1b1b1b;font-weight:600;}
+  .note code{font:600 12px var(--mono);background:#f0efec;padding:1px 5px;border-radius:4px;color:#1b1b1b;}
+  .note.warn{border-color:#C98A2E;}.note.warn h3{color:#C98A2E;}
+  .note.ok{border-color:#2f7a54;}.note.ok h3{color:#2f7a54;}
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl td{padding:6px 0;border-bottom:1px solid #ececec;color:#6e6e6e;vertical-align:top;}
+  .tbl td:first-child{font:600 11px var(--mono);color:#1b1b1b;width:36%;padding-right:10px;}
+  .tbl tr:last-child td{border-bottom:0;}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">CADENCE · 專注畫面</p>
+  <h1>開始 focus 之後的畫面</h1>
+  <p class="lede">
+    左邊是設計稿要達到的樣子。<strong>綠底、環、50px 倒數、圓角按鈕都是現況已有的</strong>，
+    顏色直接取自 <code>FocusSession.vue</code>（<code>#0e3527</code> / 超時 <code>#3a2a1c</code>）。
+    <strong>新增的只有兩塊</strong>：頂部 context bar 和環下方的 read-only 子任務清單。
+  </p>
+
+  <div class="toggle" role="tablist">
+    <button role="tab" aria-selected="true" data-k="now">① 無子任務</button>
+    <button role="tab" aria-selected="false" data-k="focus">② 專注中</button>
+    <button role="tab" aria-selected="false" data-k="soon">③ 剩 10 分</button>
+    <button role="tab" aria-selected="false" data-k="over">④ 已超時</button>
+    <button role="tab" aria-selected="false" data-k="done">⑤ 原定做完了</button>
+    <button role="tab" aria-selected="false" data-k="end">⑥ ✕ 關閉 → 結算</button>
+    <button role="tab" aria-selected="false" data-k="early">⑦ Finish → 算不算一顆</button>
+    <button role="tab" aria-selected="false" data-k="fresh">⑧ 剛開就關（不問）</button>
+  </div>
+  <p class="tabnote" id="tabnote"></p>
+
+  <div class="stage">
+    <section>
+      <p class="panel-label">393px</p>
+      <div class="fx" id="fx" data-s="">
+        <div class="fx-top"><button class="fx-close" id="btnClose" aria-label="Close">✕</button></div>
+        <div class="fx-hud" id="hud">FOCUS · POMODORO</div>
+
+        <div class="ctx" id="ctx">
+          <i></i>
+          <span class="ctx-main">
+            <span class="ctx-name">讀書</span>
+            <span class="ctx-slot">17:00–18:00</span>
+          </span>
+          <span class="ctx-left" id="ctxLeft">剩 43 分</span>
+        </div>
+
+        <div class="ring">
+          <svg width="248" height="248" viewBox="0 0 248 248">
+            <circle class="rt" cx="124" cy="124" r="114"></circle>
+            <circle class="rp" id="ring" cx="124" cy="124" r="114"
+              stroke-dasharray="716.3" stroke-dashoffset="200"></circle>
+          </svg>
+          <div class="ring-face">
+            <div class="ft"><span>讀書</span><span class="fp mono" id="pom">1/3</span></div>
+            <div class="tom">🍅</div>
+            <div class="fk" id="clock">18:24</div>
+            <div class="fl" id="status">FOCUSING</div>
+            <div class="hintline" id="hint" hidden>Past scheduled end time</div>
+            <div class="hintline" id="doneHint" hidden style="color:#bff0d4">原定的 3 顆做完了</div>
+          </div>
+        </div>
+
+        <div class="fx-list" id="fxList">
+          <p class="fx-list-h">SUBTASKS</p>
+          <div id="fxSubs"></div>
+        </div>
+
+        <div class="fx-bar" id="barFocus">
+          <button class="sec">Pause</button>
+          <button class="prim" id="btnFinish">Finish</button>
+        </div>
+
+        <!-- Mutually exclusive with the bar above: this one exists ONLY at doneCount === estPoms.
+             Never both on screen, and never this one while a pomodoro is running. -->
+        <div class="fx-bar" id="barDone" hidden>
+          <button class="sec" id="btnDoneClose">Done</button>
+          <button class="prim">Start another pomodoro</button>
+        </div>
+
+        <!-- ✕ / Done → session-level settle-up -->
+        <div id="endLayer" hidden>
+          <div class="scrim"></div>
+          <div class="esheet">
+            <div class="grab"></div>
+            <p class="es-eyebrow">FOCUS ENDED</p>
+            <h2 class="es-title">做完了什麼？</h2>
+            <p class="es-meta" id="endMeta">讀書 · 2 顆番茄 · 52 分</p>
+            <ul class="es-list" id="endSubs"></ul>
+            <div class="es-bar">
+              <button class="es-skip">跳過</button>
+              <button class="es-done">完成</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finish → pomodoro-level count question. Never co-occurs with the sheet above. -->
+        <div id="earlyLayer" hidden>
+          <div class="scrim"></div>
+          <div class="esheet">
+            <div class="grab"></div>
+            <p class="es-eyebrow">POMODORO</p>
+            <h2 class="es-title">Finish early?</h2>
+            <p class="es-meta">Time's not up yet. Count this as a completed pomodoro?</p>
+            <div class="es-bar" style="margin-top:20px">
+              <button class="es-skip">Keep focusing</button>
+              <button class="es-done">Yes, count it</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="notes">
+      <div class="note ok">
+        <h3>✅ 已經有的（不用改）</h3>
+        <table class="tbl">
+          <tr><td>綠底 + 環 + 倒數</td><td><code>#0e3527</code>、<code>stroke-width:5</code>、50px mono 倒數 —— 左邊那些全是現況</td></tr>
+          <tr><td>環中央 <code>1/3</code></td><td><code>FocusSession.vue:59</code> 已是這個格式</td></tr>
+          <tr><td>超時轉暖褐</td><td><code>.fx.overrun</code> → <code>#3a2a1c</code>，<code>.8s</code> 漸變，且<strong>不停止計時</strong></td></tr>
+          <tr><td>Pause / Finish</td><td>圓角膠囊按鈕已是現況</td></tr>
+        </table>
+      </div>
+
+      <div class="note">
+        <h3>新增①：頂部 context bar</h3>
+        <p>三段資訊，靠<strong>視覺層次</strong>區分而不是分行：</p>
+        <table class="tbl">
+          <tr><td>名稱</td><td>白、粗 —— 你在做什麼</td></tr>
+          <tr><td><code>17:00–18:00</code></td><td>淡 50%、mono —— <strong>固定不動</strong>，所以最暗</td></tr>
+          <tr><td>剩 43 分</td><td>亮 72%、mono —— <strong>唯一會自己變的數字</strong></td></tr>
+        </table>
+        <p style="margin-top:10px">為什麼需要它：環中央倒數的是<strong>這顆番茄</strong>，但「這個時間箱還剩多久」目前<strong>畫面上完全看不到</strong>。兩個時間尺度不同，不能共用一個數字。</p>
+      </div>
+
+      <div class="note">
+        <h3>新增②：子任務清單（read-only）</h3>
+        <p>放在環和按鈕之間，<strong>不能勾</strong>。設計稿自己寫了理由：勾選框會誘發中途 fiddling，而「只在結束時問一次」這個決定就是為了避免它。</p>
+        <p>所以這裡是 <code>&lt;div&gt;</code> 不是 <code>&lt;button&gt;</code>，只有小圓點不是 checkbox —— <strong>外觀就要看得出不能點</strong>。</p>
+      </div>
+
+      <div class="note warn">
+        <h3>⚠️ 三層提示只有第三層做了</h3>
+        <table class="tbl">
+          <tr><td><span class="swatch" style="background:#0e3527"></span>全程</td><td>頂部剩餘時間 —— <strong>❌ 未實作</strong>（沒有 context bar）</td></tr>
+          <tr><td><span class="swatch" style="background:#4a3a1c"></span>剩 10 分</td><td>整片轉琥珀 + <strong>響一次</strong> —— <strong>❌ 未實作</strong>。<code>make-focus-chime.ts:10</code> 只有三種音，無警示音、無 10 分門檻</td></tr>
+          <tr><td><span class="swatch" style="background:#3a2a1c"></span>超時</td><td>轉暖褐 —— <strong>✅ 已實作</strong></td></tr>
+        </table>
+        <p style="margin-top:10px">三層<strong>都不停止番茄</strong>。切上面的分頁看色階變化。</p>
+      </div>
+
+      <div class="note ok">
+        <h3>✅ 已定案：告知原定份量已達成，但不擋下一顆</h3>
+        <p><code>done</code> 階段<strong>保留</strong>——「你完成了」這個時刻有價值。但它<strong>不再是死路</strong>：畫面說明白「原定的 3 顆做完了」，右邊仍然是 <code>Start another pomodoro</code>。</p>
+        <table class="tbl">
+          <tr><td>觸發時機</td><td><strong>不變</strong>，仍在達標時進 <code>done</code></td></tr>
+          <tr><td><code>allDone</code> 提示音</td><td><strong>不變</strong></td></tr>
+          <tr><td>按鈕</td><td>單一 <code>Done</code> → <strong>兩顆</strong>：<code>Done</code>（結束）／<code>Start another pomodoro</code>（繼續）</td></tr>
+          <tr><td>再做一顆之後</td><td>做完<strong>再次回到這個畫面</strong> —— 每顆都停一下問「還要嗎」</td></tr>
+        </table>
+      </div>
+
+      <div class="note ok">
+        <h3>✅ 分母固定是原始預估：<code>4/3</code></h3>
+        <p>超出後<strong>不改分母、不換格式</strong>。<code>4/3</code> 讀起來像怪分數，但那正是重點 —— <strong>分子大於分母本身就是「超出」的視覺訊號</strong>，跟暖褐背景一樣是資訊。</p>
+        <p>另外兩個選項都有代價：<code>4/4</code> 等於偷偷改掉預估數，而且每顆都會再次「達標」；只顯示 <code>4</code> 則讓環中央在達標前後<strong>換格式</strong>，是突兀點。</p>
+      </div>
+
+      <div class="note">
+        <h3>兩組按鈕互斥，永遠只有一組在</h3>
+        <table class="tbl">
+          <tr><td>執行中</td><td><code>Pause</code> ／ <code>Finish</code></td></tr>
+          <tr><td><code>doneCount === estPoms</code></td><td><code>Done</code> ／ <code>Start another pomodoro</code></td></tr>
+        </table>
+        <p style="margin-top:10px">番茄在跑的時候<strong>不會</strong>出現 <code>Start another pomodoro</code>；達標畫面也<strong>不會</strong>有 <code>Pause</code>。這是現況已經對的行為，本輪唯一的改動是把達標時的<strong>單顆</strong> <code>Done</code> 變成兩顆。</p>
+      </div>
+
+      <div class="note">
+        <h3>要改的比想像中少</h3>
+        <p>因為 <code>done</code> 保留，<strong><code>completeFocus:147</code> 那段核心流程完全不用動</strong>。真正要改的只有四項：</p>
+        <table class="tbl">
+          <tr><td>DB constraint</td><td>drop <code>completed_pomodoros_within_estimate</code> —— 否則第 4 顆<strong>存不進去</strong></td></tr>
+          <tr><td>3 處 <code>Math.min</code></td><td><code>events-mapper:133</code>／<code>tasks-store:233</code>／<code>focus-store:53</code> —— 否則存了也<strong>讀不回來</strong></td></tr>
+          <tr><td><code>canStartAnother:197-199</code></td><td><strong>關鍵的一行</strong>：<code>phase === 'rest'</code> 改成 <code>'rest' || 'done'</code>，讓 done 畫面按得下去</td></tr>
+          <tr><td><code>completeRest:156</code>／<code>skipRest:183</code></td><td><strong>可以留著</strong> —— 它們只是「休息完回到 done 畫面」，而 done 現在有出路了</td></tr>
+        </table>
+      </div>
+
+      <div class="note ok">
+        <h3>✅ 已定案：兩個 sheet 綁在不同按鈕上</h3>
+        <p>原本的疑問是「合併還是先後出現」。答案是<strong>都不是</strong> —— 它們掛在不同動作上，所以<strong>永遠不會同時出現</strong>。</p>
+        <table class="tbl">
+          <tr><td>Finish</td><td><strong>番茄層級</strong>：結束這一顆，可能還要繼續下一顆。只問「算不算一顆」，<strong>不問子任務</strong></td></tr>
+          <tr><td>✕ 關閉</td><td><strong>session 層級</strong>：我不做了。只問「做完了什麼」，<strong>不問番茄計數</strong></td></tr>
+          <tr><td>Done（全部做完）</td><td>等同 ✕ —— 也是離開 session，而且是最自然的結算時機</td></tr>
+          <tr><td>≥ 1 顆才問</td><td>剛開就關 → 沒東西好結算，<strong>直接關</strong>（切分頁⑦，按左邊的 ✕ 試）</td></tr>
+          <tr><td>關分頁</td><td>不追問。只有<strong>主動</strong>離開才問</td></tr>
+        </table>
+        <p style="margin-top:10px">原本的衝突，是把 Finish 和 ✕ 都當成「結束」才產生的。分開之後<strong>兩者語意各自完整</strong>，不需要合併。</p>
+      </div>
+
+      <div class="note warn">
+        <h3>⚠️ ✕ 的行為要改</h3>
+        <p>現況 <code>FocusSession.vue:12</code> 的 ✕ 是<strong>無條件直接關</strong>（<code>focus.close()</code>）。加上結算 sheet 後，✕ 變成「先問、再關」，而 sheet 上的「跳過」等於原本的行為。</p>
+        <p><code>:78</code> 的 Done 按鈕同樣是 <code>focus.close()</code>，要一併改。</p>
+      </div>
+
+      <div class="note">
+        <h3>「本次跑了幾顆」需要新欄位</h3>
+        <p>結束 sheet 的 <code>2 顆番茄 · 52 分</code> 算不出來 —— <code>focus.doneCount</code> 來自 DB（是<strong>這個 task 累計</strong>），不是本次 session。</p>
+        <p><code>FocusState</code> 要加欄位並升 <code>FOCUS_STATE_VERSION</code>（<code>focus-timer.ts:6</code>）。這也是「≥1 顆才問」的判斷依據。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SUBS=[{id:1,t:'讀第三章',done:true},{id:2,t:'做筆記',done:false},{id:3,t:'整理重點',done:false}];
+  const C=716.3;
+  const $=s=>document.querySelector(s);
+  const fx=$('#fx');
+
+  const STATES={
+    now:{note:'事件沒有子任務時：清單整塊不出現，但 context bar 照常在 —— 它顯示的是父任務的時段與剩餘時間，跟子任務無關。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 43 分',list:false,clock:'18:24',pom:'1/3',status:'FOCUSING',pct:.28,hint:false},
+    focus:{note:'加上兩塊新東西：頂部 context bar（剩 43 分）與環下方的 read-only 子任務清單。中途完全不打擾。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 43 分',list:true,clock:'18:24',pom:'1/3',status:'FOCUSING',pct:.28,hint:false},
+    soon:{note:'17:50，時間箱剩 10 分鐘。整片轉琥珀、響一次提示音。番茄照跑 —— 打斷專注比跑過頭更糟。',
+      s:'soon',hud:'FOCUS · POMODORO',left:'剩 10 分',list:true,clock:'04:12',pom:'2/3',status:'FOCUSING',pct:.83,hint:false},
+    over:{note:'18:08，超過時間箱了。這是在 done 畫面按了「Start another pomodoro」之後 —— 第 4 顆正在跑，分母仍是原始預估的 3，所以是 4/3。分子大於分母本身就是「超出」的訊號。',
+      s:'over',hud:'FOCUS · POMODORO',left:'超過 8 分',list:true,clock:'11:35',pom:'4/3',status:'FOCUSING',pct:.54,hint:true},
+    done:{note:'第 3 顆做完 —— 原定的份量到了。響一次 allDone、環中央說明白，但這不是終點：右邊仍是「Start another pomodoro」。想停就按 Done，想繼續就繼續。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 12 分',list:true,clock:'00:00',pom:'3/3',status:'ALL DONE',pct:1,hint:false,doneHint:true,bar:'done',done:3},
+    end:{note:'按 ✕（或 done 畫面的 Done）離開整個 session。跑過 2 顆，所以問「做完了什麼」。只問子任務，不問番茄計數。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 43 分',list:true,clock:'18:24',pom:'2/3',status:'FOCUSING',pct:.28,hint:false,sheet:'end'},
+    early:{note:'番茄跑到一半按 Finish。只問「這顆算不算一顆」—— 這是番茄層級的操作，還可能繼續下一顆，所以不結算子任務。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 43 分',list:true,clock:'18:24',pom:'2/3',status:'FOCUSING',pct:.28,hint:false,sheet:'early'},
+    fresh:{note:'剛開始就按 ✕，一顆都沒跑完（0/3）。沒東西好結算 —— 直接關，不問。按看看左邊的 ✕。',
+      s:'',hud:'FOCUS · POMODORO',left:'剩 58 分',list:true,clock:'24:51',pom:'0/3',status:'FOCUSING',pct:.03,hint:false,done:0}
+  };
+
+  function renderSubs(){
+    $('#fxSubs').innerHTML=SUBS.map(s=>
+      `<div class="fx-sub" data-done="${s.done}"><i></i><span>${s.t}</span></div>`).join('');
+    $('#endSubs').innerHTML=SUBS.map(s=>`
+      <li class="es-sub" data-done="${s.done}">
+        <button class="es-chk" data-on="${s.done}" data-id="${s.id}" aria-label="完成 ${s.t}">
+          ${s.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7"/></svg>':''}
+        </button><span>${s.t}</span></li>`).join('');
+  }
+
+  // Pomodoros completed in THIS session — the gate for the settle-up sheet.
+  // Not focus.doneCount, which is the task's DB-wide total.
+  let sessionPoms=2;
+
+  function show(k){
+    const st=STATES[k];
+    if(st.done!==undefined)sessionPoms=st.done; else sessionPoms=2;
+    $('#tabnote').textContent=st.note;
+    fx.dataset.s=st.s;
+    $('#hud').textContent=st.hud;
+    $('#ctx').hidden=!st.left;
+    if(st.left)$('#ctxLeft').textContent=st.left;
+    $('#fxList').hidden=!st.list;
+    $('#clock').textContent=st.clock;
+    $('#pom').textContent=st.pom;
+    $('#status').textContent=st.status;
+    $('#hint').hidden=!st.hint;
+    $('#doneHint').hidden=!st.doneHint;
+    $('#barFocus').hidden=st.bar==='done';
+    $('#barDone').hidden=st.bar!=='done';
+    $('#ring').setAttribute('stroke-dashoffset',String(C*(1-st.pct)));
+    $('#endLayer').hidden=st.sheet!=='end';
+    $('#earlyLayer').hidden=st.sheet!=='early';
+  }
+
+  document.querySelectorAll('.toggle button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.toggle button').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+      show(b.dataset.k);
+    });
+  });
+
+  function goto(k){
+    document.querySelectorAll('.toggle button').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.k===k)));
+    show(k);
+  }
+
+  // ✕ and the done screen's Done are the same act: leaving the whole session.
+  // Ask what got done — but only when there is something to settle.
+  function leaveSession(){
+    if(sessionPoms<1){$('#tabnote').textContent='0 顆 → 直接關，不問。（mockup 裡畫面留著讓你看，實際會關掉整個 overlay）';return;}
+    $('#endMeta').textContent=`讀書 · ${sessionPoms} 顆番茄 · 52 分`;
+    goto('end');
+  }
+  $('#btnClose').addEventListener('click',leaveSession);
+  $('#btnDoneClose').addEventListener('click',leaveSession);
+
+  // Finish = ending THIS pomodoro early. Pomodoro-level, so it never asks about subtasks.
+  $('#btnFinish').addEventListener('click',()=>goto('early'));
+
+  document.addEventListener('click',e=>{
+    const c=e.target.closest('.es-chk'); if(!c)return;
+    const s=SUBS.find(x=>x.id===Number(c.dataset.id)); s.done=!s.done; renderSubs();
+  });
+
+  renderSubs();
+  show('now');
+</script>
+</body>
+</html>
