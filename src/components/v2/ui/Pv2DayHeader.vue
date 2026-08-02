@@ -75,10 +75,12 @@ const emit = defineEmits<{
   padding-bottom: 6px;
 }
 
+/* Weekday and month-year read as one metadata cluster beside the serif day number, so they
+   share a colour rather than splitting into a dark/light pair. */
 .pv2-dh__dow {
   font: 700 14px var(--cd-font-mono);
   letter-spacing: 0.16em;
-  color: #1b1b1b;
+  color: #9c9c9c;
 }
 
 .pv2-dh__my {
