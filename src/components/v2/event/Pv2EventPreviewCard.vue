@@ -43,7 +43,8 @@
       </div>
     </div>
 
-    <button v-if="isTask && mine" type="button" class="pv2-preview-card__focus" @click="emit('startFocus')">
+    <!-- All-day tasks have no bounded slot for a pomodoro to measure against, so no focus entry. -->
+    <button v-if="isTask && mine && !allDay" type="button" class="pv2-preview-card__focus" @click="emit('startFocus')">
       <CdIcon name="tomato" :size="18" color="#fff" />
       <span>Start focus session</span>
     </button>
@@ -61,13 +62,14 @@ withDefaults(
     eyebrow: string
     whenLabel: string
     isTask: boolean
+    allDay?: boolean
     reminderLabel: string
     notes: string
     completedPomodoros?: number
     estimatedPomodoros?: number
     mine?: boolean
   }>(),
-  { mine: true, completedPomodoros: 0, estimatedPomodoros: 1 }
+  { mine: true, allDay: false, completedPomodoros: 0, estimatedPomodoros: 1 }
 )
 
 const emit = defineEmits<{
