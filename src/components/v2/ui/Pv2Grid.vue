@@ -1,6 +1,6 @@
 <template>
   <!--
-    7 欄月曆格。容器 left/top 邊，cell 各自 right/bottom 邊 → 完整 #E2E2E2 格線。
+    7 欄月曆格。只畫水平線：容器 top 邊 + cell 各自 bottom 邊，欄與欄之間不分隔。
     grid-auto-rows:1fr 讓 5/6 週月份都撐滿可用高度（不同月 row 數不同，避免固定 density 破版）。
     maxChips 依實測 row 高度算（ResizeObserver），Caveat 載入後高度變也會重算。
   -->
@@ -72,7 +72,6 @@ const maxChips = computed(() => {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-auto-rows: 1fr;
-  border-left: 1px solid #e2e2e2;
   border-top: 1px solid #e2e2e2;
 }
 </style>
