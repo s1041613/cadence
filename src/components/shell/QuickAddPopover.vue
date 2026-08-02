@@ -156,7 +156,7 @@ watch(
     start.value = pop.time ?? '09:00'
     end.value = pop.endTime ?? '10:00'
     repeat.value = 'none'
-    reminder.value = null
+    reminder.value = '15-min'
     calendarId.value = calendarsStore.defaultCalendarId ?? ''
   }
 )

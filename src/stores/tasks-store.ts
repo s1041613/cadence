@@ -31,7 +31,7 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
     type: 'quadrant',
     backgroundColor: null,
     icon: null,
-    reminder: null,
+    reminder: '15-min',
     ...overrides
   }
 }
