@@ -111,7 +111,25 @@ const TABS = [
   { key: 'icon' as const, label: 'Icon' }
 ]
 
-const COLOR_SWATCHES = ['#4A8B85', '#63996B', '#6863B0', '#8E6FB0', '#A56D91', '#4C4E57']
+const COLOR_SWATCHES = [
+  // Original muted set
+  '#4A8B85',
+  '#63996B',
+  '#6863B0',
+  '#8E6FB0',
+  '#A56D91',
+  '#4C4E57',
+  // Added set — warmer and more saturated, for events that need to read at a glance
+  '#3EBD79', // emerald green
+  '#3FADAD', // modern cyan
+  '#3B8FD9', // deep sky blue
+  '#9C8378', // pastel brown
+  '#D6453C', // apple red
+  '#D65179', // french rose
+  '#DE6A5A', // coral pink
+  '#E8B435', // bright orange
+  '#9B72D4' // soft violet
+]
 
 const CATEGORIES: Array<{ key: 'general' | 'life' | 'work'; label: string; icon: IconName; icons: IconName[] }> = [
   { key: 'general', label: 'General', icon: 'star', icons: ['calendar', 'star', 'bell', 'clock', 'note', 'info', 'eye', 'layers', 'image', 'copy'] },
