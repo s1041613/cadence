@@ -35,7 +35,7 @@ const timedStyle = computed(() => ({
   display: flex;
   align-items: center;
   max-width: 100%;
-  font: 700 12px/1.2 var(--cd-font-ui);
+  font: 700 10px/1.2 var(--cd-font-ui);
 }
 
 /* Inner label does the single-line, whole-character clip: per-character wrapping,
