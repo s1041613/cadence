@@ -74,8 +74,11 @@
           <button class="prim" :disabled="!focus.canAnother" @click="focus.anotherPomodoro()">Start another pomodoro</button>
         </template>
       </div>
+      <!-- The milestone is stated, not enforced: the planned pomodoros are finished, but the
+           estimate is a reference, so leaving and continuing are offered side by side. -->
       <div v-if="mode === 'done'" class="fx-bar show">
-        <button class="prim" @click="focus.close()">Done</button>
+        <button class="sec" @click="focus.close()">Done</button>
+        <button class="prim" @click="focus.anotherPomodoro()">Start another pomodoro</button>
       </div>
     </template>
 
@@ -146,7 +149,9 @@ const ringOffset = computed(() => RING_C * (focus.view?.progress ?? 0))
 const ringCircumference = RING_C
 
 const statusLabel = computed(() => {
-  if (mode.value === 'done') return 'Completed'
+  // Not "Completed": the planned pomodoros are done, but the session only ends if the user
+  // says so. The label states the milestone without implying the session is over.
+  if (mode.value === 'done') return 'Planned pomodoros done'
   if (mode.value === 'rest') return paused.value ? 'Paused' : 'On break'
   return paused.value ? 'Paused' : 'Focusing'
 })

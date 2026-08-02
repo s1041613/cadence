@@ -3,7 +3,10 @@
 // boundary (background throttling, reload, "came back three hours later") a table test
 // instead of a fake-timer dance.
 
-export const FOCUS_STATE_VERSION = 1
+// 2 adds sessionPoms. Bumped rather than defaulted so a session persisted by the previous
+// build is discarded: it has no record of how much of it was worked, and treating its absence
+// as zero would silently skip the settle-up prompt after real work.
+export const FOCUS_STATE_VERSION = 2
 export const FOCUS_STATE_KEY = 'cadence.focus.session'
 
 export type FocusPhase = 'breathing' | 'focus' | 'rest' | 'done'
@@ -30,6 +33,10 @@ export interface FocusState {
   /** Full length of the current segment; needed to redraw the ring after a reload. */
   readonly durationMs: number
   readonly segment: Segment
+  /** Pomodoros completed since this session opened. Distinct from the task's
+   *  completedPomodoros, which is a cumulative total the DB owns and other devices can move.
+   *  Only this counter can answer "was anything done in the sitting I am now leaving?" */
+  readonly sessionPoms: number
   readonly updatedAt: number
 }
 
@@ -108,33 +115,34 @@ function makeState(
   phase: FocusPhase,
   durationMs: number,
   segment: Segment,
-  now: number
+  now: number,
+  sessionPoms: number
 ): FocusState {
-  return { version: FOCUS_STATE_VERSION, taskId, phase, durationMs, segment, updatedAt: now }
+  return { version: FOCUS_STATE_VERSION, taskId, phase, durationMs, segment, sessionPoms, updatedAt: now }
 }
 
 /** Opens on the breathing phase, which is animation-driven rather than clock-driven. */
 export function startSession(taskId: string, now: number): FocusState {
-  return makeState(taskId, 'breathing', 0, running(now), now)
+  return makeState(taskId, 'breathing', 0, running(now), now, 0)
 }
 
 export function skipBreathing(state: FocusState, cfg: FocusConfig, now: number): FocusState {
   if (state.phase !== 'breathing') return state
-  return makeState(state.taskId, 'focus', cfg.focusMs, running(now + cfg.focusMs), now)
+  return makeState(state.taskId, 'focus', cfg.focusMs, running(now + cfg.focusMs), now, state.sessionPoms)
 }
 
 // ---------- transitions ----------
 
 function enterRest(state: FocusState, cfg: FocusConfig, now: number): FocusState {
-  return makeState(state.taskId, 'rest', cfg.restMs, running(now + cfg.restMs), now)
+  return makeState(state.taskId, 'rest', cfg.restMs, running(now + cfg.restMs), now, state.sessionPoms)
 }
 
 function enterFocus(state: FocusState, cfg: FocusConfig, now: number): FocusState {
-  return makeState(state.taskId, 'focus', cfg.focusMs, running(now + cfg.focusMs), now)
+  return makeState(state.taskId, 'focus', cfg.focusMs, running(now + cfg.focusMs), now, state.sessionPoms)
 }
 
 function enterDone(state: FocusState, now: number): FocusState {
-  return makeState(state.taskId, 'done', 0, running(now), now)
+  return makeState(state.taskId, 'done', 0, running(now), now, state.sessionPoms)
 }
 
 /** Credits the pomodoro and moves on. `now` is the instant the segment actually ended,
@@ -143,14 +151,16 @@ function enterDone(state: FocusState, now: number): FocusState {
 function completeFocus(state: FocusState, cfg: FocusConfig, now: number): FocusResult {
   const credited = cfg.doneCount + 1
   const effects: FocusEffect[] = [{ kind: 'creditPomodoro', taskId: state.taskId }]
+  // The one place a pomodoro is earned, so the one place the session's own count moves.
+  const worked: FocusState = { ...state, sessionPoms: state.sessionPoms + 1 }
 
   if (credited >= cfg.estPoms) {
     effects.push({ kind: 'playChime', sound: 'allDone' })
-    return { state: enterDone(state, now), effects }
+    return { state: enterDone(worked, now), effects }
   }
 
   effects.push({ kind: 'playChime', sound: 'focusEnd' })
-  return { state: enterRest(state, cfg, now), effects }
+  return { state: enterRest(worked, cfg, now), effects }
 }
 
 function completeRest(state: FocusState, cfg: FocusConfig, now: number): FocusResult {
@@ -194,8 +204,20 @@ export function anotherPomodoro(state: FocusState, cfg: FocusConfig, now: number
   return { state: enterFocus(state, cfg, now), effects: [] }
 }
 
-export function canStartAnotherPomodoro(state: FocusState, cfg: FocusConfig): boolean {
-  return state.phase === 'rest' && cfg.doneCount < cfg.estPoms
+/** Purely a question of phase: there is something to start whenever a pomodoro is not already
+ *  running. Deliberately NOT gated on the estimate — that is a reference derived from the slot
+ *  length, and stopping at it stranded a user mid-flow with a dead button. `done` is included
+ *  because the milestone screen offers this as its way onward. */
+export function canStartAnotherPomodoro(state: FocusState, _cfg: FocusConfig): boolean {
+  return state.phase === 'rest' || state.phase === 'done'
+}
+
+/** Whether leaving the session should ask what got done. Deliberately reads the session's own
+ *  count and not the task's completedPomodoros: a task already at 3/3 from another day would
+ *  otherwise make an untouched session prompt on the way out. Opening a timer by mistake
+ *  should cost one tap. */
+export function shouldAskWhatGotDone(state: FocusState): boolean {
+  return state.sessionPoms > 0
 }
 
 // ---------- pause / resume ----------
@@ -267,6 +289,9 @@ export function parseFocusState(raw: unknown): FocusState | null {
   if (typeof o.phase !== 'string' || !PHASES.includes(o.phase)) return null
   if (!isFiniteNumber(o.durationMs) || o.durationMs < 0) return null
   if (!isFiniteNumber(o.updatedAt)) return null
+  // A negative or fractional session count could only come from tampering, and it feeds the
+  // settle-up gate — reject rather than coerce.
+  if (!isFiniteNumber(o.sessionPoms) || o.sessionPoms < 0 || !Number.isInteger(o.sessionPoms)) return null
   if (typeof o.segment !== 'object' || o.segment === null) return null
 
   const segment = parseSegment(o.segment as Record<string, unknown>)
@@ -281,6 +306,7 @@ export function parseFocusState(raw: unknown): FocusState | null {
     phase: o.phase as FocusPhase,
     durationMs: o.durationMs,
     segment,
+    sessionPoms: o.sessionPoms,
     updatedAt: o.updatedAt
   }
 }

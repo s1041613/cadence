@@ -109,7 +109,7 @@ import { useInboxStore } from '@/stores/inbox-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
-import { autoPoms } from '@/utils/convert-date-time'
+import { defaultPoms } from '@/utils/convert-date-time'
 import { reminderLabel } from '@/utils/event-panel'
 import type { RepeatMode, Task } from '@/types/task'
 
@@ -206,7 +206,7 @@ watch(
 const theme = computed(() =>
   draft.value ? themeOf(draft.value) : themeOf(mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId! }))
 )
-const estimatedPomodoros = computed(() => (draft.value ? autoPoms(draft.value) : 1))
+const estimatedPomodoros = computed(() => (draft.value ? defaultPoms(draft.value) : 1))
 const repeatLabel = computed(() => REPEAT_LABELS[draft.value?.repeat ?? 'none'])
 const alertLabel = computed(() => reminderLabel(draft.value?.reminder ?? null))
 const editorWidth = computed(() => (ui.draftConv ? 'min(440px, 46%)' : 'min(500px, 90%)'))
@@ -239,7 +239,7 @@ function trySave(): void {
   // isLoading flipped back to true (e.g. a retried load after sign-in), same reasoning as
   // QuickAddPopover.onAdd's guard.
   if (!draft.value || tasksStore.isLoading) return
-  draft.value.estimatedPomodoros = autoPoms(draft.value)
+  draft.value.estimatedPomodoros = defaultPoms(draft.value)
   tasksStore.saveTask(draft.value)
   inboxStore.completePromotion({ type: draft.value.type === 'event' ? 'event' : 'task', color: theme.value.backgroundColor, tag: 'Scheduled' })
   ui.eventComposerInitialValues = null

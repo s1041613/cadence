@@ -164,7 +164,11 @@ describe('events-mapper', () => {
       expect(restored.date).toBe('2026-07-10')
     })
 
-    it('clamps completed pomodoros to the estimate when the estimate is positive', () => {
+    // focus-subtasks spec "The estimate ceases to be an upper bound". The estimate is derived
+    // from the slot length, so it is a guess; exceeding it is information (the counter reads
+    // 4/3), not an error. Previously this direction was clamped here AND by a DB constraint,
+    // so an extra pomodoro was silently discarded on the way out.
+    it('carries completed pomodoros above the estimate through unchanged', () => {
       const task = mkTask({
         date: '2026-07-10',
         calendarId: CAL_ID,
@@ -174,10 +178,10 @@ describe('events-mapper', () => {
         completedPomodoros: 5
       })
 
-      expect(taskToRow(task, ctx).completed_pomodoros).toBe(3)
+      expect(taskToRow(task, ctx).completed_pomodoros).toBe(5)
     })
 
-    it('does not clamp completed pomodoros when the estimate is zero', () => {
+    it('carries completed pomodoros through when the estimate is zero', () => {
       const task = mkTask({
         date: '2026-07-10',
         calendarId: CAL_ID,
@@ -188,6 +192,24 @@ describe('events-mapper', () => {
       })
 
       expect(taskToRow(task, ctx).completed_pomodoros).toBe(4)
+    })
+
+    // The assertion the spec names as the one that would have caught the DB constraint had it
+    // been written first: an over-estimate count must survive the full write-and-read round trip.
+    it('survives a write-and-read round trip above the estimate', () => {
+      const task = mkTask({
+        date: '2026-07-10',
+        calendarId: CAL_ID,
+        start: '09:00',
+        end: '10:00',
+        estimatedPomodoros: 3,
+        completedPomodoros: 5
+      })
+
+      const restored = rowToTask(taskToRow(task, ctx), ctx)
+
+      expect(restored.completedPomodoros).toBe(5)
+      expect(restored.estimatedPomodoros).toBe(3)
     })
   })
 

@@ -331,6 +331,9 @@ function saveEdit(): void {
     repeat: editRepeat.value,
     reminder: editReminder.value,
     calendarId: editCalendarId.value || task.value.calendarId,
+    // autoPoms, not defaultPoms: this is an edit of an existing event, and the break-aware
+    // count is scoped to creation. Recomputing it here would rewrite the stored estimate of
+    // every event the user touches — including one they had set by hand.
     estimatedPomodoros: autoPoms({
       allDay: editType.value === 'event' && editAllDay.value,
       start: editType.value === 'event' && editAllDay.value ? '' : editStart.value,

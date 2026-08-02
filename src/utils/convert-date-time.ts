@@ -60,6 +60,38 @@ export const autoPoms = (t: { allDay: boolean; start: string; end: string }): nu
   return Math.max(1, Math.ceil(dur / POM_MIN))
 }
 
+// How many pomodoros genuinely fit in a slot, counting the breaks between them. autoPoms
+// ignores breaks, so it answers 5 for a two-hour slot — but 5 pomodoros occupy 145 minutes
+// and overrun it by 25. This answers 4 (115 minutes), which fits.
+//
+// Deliberately NOT a replacement for autoPoms: this supplies the default estimate at event
+// creation only. Reads still go through estPomsOf, so an event never reports one count on
+// its card and a different one in a focus session. Widening this to the read path means
+// moving every reader at once — see the spec's "deliberately narrow scope".
+//
+// focusMs/restMs are parameters rather than imports: this module must not depend on
+// focus-timer, and passing them keeps the arithmetic testable at any pomodoro length.
+export const pomsInSlot = (
+  t: { allDay: boolean; start: string; end: string },
+  focusMs: number,
+  restMs: number
+): number => {
+  if (t.allDay || !t.start || !t.end) return 1
+  const slotMs = (minutes(t.end) - minutes(t.start)) * 60_000
+  // The trailing break never has to be served, so it is credited to the slot before dividing.
+  return Math.max(1, Math.floor((slotMs + restMs) / (focusMs + restMs)))
+}
+
+// The default estimate stamped onto a task at creation, at the app's standard pomodoro
+// lengths. Every creation and save path uses this, so a task's seeded estimate never depends
+// on which screen created it. Durations live in focus-timer; they are re-stated here rather
+// than imported to keep this module free of any dependency on the timer.
+const DEFAULT_POM_FOCUS_MS = 25 * 60_000
+const DEFAULT_POM_REST_MS = 5 * 60_000
+
+export const defaultPoms = (t: { allDay: boolean; start: string; end: string }): number =>
+  pomsInSlot(t, DEFAULT_POM_FOCUS_MS, DEFAULT_POM_REST_MS)
+
 // Single source of truth for "how many pomodoros does this task need". The stored estimate
 // is a snapshot from creation time; autoPoms recomputes from the slot. Consumers that pick
 // differently drift apart once an event's times are edited, which stalls or short-circuits

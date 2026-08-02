@@ -5,7 +5,7 @@ import { useFocusStore } from './focus-store'
 import { useUiStore } from './ui-store'
 import { useTasksStore } from './tasks-store'
 import { loadStore, saveStore } from '@/utils/save-load-local-storage'
-import { FOCUS_STATE_KEY, DEFAULT_FOCUS_MS, type FocusState } from '@/utils/focus-timer'
+import { FOCUS_STATE_KEY, FOCUS_STATE_VERSION, DEFAULT_FOCUS_MS, type FocusState } from '@/utils/focus-timer'
 import type { Task } from '@/types/task'
 
 // The pure reducer is covered exhaustively in focus-timer.test.ts. What is verified here
@@ -256,13 +256,35 @@ describe('focus-store progress reporting', () => {
     expect(focus.estPoms).toBe(2)
   })
 
-  it('disables another pomodoro once every one is done', async () => {
+  // focus-subtasks spec "The completed phase becomes a fork, not a terminus": reaching the
+  // planned count lands on the milestone screen, which offers continuing as well as leaving.
+  // Wired end to end here because it depends on the reducer, the clock and the synced task
+  // agreeing — the reducer alone cannot show that canAnother survives the transition.
+  // The gate for the settle-up prompt, verified through the wiring rather than the reducer:
+  // it must count only this sitting, even on a task the DB already shows as fully worked.
+  it('counts nothing for a session that was opened and not worked', async () => {
+    const { focus, open } = setup(makeTask({ completedPomodoros: 3, estimatedPomodoros: 4 }))
+    await open()
+
+    expect(focus.state?.sessionPoms).toBe(0)
+  })
+
+  it('counts the pomodoro completed in this sitting', async () => {
+    const { focus, open } = setup(makeTask({ completedPomodoros: 3, estimatedPomodoros: 4 }))
+    await open()
+    focus.skipBreathing()
+    focus.finishEarly()
+
+    expect(focus.state?.sessionPoms).toBe(1)
+  })
+
+  it('still offers another pomodoro once every planned one is done', async () => {
     const { focus, open } = setup(makeTask({ completedPomodoros: 4, estimatedPomodoros: 4 }))
     await open()
     focus.skipBreathing()
     focus.finishEarly()
 
-    expect(focus.canAnother).toBe(false)
+    expect(focus.canAnother).toBe(true)
   })
 })
 
@@ -323,11 +345,12 @@ describe('focus-store rehydration', () => {
   it('resumes a session that still has time left', () => {
     const { focus, ui } = setup()
     saveStore(FOCUS_STATE_KEY, {
-      version: 1,
+      version: FOCUS_STATE_VERSION,
       taskId: 'task-1',
       phase: 'focus',
       durationMs: DEFAULT_FOCUS_MS,
       segment: { status: 'running', endsAt: T0 + 10 * 60_000 },
+      sessionPoms: 0,
       updatedAt: T0
     })
 
@@ -341,11 +364,12 @@ describe('focus-store rehydration', () => {
   it('discards an expired session without crediting anything', () => {
     const { focus, ui, increment } = setup()
     saveStore(FOCUS_STATE_KEY, {
-      version: 1,
+      version: FOCUS_STATE_VERSION,
       taskId: 'task-1',
       phase: 'focus',
       durationMs: DEFAULT_FOCUS_MS,
       segment: { status: 'running', endsAt: T0 - 60_000 },
+      sessionPoms: 0,
       updatedAt: T0 - DEFAULT_FOCUS_MS
     })
 
@@ -359,7 +383,7 @@ describe('focus-store rehydration', () => {
 
   it('discards a corrupt payload', () => {
     const { focus } = setup()
-    saveStore(FOCUS_STATE_KEY, { version: 1, taskId: 'task-1', segment: 'broken' })
+    saveStore(FOCUS_STATE_KEY, { version: FOCUS_STATE_VERSION, taskId: 'task-1', segment: 'broken' })
 
     focus.rehydrate()
 
@@ -370,11 +394,12 @@ describe('focus-store rehydration', () => {
   it('discards a session whose task no longer exists', () => {
     const { focus } = setup()
     saveStore(FOCUS_STATE_KEY, {
-      version: 1,
+      version: FOCUS_STATE_VERSION,
       taskId: 'deleted-task',
       phase: 'focus',
       durationMs: DEFAULT_FOCUS_MS,
       segment: { status: 'running', endsAt: T0 + 60_000 },
+      sessionPoms: 0,
       updatedAt: T0
     })
 
@@ -392,11 +417,12 @@ describe('focus-store rehydration', () => {
   it('restores a paused session with its remaining time intact', () => {
     const { focus } = setup()
     saveStore(FOCUS_STATE_KEY, {
-      version: 1,
+      version: FOCUS_STATE_VERSION,
       taskId: 'task-1',
       phase: 'focus',
       durationMs: DEFAULT_FOCUS_MS,
       segment: { status: 'paused', remainingMs: 7 * 60_000 },
+      sessionPoms: 0,
       updatedAt: T0 - 48 * 60 * 60_000
     })
 
