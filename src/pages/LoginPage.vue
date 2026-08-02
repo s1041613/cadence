@@ -47,8 +47,6 @@
           <a href="#" @click.prevent>Privacy</a>.
         </p>
         <p v-if="auth.error" class="login__error">{{ auth.error }}</p>
-
-        <div class="login__home-indicator" aria-hidden="true"></div>
       </div>
     </div>
   </div>
@@ -143,8 +141,7 @@ function signInWithApple(): void {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* 暖色 panel 延伸進底部 safe-area，避免露出外層 --cd-surface-page 的色差帶 */
-  padding: 22px 24px env(safe-area-inset-bottom);
+  padding: 22px 24px 0;
 }
 
 .login__label {
