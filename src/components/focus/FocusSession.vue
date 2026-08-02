@@ -8,14 +8,14 @@
     @click="focus.unlockSound()"
   >
     <div class="fx-top">
-      <button v-if="phase === 'breathing'" class="fx-skip" @click="focus.skipBreathing()">跳過</button>
-      <button class="fx-close" aria-label="關閉" @click="focus.close()">
+      <button v-if="phase === 'breathing'" class="fx-skip" @click="focus.skipBreathing()">Skip</button>
+      <button class="fx-close" aria-label="Close" @click="focus.close()">
         <CdIcon name="close" :size="16" color="#fff" />
       </button>
     </div>
 
     <template v-if="phase === 'breathing'">
-      <div class="fx-hud">上坡吸氣 · 下坡吐氣（三次）</div>
+      <div class="fx-hud">Breathe in on the rise · out on the fall</div>
       <div class="fx-dots">
         <span v-for="i in BREATHS" :key="i" :class="{ done: i <= breathsDone, active: i === breathsDone + 1 }" />
       </div>
@@ -34,7 +34,7 @@
     </template>
 
     <template v-else>
-      <div class="fx-hud">{{ mode === 'focus' ? '正在專注 · 番茄鐘' : `短休息 · ${restMinutes} 分鐘` }}</div>
+      <div class="fx-hud">{{ mode === 'focus' ? 'Focus · Pomodoro' : `Short break · ${restMinutes} min` }}</div>
       <svg class="fx-scene" viewBox="0 0 100 190" preserveAspectRatio="xMidYMid slice" style="opacity: .3">
         <defs>
           <linearGradient id="fxbg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123f30" /><stop offset="1" stop-color="#0e3527" /></linearGradient>
@@ -55,37 +55,37 @@
       </div>
       <div class="fx-face show">
         <div class="ft fx-ft">
-          <span class="fx-ft-txt">{{ task.title || '（未命名）' }}</span>
+          <span class="fx-ft-txt">{{ task.title || 'Untitled' }}</span>
           <span class="fx-fp mono">{{ focus.doneCount }}/{{ focus.estPoms }}</span>
         </div>
         <svg class="fx-faceTom" :class="{ pulse: pulseTomato }" width="50" height="50" viewBox="0 0 24 24" v-html="TOMATO_SVG" />
         <div class="fk fx-fk mono">{{ fmt(secondsLeft) }}</div>
         <div class="fl fx-fl">{{ statusLabel }}</div>
-        <div v-if="focus.overrunning" class="fx-overrunHint">已超過預定結束時間</div>
-        <div v-if="!focus.soundUnlocked" class="fx-soundHint">點一下畫面以啟用提示音</div>
+        <div v-if="focus.overrunning" class="fx-overrunHint">Past scheduled end time</div>
+        <div v-if="!focus.soundUnlocked" class="fx-soundHint">Tap anywhere to enable sound</div>
       </div>
       <div v-if="mode !== 'done'" class="fx-bar show">
         <template v-if="mode === 'focus'">
-          <button class="sec" @click="togglePause">{{ paused ? '繼續' : '暫停' }}</button>
-          <button class="prim" @click="openEarlyFinishSheet">完成</button>
+          <button class="sec" @click="togglePause">{{ paused ? 'Resume' : 'Pause' }}</button>
+          <button class="prim" @click="openEarlyFinishSheet">Finish</button>
         </template>
         <template v-else-if="mode === 'rest'">
-          <button class="sec" @click="focus.skipRest()">跳過休息</button>
-          <button class="prim" :disabled="!focus.canAnother" @click="focus.anotherPomodoro()">再一顆番茄</button>
+          <button class="sec" @click="focus.skipRest()">Skip break</button>
+          <button class="prim" :disabled="!focus.canAnother" @click="focus.anotherPomodoro()">Start another pomodoro</button>
         </template>
       </div>
       <div v-if="mode === 'done'" class="fx-bar show">
-        <button class="prim" @click="focus.close()">結束</button>
+        <button class="prim" @click="focus.close()">Done</button>
       </div>
     </template>
 
     <div v-if="earlyFinishSheetOpen" class="fx-sheet">
       <div class="box">
-        <h4>提早完成？</h4>
-        <p>還沒到時間。確定要把這段算成一顆完成的番茄嗎？</p>
+        <h4>Finish early?</h4>
+        <p>Time's not up yet. Count this as a completed pomodoro?</p>
         <div class="r">
-          <button class="no" @click="cancelEarlyFinish">再專注一下</button>
-          <button class="yes" @click="confirmEarlyFinish">完成，算一顆</button>
+          <button class="no" @click="cancelEarlyFinish">Keep focusing</button>
+          <button class="yes" @click="confirmEarlyFinish">Yes, count it</button>
         </div>
       </div>
     </div>
@@ -146,9 +146,9 @@ const ringOffset = computed(() => RING_C * (focus.view?.progress ?? 0))
 const ringCircumference = RING_C
 
 const statusLabel = computed(() => {
-  if (mode.value === 'done') return '已完成'
-  if (mode.value === 'rest') return paused.value ? '已暫停' : '休息中'
-  return paused.value ? '已暫停' : '專注中'
+  if (mode.value === 'done') return 'Completed'
+  if (mode.value === 'rest') return paused.value ? 'Paused' : 'On break'
+  return paused.value ? 'Paused' : 'Focusing'
 })
 
 function fmt(v: number): string {
