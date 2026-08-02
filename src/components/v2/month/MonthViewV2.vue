@@ -195,7 +195,7 @@ void stepMonthBy // 目前未在模板使用（無箭頭），保留給後續切
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 6px 15px 12px;
+  padding: 6px 8px 12px;
   overflow: hidden;
 }
 
