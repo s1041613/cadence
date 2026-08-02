@@ -16,13 +16,16 @@
         />
       </div>
 
-      <Pv2GoalCard class="dv2__goal" :text="goalText" :image="goalImage" />
+      <!-- TEMP: MY GOAL card hidden while the timeline is being reworked -->
+      <!-- <Pv2GoalCard class="dv2__goal" :text="goalText" :image="goalImage" /> -->
 
-      <Pv2DayTabs v-model="activeTab" class="dv2__tabs" />
+      <!-- TEMP: tabs hidden while the timeline rendering is reworked; restore with the panel switch below -->
+      <!-- <Pv2DayTabs v-model="activeTab" class="dv2__tabs" /> -->
 
       <div class="dv2__panel">
-        <DaySchedule v-if="activeTab === 'schedule'" />
-        <DayMyDay v-else />
+        <DaySchedule />
+        <!-- <DaySchedule v-if="activeTab === 'schedule'" /> -->
+        <!-- <DayMyDay v-else /> -->
       </div>
     </div>
 
@@ -32,18 +35,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import Pv2DayHeader from '@/components/v2/ui/Pv2DayHeader.vue'
-import Pv2GoalCard from '@/components/v2/ui/Pv2GoalCard.vue'
-import Pv2DayTabs from '@/components/v2/ui/Pv2DayTabs.vue'
+// TEMP: restore alongside the MY GOAL card in the template
+// import Pv2GoalCard from '@/components/v2/ui/Pv2GoalCard.vue'
+// TEMP: restore alongside the tabs block in the template
+// import Pv2DayTabs from '@/components/v2/ui/Pv2DayTabs.vue'
 import DaySchedule from '@/components/v2/day/DaySchedule.vue'
-import DayMyDay from '@/components/v2/day/DayMyDay.vue'
+// import DayMyDay from '@/components/v2/day/DayMyDay.vue'
 import Pv2Fab from '@/components/v2/ui/Pv2Fab.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { parseISO, iso, addDays, WD_CAP } from '@/utils/convert-date-time'
-import { publicAssetPath } from '@/utils/public-assets'
+// TEMP: restore alongside the MY GOAL card
+// import { publicAssetPath } from '@/utils/public-assets'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -60,12 +66,12 @@ function stepDayBy(delta: number): void {
   ui.selectedDate = iso(addDays(cur.value, delta))
 }
 
-// tab 切換：元件 local state，切日期不重置
-const activeTab = ref<'schedule' | 'myday'>('schedule')
+// TEMP: tab 切換：元件 local state，切日期不重置
+// const activeTab = ref<'schedule' | 'myday'>('schedule')
 
-// MY GOAL（本階段固定預設圖 + 文字，不做上傳/持久化）
-const goalText = 'Ship the week-view redesign and clear inbox to zero.'
-const goalImage = publicAssetPath('v2-backgrounds/default.jpg')
+// TEMP: MY GOAL（本階段固定預設圖 + 文字，不做上傳/持久化）
+// const goalText = 'Ship the week-view redesign and clear inbox to zero.'
+// const goalImage = publicAssetPath('v2-backgrounds/default.jpg')
 
 function onCreate(): void {
   if (tasksStore.isLoading) return
@@ -107,12 +113,15 @@ function onCreate(): void {
   margin-top: 18px;
 }
 
-/* 分頁內容撐滿剩餘高度，內部自捲 */
+/* 分頁內容撐滿剩餘高度。時間軸自己是捲動容器（ALL-DAY 列要固定在軸上方不跟著捲），
+   所以這層只給高度、不再自捲，避免巢狀捲動。 */
 .dv2__panel {
   flex: 1;
   min-height: 0;
   margin-top: 18px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   scrollbar-width: none;
 }
 

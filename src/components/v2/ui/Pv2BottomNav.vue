@@ -33,7 +33,7 @@ const router = useRouter()
 const items: Array<{ key: NavKey; glyph: string; label: string; enabled: boolean; to?: string }> = [
   { key: 'month', glyph: 'm', label: 'month', enabled: true, to: '/v2/month' },
   { key: 'week', glyph: 'w', label: 'week', enabled: true, to: '/v2/week' },
-  { key: 'draft', glyph: 'd', label: 'draft', enabled: true, to: '/v2/day' },
+  { key: 'draft', glyph: 'd', label: 'day', enabled: true, to: '/v2/day' },
   { key: 'setting', glyph: 's', label: 'setting', enabled: true, to: '/v2/settings' }
 ]
 
