@@ -1,5 +1,5 @@
 <template>
-  <CdPopover v-if="ui.eventPreview && task && isDesktop" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="520" caret @scrim-click="close">
+  <CdPopover v-if="ui.eventPreview && task && isDesktop" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="previewApproxHeight" caret @scrim-click="close">
     <Pv2CopyToDaysCard
       v-if="copyMode"
       :month-label="copyMonthLabel"
@@ -65,10 +65,15 @@
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
       :mine="isOwnTask"
+      :subtasks="subtasks"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
       @start-focus="startFocus"
+      @add-subtask="addSubtask"
+      @toggle-subtask="tasksStore.toggleSubtaskDone"
+      @rename-subtask="tasksStore.renameSubtask"
+      @delete-subtask="tasksStore.deleteSubtask"
     />
   </CdPopover>
   <CdDrawerOrSheet v-else-if="ui.eventPreview && task" presentation="sheet" scrim-color="var(--cd-scrim)" @scrim-click="close" @dismiss="close">
@@ -137,10 +142,15 @@
       :completed-pomodoros="task.completedPomodoros"
       :estimated-pomodoros="task.estimatedPomodoros"
       :mine="isOwnTask"
+      :subtasks="subtasks"
       @copy="openCopyMode"
       @edit="openEditMode"
       @delete="deleteTask"
       @start-focus="startFocus"
+      @add-subtask="addSubtask"
+      @toggle-subtask="tasksStore.toggleSubtaskDone"
+      @rename-subtask="tasksStore.renameSubtask"
+      @delete-subtask="tasksStore.deleteSubtask"
     />
   </CdDrawerOrSheet>
 </template>
@@ -208,6 +218,28 @@ const whenLabel = computed(() => {
 })
 
 const popWidth = computed(() => (copyMode.value ? 340 : ui.eventPreview?.mode === 'edit' ? 388 : 370))
+
+const subtasks = computed(() => (task.value ? tasksStore.subtasksFor(task.value.id) : []))
+
+function addSubtask(title: string): void {
+  if (!task.value || !isOwnTask.value) return
+  tasksStore.addSubtask(task.value.id, title)
+}
+
+// The popover is positioned from an expected height, so a variable-length checklist would
+// otherwise flip or overflow for events near the bottom of the viewport. 520 was the height
+// before subtasks existed; the block adds its 48px header, its rows (capped at the list's own
+// 196px scroll limit) and — for one's own event — the composer row.
+const SUBTASK_HEAD_PX = 48
+const SUBTASK_ROW_PX = 44
+const SUBTASK_LIST_MAX_PX = 196
+const BASE_PREVIEW_HEIGHT_PX = 520
+
+const previewApproxHeight = computed(() => {
+  if (ui.eventPreview?.mode === 'edit' || copyMode.value) return BASE_PREVIEW_HEIGHT_PX
+  const rows = Math.min(subtasks.value.length * SUBTASK_ROW_PX, SUBTASK_LIST_MAX_PX)
+  return BASE_PREVIEW_HEIGHT_PX + SUBTASK_HEAD_PX + rows + (isOwnTask.value ? SUBTASK_ROW_PX : 0)
+})
 
 const editTitle = ref('')
 const editType = ref<'event' | 'task'>('task')

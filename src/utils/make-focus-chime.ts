@@ -7,7 +7,7 @@
 // through that graph would be silent exactly when it matters. Do not "helpfully" merge
 // these two modules.
 
-export type ChimeSound = 'focusEnd' | 'restEnd' | 'allDone'
+export type ChimeSound = 'focusEnd' | 'restEnd' | 'allDone' | 'slotEndingSoon'
 
 export interface FocusChime {
   /** Must be called from inside a user-gesture handler. Idempotent and cheap. */
@@ -39,6 +39,13 @@ const MOTIFS: Record<ChimeSound, readonly { freq: number; at: number; dur: numbe
     { freq: 660, at: 0, dur: 0.22 },
     { freq: 830, at: 0.15, dur: 0.22 },
     { freq: 990, at: 0.3, dur: 0.44 }
+  ],
+  // Ten minutes of the timebox left. Two low notes on the same pitch, quieter and darker
+  // than the three above: this one is not the end of anything, it is a nudge to start
+  // winding down. Repetition rather than an interval keeps it from reading as a transition.
+  slotEndingSoon: [
+    { freq: 494, at: 0, dur: 0.26 },
+    { freq: 494, at: 0.22, dur: 0.38 }
   ]
 }
 

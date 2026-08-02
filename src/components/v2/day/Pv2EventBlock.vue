@@ -5,28 +5,44 @@
     :style="blockStyle"
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
   >
-    <span class="pv2-event-block__title">{{ title }}</span>
-    <span class="pv2-event-block__time">{{ startLabel }}</span>
+    <div class="pv2-event-block__head">
+      <span class="pv2-event-block__title">{{ title }}</span>
+      <span class="pv2-event-block__time">{{ startLabel }}</span>
+    </div>
+    <!-- Reading a block's intent without opening it. Only as many lines as the block's own
+         height affords, with the remainder counted rather than clipped: one busy block must
+         not crowd out the rest of the day. -->
+    <ul v-if="visibleSubtasks.length" class="pv2-event-block__subs">
+      <li v-for="subtask in visibleSubtasks" :key="subtask.id" :data-done="subtask.done">
+        {{ subtask.title }}
+      </li>
+      <li v-if="hiddenSubtaskCount > 0" class="pv2-event-block__more">+{{ hiddenSubtaskCount }} more</li>
+    </ul>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { Subtask } from '@/types/subtask'
 
 // Pv2EventBlock — v2 copy of CdEventBlock. The geometry and the three height clamps are
 // carried over unchanged (they are the tested part); only the palette differs: v2 mixes
 // against its own neutral paper instead of --cd-surface-raised, so no warm token reaches v2.
-const props = defineProps<{
-  title: string
-  color: string
-  top: number // px from grid top
-  height: number // px
-  left: string // CSS calc() or percentage string, from lane layout
-  right: string
-  lane: number
-  startLabel: string
-  active: boolean // true when this event is "in progress" (today + now within range)
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    color: string
+    top: number // px from grid top
+    height: number // px
+    left: string // CSS calc() or percentage string, from lane layout
+    right: string
+    lane: number
+    startLabel: string
+    active: boolean // true when this event is "in progress" (today + now within range)
+    subtasks?: Subtask[]
+  }>(),
+  { subtasks: () => [] }
+)
 
 const emit = defineEmits<{
   click: [event: MouseEvent]
@@ -43,6 +59,24 @@ const MIN_CONTENT_HEIGHT = 31
 // v2 paper. Kept as a literal rather than a --cd-* token: the whole v2 tree hardcodes its
 // neutral palette so the app-wide warm tokens cannot leak in.
 const V2_PAPER = '#fafaf9'
+
+// One subtask line at 12px/1.35 plus its 2px row gap. Blocks are sized by the clock, not by
+// their contents, so the list takes only the room the slot already affords rather than growing
+// the block and pushing the day's geometry out of true.
+const SUBTASK_LINE_HEIGHT = 18
+
+// A "+N more" line costs a row too, so it is only worth showing when it hides more than the
+// one subtask it would have displaced.
+const visibleSubtasks = computed(() => {
+  const all = props.subtasks
+  if (all.length === 0) return []
+  const room = Math.floor((props.height - MIN_CONTENT_HEIGHT) / SUBTASK_LINE_HEIGHT)
+  if (room <= 0) return []
+  if (all.length <= room) return all
+  return all.slice(0, Math.max(0, room - 1))
+})
+
+const hiddenSubtaskCount = computed(() => props.subtasks.length - visibleSubtasks.value.length)
 
 const blockStyle = computed(() => ({
   position: 'absolute' as const,
@@ -66,6 +100,13 @@ const blockStyle = computed(() => ({
   border-radius: 8px;
   padding: 6px 12px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The title/time row keeps the original one-line baseline treatment; any subtask lines
+   stack beneath it. */
+.pv2-event-block__head {
   display: flex;
   align-items: baseline;
   gap: 10px;
@@ -92,5 +133,36 @@ const blockStyle = computed(() => ({
 .pv2-event-block--active .pv2-event-block__time {
   color: inherit;
   opacity: 0.85;
+}
+
+.pv2-event-block__subs {
+  list-style: none;
+  margin: 2px 0 0;
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pv2-event-block__subs li {
+  font: 500 12px/1.35 var(--cd-font-ui);
+  color: #6e6e6e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pv2-event-block__subs li[data-done='true'] {
+  text-decoration: line-through;
+  color: #b2b2b2;
+}
+
+.pv2-event-block__more {
+  font-weight: 700;
+  color: #9c9c9c;
+}
+
+.pv2-event-block--active .pv2-event-block__subs li {
+  color: inherit;
+  opacity: 0.8;
 }
 </style>

@@ -24,7 +24,12 @@
           >
             <span class="pv2-wdr__dot" :style="{ background: ev.color }" />
             <span class="pv2-wdr__title">{{ ev.title }}</span>
+            <!-- Says how much is hidden: the names below are capped, the count is not. -->
+            <span v-if="ev.subtaskTotal" class="pv2-wdr__subcount">{{ ev.subtaskDone }}/{{ ev.subtaskTotal }}</span>
             <span class="pv2-wdr__time">{{ ev.timeLabel }}</span>
+            <!-- Only the first few names: a week has to read at a glance, and the count above
+                 already says how much is hidden. -->
+            <span v-if="ev.subtaskTitles.length" class="pv2-wdr__subs">{{ ev.subtaskTitles.join(' · ') }}</span>
           </button>
         </template>
         <span v-else class="pv2-wdr__empty">nothing planned</span>
@@ -39,6 +44,11 @@ export interface Pv2WeekEvent {
   title: string
   color: string
   timeLabel: string // "09:00" / "all-day" / "—"
+  /** Only the first few. subtaskTotal carries the real size — one week row cannot hold a
+   *  whole checklist. */
+  subtaskTitles: string[]
+  subtaskDone: number
+  subtaskTotal: number
 }
 
 defineProps<{
@@ -125,16 +135,37 @@ const emit = defineEmits<{
   color: #6e6e6e;
 }
 
+/* Two rows: dot / title / count / time on the first, subtask names on the second. A grid
+   rather than flex so the second row aligns with the title instead of tucking under the dot. */
 .pv2-wdr__event {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 9px;
+  gap: 0 9px;
   width: 100%;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
   text-align: left;
+}
+
+.pv2-wdr__subcount {
+  flex: none;
+  font: 700 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
+  color: #9c9c9c;
+}
+
+/* Spans to the end, starting at the title column rather than the dot's. */
+.pv2-wdr__subs {
+  grid-column: 2 / -1;
+  margin-top: 2px;
+  font: 500 11.5px/1.4 var(--cd-font-ui);
+  color: #9c9c9c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pv2-wdr__dot {

@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
+import type { Subtask } from '@/types/subtask'
 import { defaultPoms, estPomsOf } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
+import * as subtasksService from '@/services/subtasks-service'
 import { notifySyncError } from '@/lib/notify'
 
 // calendarId is required (not defaulted) so every call site must supply a real calendar uuid —
@@ -40,6 +42,9 @@ export type TaskSyncStatus = 'pending' | 'synced' | 'failed'
 
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
+  /** Flat across every parent; subtasksFor() narrows. A dependent row is only ever reached
+   *  through its parent, so there is no need for a second index. */
+  const subtasks = ref<Subtask[]>([])
   const isLoading = ref(true)
   const pendingWriteCount = ref(0)
   const isSaving = computed(() => pendingWriteCount.value > 0)
@@ -117,7 +122,16 @@ export const useTasksStore = defineStore('tasks', () => {
       syncCtx = ctx
       const remote = await eventsService.fetchTasks(ctx, memberCalendarIds)
       if (version !== sessionVersion) return
+      // Subtasks load by parent id, so they can only be fetched once the events are known.
+      // Caught separately on purpose: a checklist failure is not a calendar failure. The tasks
+      // are already in hand, so an empty checklist is surfaced rather than the whole load being
+      // discarded and the user left staring at an empty calendar.
+      const remoteSubtasks = await subtasksService
+        .fetchSubtasks(remote.map((t) => t.id))
+        .catch(() => [])
+      if (version !== sessionVersion) return
       tasks.value = remote
+      subtasks.value = remoteSubtasks
       syncStatusByTaskId.value = {}
     } catch {
       if (version !== sessionVersion) return
@@ -132,6 +146,7 @@ export const useTasksStore = defineStore('tasks', () => {
   function resetLocal(): void {
     sessionVersion += 1
     tasks.value = []
+    subtasks.value = []
     syncStatusByTaskId.value = {}
     // Drop every pending write chain so queued same-id writes don't fire against
     // the new session; the bumped sessionVersion also gates any in-flight op at
@@ -182,6 +197,10 @@ export const useTasksStore = defineStore('tasks', () => {
     if (idx === -1) return
     const removed = tasks.value[idx]!
     tasks.value = tasks.value.filter((t) => t.id !== id)
+    // The database cascades on the parent reference; mirror that locally so a deleted
+    // event's checklist does not linger until the next full load. Held for rollback.
+    const removedSubtasks = subtasks.value.filter((s) => s.parentId === id)
+    subtasks.value = subtasks.value.filter((s) => s.parentId !== id)
     setSyncStatus(id, 'pending')
 
     void enqueueWrite(id, () => withWriteState(() => eventsService.deleteTask(id)))
@@ -193,6 +212,7 @@ export const useTasksStore = defineStore('tasks', () => {
         if (version !== sessionVersion) return
         const insertAt = Math.min(idx, tasks.value.length)
         tasks.value = [...tasks.value.slice(0, insertAt), removed, ...tasks.value.slice(insertAt)]
+        subtasks.value = [...subtasks.value, ...removedSubtasks]
         setSyncStatus(id, 'failed')
         notifySyncError('刪除失敗', () => deleteTask(id))
       })
@@ -255,6 +275,147 @@ export const useTasksStore = defineStore('tasks', () => {
       })
   }
 
+  // --- subtasks --------------------------------------------------------------
+  // Same optimistic-write-then-reconcile shape as the task actions above, but keyed on the
+  // subtask's own id so two subtasks of one parent are not serialized behind each other.
+  // Rollback restores the previous row rather than dropping it: a failed write must not
+  // silently discard what the user typed.
+
+  function subtasksFor(parentId: string): Subtask[] {
+    return subtasks.value.filter((s) => s.parentId === parentId)
+  }
+
+  /** Mirrors the RLS policy: only the parent event's owner may write its subtasks. Enforced
+   *  here rather than at each call site so every mutation is covered at once — an optimistic
+   *  write the server will reject surfaces as a value that appears to save and then reverts,
+   *  which is worse than not accepting the input at all. An absent ownerId means the task was
+   *  created locally by the current user. */
+  function canWriteSubtasksOf(parentId: string): boolean {
+    const parent = tasks.value.find((t) => t.id === parentId)
+    if (!parent) return false
+    return parent.ownerId === undefined || parent.ownerId === syncCtx?.ownerId
+  }
+
+  /** Every subtask write funnels through here so the optimistic update, the rollback and the
+   *  retry notice stay in one place. `revert` restores whatever the list held beforehand. */
+  function writeSubtask(subtask: Subtask, message: string, revert: () => void, retry: () => void): void {
+    const version = sessionVersion
+    void enqueueWrite(subtask.id, () => withWriteState(() => subtasksService.upsertSubtask(subtask)))
+      .catch(() => {
+        if (version !== sessionVersion) return
+        revert()
+        notifySyncError(message, retry)
+      })
+  }
+
+  function addSubtask(parentId: string, title: string): void {
+    const trimmed = title.trim()
+    // The title is the only thing identifying a subtask, so a blank one is refused outright
+    // rather than saved as a row nobody can tell from its neighbours.
+    if (trimmed === '') return
+    // A subtask is a dependent row reached only through its parent. Writing against a parent
+    // the store does not hold would create an orphan the user never sees; writing against
+    // someone else's event is what RLS would reject.
+    if (!canWriteSubtasksOf(parentId)) return
+
+    if (syncCtx === null) {
+      rejectUnsyncedWrite(() => addSubtask(parentId, title))
+      return
+    }
+
+    // Position is insertion order: append past the highest currently held, so a delete
+    // followed by an add cannot collide with a surviving row's position.
+    const siblings = subtasksFor(parentId)
+    const nextPosition = siblings.reduce((max, s) => Math.max(max, s.position), -1) + 1
+    const created: Subtask = {
+      id: crypto.randomUUID(),
+      parentId,
+      title: trimmed,
+      done: false,
+      position: nextPosition
+    }
+    subtasks.value = [...subtasks.value, created]
+
+    writeSubtask(
+      created,
+      '新增子任務失敗',
+      () => {
+        subtasks.value = subtasks.value.filter((s) => s.id !== created.id)
+      },
+      () => addSubtask(parentId, title)
+    )
+  }
+
+  function replaceSubtask(next: Subtask): void {
+    subtasks.value = subtasks.value.map((s) => (s.id === next.id ? next : s))
+  }
+
+  function toggleSubtaskDone(id: string): void {
+    const current = subtasks.value.find((s) => s.id === id)
+    if (!current) return
+    if (!canWriteSubtasksOf(current.parentId)) return
+
+    if (syncCtx === null) {
+      rejectUnsyncedWrite(() => toggleSubtaskDone(id))
+      return
+    }
+
+    // A pure boolean: checking triggers no pomodoro logic. The checkbox stays live even on a
+    // checked row, so uncheck → correct → re-check is always available.
+    const next: Subtask = { ...current, done: !current.done }
+    replaceSubtask(next)
+
+    writeSubtask(next, '更新子任務失敗', () => replaceSubtask(current), () => toggleSubtaskDone(id))
+  }
+
+  function renameSubtask(id: string, title: string): void {
+    const current = subtasks.value.find((s) => s.id === id)
+    if (!current) return
+    if (!canWriteSubtasksOf(current.parentId)) return
+    // Checking settles an item: the title greys, strikes through and stops accepting edits,
+    // which is what makes the strike-through an honest signal rather than decoration.
+    // Unchecking lifts this.
+    if (current.done) return
+
+    const trimmed = title.trim()
+    // Refusing means keeping the previous title, never deleting the row.
+    if (trimmed === '' || trimmed === current.title) return
+
+    if (syncCtx === null) {
+      rejectUnsyncedWrite(() => renameSubtask(id, title))
+      return
+    }
+
+    const next: Subtask = { ...current, title: trimmed }
+    replaceSubtask(next)
+
+    writeSubtask(next, '重新命名子任務失敗', () => replaceSubtask(current), () => renameSubtask(id, title))
+  }
+
+  function deleteSubtask(id: string): void {
+    const idx = subtasks.value.findIndex((s) => s.id === id)
+    if (idx === -1) return
+    if (!canWriteSubtasksOf(subtasks.value[idx]!.parentId)) return
+
+    if (syncCtx === null) {
+      rejectUnsyncedWrite(() => deleteSubtask(id))
+      return
+    }
+
+    const version = sessionVersion
+    const removed = subtasks.value[idx]!
+    subtasks.value = subtasks.value.filter((s) => s.id !== id)
+
+    void enqueueWrite(id, () => withWriteState(() => subtasksService.deleteSubtask(id)))
+      .catch(() => {
+        if (version !== sessionVersion) return
+        // Restore at its original index so a failed delete does not silently reorder the list.
+        const insertAt = Math.min(idx, subtasks.value.length)
+        subtasks.value = [...subtasks.value.slice(0, insertAt), removed, ...subtasks.value.slice(insertAt)]
+        notifySyncError('刪除子任務失敗', () => deleteSubtask(id))
+      })
+  }
+
   function copyToDays(task: Task, dates: string[]): Task[] {
     const created = dates.map((date) =>
       mkTask({
@@ -293,6 +454,7 @@ export const useTasksStore = defineStore('tasks', () => {
 
   return {
     tasks,
+    subtasks,
     isLoading,
     isSaving,
     syncStatusByTaskId,
@@ -302,6 +464,11 @@ export const useTasksStore = defineStore('tasks', () => {
     deleteTask,
     toggleDone,
     incrementCompletedPomodoros,
+    subtasksFor,
+    addSubtask,
+    toggleSubtaskDone,
+    renameSubtask,
+    deleteSubtask,
     copyToDays
   }
 })
