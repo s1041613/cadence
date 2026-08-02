@@ -104,7 +104,42 @@ PausedSegment  = { status: 'paused', remainingMs: number } // 凍結餘額，不
 
 ---
 
-## 4. ⚠️ 未決的設計問題（下一個 session 的主要工作）
+## 4. ~~未決的設計問題~~ → 已於 2026-08-02 結案
+
+### 結論：入口限制整個不做，A / B / C 三個方向都不採用
+
+Zoe 的裁決：**「未完成的應該要移動到某一天繼續做才對」**。
+
+這推翻了整節的前提 —— 原本在問「逾期的事要不要擋、怎麼補做」，但她的產品模型是**逾期的事根本不該留在原地**，該搬到未來某天。A 的「補做」語意在這個模型下是多餘甚至誤導的，所以連 A 也不做。
+
+這正好是本節調研裡 Sunsama 的作法（rollover 搬到今天，而非禁止）—— 當時只當旁註寫，實際上它才是主線。
+
+| 方向 | 結論 |
+|---|---|
+| A（改語意「補做」） | ❌ 不做 —— 模型是搬移不是補做 |
+| B（detached session） | ❌ 不做 |
+| C（番茄數手動覆寫＋凍結） | ❌ 不做 —— Zoe：「番茄數會跟著事件時段跳動 → 沒差」 |
+| 舊答案「按鈕顯示為停用」 | ✅ 作廢 |
+
+### 這輪實際做的兩件事
+
+1. **all-day 不顯示「開始專注」按鈕**（Zoe：「all-day 沒有番茄功能」）。兩張 preview card 的 `v-if` 加 `!allDay`，兩個 popover 傳 `:all-day="task.allDay"`。
+   **性質是防守性的**：存檔路徑已強制 quadrant task 的 `allDay = false`（`EventPreviewPopover.vue` / `EventPreviewPopoverV2.vue` 的 `saveEdit`），正常流程產生不出 all-day task。這道防的是 `tasks-store.ts:15` `createTask` 的 `overrides.allDay` 缺口。
+2. **`FocusSession.vue` 全面英文化**（21 個字串）。系統預設是英文介面，原本整支番茄鐘 UI 是中文，是全站少數的中文 UI。用語照業界慣例（`Short break`、`Start another pomodoro`、`Focus · Pomodoro`）。
+   `notifySyncError` 那批 18 個中文 toast **刻意不動**（Zoe 明確排除），所以全站 toast 目前仍是中英混用（`Pv2SettingsNotifications.vue:112` 已是英文）。
+
+### 📌 未來規劃：rollover（搬到某一天）
+
+Zoe 自己規劃，**這輪不做，repo 裡也完全沒有任何實作**（搬移目前只能手動在 edit card 改日期）。
+
+真的要做時，以下兩題必須先答（本輪問了但她擱置）：
+
+1. **自動還是手動？** 手動（逾期事件上出現「移到今天」按鈕，改 `date` 走既有 `saveTask`）技術上很小、不用新表；自動 rollover 要處理「什麼算未完成」、重複事件、跨裝置誰負責搬（每台裝置開 app 都搬一次會打架）。
+2. **搬移後已完成的番茄數保留還是歸零？** 現在 `completedPomodoros` 累積在 task 上，若搬移只改 `date` 則**預設保留**（1/3 繼續做），要歸零得額外寫。
+
+---
+
+### 以下為原始記錄（決策過程，保留備查）
 
 ### 問題
 
