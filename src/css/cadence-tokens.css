@@ -190,6 +190,12 @@
   --cd-fs-46: 46px;
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
+  /* ---------- v2 layout ---------- */
+  /* Pv2BottomNav 的實際高度：12 上 + 30 圖示 + 6 間距 + 11 標籤 + 30 下 + 1 邊框。
+     各檢視的 FAB 用它算離底距離；改 Pv2BottomNav 的 padding 要同步改這裡，
+     否則 FAB 會壓到 nav（FAB 那側不會有任何錯誤提示）。 */
+  --pv2-nav-h: 90px;
+
   /* ---------- Radius ---------- */
   --cd-radius-pill: 999px;
   --cd-radius-drawer: 22px;

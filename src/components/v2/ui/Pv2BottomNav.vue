@@ -48,7 +48,9 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  /* 底部 30px：為 home indicator 讓開，避免導覽文字被系統橫條壓到 */
+  /* 底部 30px：為 home indicator 讓開，避免導覽文字被系統橫條壓到。
+     改這裡的 padding 就要同步改 --pv2-nav-h（見 cadence-tokens.css），
+     否則各檢視的 FAB 會壓到 nav。 */
   padding: 12px 18px 30px;
   border-top: 1px solid #e2e2e2;
   background: #fff;

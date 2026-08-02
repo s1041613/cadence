@@ -129,8 +129,8 @@ function onCreate(): void {
   display: none;
 }
 
-/* FAB 浮在底部 nav 之上（同月曆/週，nav 縮 40px 後對應下移） */
+/* FAB 浮在底部 nav 之上：離 nav 頂緣 16px，隨 nav 高度自動跟著走 */
 .dv2__fab {
-  bottom: 75px;
+  bottom: calc(var(--pv2-nav-h) + 16px);
 }
 </style>
