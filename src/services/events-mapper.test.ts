@@ -78,7 +78,10 @@ describe('events-mapper', () => {
         repeat: 'none'
       })
 
-      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
+      // Reminders live in event_reminders, not on the event row, so taskToRow cannot carry one
+      // and the row-only round-trip always comes back null. events-service owns that write path
+      // (upsert on save, delete when cleared); the reminder tests below cover rowToTask's side.
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId, reminder: null })
     })
 
     it('round-trips an all-day event unchanged', () => {
@@ -92,7 +95,7 @@ describe('events-mapper', () => {
         icon: 'flag'
       })
 
-      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId, reminder: null })
     })
   })
 
