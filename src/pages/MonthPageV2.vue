@@ -69,8 +69,9 @@ onBeforeUnmount(() => {
 }
 
 .mp2__frame {
-  /* --mp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。 */
-  --mp2-safe-top: max(env(safe-area-inset-top), 40px);
+  /* --mp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。
+     手機是 0：safe-area 策略待重新設計，這裡不再自行讓位。桌面 device frame 另有覆寫。 */
+  --mp2-safe-top: 0px;
   position: relative;
   width: 100%;
   height: 100%;
@@ -79,12 +80,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   background: #fafaf9; /* 海報底（無背景圖時的底色，對齊設計稿頁面底色） */
   isolation: isolate; /* 建立堆疊脈絡，讓背景層的負 z-index 只落在 frame 內 */
-  /* 頂部 safe-area：真機讓開系統 status bar；至少留一點空白，chip 列不貼到最上方。
-     不畫假的 9:41/電量（真機自有系統 status bar），只保留其佔位。 */
   padding-top: var(--mp2-safe-top);
-  /* 底部 safe-area：把內容欄（含白色底部 nav）推到 home indicator 之上，
-     讓 frame 的底色填滿 safe-area，與頁面連續、不露 body 底色帶。 */
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 背景圖鋪滿整個 frame（含 safe-area 區），浮在底色上、月曆內容下。

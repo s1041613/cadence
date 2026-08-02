@@ -62,8 +62,9 @@ onBeforeUnmount(() => {
 }
 
 .dp2__frame {
-  /* --dp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。 */
-  --dp2-safe-top: max(env(safe-area-inset-top), 40px);
+  /* --dp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。
+     手機是 0：safe-area 策略待重新設計，這裡不再自行讓位。桌面 device frame 另有覆寫。 */
+  --dp2-safe-top: 0px;
   position: relative;
   width: 100%;
   height: 100%;
@@ -73,8 +74,6 @@ onBeforeUnmount(() => {
   background: #fafaf9;
   isolation: isolate;
   padding-top: var(--dp2-safe-top);
-  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 背景層錨定 padding-box 內緣，用負 top 抵回 padding-top 讓圖鋪到 frame 頂，

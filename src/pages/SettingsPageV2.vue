@@ -45,9 +45,6 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
   flex-direction: column;
   overflow: hidden;
   background: #fafaf9;
-  padding-top: max(env(safe-area-inset-top), 40px);
-  /* 底部 safe-area：讓 frame 底色填滿 home indicator 區，不露 body 底色帶 */
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .sp2__content {
