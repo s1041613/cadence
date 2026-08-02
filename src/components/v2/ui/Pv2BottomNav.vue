@@ -48,7 +48,8 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   flex: none;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  padding: 12px 18px;
+  /* 底部 30px：為 home indicator 讓開，避免導覽文字被系統橫條壓到 */
+  padding: 12px 18px 30px;
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }

@@ -23,7 +23,7 @@ const emit = defineEmits<{
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 0;
+  padding: 20px;
   border: none;
   background: none;
   cursor: pointer;

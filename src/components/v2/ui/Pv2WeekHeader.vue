@@ -1,6 +1,7 @@
 <template>
   <!--
-    週檢視標題（照設計稿）：Week N（serif）+ 日期區間（mono 副標）+ 右側上/下週圓框箭頭 + 底部黑線。
+    週檢視標題（照設計稿）：Week N（Instrument Serif）+ 日期區間（Zen Kaku 副標）
+    + 右側上/下週圓框箭頭 + 底部黑線。
   -->
   <div class="pv2-wh">
     <div class="pv2-wh__row">
@@ -63,11 +64,16 @@ const emit = defineEmits<{
   -webkit-text-stroke: 1px #1b1b1b;
 }
 
+/* 日期區間副標：照片背景上 #9c9c9c 只有約 2.2:1，加深到 #6e6e6e，
+   仍明顯次於上方 Week N 主標。
+   Zen Kaku 比例字身，字距從 0.16em 收到 0.12em 才不鬆散；數字補 tabular-nums，
+   換週時 "AUG 2 — 8" 的寬度才不會跳動。 */
 .pv2-wh__range {
-  font: 600 12px var(--cd-font-mono);
-  letter-spacing: 0.16em;
+  font: 500 12px var(--cd-font-ui);
+  font-variant-numeric: var(--cd-numeric-aligned);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: #6e6e6e;
 }
 
 .pv2-wh__nav {

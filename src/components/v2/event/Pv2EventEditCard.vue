@@ -50,7 +50,6 @@
               type="button"
               class="pv2-edit-card__matrix-cell"
               :class="{ 'pv2-edit-card__matrix-cell--selected': quad === q.k }"
-              :style="quad === q.k ? { background: q.color, borderColor: q.color } : { '--pv2-quad': q.color }"
               @click="emit('update:quad', q.k)"
             >
               <span>{{ q.l }}</span>
@@ -213,11 +212,15 @@ const pomodoroCount = computed(() =>
   estPomsOf({ estimatedPomodoros: props.estimatedPomodoros ?? 0, allDay: false, start: props.start, end: props.end })
 )
 
+// No per-quadrant colour here: selection is signalled by the shared v2 filled-ink
+// treatment (see .pv2-edit-card__matrix-cell--selected), matching Pv2Chip's "on" state
+// and Pv2MonthSheet's done button. The quadrant hues in use-theme.ts stay the authority
+// for how a task renders in the month/week/day views — this picker only records a choice.
 const matrixOptions = [
-  { k: 'do' as const, l: 'Do Now', s: 'Right away', color: 'var(--cd-quad-do)' },
-  { k: 'plan' as const, l: 'Plan', s: 'Schedule it', color: 'var(--cd-quad-plan)' },
-  { k: 'quick' as const, l: 'Quick', s: 'Quick win', color: 'var(--cd-quad-quick)' },
-  { k: 'later' as const, l: 'Later', s: 'When free', color: 'var(--cd-quad-later)' }
+  { k: 'do' as const, l: 'Do Now', s: 'Right away' },
+  { k: 'plan' as const, l: 'Plan', s: 'Schedule it' },
+  { k: 'quick' as const, l: 'Quick', s: 'Quick win' },
+  { k: 'later' as const, l: 'Later', s: 'When free' }
 ]
 </script>
 
@@ -238,6 +241,9 @@ const matrixOptions = [
 
   --pv2-label-col: 92px;
   --pv2-gap: 12px;
+  /* Shared row height for every __line, set by the tallest control on the card (the
+     STARTS/ENDS date/time pills). See .pv2-edit-card__line for the derivation. */
+  --pv2-row-h: 62.67px;
   /* Shared width for the REMINDER / REPEAT / CALENDAR value pills so they align as
      one column; wide enough for the longest preset label ("Does not repeat"). */
   --pv2-pill-w: 156px;
@@ -268,7 +274,7 @@ const matrixOptions = [
   background: transparent;
   color: var(--pv2-ink-2);
   cursor: pointer;
-  font: 800 11px var(--cd-font-mono);
+  font: 700 11px var(--cd-font-ui);
   letter-spacing: 0.08em;
 }
 
@@ -282,7 +288,8 @@ const matrixOptions = [
   outline: none;
   background: transparent;
   color: var(--pv2-ink);
-  font: 500 32px/1.04 var(--cd-font-serif);
+  font: 500 32px/1.12 var(--cd-font-ui);
+  letter-spacing: -0.01em;
 }
 
 .pv2-edit-card__scroll {
@@ -314,9 +321,9 @@ const matrixOptions = [
   padding: 11px 14px;
   border-radius: 10px;
   color: var(--pv2-ink-2);
-  font-family: var(--cd-font-mono);
+  font-family: var(--cd-font-ui);
   font-size: 12px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
 }
 
 .pv2-edit-card__type:deep(.cd-segmented__btn--active) {
@@ -331,13 +338,20 @@ const matrixOptions = [
   grid-template-columns: var(--pv2-label-col) minmax(0, 1fr);
   align-items: center;
   gap: var(--pv2-gap);
-  min-height: 48px;
+  /* One shared height floor for every row (STYLE, ALL-DAY, STARTS/ENDS, and the
+     MORE OPTIONS rows) so the dividers keep an even rhythm no matter which control
+     a row holds. 62.67px is what the STARTS/ENDS rows measure naturally: 10px top +
+     10px bottom padding around a 42.67px date/time pill (15.5px mono text + 9px
+     vertical padding + 1px border, both sides). Expressed as a min-height rather
+     than a fixed height so a row whose content grows — a wrapped value, or the NOTES
+     textarea dragged taller — still expands instead of overflowing. */
+  min-height: var(--pv2-row-h);
+  padding: 10px 0;
   border-bottom: 1px solid var(--pv2-line);
 }
 
 .pv2-edit-card__line--time {
   align-items: start;
-  padding: 10px 0;
 }
 
 /* REMINDER / REPEAT pills, restyled to the design's white chip with a thin neutral
@@ -367,12 +381,12 @@ const matrixOptions = [
 }
 
 .pv2-edit-card__line--pill:deep(.cd-reminder-pill__text) {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .pv2-edit-card__line--pill:deep(.cd-repeat-pill) {
   padding: 9px 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Every row's value (the non-label second column) hugs the right edge, matching the
@@ -384,14 +398,14 @@ const matrixOptions = [
 }
 
 .pv2-edit-card__label {
-  font: 800 10px var(--cd-font-mono);
+  font: 700 10px var(--cd-font-ui);
   letter-spacing: 0.06em;
   color: var(--pv2-ink-2);
 }
 
 .pv2-edit-card__matrix-head {
-  font: 800 9px var(--cd-font-mono);
-  letter-spacing: 0.14em;
+  font: 700 9px var(--cd-font-ui);
+  letter-spacing: 0.12em;
   color: var(--pv2-ink-3);
 }
 
@@ -467,8 +481,8 @@ const matrixOptions = [
   justify-content: center;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  letter-spacing: 0.14em;
-  font: 800 9px var(--cd-font-mono);
+  letter-spacing: 0.12em;
+  font: 700 9px var(--cd-font-ui);
   color: var(--pv2-ink-3);
 }
 
@@ -483,10 +497,18 @@ const matrixOptions = [
   border: 1px solid var(--pv2-line);
   border-radius: var(--cd-radius-matrix);
   background: #fff;
-  color: var(--pv2-quad);
+  color: var(--pv2-ink);
   cursor: pointer;
   text-align: left;
   padding: 12px;
+  transition:
+    background var(--cd-duration-micro-3),
+    border-color var(--cd-duration-micro-3);
+}
+
+.pv2-edit-card__matrix-cell:hover:not(.pv2-edit-card__matrix-cell--selected) {
+  background: var(--pv2-fill-hover);
+  border-color: var(--pv2-line-strong);
 }
 
 .pv2-edit-card__matrix-cell span,
@@ -495,18 +517,27 @@ const matrixOptions = [
 }
 
 .pv2-edit-card__matrix-cell span {
-  font: 800 14px var(--cd-font-ui);
+  font: 500 14px var(--cd-font-ui);
 }
 
 .pv2-edit-card__matrix-cell small {
   margin-top: 4px;
   color: var(--pv2-ink-2);
-  font: 600 11px var(--cd-font-ui);
+  font: 400 11px var(--cd-font-ui);
 }
 
-.pv2-edit-card__matrix-cell--selected,
+/* Selection = filled ink, the same "on" treatment as Pv2Chip and Pv2MonthSheet's done
+   button, so the chosen quadrant is the most prominent cell rather than the palest.
+   The subtitle lifts to #d7d7d5 (not the base --pv2-ink-2, which would be unreadable on
+   ink) to keep it secondary to the title while clearing WCAG AA. */
+.pv2-edit-card__matrix-cell--selected {
+  background: var(--pv2-ink);
+  border-color: var(--pv2-ink);
+  color: var(--pv2-paper);
+}
+
 .pv2-edit-card__matrix-cell--selected small {
-  color: #fff;
+  color: #d7d7d5;
 }
 
 .pv2-edit-card__time-controls {
@@ -603,7 +634,8 @@ const matrixOptions = [
 
 .pv2-edit-card__estimate-detail {
   margin-left: auto;
-  font: 500 13px var(--cd-font-mono);
+  font: 500 13px var(--cd-font-ui);
+  font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--pv2-ink-3);
 }
 
@@ -634,7 +666,7 @@ const matrixOptions = [
   align-items: center;
   gap: 8px;
   letter-spacing: 0.12em;
-  font: 800 10px var(--cd-font-mono);
+  font: 700 10px var(--cd-font-ui);
 }
 
 .pv2-edit-card__more-icon {
@@ -681,17 +713,28 @@ const matrixOptions = [
 
 /* NOTES is a textarea (multi-line notes) styled to look like the same frameless,
    right-aligned value as the other rows. field-sizing:content grows it with the text
-   where supported; otherwise it starts one row tall and can be dragged taller. */
+   where supported; otherwise it starts one row tall and can be dragged taller.
+   The row's min-height gives it the same floor as every other row while empty; once
+   the text wraps past that, the textarea grows and the row's min-height yields to it
+   rather than clipping. align-self:center keeps a short value optically centered in
+   the row; a grown one simply fills it. */
 .pv2-edit-card__inline-input--notes {
-  font: 400 16px/1.35 var(--cd-font-serif);
+  align-self: center;
+  font: 400 15px/1.4 var(--cd-font-ui);
   resize: vertical;
   min-height: 1.35em;
   max-height: 6em;
   field-sizing: content;
 }
 
+/* No italic here: Zen Kaku ships no true italic, so `font-style: italic` would be a
+   synthetic oblique — a mechanical slant applied to a CJK-capable gothic, which reads
+   as a rendering fault rather than emphasis. The placeholder's de-emphasis instead
+   comes from colour alone (--pv2-ink-3, inherited from the base ::placeholder rule
+   above), which is what every other placeholder on the card already relies on. */
 .pv2-edit-card__inline-input--notes::placeholder {
-  font-style: italic;
+  color: var(--pv2-ink-3);
+  opacity: 1;
 }
 
 .pv2-edit-card__footer {
@@ -710,7 +753,7 @@ const matrixOptions = [
   height: 44px;
   border-radius: var(--cd-radius-editor-field);
   cursor: pointer;
-  font: 800 12px var(--cd-font-ui);
+  font: 700 12px var(--cd-font-ui);
 }
 
 .pv2-edit-card__delete {

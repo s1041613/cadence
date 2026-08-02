@@ -6,11 +6,11 @@
   -->
   <div class="mv2">
     <div class="mv2__body">
-      <Pv2CalStrip :chips="chips" @toggle="onToggleCalendar" />
-
       <div class="mv2__poster">
         <Pv2Poster :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
       </div>
+
+      <Pv2CalStrip class="mv2__strip" :chips="chips" @toggle="onToggleCalendar" />
 
       <div class="mv2__weekdays">
         <Pv2WeekdayHeader :first-day="settings.firstDay" />
@@ -18,9 +18,6 @@
 
       <Pv2Grid :cells="gridCells" @cell-click="onCellClick" />
     </div>
-
-    <!-- 新增按鈕：浮在格線上、nav 之上；點擊開新建事件（不帶日期，照舊 createOpen 語義） -->
-    <Pv2Fab class="mv2__fab" @click="onCreate" />
 
     <!-- 底部 nav：共用元件，month active -->
     <Pv2BottomNav active="month" />
@@ -62,7 +59,6 @@ import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridCell } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
-import Pv2Fab from '@/components/v2/ui/Pv2Fab.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2DaySheet, { type Pv2DayEvent } from '@/components/v2/ui/Pv2DaySheet.vue'
 import type { Pv2CellEvent } from '@/components/v2/ui/Pv2Cell.vue'
@@ -167,12 +163,6 @@ function onDaySheetEventClick(event: Pv2DayEvent, e: MouseEvent): void {
   ui.eventPreview = { taskId: event.id, anchor: anchorFromEvent(e), mode: 'preview' }
 }
 
-// 新增按鈕：開新建事件（不帶日期，沿用舊 createOpen 語義）。EventComposerOverlay 消費。
-function onCreate(): void {
-  if (tasksStore.isLoading) return
-  ui.createOpen = true
-}
-
 // 月/年輪盤
 const sheetOpen = ref(false)
 function openSheet(): void {
@@ -192,18 +182,12 @@ void stepMonthBy // 目前未在模板使用（無箭頭），保留給後續切
 
 <style scoped>
 .mv2 {
-  position: relative; /* FAB 的定位錨 */
+  position: relative; /* 絕對定位子層的錨點 */
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   overflow: hidden;
-}
-
-/* FAB 浮在底部 nav 之上：nav 現高約 55px，FAB 往上讓開 ~20px。
-   錨點是 .mv2（nav 頂緣），不受 frame padding 影響。 */
-.mv2__fab {
-  bottom: 75px;
 }
 
 .mv2__body {
@@ -215,8 +199,8 @@ void stepMonthBy // 目前未在模板使用（無箭頭），保留給後續切
   overflow: hidden;
 }
 
-/* chip 列與標題之間留白（設計稿 headline 上方有明顯間距，不與 chip 相黏） */
-.mv2__poster {
+/* 標題與 chip 列之間留白（headline 在上，chip 列不與標題相黏） */
+.mv2__strip {
   margin-top: 18px;
 }
 

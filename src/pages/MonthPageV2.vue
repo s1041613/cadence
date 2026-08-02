@@ -28,7 +28,7 @@
       <EventPreviewPopoverV2 v-if="ui.eventPreview" />
     </div>
 
-    <!-- 新建事件 overlay：FAB 的 ui.createOpen 由它消費（暫用舊皮，能用就好） -->
+    <!-- 新建事件 overlay：day sheet 新增的 ui.createOpen 由它消費（暫用舊皮，能用就好） -->
     <EventComposerOverlay v-if="ui.eventComposerInitialValues || ui.createOpen" variant="v2" />
 
   </div>

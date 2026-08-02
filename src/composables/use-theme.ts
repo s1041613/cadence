@@ -25,8 +25,9 @@ export interface TaskTheme extends Appearance {
 //
 // This array is the authority for quadrant colors, and the values stay literal hex on purpose:
 // backgroundColor is written onto persisted event records (see completePromotion callers), so a
-// var() reference here would store CSS syntax as data. The same values are mirrored into
-// src/css/cadence-tokens.css as --cd-quad-* / --cd-quad-*-ink for stylesheet use; keep both in sync.
+// var() reference here would store CSS syntax as data. There is no CSS mirror: the former
+// --cd-quad-* / --cd-quad-*-ink tokens were deleted (see cadence-tokens.css), so read these
+// colors from JS only — a stylesheet var() reference to them resolves to nothing.
 export const QUADRANTS: Quadrant[] = [
   {
     key: 'do',

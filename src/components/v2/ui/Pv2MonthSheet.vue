@@ -38,6 +38,19 @@
         <div class="pv2-sheet__fade pv2-sheet__fade--top" />
         <div class="pv2-sheet__fade pv2-sheet__fade--bottom" />
       </div>
+
+      <!-- 動作列：TODAY 把輪盤轉回今天（同時 emit select），DONE 收起面板。
+           輪盤本來就邊捲邊 emit select，所以 DONE 只是確認關閉，不是提交。 -->
+      <div class="pv2-sheet__actions">
+        <button type="button" class="pv2-sheet__today" @click="onToday">
+          <svg class="pv2-sheet__today-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2" />
+            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          Today
+        </button>
+        <button type="button" class="pv2-sheet__done" @click="emit('close')">Done</button>
+      </div>
     </div>
   </div>
 </template>
@@ -87,6 +100,21 @@ function onYearScroll(e: Event): void {
     yearIdx.value = i
     emit('select', { month: monthIdx.value, year: BASE_YEAR + i })
   }
+}
+
+// TODAY：兩欄轉回今天所在的月/年並直接 emit。
+// 不倚賴捲動觸發 onScroll——目標與現值相同時不會有 scroll 事件，那樣就不會 emit 了。
+function onToday(): void {
+  const now = new Date()
+  const m = now.getMonth()
+  const y = now.getFullYear()
+  const yi = Math.max(0, Math.min(YEAR_COUNT - 1, y - BASE_YEAR))
+
+  monthIdx.value = m
+  yearIdx.value = yi
+  if (monthEl.value) monthEl.value.scrollTo({ top: m * IH, behavior: 'smooth' })
+  if (yearEl.value) yearEl.value.scrollTo({ top: yi * IH, behavior: 'smooth' })
+  emit('select', { month: m, year: BASE_YEAR + yi })
 }
 
 // 距中央越遠越小越淡（照設計稿 wheelStyle）。月欄字級大於年欄，中央列最大。
@@ -167,6 +195,59 @@ function itemStyle(dist: number, isYear: boolean): Record<string, string> {
   font-family: var(--cd-font-mono);
   font-weight: 500;
   letter-spacing: 0.08em;
+}
+
+/* 動作列：與輪盤之間用細線分隔（照設計稿），TODAY 左、DONE 右 */
+.pv2-sheet__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e4e1;
+}
+
+/* 兩顆按鈕共用：藥丸、鎖死 line-height（button 預設 normal 會撐高），字距同 chip */
+.pv2-sheet__today,
+.pv2-sheet__done {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 500 11px var(--cd-font-ui);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.pv2-sheet__today {
+  gap: 6px;
+  padding: 11px 18px;
+  border: 1px solid #cdcdcd;
+  background: transparent;
+  color: #6e6e6e;
+}
+
+.pv2-sheet__today-icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.pv2-sheet__done {
+  padding: 11px 26px;
+  border: 1px solid #1b1b1b;
+  background: #1b1b1b;
+  color: #fafaf9;
+}
+
+.pv2-sheet__today:active {
+  background: #f0efec;
+}
+
+.pv2-sheet__done:active {
+  opacity: 0.82;
 }
 
 .pv2-sheet__fade {
