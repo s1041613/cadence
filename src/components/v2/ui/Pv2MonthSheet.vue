@@ -2,6 +2,7 @@
   <!--
     月/年輪盤選擇器（照設計稿）：兩欄 scroll-snap，月欄 Instrument Serif italic、年欄 mono。
     中央高亮列有上下細線；上下漸層淡出。捲動 snap 到某列即選定該月/年。
+    兩欄都是 Pv2WheelColumn，與時間滾輪共用同一份 scroll-snap 實作。
   -->
   <div class="pv2-sheet-scrim" @click="emit('close')">
     <div class="pv2-sheet" @click.stop>
@@ -9,31 +10,22 @@
 
       <!-- 選中列不畫高亮帶（樣式 B）：只靠中央列字最大最深區分選中 -->
       <div class="pv2-sheet__wheels">
-        <div ref="monthEl" class="pv2-sheet__col" @scroll="onMonthScroll">
-          <div class="pv2-sheet__pad" />
-          <div
-            v-for="(m, i) in MONTHS_SHORT"
-            :key="m"
-            class="pv2-sheet__item pv2-sheet__item--month"
-            :style="itemStyle(i - monthIdx, false)"
-          >
-            {{ m }}
-          </div>
-          <div class="pv2-sheet__pad" />
-        </div>
-
-        <div ref="yearEl" class="pv2-sheet__col" @scroll="onYearScroll">
-          <div class="pv2-sheet__pad" />
-          <div
-            v-for="(y, i) in years"
-            :key="y"
-            class="pv2-sheet__item pv2-sheet__item--year"
-            :style="itemStyle(i - yearIdx, true)"
-          >
-            {{ y }}
-          </div>
-          <div class="pv2-sheet__pad" />
-        </div>
+        <Pv2WheelColumn
+          :items="monthItems"
+          :model-value="monthIdx"
+          variant="serif"
+          :sizes="['25px', '21px', '19px', '18px']"
+          ariaLabel="Month"
+          @update:model-value="(v) => onSelect(Number(v), yearIdx)"
+        />
+        <Pv2WheelColumn
+          :items="yearItems"
+          :model-value="yearIdx"
+          variant="mono"
+          :sizes="['18px', '15px', '14px', '13px']"
+          ariaLabel="Year"
+          @update:model-value="(v) => onSelect(monthIdx, Number(v))"
+        />
 
         <div class="pv2-sheet__fade pv2-sheet__fade--top" />
         <div class="pv2-sheet__fade pv2-sheet__fade--bottom" />
@@ -56,7 +48,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
+import Pv2WheelColumn from './Pv2WheelColumn.vue'
 
 const props = defineProps<{
   month: number // 0-11
@@ -69,63 +62,29 @@ const emit = defineEmits<{
 }>()
 
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const IH = 44 // item height（與 CSS 對齊）
 const BASE_YEAR = 2020
 const YEAR_COUNT = 21
 
-const years = computed(() => Array.from({ length: YEAR_COUNT }, (_, i) => String(BASE_YEAR + i)))
+// Wheel items carry indices, not display values: the month column's value is 0-11 and the
+// year column's is an offset from BASE_YEAR, so a selection maps straight back onto both refs.
+const monthItems = MONTHS_SHORT.map((label, value) => ({ value, label }))
+const yearItems = computed(() => Array.from({ length: YEAR_COUNT }, (_, i) => ({ value: i, label: String(BASE_YEAR + i) })))
 
-const monthEl = ref<HTMLElement | null>(null)
-const yearEl = ref<HTMLElement | null>(null)
 const monthIdx = ref(props.month)
 const yearIdx = ref(props.year - BASE_YEAR)
 
-onMounted(async () => {
-  await nextTick()
-  if (monthEl.value) monthEl.value.scrollTop = props.month * IH
-  if (yearEl.value) yearEl.value.scrollTop = (props.year - BASE_YEAR) * IH
-})
-
-function onMonthScroll(e: Event): void {
-  const i = Math.max(0, Math.min(11, Math.round((e.target as HTMLElement).scrollTop / IH)))
-  if (i !== monthIdx.value) {
-    monthIdx.value = i
-    emit('select', { month: i, year: BASE_YEAR + yearIdx.value })
-  }
-}
-
-function onYearScroll(e: Event): void {
-  const i = Math.max(0, Math.min(YEAR_COUNT - 1, Math.round((e.target as HTMLElement).scrollTop / IH)))
-  if (i !== yearIdx.value) {
-    yearIdx.value = i
-    emit('select', { month: monthIdx.value, year: BASE_YEAR + i })
-  }
+function onSelect(m: number, y: number): void {
+  monthIdx.value = m
+  yearIdx.value = y
+  emit('select', { month: m, year: BASE_YEAR + y })
 }
 
 // TODAY：兩欄轉回今天所在的月/年並直接 emit。
 // 不倚賴捲動觸發 onScroll——目標與現值相同時不會有 scroll 事件，那樣就不會 emit 了。
+// 寫 monthIdx/yearIdx 會讓 Pv2WheelColumn 的 watcher 把兩欄轉過去，它自己擋掉回授。
 function onToday(): void {
   const now = new Date()
-  const m = now.getMonth()
-  const y = now.getFullYear()
-  const yi = Math.max(0, Math.min(YEAR_COUNT - 1, y - BASE_YEAR))
-
-  monthIdx.value = m
-  yearIdx.value = yi
-  if (monthEl.value) monthEl.value.scrollTo({ top: m * IH, behavior: 'smooth' })
-  if (yearEl.value) yearEl.value.scrollTo({ top: yi * IH, behavior: 'smooth' })
-  emit('select', { month: m, year: BASE_YEAR + yi })
-}
-
-// 距中央越遠越小越淡（照設計稿 wheelStyle）。月欄字級大於年欄，中央列最大。
-function itemStyle(dist: number, isYear: boolean): Record<string, string> {
-  const d = Math.abs(dist)
-  const sizes = isYear ? ['18px', '15px', '14px', '13px'] : ['25px', '21px', '19px', '18px']
-  const fontSize = sizes[Math.min(d, 3)]!
-  if (d === 0) return { fontSize, color: '#1b1b1b', opacity: '1' }
-  if (d === 1) return { fontSize, color: '#6e6e6e', opacity: '0.6' }
-  if (d === 2) return { fontSize, color: '#b2b2b2', opacity: '0.4' }
-  return { fontSize, color: '#c4c4c4', opacity: '0.22' }
+  onSelect(now.getMonth(), Math.max(0, Math.min(YEAR_COUNT - 1, now.getFullYear() - BASE_YEAR)))
 }
 </script>
 
@@ -159,42 +118,6 @@ function itemStyle(dist: number, isYear: boolean): Record<string, string> {
   position: relative;
   height: 220px;
   display: flex;
-}
-
-.pv2-sheet__col {
-  flex: 1;
-  height: 100%;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scrollbar-width: none;
-}
-
-.pv2-sheet__col::-webkit-scrollbar {
-  display: none;
-}
-
-.pv2-sheet__pad {
-  height: 88px;
-}
-
-.pv2-sheet__item {
-  height: 44px;
-  line-height: 44px;
-  text-align: center;
-  scroll-snap-align: center;
-}
-
-/* 字級由 inline itemStyle 依距中央距離給（月中央 25、年中央 18）；這裡只定 family/style/weight */
-.pv2-sheet__item--month {
-  font-family: var(--cd-font-serif);
-  font-style: italic;
-  font-weight: 400;
-}
-
-.pv2-sheet__item--year {
-  font-family: var(--cd-font-mono);
-  font-weight: 500;
-  letter-spacing: 0.08em;
 }
 
 /* 動作列：與輪盤之間用細線分隔（照設計稿），TODAY 左、DONE 右 */

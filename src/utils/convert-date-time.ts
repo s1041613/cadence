@@ -49,6 +49,63 @@ export type TimeFormatName = '24-Hour'
 // always rendered as-is — callers pass the stored value straight through this wrapper.
 export const formatTime = (t: string, _format: TimeFormatName): string => t
 
+// Latest time any picker may land on. Times are stored as "HH:MM" and validated by
+// isTimeValue, so arithmetic must never produce 24:00 — the wheel has no such row and the
+// value would be rejected on save.
+const DAY_FIRST_MIN = 0
+const DAY_LAST_MIN = 23 * 60 + 55
+
+const clampToDay = (mins: number): number => Math.max(DAY_FIRST_MIN, Math.min(DAY_LAST_MIN, mins))
+
+// Duration given to a range that arrives inverted, empty, or unparseable, so the repaired
+// range is still a valid slot. One wheel step.
+const MIN_RANGE_MIN = 5
+
+// Rounds a time onto the wheel's minute grid, for positioning only — callers must not write
+// the result back over a stored value. A deliberately-typed 09:07 stays 09:07; the wheel just
+// renders at 09:05. See the picker spec's "typed values are not snapped".
+//
+// Unparseable input (an all-day event stores '') returns '' rather than "NaN:NaN": minutes()
+// yields NaN, and every arithmetic path below would carry it into the formatted string.
+export const snapToStep = (t: string, step: number): string =>
+  isTimeValue(t) ? toHM(clampToDay(Math.round(minutes(t) / step) * step)) : ''
+
+/**
+ * Moves one edge of a time range and carries the other with it, preserving duration.
+ *
+ * Moving the start always carries the end. Moving the end carries the start only when the
+ * new end would land at or before it — that is the case the "end must be after start" error
+ * used to catch, and auto-shifting resolves it instead of blocking the user.
+ *
+ * Both edges clamp into the day, so a range pushed against midnight compresses rather than
+ * producing an invalid time.
+ */
+export const shiftRange = (
+  range: { start: string; end: string },
+  edge: 'start' | 'end',
+  value: string
+): { start: string; end: string } => {
+  // A value the picker cannot express is not a shift — leave the range untouched rather than
+  // formatting NaN into it.
+  if (!isTimeValue(value)) return { start: range.start, end: range.end }
+
+  // The incoming range may be inverted or empty: the card keeps its "end must be after start"
+  // backstop precisely because such values arrive from elsewhere, and an all-day event stores
+  // ''. Carrying a negative (or NaN) duration would drag the far edge backwards while the
+  // user drags this one forwards, preserving the very state auto-shift exists to resolve.
+  const rawDuration = minutes(range.end) - minutes(range.start)
+  const duration = Number.isNaN(rawDuration) || rawDuration <= 0 ? MIN_RANGE_MIN : rawDuration
+
+  if (edge === 'start') {
+    const start = clampToDay(minutes(value))
+    return { start: toHM(start), end: toHM(clampToDay(start + duration)) }
+  }
+  const end = clampToDay(minutes(value))
+  const startMins = minutes(range.start)
+  const keepStart = !Number.isNaN(startMins) && end > startMins
+  return { start: toHM(keepStart ? startMins : clampToDay(end - duration)), end: toHM(end) }
+}
+
 export const fmtDur = (m: number): string => (m >= 60 ? `${(m / 60).toFixed(m % 60 ? 1 : 0)} hr` : `${m} min`)
 
 // Pomodoro count derived from slot length: 1 = 25 min, rounded up (all-day = 1).

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, pomsInSlot, defaultPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, pomsInSlot, defaultPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime, snapToStep, shiftRange } from './convert-date-time'
 import { DEFAULT_FOCUS_MS, DEFAULT_REST_MS } from './focus-timer'
 
 describe('pad', () => {
@@ -265,5 +265,89 @@ describe('formatTime', () => {
   it('passes 24-hour values through unchanged', () => {
     expect(formatTime('14:30', '24-Hour')).toBe('14:30')
     expect(formatTime('00:00', '24-Hour')).toBe('00:00')
+  })
+})
+
+describe('snapToStep', () => {
+  it('rounds to the nearest step', () => {
+    expect(snapToStep('09:07', 5)).toBe('09:05')
+    expect(snapToStep('09:08', 5)).toBe('09:10')
+  })
+
+  it('leaves a value already on the step unchanged', () => {
+    expect(snapToStep('09:05', 5)).toBe('09:05')
+    expect(snapToStep('00:00', 5)).toBe('00:00')
+  })
+
+  it('carries into the next hour when rounding up', () => {
+    expect(snapToStep('09:58', 5)).toBe('10:00')
+  })
+
+  // The wheel only renders times that exist. Rounding 23:58 up would produce 24:00, which
+  // isTimeValue rejects and no hour column can display — clamp to the last slot instead.
+  it('clamps at the end of the day rather than overflowing to 24:00', () => {
+    expect(snapToStep('23:58', 5)).toBe('23:55')
+    expect(snapToStep('23:59', 5)).toBe('23:55')
+  })
+
+  // An all-day event stores '' for its times. minutes('') is NaN, which would serialise as
+  // the literal "NaN:NaN" — a value the wheel cannot render and isTimeValue rejects.
+  it('returns an empty string for a time it cannot parse', () => {
+    expect(snapToStep('', 5)).toBe('')
+    expect(snapToStep('not-a-time', 5)).toBe('')
+  })
+})
+
+describe('shiftRange', () => {
+  it('carries the end along when the start moves, preserving duration', () => {
+    expect(shiftRange({ start: '09:00', end: '10:30' }, 'start', '13:00')).toEqual({ start: '13:00', end: '14:30' })
+  })
+
+  it('carries the end backwards when the start moves earlier', () => {
+    expect(shiftRange({ start: '13:00', end: '14:00' }, 'start', '09:00')).toEqual({ start: '09:00', end: '10:00' })
+  })
+
+  it('leaves the start alone when the end moves but stays later', () => {
+    expect(shiftRange({ start: '09:00', end: '10:00' }, 'end', '11:00')).toEqual({ start: '09:00', end: '11:00' })
+  })
+
+  // Auto-shift exists so the picker never strands the user in the "end must be after start"
+  // error state: dragging the end past the start pushes the start back instead of failing.
+  it('carries the start backwards when the end is moved before it', () => {
+    expect(shiftRange({ start: '13:00', end: '14:00' }, 'end', '11:00')).toEqual({ start: '10:00', end: '11:00' })
+  })
+
+  it('treats an end moved exactly onto the start as a conflict', () => {
+    expect(shiftRange({ start: '13:00', end: '14:00' }, 'end', '13:00')).toEqual({ start: '12:00', end: '13:00' })
+  })
+
+  it('clamps at the end of the day when the carried end would overflow', () => {
+    expect(shiftRange({ start: '09:00', end: '10:30' }, 'start', '23:00')).toEqual({ start: '23:00', end: '23:55' })
+  })
+
+  it('clamps at the start of the day when the carried start would underflow', () => {
+    expect(shiftRange({ start: '13:00', end: '14:00' }, 'end', '00:30')).toEqual({ start: '00:00', end: '00:30' })
+  })
+
+  // An already-inverted range can arrive from elsewhere (the card keeps its "end must be
+  // after start" backstop for exactly that). Carrying its negative duration would drag the
+  // end backwards as the user drags the start forwards, preserving the broken state the
+  // auto-shift exists to resolve — so the first move repairs it instead.
+  it('repairs an inverted range rather than carrying a negative duration', () => {
+    expect(shiftRange({ start: '13:00', end: '12:00' }, 'start', '15:00')).toEqual({ start: '15:00', end: '15:05' })
+  })
+
+  it('keeps the end after the start when the incoming range is empty', () => {
+    expect(shiftRange({ start: '13:00', end: '13:00' }, 'start', '15:00')).toEqual({ start: '15:00', end: '15:05' })
+  })
+
+  // Times are stored as '' for an all-day event; arithmetic on those is NaN, which would
+  // otherwise serialise as the literal "NaN:NaN" and be saved.
+  it('falls back to a valid range when the incoming times are empty', () => {
+    expect(shiftRange({ start: '', end: '' }, 'start', '09:00')).toEqual({ start: '09:00', end: '09:05' })
+  })
+
+  it('ignores an invalid new value rather than emitting NaN', () => {
+    expect(shiftRange({ start: '09:00', end: '10:00' }, 'start', '')).toEqual({ start: '09:00', end: '10:00' })
   })
 })
