@@ -40,7 +40,10 @@ function createMemoryStorage(): Storage {
   }
 }
 
-const T0 = 1_700_000_000_000
+// Task start/end times ("09:00") are parsed as local time, so the session clock has to be
+// pinned in local time too. A fixed epoch would land on a different wall-clock hour per
+// timezone and desync the two — 06:13 in Asia/Taipei, the previous evening in UTC.
+const T0 = new Date(2023, 10, 15, 6, 13, 20).getTime()
 
 function makeTask(over: Partial<Task> = {}): Task {
   return {
