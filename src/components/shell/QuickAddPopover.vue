@@ -15,7 +15,7 @@
       alert-label="No reminder"
       :reminder="reminder"
       :repeat-label="repeatLabel"
-      location=""
+      :location="location"
       notes=""
       :time-format="settings.timeFormat"
       :calendar-options="calendarOptions"
@@ -36,9 +36,10 @@
       @update:end="(v) => (end = v)"
       @update:reminder="(v) => (reminder = v)"
       @cycle-repeat="cycleRepeat"
-      @update:location="() => undefined"
+      @update:location="(v) => (location = v)"
       @update:notes="() => undefined"
       @save="onAdd"
+      @apply-suggestion="applySuggestion"
     />
   </CdPopover>
   <CdDrawerOrSheet v-else-if="ui.qaPop" presentation="sheet" scrim-color="var(--cd-scrim)" @scrim-click="close" @dismiss="close">
@@ -57,7 +58,7 @@
       alert-label="No reminder"
       :reminder="reminder"
       :repeat-label="repeatLabel"
-      location=""
+      :location="location"
       notes=""
       :time-format="settings.timeFormat"
       :calendar-options="calendarOptions"
@@ -78,9 +79,10 @@
       @update:end="(v) => (end = v)"
       @update:reminder="(v) => (reminder = v)"
       @cycle-repeat="cycleRepeat"
-      @update:location="() => undefined"
+      @update:location="(v) => (location = v)"
       @update:notes="() => undefined"
       @save="onAdd"
+      @apply-suggestion="applySuggestion"
     />
   </CdDrawerOrSheet>
 </template>
@@ -96,6 +98,7 @@ import { useTasksStore, mkTask } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
+import type { TitleSuggestion } from '@/utils/title-suggestions'
 import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset, RepeatMode } from '@/types/task'
 
@@ -128,6 +131,7 @@ const end = ref('09:30')
 const repeat = ref<RepeatMode>('none')
 const reminder = ref<ReminderPreset | null>(null)
 const calendarId = ref('')
+const location = ref('')
 
 const REPEAT_LABELS: Record<RepeatMode, string> = {
   none: 'Does not repeat',
@@ -158,8 +162,24 @@ watch(
     repeat.value = 'none'
     reminder.value = '15-min'
     calendarId.value = calendarsStore.defaultCalendarId ?? ''
+    location.value = ''
   }
 )
+
+// Overwrites every carried field, including the tapped time slot: showing "12:00 - 13:00" on the
+// row and then producing something else would make the list dishonest. Notes and repeat are
+// deliberately not carried.
+function applySuggestion(suggestion: TitleSuggestion): void {
+  title.value = suggestion.title
+  allDay.value = suggestion.allDay
+  start.value = suggestion.start
+  end.value = suggestion.end
+  color.value = suggestion.backgroundColor ?? color.value
+  icon.value = (suggestion.icon as IconName | null) ?? null
+  calendarId.value = suggestion.calendarId
+  reminder.value = suggestion.reminder
+  location.value = suggestion.location
+}
 
 function close(): void {
   ui.qaPop = null
@@ -191,7 +211,8 @@ function onAdd(): void {
     backgroundColor: type.value === 'event' ? color.value : null,
     icon: type.value === 'event' ? icon.value : null,
     repeat: repeat.value,
-    reminder: reminder.value
+    reminder: reminder.value,
+    location: location.value
   })
   tasksStore.saveTask(task)
   close()

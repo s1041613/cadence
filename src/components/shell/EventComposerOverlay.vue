@@ -27,6 +27,7 @@
         @close="close"
         @cancel="close"
         @save="trySave"
+        @apply-suggestion="applySuggestion"
         @update:title="(v) => (draft!.title = v)"
         @update:type="onUpdateType"
         @update:quad="onUpdateQuad"
@@ -79,6 +80,7 @@
       @close="close"
       @cancel="close"
       @save="trySave"
+      @apply-suggestion="applySuggestion"
       @cycle-repeat="cycleRepeat"
       @update:title="(v) => (draft!.title = v)"
       @update:type="onUpdateType"
@@ -111,6 +113,7 @@ import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
 import { defaultPoms } from '@/utils/convert-date-time'
 import { reminderLabel } from '@/utils/event-panel'
+import type { TitleSuggestion } from '@/utils/title-suggestions'
 import type { RepeatMode, Task } from '@/types/task'
 
 // EventComposerOverlay — feature-layer composition for the handoff's New Event/Task edit card.
@@ -188,6 +191,22 @@ watch(
   },
   { immediate: true }
 )
+
+// Picking a past event overwrites every carried field, including the time — the seeds this host
+// supplies are hardcoded defaults (DEFAULT_START/DEFAULT_END, or DraftDrawer's 09:00-10:00), so
+// there is no user time intent here to preserve. Notes and repeat are deliberately not carried.
+function applySuggestion(suggestion: TitleSuggestion): void {
+  if (!draft.value) return
+  draft.value.title = suggestion.title
+  draft.value.allDay = suggestion.allDay
+  draft.value.start = suggestion.start
+  draft.value.end = suggestion.end
+  draft.value.backgroundColor = suggestion.backgroundColor
+  draft.value.icon = suggestion.icon
+  draft.value.calendarId = suggestion.calendarId
+  draft.value.reminder = suggestion.reminder
+  draft.value.location = suggestion.location
+}
 
 // The topbar Create pill / phone FAB set ui.createOpen (no date/time context, per design.md's
 // "Creation entry points seed context from where they are invoked" — Create carries only today's
