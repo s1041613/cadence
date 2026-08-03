@@ -11,6 +11,7 @@
           :range-label="rangeLabel"
           @prev="stepWeekBy(-1)"
           @next="stepWeekBy(1)"
+          @today="goToday"
         />
       </div>
 
@@ -122,6 +123,11 @@ const weekRows = computed(() =>
 
 function stepWeekBy(delta: number): void {
   ui.selectedDate = iso(addDays(weekStart.value, delta * 7))
+}
+
+// 回本週：選今天而非本週第一天，這樣切到 day 檢視時停在今天。
+function goToday(): void {
+  ui.selectedDate = iso(new Date())
 }
 
 function onEventClick(event: Pv2WeekEvent, e: MouseEvent): void {

@@ -13,6 +13,7 @@
           :month-year="monthYear"
           @prev="stepDayBy(-1)"
           @next="stepDayBy(1)"
+          @today="goToday"
         />
       </div>
 
@@ -64,6 +65,10 @@ const monthYear = computed(() =>
 // Day 就是單純 ±1 天（不同於 week 對 weekStart 加減）
 function stepDayBy(delta: number): void {
   ui.selectedDate = iso(addDays(cur.value, delta))
+}
+
+function goToday(): void {
+  ui.selectedDate = iso(new Date())
 }
 
 // TEMP: tab 切換：元件 local state，切日期不重置
