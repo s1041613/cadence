@@ -59,19 +59,52 @@
         </div>
       </div>
 
-      <div class="pv2-edit-card__line pv2-edit-card__line--time">
-        <span class="pv2-edit-card__label">STARTS</span>
-        <div class="pv2-edit-card__time-controls">
-          <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
-          <CdTimeDropdown v-if="!effectiveAllDay" :model-value="start" :format="timeFormat" @update:model-value="(v) => emit('update:start', v)" />
+      <!-- Row + wheel share a wrapper: the wheel must span the card's full width rather than
+           sit in the row's value column, and the wrapper doubles as the containment boundary
+           for the outside-click that closes it. -->
+      <div ref="startFieldEl" class="pv2-edit-card__time-field">
+        <div class="pv2-edit-card__line pv2-edit-card__line--time">
+          <span class="pv2-edit-card__label">STARTS</span>
+          <div class="pv2-edit-card__time-controls">
+            <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
+            <Pv2TimeChip
+              v-if="!effectiveAllDay"
+              :model-value="start"
+              :open="openWheel === 'start'"
+              ariaLabel="Start time"
+              @open="openWheel = 'start'"
+              @update:model-value="(v) => commitTime('start', v)"
+            />
+          </div>
         </div>
+        <Pv2TimeWheel
+          v-if="openWheel === 'start' && !effectiveAllDay"
+          :model-value="start"
+          aria-label="Start"
+          @update:model-value="(v) => commitTime('start', v)"
+        />
       </div>
-      <div class="pv2-edit-card__line pv2-edit-card__line--time">
-        <span class="pv2-edit-card__label">ENDS</span>
-        <div class="pv2-edit-card__time-controls">
-          <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
-          <CdTimeDropdown v-if="!effectiveAllDay" :model-value="end" :format="timeFormat" @update:model-value="(v) => emit('update:end', v)" />
+      <div ref="endFieldEl" class="pv2-edit-card__time-field">
+        <div class="pv2-edit-card__line pv2-edit-card__line--time">
+          <span class="pv2-edit-card__label">ENDS</span>
+          <div class="pv2-edit-card__time-controls">
+            <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
+            <Pv2TimeChip
+              v-if="!effectiveAllDay"
+              :model-value="end"
+              :open="openWheel === 'end'"
+              ariaLabel="End time"
+              @open="openWheel = 'end'"
+              @update:model-value="(v) => commitTime('end', v)"
+            />
+          </div>
         </div>
+        <Pv2TimeWheel
+          v-if="openWheel === 'end' && !effectiveAllDay"
+          :model-value="end"
+          aria-label="End"
+          @update:model-value="(v) => commitTime('end', v)"
+        />
       </div>
       <p v-if="timeInvalid" class="pv2-edit-card__warning">End time must be after start time</p>
       <div v-else-if="type === 'task'" class="pv2-edit-card__estimate">
@@ -139,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import CdAppearancePicker from '@/components/ui/CdAppearancePicker.vue'
 import CdDatePicker from '@/components/ui/CdDatePicker.vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
@@ -147,8 +180,9 @@ import CdReminderPill from '@/components/ui/CdReminderPill.vue'
 import CdRepeatPill from '@/components/ui/CdRepeatPill.vue'
 import CdSegmented from '@/components/ui/CdSegmented.vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
-import CdTimeDropdown from '@/components/ui/CdTimeDropdown.vue'
-import { estPomsOf, minutes, type TimeFormatName } from '@/utils/convert-date-time'
+import Pv2TimeChip from '@/components/v2/ui/Pv2TimeChip.vue'
+import Pv2TimeWheel from '@/components/v2/ui/Pv2TimeWheel.vue'
+import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
 import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset } from '@/types/task'
 
@@ -202,9 +236,55 @@ const emit = defineEmits<{
 const moreOpen = ref(false)
 const appearanceOpen = ref(false)
 
+// Which time wheel is expanded. Only one at a time: the card is fixed-height, and two open
+// wheels would push the footer out of reach.
+const openWheel = ref<'start' | 'end' | null>(null)
+const startFieldEl = ref<HTMLElement | null>(null)
+const endFieldEl = ref<HTMLElement | null>(null)
+
+// Moving one edge carries the other, so the picker can't strand the user in the
+// "end must be after start" state. shiftRange owns the arithmetic and the day-boundary clamp.
+function commitTime(edge: 'start' | 'end', value: string): void {
+  const next = shiftRange({ start: props.start, end: props.end }, edge, value)
+  if (next.start !== props.start) emit('update:start', next.start)
+  if (next.end !== props.end) emit('update:end', next.end)
+}
+
+// Deliberately NOT closed on the chip's blur: moving a finger from the chip to the wheel
+// blurs the input, which would make the wheel vanish exactly when it is being used.
+function onOutsideInteraction(e: Event): void {
+  const target = e.target as Node
+  const field = openWheel.value === 'start' ? startFieldEl.value : endFieldEl.value
+  if (field?.contains(target)) return
+  openWheel.value = null
+}
+
+watch(openWheel, async (v) => {
+  if (v) {
+    document.addEventListener('mousedown', onOutsideInteraction)
+    document.addEventListener('touchstart', onOutsideInteraction)
+    // The card scrolls internally and is height-capped, so a wheel opened near the bottom
+    // can expand out of view.
+    await nextTick()
+    const field = v === 'start' ? startFieldEl.value : endFieldEl.value
+    field?.scrollIntoView({ block: 'nearest' })
+  } else {
+    document.removeEventListener('mousedown', onOutsideInteraction)
+    document.removeEventListener('touchstart', onOutsideInteraction)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', onOutsideInteraction)
+  document.removeEventListener('touchstart', onOutsideInteraction)
+})
+
 const ICON_NAMES = new Set<string>(['copy', 'pencil', 'trash', 'journal', 'spark', 'bell', 'target', 'search', 'calendar', 'clock', 'check', 'image', 'repeat', 'location', 'notes', 'info', 'sync', 'mail', 'reset', 'spark-mono', 'journal-plain', 'calendar-alt', 'tomato', 'view-day', 'view-week', 'view-month', 'view-list', 'gear'])
 const iconName = computed<IconName | null>(() => (props.icon && ICON_NAMES.has(props.icon) ? (props.icon as IconName) : null))
 const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.allDay))
+
+// An all-day event must not leave an orphaned wheel behind after its chip is gone.
+watch(effectiveAllDay, (v) => { if (v) openWheel.value = null })
 const timeInvalid = computed(() => !effectiveAllDay.value && minutes(props.end) <= minutes(props.start))
 // estPomsOf, not `?? autoPoms`: a stored 0 must fall through to the derived count, or the
 // card shows 0 while the focus session shows the real total.
@@ -549,14 +629,14 @@ const matrixOptions = [
 
 /* Keep the date and time pills on one row, each hugging its own content (no stretch,
    no wrap) so they sit side by side and right-aligned, as in the design. */
-.pv2-edit-card__time-controls:deep(.cd-date-picker),
-.pv2-edit-card__time-controls:deep(.cd-time-dropdown) {
+.pv2-edit-card__time-controls:deep(.cd-date-picker) {
   flex: none;
 }
 
 /* STARTS/ENDS pills per the design: white fill with a thin neutral border, no
-   calendar icon — just the mono date/time text in v2 ink. Scoped via :deep so the
-   shared CdDatePicker / CdTimeDropdown keep their own look everywhere else. */
+   calendar icon — just the mono date text in v2 ink. Scoped via :deep so the shared
+   CdDatePicker keeps its own look everywhere else. The time chip is a v2 component and
+   styles itself. */
 .pv2-edit-card__time-controls:deep(.cd-date-picker__trigger) {
   border: 1px solid var(--pv2-line-strong);
   background: #fff;
@@ -569,9 +649,8 @@ const matrixOptions = [
   background: var(--pv2-fill);
 }
 
-/* Neutralize the shared pickers' olive open-state accent — off the v2 palette. */
-.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger--open),
-.pv2-edit-card__time-controls:deep(.cd-time-dropdown__field--open) {
+/* Neutralize the shared picker's olive open-state accent — off the v2 palette. */
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger--open) {
   border-color: var(--pv2-ink);
 }
 
@@ -579,27 +658,11 @@ const matrixOptions = [
   display: none;
 }
 
-.pv2-edit-card__time-controls:deep(.cd-time-dropdown__field) {
-  border: 1px solid var(--pv2-line-strong);
-  background: #fff;
-  border-radius: var(--cd-radius-sm);
-  padding: 9px 14px;
-  /* Hug the HH:MM text instead of the shared 72px / stretched flex width — the field
-     should be as wide as its content, matching the date pill's fit-to-text sizing. */
-  width: fit-content;
-  color: var(--pv2-ink);
-}
-
-/* The shared input flex-grows to fill the field; cap it to the time string so the
-   pill can shrink-wrap around "09:00" rather than stretching across the row. */
-.pv2-edit-card__time-controls:deep(.cd-time-dropdown__input) {
-  flex: none;
-  width: 5ch;
-  text-align: center;
-}
-
-.pv2-edit-card__time-controls:deep(.cd-time-dropdown__field:hover) {
-  background: var(--pv2-fill);
+/* The row keeps its own divider; the wrapper only groups it with the wheel below, so the
+   wheel spans the card's width instead of sitting in the row's value column. */
+.pv2-edit-card__time-field {
+  display: flex;
+  flex-direction: column;
 }
 
 .pv2-edit-card__warning {
