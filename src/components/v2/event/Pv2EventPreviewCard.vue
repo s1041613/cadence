@@ -106,7 +106,6 @@
             </button>
           </li>
         </ul>
-        <p v-else class="pv2-subtasks__empty">No subtasks yet</p>
 
         <!-- A row rather than a button, so "add" reads as the next line of the list instead of
              something to open first. Stays focused after submit: typing three in a row is the
@@ -176,8 +175,8 @@ const emit = defineEmits<{
   deleteSubtask: [id: string]
 }>()
 
-// Expanded when there is something to show, collapsed when the only thing inside would be an
-// empty line and a composer. Deliberately not persisted: it resets each time the card opens.
+// Expanded when there is something to show, collapsed when the only thing inside would be the
+// composer. Deliberately not persisted: it resets each time the card opens.
 const expanded = ref(props.subtasks.length > 0)
 
 // Re-seeds only when the card switches to a different event, keyed on the parent the rows
@@ -506,15 +505,6 @@ function cancelEdit(): void {
 
 .pv2-subtasks__del:hover {
   background: #f0e7e6;
-}
-
-.pv2-subtasks__empty {
-  margin: 0;
-  padding: 14px 0 14px 34px;
-  font: 500 13px var(--cd-font-ui);
-  font-style: italic;
-  color: #b2b2b2;
-  border-bottom: 1px solid #e2e2e2;
 }
 
 .pv2-subtasks__add {
