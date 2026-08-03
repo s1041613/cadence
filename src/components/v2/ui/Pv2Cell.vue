@@ -66,7 +66,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   min-height: 0;
   overflow: hidden;
   border-bottom: 1px solid #cdcdcd;
-  padding: 4px 3px 5px;
+  padding: 4px 2px 5px;
   box-sizing: border-box;
   cursor: pointer;
 }
@@ -84,7 +84,7 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   height: 20px;
   padding: 0 3px;
   border-radius: 999px;
-  font: 700 15px var(--cd-font-caveat);
+  font: 700 13px var(--cd-font-caveat);
   line-height: 1;
   color: #1b1b1b;
   text-shadow: 0 1px 3px rgba(250, 250, 249, 0.9), 0 0 2px rgba(250, 250, 249, 0.9);

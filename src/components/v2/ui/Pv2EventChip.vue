@@ -35,7 +35,8 @@ const timedStyle = computed(() => ({
   display: flex;
   align-items: center;
   max-width: 100%;
-  font: 700 8px/1.2 var(--cd-font-ui);
+  font: 700 9px/1.2 var(--cd-font-ui);
+  letter-spacing: -0.02em;
 }
 
 /* Inner label does the single-line, whole-character clip: per-character wrapping,
@@ -55,14 +56,14 @@ const timedStyle = computed(() => ({
 /* 整天：實心色填滿 bar */
 .pv2-chip--allday {
   border-radius: 6px;
-  padding: 3px 7px;
+  padding: 3px 3px;
 }
 
 /* 定時：白底 + 色描邊 + 同色文字 */
 .pv2-chip--timed {
   border: 1px solid;
   border-radius: 6px;
-  padding: 1px 7px;
+  padding: 1px 3px;
   background: #fff;
 }
 </style>
