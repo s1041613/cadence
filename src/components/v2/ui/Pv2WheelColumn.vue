@@ -195,6 +195,9 @@ function itemStyle(dist: number): Record<string, string> {
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
   outline: none;
+  /* Digits are a control surface, not prose: without this, dragging the wheel highlights the
+     numbers as text, and a click leaves a stray blue selection over the snapped value. */
+  user-select: none;
 }
 
 .pv2-wheel-col:focus-visible {

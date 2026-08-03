@@ -20,7 +20,6 @@
       :type="editType"
       :quad="editQuad"
       :color="editColor"
-      :icon="editIcon"
       :all-day="editAllDay"
       :date="editDate"
       :start="editStart"
@@ -40,8 +39,6 @@
       @update:type="onUpdateEditType"
       @update:quad="(v) => (editQuad = v)"
       @update:color="(v) => (editColor = v)"
-      @update:icon="(v) => (editIcon = v)"
-      @remove-icon="editIcon = null"
       @update:all-day="(v) => (editAllDay = v)"
       @update:date="(v) => (editDate = v)"
       @update:start="(v) => (editStart = v)"
@@ -97,7 +94,6 @@
       :type="editType"
       :quad="editQuad"
       :color="editColor"
-      :icon="editIcon"
       :all-day="editAllDay"
       :date="editDate"
       :start="editStart"
@@ -117,8 +113,6 @@
       @update:type="onUpdateEditType"
       @update:quad="(v) => (editQuad = v)"
       @update:color="(v) => (editColor = v)"
-      @update:icon="(v) => (editIcon = v)"
-      @remove-icon="editIcon = null"
       @update:all-day="(v) => (editAllDay = v)"
       @update:date="(v) => (editDate = v)"
       @update:start="(v) => (editStart = v)"
@@ -245,6 +239,9 @@ const editTitle = ref('')
 const editType = ref<'event' | 'task'>('task')
 const editQuad = ref<'do' | 'plan' | 'quick' | 'later'>('later')
 const editColor = ref<string>('#4A8B85')
+// No UI writes this any more — v2's STYLE field picks a colour only. It is kept because
+// seedEditState/saveEdit round-trip it: dropping the ref would null out the stored icon of
+// any event edited in v2, which v1's picker can still set.
 const editIcon = ref<string | null>(null)
 const editAllDay = ref(false)
 const editDate = ref('')

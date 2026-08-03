@@ -42,14 +42,11 @@
         @update:model-value="(v) => emit('update:type', v as 'event' | 'task')"
       />
 
-      <div v-if="type === 'event'" class="pv2-edit-card__line">
-        <span class="pv2-edit-card__label">STYLE</span>
-        <button type="button" class="pv2-edit-card__style" aria-label="Edit style" @click="appearanceOpen = true">
-          <span class="pv2-edit-card__style-dot" :style="{ background: color }">
-            <CdIcon v-if="iconName" :name="iconName" :size="11" color="#fff" />
-          </span>
-          <span>›</span>
-        </button>
+      <div v-if="calendarOptions && calendarOptions.length > 1" class="pv2-edit-card__line">
+        <span class="pv2-edit-card__label">CALENDAR</span>
+        <select class="pv2-edit-card__select" :value="calendarId ?? ''" @change="emit('update:calendarId', ($event.target as HTMLSelectElement).value)">
+          <option v-for="option in calendarOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
+        </select>
       </div>
 
       <div v-if="type === 'event'" class="pv2-edit-card__line">
@@ -105,6 +102,7 @@
           v-if="openWheel === 'start' && !effectiveAllDay"
           :model-value="start"
           aria-label="Start"
+          @click="onWheelClick"
           @update:model-value="(v) => commitTime('start', v)"
         />
       </div>
@@ -127,6 +125,7 @@
           v-if="openWheel === 'end' && !effectiveAllDay"
           :model-value="end"
           aria-label="End"
+          @click="onWheelClick"
           @update:model-value="(v) => commitTime('end', v)"
         />
       </div>
@@ -135,6 +134,40 @@
         <span class="pv2-edit-card__estimate-dot" :style="{ background: color }" />
         <span class="pv2-edit-card__estimate-count">{{ pomodoroCount }} pomodoros</span>
         <span class="pv2-edit-card__estimate-detail">25 min · 5 min</span>
+      </div>
+
+      <!-- Same wrapper pattern as the time fields above: the row keeps its own divider and
+           the expanded list spans the card's full width instead of sitting in the row's
+           value column, and the wrapper is the containment boundary for the outside-click. -->
+      <div v-if="type === 'event'" ref="styleFieldEl" class="pv2-edit-card__style-field">
+        <div class="pv2-edit-card__line">
+          <span class="pv2-edit-card__label">STYLE</span>
+          <button
+            type="button"
+            class="pv2-edit-card__style"
+            aria-label="Edit colour"
+            :aria-expanded="colorOpen"
+            @click="colorOpen = !colorOpen"
+          >
+            <span class="pv2-edit-card__style-dot" :style="{ background: color }" />
+            <span class="pv2-edit-card__style-name">{{ colorName ?? 'Custom' }}</span>
+            <svg class="pv2-edit-card__more-icon" :class="{ 'pv2-edit-card__more-icon--open': colorOpen }" width="11" height="7" viewBox="0 0 11 7" fill="none" aria-hidden="true">
+              <path d="M1 1.5 L5.5 5.5 L10 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+        <Pv2ColorList
+          v-if="colorOpen"
+          :model-value="color"
+          aria-label="Event colour"
+          @pick="pickColor"
+          @preview="(v) => emit('update:color', v)"
+        />
+      </div>
+
+      <div class="pv2-edit-card__line pv2-edit-card__line--pill">
+        <span class="pv2-edit-card__label">REMINDER</span>
+        <CdReminderPill :model-value="reminder" @update:model-value="(v) => emit('update:reminder', v)" />
       </div>
 
       <button type="button" class="pv2-edit-card__more" @click="moreOpen = !moreOpen">
@@ -147,16 +180,6 @@
       </button>
 
       <div v-if="moreOpen" class="pv2-edit-card__more-body">
-        <div v-if="calendarOptions && calendarOptions.length > 1" class="pv2-edit-card__line">
-          <span class="pv2-edit-card__label">CALENDAR</span>
-          <select class="pv2-edit-card__select" :value="calendarId ?? ''" @change="emit('update:calendarId', ($event.target as HTMLSelectElement).value)">
-            <option v-for="option in calendarOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
-          </select>
-        </div>
-        <div class="pv2-edit-card__line pv2-edit-card__line--pill">
-          <span class="pv2-edit-card__label">REMINDER</span>
-          <CdReminderPill :model-value="reminder" @update:model-value="(v) => emit('update:reminder', v)" />
-        </div>
         <div class="pv2-edit-card__line pv2-edit-card__line--pill">
           <span class="pv2-edit-card__label">REPEAT</span>
           <CdRepeatPill :label="repeatLabel" @cycle="emit('cycleRepeat')" />
@@ -182,22 +205,11 @@
         {{ isNew ? 'Add' : 'Save' }}
       </button>
     </div>
-
-    <CdAppearancePicker
-      v-if="appearanceOpen && type === 'event'"
-      :icon="icon"
-      :color="color"
-      @close="appearanceOpen = false"
-      @remove="emit('removeIcon')"
-      @pick-icon="(v) => emit('update:icon', v)"
-      @pick-color="(v) => emit('update:color', v)"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
-import CdAppearancePicker from '@/components/ui/CdAppearancePicker.vue'
 import Pv2TitleSuggestions from './Pv2TitleSuggestions.vue'
 import CdDatePicker from '@/components/ui/CdDatePicker.vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
@@ -205,15 +217,16 @@ import CdReminderPill from '@/components/ui/CdReminderPill.vue'
 import CdRepeatPill from '@/components/ui/CdRepeatPill.vue'
 import CdSegmented from '@/components/ui/CdSegmented.vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
+import Pv2ColorList from '@/components/v2/ui/Pv2ColorList.vue'
 import Pv2TimeChip from '@/components/v2/ui/Pv2TimeChip.vue'
 import Pv2TimeWheel from '@/components/v2/ui/Pv2TimeWheel.vue'
+import { eventColorNameOf } from '@/components/v2/ui/event-colors'
 import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
 import { buildTitleSuggestions, type TitleSuggestion } from '@/utils/title-suggestions'
 import { useImeSafeEnter } from '@/composables/use-ime-safe-enter'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
-import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset } from '@/types/task'
 
 const props = withDefaults(
@@ -223,7 +236,6 @@ const props = withDefaults(
     type: 'event' | 'task'
     quad: 'do' | 'plan' | 'quick' | 'later'
     color?: string
-    icon?: string | null
     allDay: boolean
     date: string
     start: string
@@ -238,7 +250,7 @@ const props = withDefaults(
     calendarOptions?: Array<{ id: string; name: string }>
     calendarId?: string | null
   }>(),
-  { color: '#E3A75C', icon: null, timeFormat: '24-Hour', calendarId: null }
+  { color: '#E3A75C', timeFormat: '24-Hour', calendarId: null }
 )
 
 const emit = defineEmits<{
@@ -250,8 +262,6 @@ const emit = defineEmits<{
   'update:type': [value: 'event' | 'task']
   'update:quad': [value: 'do' | 'plan' | 'quick' | 'later']
   'update:color': [value: string]
-  'update:icon': [value: IconName]
-  removeIcon: []
   'update:allDay': [value: boolean]
   'update:date': [value: string]
   'update:start': [value: string]
@@ -265,13 +275,14 @@ const emit = defineEmits<{
 }>()
 
 const moreOpen = ref(false)
-const appearanceOpen = ref(false)
+const colorOpen = ref(false)
 
 // Which time wheel is expanded. Only one at a time: the card is fixed-height, and two open
 // wheels would push the footer out of reach.
 const openWheel = ref<'start' | 'end' | null>(null)
 const startFieldEl = ref<HTMLElement | null>(null)
 const endFieldEl = ref<HTMLElement | null>(null)
+const styleFieldEl = ref<HTMLElement | null>(null)
 
 // Moving one edge carries the other, so the picker can't strand the user in the
 // "end must be after start" state. shiftRange owns the arithmetic and the day-boundary clamp.
@@ -283,10 +294,28 @@ function commitTime(edge: 'start' | 'end', value: string): void {
 
 // Deliberately NOT closed on the chip's blur: moving a finger from the chip to the wheel
 // blurs the input, which would make the wheel vanish exactly when it is being used.
+//
+// Containment is tested against the row and the wheel's *columns*, not the wrapper: the
+// wrapper is a full-width flex column and the wheel's root spans it too, but the wheel only
+// paints a centred ~136px pair of columns. Testing the wrapper would count the wide blank
+// gutters either side of the digits as "inside", so a click on obviously empty space would
+// not dismiss it.
 function onOutsideInteraction(e: Event): void {
   const target = e.target as Node
   const field = openWheel.value === 'start' ? startFieldEl.value : endFieldEl.value
-  if (field?.contains(target)) return
+  const row = field?.querySelector('.pv2-edit-card__line')
+  const cols = field?.querySelector('.pv2-time-wheel__cols')
+  if (row?.contains(target) || cols?.contains(target)) return
+  openWheel.value = null
+}
+
+// Clicking the digits confirms the scrolled-to time and dismisses. The value is already
+// committed on every snap, so there is nothing to save here — this only closes.
+//
+// Bound to `click` rather than the `mousedown` path above because a click fires only when
+// press and release land on the same element: ending a scroll drag over the digits therefore
+// does not count, and the wheel stays open mid-gesture.
+function onWheelClick(): void {
   openWheel.value = null
 }
 
@@ -305,9 +334,41 @@ watch(openWheel, async (v) => {
   }
 })
 
+// Same containment rule as the wheel, on the STYLE wrapper: a click inside the list is a
+// colour pick (which closes it itself), anything else outside dismisses.
+function onOutsideColorInteraction(e: Event): void {
+  if (styleFieldEl.value?.contains(e.target as Node)) return
+  colorOpen.value = false
+}
+
+watch(colorOpen, async (v) => {
+  if (v) {
+    document.addEventListener('mousedown', onOutsideColorInteraction)
+    document.addEventListener('touchstart', onOutsideColorInteraction)
+    // The card scrolls internally and is height-capped, so a list opened near the bottom
+    // can expand out of view.
+    await nextTick()
+    styleFieldEl.value?.scrollIntoView({ block: 'nearest' })
+  } else {
+    document.removeEventListener('mousedown', onOutsideColorInteraction)
+    document.removeEventListener('touchstart', onOutsideColorInteraction)
+  }
+})
+
+// Switching to a task hides the STYLE row entirely, which would otherwise leave the list's
+// document listeners bound with no way to reach the row that owns them.
+watch(() => props.type, (v) => { if (v !== 'event') colorOpen.value = false })
+
+function pickColor(hex: string): void {
+  emit('update:color', hex)
+  colorOpen.value = false
+}
+
 onBeforeUnmount(() => {
   document.removeEventListener('mousedown', onOutsideInteraction)
   document.removeEventListener('touchstart', onOutsideInteraction)
+  document.removeEventListener('mousedown', onOutsideColorInteraction)
+  document.removeEventListener('touchstart', onOutsideColorInteraction)
 })
 
 // --- title suggestions ------------------------------------------------------
@@ -432,8 +493,10 @@ function dismissSuggestion(suggestion: TitleSuggestion): void {
   activeIndex.value = -1
 }
 
-const ICON_NAMES = new Set<string>(['copy', 'pencil', 'trash', 'journal', 'spark', 'bell', 'target', 'search', 'calendar', 'clock', 'check', 'image', 'repeat', 'location', 'notes', 'info', 'sync', 'mail', 'reset', 'spark-mono', 'journal-plain', 'calendar-alt', 'tomato', 'view-day', 'view-week', 'view-month', 'view-list', 'gear'])
-const iconName = computed<IconName | null>(() => (props.icon && ICON_NAMES.has(props.icon) ? (props.icon as IconName) : null))
+// Null for a colour outside the palette (an older event, a calendar's own colour); the
+// trigger then shows the swatch with a neutral "Custom" label rather than a wrong name.
+const colorName = computed(() => eventColorNameOf(props.color))
+
 const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.allDay))
 
 // An all-day event must not leave an orphaned wheel behind after its chip is gone.
@@ -642,21 +705,31 @@ const matrixOptions = [
   color: var(--pv2-ink-3);
 }
 
-/* The style value reads as a pill, matching the design: a warm-grey rounded
-   container holding the color dot and a chevron affordance, echoing the
-   STARTS/ENDS and REMINDER/REPEAT pills so the whole right column is one family. */
+/* The row keeps its own divider; the wrapper only groups it with the colour list below, so
+   the list spans the card's width instead of sitting in the row's value column. Same shape
+   as .pv2-edit-card__time-field. */
+.pv2-edit-card__style-field {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The style value reads as a pill, matching the design: a white rounded container holding
+   the colour dot, the colour's name and a chevron affordance, echoing the STARTS/ENDS and
+   REMINDER/REPEAT pills so the whole right column is one family — including their shared
+   --pv2-pill-w width, so STYLE lines up with REMINDER/REPEAT/CALENDAR. */
 .pv2-edit-card__style {
   justify-self: end;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
+  gap: 10px;
+  min-width: var(--pv2-pill-w);
+  min-height: 36px;
+  padding: 7px 12px;
   border: 1px solid var(--pv2-line-strong);
   border-radius: var(--cd-radius-sm);
   background: #fff;
   color: var(--pv2-ink-3);
   cursor: pointer;
-  font: 400 16px/1 var(--cd-font-ui);
   transition: background var(--cd-duration-micro-3);
 }
 
@@ -665,12 +738,23 @@ const matrixOptions = [
 }
 
 .pv2-edit-card__style-dot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
+  flex: none;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
+}
+
+/* Pushes the chevron to the pill's right edge, so the affordance sits where it does on the
+   REMINDER/REPEAT pills regardless of how long the colour's name is. */
+.pv2-edit-card__style-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  color: var(--pv2-ink);
+  font: 500 13px var(--cd-font-ui);
 }
 
 .pv2-edit-card__matrix {
@@ -853,6 +937,25 @@ const matrixOptions = [
   font: 500 13px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--pv2-ink-3);
+}
+
+/* MORE OPTIONS draws its own flanking hairlines, so the row directly above it must drop
+   its divider or the two stack into a visible double rule. Written as a sibling selector
+   rather than a modifier class so it keeps holding whichever row ends up last — the rows
+   above are conditional (STYLE and ALL-DAY are event-only, CALENDAR needs 2+ calendars). */
+.pv2-edit-card__line:has(+ .pv2-edit-card__more),
+.pv2-edit-card__style-field:has(+ .pv2-edit-card__more) .pv2-edit-card__line,
+.pv2-edit-card__time-field:has(+ .pv2-edit-card__more) .pv2-edit-card__line {
+  border-bottom: none;
+}
+
+/* Same doubling against the footer, which keeps its own border-top as the anchor line that
+   separates it from content scrolling underneath. The last row inside the scroll area drops
+   its divider instead — :last-child on the row and on the expanded MORE OPTIONS body, since
+   either can be what ends the scroll area depending on whether the section is open. */
+.pv2-edit-card__scroll > .pv2-edit-card__line:last-child,
+.pv2-edit-card__more-body:last-child > .pv2-edit-card__line:last-child {
+  border-bottom: none;
 }
 
 /* Centered label flanked by hairlines, matching the design's "— FEWER OPTIONS ^ —"
