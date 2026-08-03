@@ -1,0 +1,265 @@
+<title>Time Wheel — Mockup</title>
+<style>
+  :root {
+    --pv2-ink: #1b1b1b;
+    --pv2-ink-2: #6e6e6e;
+    --pv2-ink-3: #b2b2b2;
+    --pv2-line: #e2e2e2;
+    --pv2-line-strong: #cdcdcd;
+    --pv2-fill: #f3f3f1;
+    --pv2-paper: #fafaf9;
+    --pv2-label-col: 92px;
+    --pv2-gap: 12px;
+    --radius-sm: 8px;
+    --ui: -apple-system, BlinkMacSystemFont, "Zen Kaku Gothic New", "Segoe UI", sans-serif;
+    --page-bg: #eceae6;
+    --page-ink: #1b1b1b;
+    --page-muted: #6e6e6e;
+    --panel: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --page-bg: #16161a; --page-ink: #ececea; --page-muted: #9a9a96; --panel: #202024; }
+  }
+  :root[data-theme="dark"] { --page-bg: #16161a; --page-ink: #ececea; --page-muted: #9a9a96; --panel: #202024; }
+  :root[data-theme="light"] { --page-bg: #eceae6; --page-ink: #1b1b1b; --page-muted: #6e6e6e; --panel: #fff; }
+
+  body { margin: 0; padding: 32px 20px 64px; background: var(--page-bg); color: var(--page-ink); font: 400 15px/1.6 var(--ui); }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .sub { color: var(--page-muted); margin: 0 0 28px; font-size: 14px; }
+  h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--page-muted); margin: 36px 0 14px; }
+
+  .stage { display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* ---- the card ---- */
+  .card {
+    width: 388px; max-width: 100%;
+    background: var(--pv2-paper); color: var(--pv2-ink);
+    border: 1px solid var(--pv2-line); border-radius: var(--radius-sm);
+    overflow: hidden; flex: none;
+    box-shadow: 0 8px 28px rgba(0,0,0,.10);
+  }
+  .card__title { width: calc(100% - 36px); margin: 20px 18px 0; padding: 0 0 14px; border: none; border-bottom: 1.5px solid var(--pv2-ink); background: transparent; color: var(--pv2-ink); font: 500 32px/1.12 var(--ui); letter-spacing: -0.01em; outline: none; }
+  .card__title::placeholder { color: var(--pv2-ink-3); }
+  .card__body { padding: 16px 18px 18px; }
+
+  .line { display: grid; grid-template-columns: var(--pv2-label-col) minmax(0,1fr); align-items: center; gap: var(--pv2-gap); min-height: 62.67px; padding: 10px 0; border-bottom: 1px solid var(--pv2-line); }
+  .label { font: 700 10px var(--ui); letter-spacing: 0.06em; color: var(--pv2-ink-2); }
+  .controls { display: flex; gap: 8px; justify-content: flex-end; }
+
+  .pill { border: 1px solid var(--pv2-line-strong); background: #fff; border-radius: var(--radius-sm); padding: 9px 14px; color: var(--pv2-ink); font: 700 15.5px var(--ui); font-variant-numeric: tabular-nums; cursor: pointer; }
+  /* NOT 5ch: at 15.5px/700 with tabular numerals the colon plus five glyphs overflow
+     it and "23:25" clips to "23:". ch is the advance of "0", which under-measures ":".
+     min-width + fit content lets the pill size to the real string. */
+  .chip { width: auto; min-width: 5.9ch; text-align: center; outline: none; box-sizing: content-box; }
+  .chip--open { border-color: var(--pv2-ink); }
+
+  /* ---- wheel ---- */
+  .wheel { display: none; position: relative; height: 176px; margin: 4px 0 12px; }
+  .wheel--open { display: block; }
+  .wheel__pill { position: absolute; left: 50%; transform: translateX(-50%); top: 66px; width: 168px; height: 44px; border-radius: var(--radius-sm); background: var(--pv2-fill); pointer-events: none; }
+  .wheel__cols { position: relative; height: 100%; display: flex; justify-content: center; gap: 4px; }
+  .col { width: 66px; height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
+  .col::-webkit-scrollbar { display: none; }
+  /* (visibleCount - 1) / 2 * itemHeight, for the 4-row frame above. The container height and
+     this padding must stay in lockstep or every selection reads one row off. */
+  .col__pad { height: 66px; }
+  .col__item { height: 44px; line-height: 44px; text-align: center; scroll-snap-align: center; font-family: var(--ui); font-variant-numeric: tabular-nums; font-weight: 500; transition: color .12s, opacity .12s, font-size .12s; }
+  .wheel__sep { align-self: center; font: 500 21px var(--ui); color: var(--pv2-ink); padding-bottom: 2px; }
+  .wheel__fade { position: absolute; left: 0; right: 0; height: 60px; pointer-events: none; }
+  .wheel__fade--t { top: 0; background: linear-gradient(var(--pv2-paper), rgba(250,250,249,0)); }
+  .wheel__fade--b { bottom: 0; background: linear-gradient(rgba(250,250,249,0), var(--pv2-paper)); }
+
+  .footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; border-top: 1px solid var(--pv2-line); }
+  .btn-del { border: none; background: transparent; color: var(--pv2-ink-2); font: 700 11px var(--ui); letter-spacing: .08em; cursor: pointer; }
+  .btn-save { border: 1px solid var(--pv2-ink); background: var(--pv2-ink); color: var(--pv2-paper); border-radius: 999px; padding: 11px 26px; font: 500 11px var(--ui); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+
+  /* ---- notes ---- */
+  .notes { flex: 1 1 320px; min-width: 280px; }
+  .note { background: var(--panel); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; border-left: 3px solid var(--pv2-ink-3); }
+  .note h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+  .note p { margin: 0; font-size: 13.5px; color: var(--page-muted); }
+  .note--warn { border-left-color: #c2703f; }
+  .note--ok { border-left-color: #4a7c59; }
+  code { background: rgba(127,127,127,.16); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; }
+  .live { display: inline-block; background: rgba(127,127,127,.16); border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; font-weight: 700; }
+</style>
+
+<div class="wrap">
+  <h1>時間滾輪 — Mockup</h1>
+  <p class="sub">互動式原型。chip 可以打字，滾輪可以捲，兩邊即時同步。改開始時間會看到結束時間自動推移。</p>
+
+  <div class="stage">
+    <div class="card">
+      <input class="card__title" placeholder="Event name" value="英文課">
+      <div class="card__body">
+
+        <div class="line">
+          <span class="label">ALL-DAY</span>
+          <div class="controls"><span style="color:var(--pv2-ink-3);font-size:13px">off</span></div>
+        </div>
+
+        <div class="line" id="row-start">
+          <span class="label">STARTS</span>
+          <div class="controls">
+            <button class="pill">Aug 3, 2026</button>
+            <input class="pill chip" id="chip-start" value="13:00" aria-label="Start time">
+          </div>
+        </div>
+        <div class="wheel" id="wheel-start">
+          <div class="wheel__pill"></div>
+          <div class="wheel__cols">
+            <div class="col" data-for="start" data-unit="h" aria-label="Start hour"></div>
+            <span class="wheel__sep">:</span>
+            <div class="col" data-for="start" data-unit="m" aria-label="Start minute"></div>
+          </div>
+          <div class="wheel__fade wheel__fade--t"></div>
+          <div class="wheel__fade wheel__fade--b"></div>
+        </div>
+
+        <div class="line" id="row-end">
+          <span class="label">ENDS</span>
+          <div class="controls">
+            <button class="pill">Aug 3, 2026</button>
+            <input class="pill chip" id="chip-end" value="14:30" aria-label="End time">
+          </div>
+        </div>
+        <div class="wheel" id="wheel-end">
+          <div class="wheel__pill"></div>
+          <div class="wheel__cols">
+            <div class="col" data-for="end" data-unit="h" aria-label="End hour"></div>
+            <span class="wheel__sep">:</span>
+            <div class="col" data-for="end" data-unit="m" aria-label="End minute"></div>
+          </div>
+          <div class="wheel__fade wheel__fade--t"></div>
+          <div class="wheel__fade wheel__fade--b"></div>
+        </div>
+
+      </div>
+      <div class="footer">
+        <button class="btn-del">DELETE</button>
+        <button class="btn-save">Save</button>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="note note--ok">
+        <h3>試試看：打字 ↔ 滾動雙向同步</h3>
+        <p>在 chip 裡把 <code>13:00</code> 改成 <code>16:45</code> 再按 Enter — 滾輪會轉過去。反過來捲滾輪，chip 文字即時跟著變。這是 TimeTree 的行為。</p>
+      </div>
+      <div class="note note--ok">
+        <h3>試試看：自動推移</h3>
+        <p>現在時長是 <span class="live" id="dur">1 hr 30 min</span>。捲動 STARTS，ENDS 會保持同樣時長跟著移動，不會跳出「結束必須晚於開始」的紅字。</p>
+      </div>
+      <div class="note">
+        <h3>分鐘刻度 5 分</h3>
+        <p>分鐘欄是 00 / 05 / 10 … 55，共 12 筆。舊的下拉清單是 48 筆 30 分刻度 — 想要 09:45 這種時間過去做不到。</p>
+      </div>
+      <div class="note note--warn">
+        <h3>這份 mockup 沒有呈現的</h3>
+        <p>真實卡片是固定高度且內部捲動，滾輪展開時可能需要 <code>scrollIntoView</code>；手機 bottom sheet 與桌機 docked panel 的版面壓力也看不出來。另外收合邏輯這裡簡化了 — 真實實作不能綁 blur，否則手指從 chip 移到滾輪時滾輪會當場消失。</p>
+      </div>
+      <div class="note">
+        <h3>24 小時制</h3>
+        <p>沒有第三欄 AM/PM。app 目前是 24h 硬編碼，加 12 小時制要動型別、加設定、掃所有顯示時間的地方 — 另開一張單。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const IH = 44, STEP = 5;
+  const pad = n => String(n).padStart(2, '0');
+  const mins = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+  const toHM = v => `${pad(Math.floor(v / 60) % 24)}:${pad(v % 60)}`;
+  const clampDay = v => Math.max(0, Math.min(23 * 60 + 55, v));
+
+  const state = { start: '13:00', end: '14:30' };
+  const cols = {};
+  document.querySelectorAll('.col').forEach(c => {
+    const items = c.dataset.unit === 'h'
+      ? Array.from({ length: 24 }, (_, i) => pad(i))
+      : Array.from({ length: 60 / STEP }, (_, i) => pad(i * STEP));
+    c.innerHTML = `<div class="col__pad"></div>` + items.map(v => `<div class="col__item">${v}</div>`).join('') + `<div class="col__pad"></div>`;
+    c.setAttribute('role', 'listbox');
+    cols[c.dataset.for + c.dataset.unit] = { el: c, items, lock: false };
+  });
+
+  // Distance-based falloff, mirroring Pv2MonthSheet's itemStyle().
+  function paint(c) {
+    const sel = Math.round(c.el.scrollTop / IH);
+    [...c.el.querySelectorAll('.col__item')].forEach((it, i) => {
+      const d = Math.abs(i - sel);
+      const size = ['21px', '18px', '16px', '15px'][Math.min(d, 3)];
+      const [col, op] = d === 0 ? ['#1b1b1b', 1] : d === 1 ? ['#6e6e6e', .6] : d === 2 ? ['#b2b2b2', .4] : ['#c4c4c4', .22];
+      it.style.fontSize = size; it.style.color = col; it.style.opacity = op;
+      it.setAttribute('aria-selected', d === 0);
+    });
+  }
+
+  function scrollTo(c, idx, smooth) {
+    c.lock = true;
+    c.el.scrollTo({ top: idx * IH, behavior: smooth ? 'smooth' : 'auto' });
+    setTimeout(() => { c.lock = false; paint(c); }, smooth ? 320 : 40);
+  }
+
+  // Render a field's value into its chip + both columns. Never emits.
+  function render(field, smooth) {
+    const v = state[field], m = mins(v);
+    document.getElementById('chip-' + field).value = v;
+    const h = cols[field + 'h'], mm = cols[field + 'm'];
+    scrollTo(h, Math.floor(m / 60), smooth);
+    scrollTo(mm, Math.round((m % 60) / STEP) % (60 / STEP), smooth);
+    const d = mins(state.end) - mins(state.start);
+    document.getElementById('dur').textContent =
+      d >= 60 ? `${Math.floor(d / 60)} hr${d % 60 ? ' ' + (d % 60) + ' min' : ''}` : `${d} min`;
+  }
+
+  // Auto-shift: moving one edge carries the other, preserving duration, clamped to the day.
+  function commit(field, value, fromWheel) {
+    const dur = mins(state.end) - mins(state.start);
+    if (field === 'start') {
+      state.start = toHM(clampDay(mins(value)));
+      state.end = toHM(clampDay(mins(state.start) + dur));
+    } else {
+      state.end = toHM(clampDay(mins(value)));
+      if (mins(state.end) <= mins(state.start)) state.start = toHM(clampDay(mins(state.end) - dur));
+    }
+    render(field === 'start' ? 'end' : 'start', true);
+    if (!fromWheel) render(field, true); else document.getElementById('chip-' + field).value = state[field];
+  }
+
+  Object.values(cols).forEach(c => {
+    c.el.addEventListener('scroll', () => {
+      paint(c);
+      if (c.lock) return;
+      const f = c.el.dataset.for;
+      const hi = Math.round(cols[f + 'h'].el.scrollTop / IH);
+      const mi = Math.round(cols[f + 'm'].el.scrollTop / IH);
+      clearTimeout(c.t);
+      c.t = setTimeout(() => commit(f, `${pad(hi)}:${pad(mi * STEP)}`, true), 90);
+    });
+  });
+
+  ['start', 'end'].forEach(f => {
+    const chip = document.getElementById('chip-' + f);
+    const open = () => {
+      ['start', 'end'].forEach(o => {
+        document.getElementById('wheel-' + o).classList.toggle('wheel--open', o === f);
+        document.getElementById('chip-' + o).classList.toggle('chip--open', o === f);
+      });
+      render(f, false);
+    };
+    chip.addEventListener('focus', open);
+    chip.addEventListener('click', open);
+    // Typed values are NOT snapped — a deliberate 09:07 survives.
+    chip.addEventListener('change', () => {
+      if (/^([01]\d|2[0-3]):[0-5]\d$/.test(chip.value)) commit(f, chip.value, false);
+      else chip.value = state[f];
+    });
+  });
+
+  render('start', false); render('end', false);
+  document.getElementById('wheel-start').classList.add('wheel--open');
+  document.getElementById('chip-start').classList.add('chip--open');
+</script>
