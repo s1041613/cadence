@@ -14,6 +14,11 @@ export interface TasksStoreLike {
   resetLocal: () => void
 }
 
+export interface TitleDismissalsStoreLike {
+  loadFromRemote: () => Promise<void>
+  resetLocal: () => void
+}
+
 export interface OnAuthUserChangeDeps {
   ensureDefaultCalendar: (userId: string) => Promise<string>
   tasksStore: TasksStoreLike
@@ -22,6 +27,10 @@ export interface OnAuthUserChangeDeps {
   // same second phase as tasks (after calendars), so a failed ensureDefaultCalendar also leaves
   // inbox un-loaded — acceptable since that failure makes the whole app unusable anyway.
   inboxStore: CalendarsStoreLike
+  // Title-suggestion dismissals. Scoped to the user with no calendar or default-id dependency, and
+  // a failed load only means dismissed rows reappear until the next sign-in — so it loads alongside
+  // tasks rather than gating anything.
+  titleDismissalsStore: TitleDismissalsStoreLike
   // Reads the *current* signed-in user id at the moment it's called (not the userId this change
   // event started with) — used only for the stale-session check below.
   getCurrentUserId: () => string | null
@@ -38,12 +47,21 @@ export interface OnAuthUserChangeDeps {
 // loading stores with another user's (or no user's) data. A failed ensureDefaultCalendar (thrown)
 // also leaves both stores un-loaded rather than partially loaded.
 export async function onAuthUserChange(userId: string | null, deps: OnAuthUserChangeDeps): Promise<void> {
-  const { ensureDefaultCalendar, tasksStore, calendarsStore, inboxStore, getCurrentUserId, getMemberCalendarIds } = deps
+  const {
+    ensureDefaultCalendar,
+    tasksStore,
+    calendarsStore,
+    inboxStore,
+    titleDismissalsStore,
+    getCurrentUserId,
+    getMemberCalendarIds
+  } = deps
 
   if (userId === null) {
     tasksStore.resetLocal()
     calendarsStore.resetLocal()
     inboxStore.resetLocal()
+    titleDismissalsStore.resetLocal()
     return
   }
 
@@ -62,6 +80,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
   await calendarsStore.loadFromRemote(userId, defaultId)
   await Promise.all([
     tasksStore.loadFromRemote(userId, defaultId, getMemberCalendarIds()),
-    inboxStore.loadFromRemote(userId, defaultId)
+    inboxStore.loadFromRemote(userId, defaultId),
+    titleDismissalsStore.loadFromRemote()
   ])
 }

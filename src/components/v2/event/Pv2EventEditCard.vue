@@ -3,11 +3,35 @@
     <button v-if="!isNew" type="button" class="pv2-edit-card__back" @click="emit('back')">‹ EDIT</button>
 
     <input
+      ref="titleEl"
       class="pv2-edit-card__title"
       :value="title"
       :autofocus="isNew"
       :placeholder="isNew ? (type === 'task' ? 'Task name' : 'Event name') : 'Event name'"
-      @input="emit('update:title', ($event.target as HTMLInputElement).value)"
+      :role="suggestionsEnabled ? 'combobox' : undefined"
+      :aria-expanded="suggestionsEnabled ? listboxRendered : undefined"
+      :aria-controls="listboxRendered ? SUGGESTIONS_ID : undefined"
+      :aria-autocomplete="suggestionsEnabled ? 'list' : undefined"
+      :aria-activedescendant="activeDescendant"
+      autocomplete="off"
+      @input="onTitleInput"
+      @focus="onTitleFocus"
+      @blur="closeSuggestions"
+      @keydown="onTitleKeydown"
+      @compositionstart="onCompositionStart"
+      @compositionend="onTitleCompositionEnd"
+    />
+
+    <Pv2TitleSuggestions
+      v-if="listboxRendered"
+      :suggestions="suggestions"
+      :active-index="activeIndex"
+      :anchor="titleEl"
+      :listbox-id="SUGGESTIONS_ID"
+      @select="applySuggestion"
+      @dismiss="dismissSuggestion"
+      @dismiss-list="closeSuggestions"
+      @update:active-index="(i) => (activeIndex = i)"
     />
 
     <div class="pv2-edit-card__scroll">
@@ -172,8 +196,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import CdAppearancePicker from '@/components/ui/CdAppearancePicker.vue'
+import Pv2TitleSuggestions from './Pv2TitleSuggestions.vue'
 import CdDatePicker from '@/components/ui/CdDatePicker.vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
 import CdReminderPill from '@/components/ui/CdReminderPill.vue'
@@ -183,6 +208,11 @@ import CdSwitch from '@/components/ui/CdSwitch.vue'
 import Pv2TimeChip from '@/components/v2/ui/Pv2TimeChip.vue'
 import Pv2TimeWheel from '@/components/v2/ui/Pv2TimeWheel.vue'
 import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
+import { buildTitleSuggestions, type TitleSuggestion } from '@/utils/title-suggestions'
+import { useImeSafeEnter } from '@/composables/use-ime-safe-enter'
+import { useAuthStore } from '@/stores/auth-store'
+import { useTasksStore } from '@/stores/tasks-store'
+import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
 import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset } from '@/types/task'
 
@@ -231,6 +261,7 @@ const emit = defineEmits<{
   'update:notes': [value: string]
   cycleRepeat: []
   'update:calendarId': [value: string]
+  applySuggestion: [suggestion: TitleSuggestion]
 }>()
 
 const moreOpen = ref(false)
@@ -278,6 +309,124 @@ onBeforeUnmount(() => {
   document.removeEventListener('mousedown', onOutsideInteraction)
   document.removeEventListener('touchstart', onOutsideInteraction)
 })
+
+// --- title suggestions ------------------------------------------------------
+// Past events offered while naming a new one. Creation only: on an existing event the list would
+// sit over the form every time the user fixes a typo.
+const tasksStore = useTasksStore()
+const dismissalsStore = useTitleDismissalsStore()
+const auth = useAuthStore()
+const { isComposing, onCompositionStart, onCompositionEnd } = useImeSafeEnter()
+
+const SUGGESTIONS_ID = `pv2-title-suggestions-${useId()}`
+const titleEl = ref<HTMLInputElement | null>(null)
+const suggestionsOpen = ref(false)
+const activeIndex = ref(-1)
+// Frozen while an IME composition is in flight: mid-composition the input holds bopomofo or pinyin
+// fragments, which match nothing and would blink the list shut between keystrokes.
+const committedQuery = ref('')
+
+const suggestionsEnabled = computed(() => props.isNew && props.type === 'event')
+
+const suggestions = computed<TitleSuggestion[]>(() => {
+  if (!suggestionsEnabled.value) return []
+  return buildTitleSuggestions(tasksStore.tasks, {
+    ownerId: auth.user?.id,
+    query: committedQuery.value,
+    dismissed: dismissalsStore.dismissedKeys
+  })
+})
+
+// Single source of truth for "is the listbox in the DOM". aria-controls and aria-expanded must
+// agree with it exactly, or they point at an element that isn't there.
+const listboxRendered = computed(
+  () => suggestionsEnabled.value && suggestionsOpen.value && suggestions.value.length > 0
+)
+
+// No active row until the user arrows into the list, so Enter still saves the form rather than
+// silently picking whatever happens to be first.
+const activeDescendant = computed(() =>
+  suggestionsEnabled.value && suggestionsOpen.value && activeIndex.value >= 0
+    ? `${SUGGESTIONS_ID}-option-${activeIndex.value}`
+    : undefined
+)
+
+function onTitleInput(e: Event): void {
+  const value = (e.target as HTMLInputElement).value
+  emit('update:title', value)
+  if (isComposing.value) return
+  committedQuery.value = value
+  activeIndex.value = -1
+  suggestionsOpen.value = true
+}
+
+// compositionend fires before `input` in Safari and after it in Chrome, so read the element
+// directly here rather than relying on the ordering.
+function onTitleCompositionEnd(e: CompositionEvent): void {
+  onCompositionEnd()
+  const value = (e.target as HTMLInputElement).value
+  emit('update:title', value)
+  committedQuery.value = value
+  activeIndex.value = -1
+  suggestionsOpen.value = true
+}
+
+function onTitleFocus(): void {
+  committedQuery.value = props.title
+  activeIndex.value = -1
+  suggestionsOpen.value = true
+}
+
+function closeSuggestions(): void {
+  suggestionsOpen.value = false
+  activeIndex.value = -1
+}
+
+function onTitleKeydown(e: KeyboardEvent): void {
+  // Never steal keys mid-composition: Enter and arrows belong to the IME candidate window.
+  if (isComposing.value || e.isComposing) return
+  if (!suggestionsEnabled.value) return
+
+  const count = suggestions.value.length
+
+  if (e.key === 'Escape' && suggestionsOpen.value) {
+    e.stopPropagation()
+    closeSuggestions()
+    return
+  }
+  if (!suggestionsOpen.value || count === 0) return
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    activeIndex.value = activeIndex.value >= count - 1 ? 0 : activeIndex.value + 1
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    activeIndex.value = activeIndex.value <= 0 ? count - 1 : activeIndex.value - 1
+  } else if (e.key === 'Enter' && activeIndex.value >= 0) {
+    e.preventDefault()
+    const picked = suggestions.value[activeIndex.value]
+    if (picked) applySuggestion(picked)
+  } else if ((e.key === 'Delete' || e.key === 'Backspace') && activeIndex.value >= 0) {
+    // Focus stays on the input for the whole interaction (aria-activedescendant, not roving focus),
+    // so the row's ✕ button is never tabbable. This is the keyboard route to it.
+    e.preventDefault()
+    const picked = suggestions.value[activeIndex.value]
+    if (picked) dismissSuggestion(picked)
+  }
+}
+
+function applySuggestion(suggestion: TitleSuggestion): void {
+  emit('applySuggestion', suggestion)
+  committedQuery.value = suggestion.title
+  closeSuggestions()
+  // Dismiss the on-screen keyboard so the carried-over fields are visible on mobile.
+  titleEl.value?.blur()
+}
+
+function dismissSuggestion(suggestion: TitleSuggestion): void {
+  void dismissalsStore.dismiss(suggestion.key)
+  activeIndex.value = -1
+}
 
 const ICON_NAMES = new Set<string>(['copy', 'pencil', 'trash', 'journal', 'spark', 'bell', 'target', 'search', 'calendar', 'clock', 'check', 'image', 'repeat', 'location', 'notes', 'info', 'sync', 'mail', 'reset', 'spark-mono', 'journal-plain', 'calendar-alt', 'tomato', 'view-day', 'view-week', 'view-month', 'view-list', 'gear'])
 const iconName = computed<IconName | null>(() => (props.icon && ICON_NAMES.has(props.icon) ? (props.icon as IconName) : null))
