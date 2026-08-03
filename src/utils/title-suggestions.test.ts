@@ -55,10 +55,22 @@ describe('buildTitleSuggestions', () => {
       expect(build([local]).map((s) => s.title)).toEqual(['Local draft'])
     })
 
-    it('excludes quadrant tasks, which share the Task interface but are not calendar events', () => {
-      const tasks = [mkEvent({ title: 'An event', type: 'event' }), mkEvent({ title: 'A task', type: 'quadrant' })]
+    it('includes quadrant tasks, so a recurring chore is suggested as readily as an event', () => {
+      const tasks = [
+        mkEvent({ title: 'An event', type: 'event', date: '2026-07-02' }),
+        mkEvent({ title: 'A task', type: 'quadrant', date: '2026-07-01' })
+      ]
 
-      expect(build(tasks).map((s) => s.title)).toEqual(['An event'])
+      expect(build(tasks).map((s) => s.title)).toEqual(['An event', 'A task'])
+    })
+
+    it('does not let a task and an event of the same name and time become two rows', () => {
+      const tasks = [
+        mkEvent({ title: '吃飯', type: 'event', start: '12:00', end: '13:00', date: '2026-07-01' }),
+        mkEvent({ title: '吃飯', type: 'quadrant', start: '12:00', end: '13:00', date: '2026-07-02' })
+      ]
+
+      expect(build(tasks)).toHaveLength(1)
     })
 
     it('excludes events with a blank title', () => {
@@ -287,6 +299,12 @@ describe('buildTitleSuggestions', () => {
         reminder: '15-min',
         location: '南陽街'
       })
+    })
+
+    it('carries a task with no colour, since a quadrant task derives its hue at render time', () => {
+      const tasks = [mkEvent({ title: '倒垃圾', type: 'quadrant', backgroundColor: null, start: '20:00', end: '20:15' })]
+
+      expect(build(tasks)[0]).toMatchObject({ title: '倒垃圾', backgroundColor: null, start: '20:00', end: '20:15' })
     })
 
     it('omits notes, which are usually specific to one occurrence', () => {
