@@ -9,23 +9,22 @@
         <span class="pv2-wh__title">Week {{ weekNumber }}</span>
         <span class="pv2-wh__range">{{ rangeLabel }}</span>
       </div>
-      <div class="pv2-wh__nav">
-        <button type="button" class="pv2-wh__arrow" aria-label="上一週" @click="emit('prev')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 6 L8 12 L14 18" />
-          </svg>
-        </button>
-        <button type="button" class="pv2-wh__arrow" aria-label="下一週" @click="emit('next')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 6 L16 12 L10 18" />
-          </svg>
-        </button>
-      </div>
+      <Pv2HeaderNav
+        class="pv2-wh__nav"
+        prev-label="上一週"
+        next-label="下一週"
+        today-label="回到本週"
+        @prev="emit('prev')"
+        @next="emit('next')"
+        @today="emit('today')"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Pv2HeaderNav from '@/components/v2/ui/Pv2HeaderNav.vue'
+
 defineProps<{
   weekNumber: number
   rangeLabel: string
@@ -34,6 +33,7 @@ defineProps<{
 const emit = defineEmits<{
   prev: []
   next: []
+  today: []
 }>()
 </script>
 
@@ -43,9 +43,11 @@ const emit = defineEmits<{
   padding-bottom: 14px;
 }
 
+/* 導覽鈕靠下對齊：與日期區間副標齊平，而非貼齊 "Week N" 的頂緣。
+   標題那欄有兩行、比導覽鈕高，靠上會讓鈕孤懸在右上角。 */
 .pv2-wh__row {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
@@ -53,6 +55,11 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* 略微抬離底線：靠下對齊後鈕的底緣會與副標基線同高，浮一點才不顯得沉在底部。 */
+.pv2-wh__nav {
+  margin-bottom: 2px;
 }
 
 /* 與 month 的 "July" 一致：Instrument Serif italic + 描邊 */
@@ -74,23 +81,5 @@ const emit = defineEmits<{
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #6e6e6e;
-}
-
-.pv2-wh__nav {
-  display: flex;
-  gap: 12px;
-}
-
-/* 白底圓框 + 淡陰影 + 深色 chevron，照設計稿 */
-.pv2-wh__arrow {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #ececec;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
 }
 </style>

@@ -11,23 +11,21 @@
           <span class="pv2-dh__my">{{ monthYear }}</span>
         </span>
       </div>
-      <div class="pv2-dh__nav">
-        <button type="button" class="pv2-dh__arrow" aria-label="前一天" @click="emit('prev')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 6 L8 12 L14 18" />
-          </svg>
-        </button>
-        <button type="button" class="pv2-dh__arrow" aria-label="後一天" @click="emit('next')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 6 L16 12 L10 18" />
-          </svg>
-        </button>
-      </div>
+      <Pv2HeaderNav
+        prev-label="前一天"
+        next-label="後一天"
+        today-label="回到今天"
+        @prev="emit('prev')"
+        @next="emit('next')"
+        @today="emit('today')"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import Pv2HeaderNav from '@/components/v2/ui/Pv2HeaderNav.vue'
+
 defineProps<{
   dayNum: number
   dow: string // "FRI"
@@ -37,6 +35,7 @@ defineProps<{
 const emit = defineEmits<{
   prev: []
   next: []
+  today: []
 }>()
 </script>
 
@@ -88,25 +87,5 @@ const emit = defineEmits<{
   font: 500 11px var(--cd-font-ui);
   letter-spacing: 0.12em;
   color: #1b1b1b;
-}
-
-/* No bottom padding here: it made the arrows 38px tall against the week header's 32px and
-   sat them lower than week's. Matches .pv2-wh__nav exactly. */
-.pv2-dh__nav {
-  display: flex;
-  gap: 12px;
-}
-
-/* 白底圓框 + 淡陰影 + 深色 chevron（抄週檢視 header 箭頭） */
-.pv2-dh__arrow {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #ececec;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
 }
 </style>
