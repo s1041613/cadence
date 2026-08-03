@@ -326,7 +326,11 @@ const activeIndex = ref(-1)
 // fragments, which match nothing and would blink the list shut between keystrokes.
 const committedQuery = ref('')
 
-const suggestionsEnabled = computed(() => props.isNew && props.type === 'event')
+// Offered for tasks as well as events: recurring chores ("吃飯", "倒垃圾") are retyped as often as
+// recurring events, and when you type a title you're thinking of the words, not whether last time
+// it was stored as an event or a task. The suggestion source stays events-only — a task carries no
+// colour, icon or calendar, so those fields are simply dropped on the way in (see the hosts).
+const suggestionsEnabled = computed(() => props.isNew)
 
 const suggestions = computed<TitleSuggestion[]>(() => {
   if (!suggestionsEnabled.value) return []

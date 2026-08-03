@@ -209,10 +209,19 @@ describe('buildTitleSuggestions', () => {
       expect(build(tasks, { query: '' })).toHaveLength(2)
     })
 
-    it('excludes an exact full-title match, since the field already holds that title', () => {
-      const tasks = [mkEvent({ title: '頭髮' }), mkEvent({ title: '頭髮乾燥' })]
+    it('keeps an exact full-title match, since its time and style are still worth picking up', () => {
+      const tasks = [mkEvent({ title: 'test' })]
 
-      expect(build(tasks, { query: '頭髮' }).map((s) => s.title)).toEqual(['頭髮乾燥'])
+      expect(build(tasks, { query: 'test' }).map((s) => s.title)).toEqual(['test'])
+    })
+
+    it('keeps both the exact match and longer titles sharing the prefix', () => {
+      const tasks = [
+        mkEvent({ title: '頭髮', date: '2026-07-20' }),
+        mkEvent({ title: '頭髮乾燥', date: '2026-07-21' })
+      ]
+
+      expect(build(tasks, { query: '頭髮' }).map((s) => s.title).sort()).toEqual(['頭髮', '頭髮乾燥'])
     })
   })
 

@@ -171,14 +171,26 @@ watch(
 // deliberately not carried.
 function applySuggestion(suggestion: TitleSuggestion): void {
   title.value = suggestion.title
+  reminder.value = suggestion.reminder
+  location.value = suggestion.location
+
+  // A task has no colour, icon, calendar or all-day concept — the card hides those rows entirely.
+  // Carrying them would set state the user can't see or undo, so a task takes the title, the
+  // reminder and the time only.
+  if (type.value === 'task') {
+    if (!suggestion.allDay) {
+      start.value = suggestion.start
+      end.value = suggestion.end
+    }
+    return
+  }
+
   allDay.value = suggestion.allDay
   start.value = suggestion.start
   end.value = suggestion.end
   color.value = suggestion.backgroundColor ?? color.value
   icon.value = (suggestion.icon as IconName | null) ?? null
   calendarId.value = suggestion.calendarId
-  reminder.value = suggestion.reminder
-  location.value = suggestion.location
 }
 
 function close(): void {
