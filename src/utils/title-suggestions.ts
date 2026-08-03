@@ -3,9 +3,9 @@ import type { ReminderPreset, Task } from '../types/task'
 // Fits above a mobile on-screen keyboard without scrolling.
 export const SUGGESTION_LIMIT = 7
 
-/** A past event offered as a starting point for a new one. Deliberately omits `notes` (usually
- * specific to one occurrence) and `repeat` (inert today, but carrying it would silently schedule
- * recurrences once that lands). */
+/** A past event or task offered as a starting point for a new one. Deliberately omits `notes`
+ * (usually specific to one occurrence) and `repeat` (inert today, but carrying it would silently
+ * schedule recurrences once that lands). */
 export interface TitleSuggestion {
   /** Identity of the row, and the value persisted when the user dismisses it. */
   key: string
@@ -43,8 +43,8 @@ const isOwn = (task: Task, ownerId: string | undefined): boolean =>
 // array happens to be in. Both fields are zero-padded, so lexicographic order is chronological.
 const recencyOf = (task: Task): string => `${task.date} ${task.start}`
 
-/** Derives suggestions from events already in memory — no separate index table, so the list is
- * complete from the first use rather than accumulating from the day the feature ships. */
+/** Derives suggestions from the events and tasks already in memory — no separate index table, so
+ * the list is complete from the first use rather than accumulating from the day the feature ships. */
 export function buildTitleSuggestions(tasks: Task[], options: TitleSuggestionOptions): TitleSuggestion[] {
   const { ownerId, query, dismissed } = options
   const normalizedQuery = normalize(query)
@@ -53,7 +53,9 @@ export function buildTitleSuggestions(tasks: Task[], options: TitleSuggestionOpt
   const latest = new Map<string, Task>()
 
   for (const task of tasks) {
-    if (task.type !== 'event') continue
+    // Events and quadrant tasks both feed the list: a recurring chore is retyped as often as a
+    // recurring event, and when you type a title you're thinking of the words, not which of the two
+    // it was stored as last time. A task supplies only what it has — no colour, icon or calendar.
     if (!isOwn(task, ownerId)) continue
     if (!task.title.trim()) continue
 
