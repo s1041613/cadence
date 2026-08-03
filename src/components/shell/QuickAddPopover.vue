@@ -28,7 +28,7 @@
       @update:type="(v) => (type = v)"
       @update:quad="(v) => (quad = v)"
       @update:color="(v) => (color = v)"
-      @update:icon="(v) => (icon = v)"
+      @update:icon="(v: IconName) => (icon = v)"
       @remove-icon="icon = null"
       @update:all-day="(v) => (allDay = v)"
       @update:date="(v) => (date = v)"
@@ -71,7 +71,7 @@
       @update:type="(v) => (type = v)"
       @update:quad="(v) => (quad = v)"
       @update:color="(v) => (color = v)"
-      @update:icon="(v) => (icon = v)"
+      @update:icon="(v: IconName) => (icon = v)"
       @remove-icon="icon = null"
       @update:all-day="(v) => (allDay = v)"
       @update:date="(v) => (date = v)"
@@ -144,6 +144,10 @@ const REPEAT_CYCLE: RepeatMode[] = ['none', 'daily', 'weekly', 'monthly']
 const calendarOptions = computed(() =>
   [...calendarsStore.calendars].sort((a, b) => a.order - b.order).map((c) => ({ id: c.id, name: c.name }))
 )
+// One template drives both cards, so the icon prop/handlers stay even though the v2 card no
+// longer declares them (its STYLE field picks a colour only): v1 still has a full icon
+// picker, and on v2 they simply fall through as unused attrs. The `v: IconName` annotation
+// is needed because the union of the two cards no longer types the payload.
 const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
 
 watch(

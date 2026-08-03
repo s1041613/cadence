@@ -32,7 +32,7 @@
         @update:type="onUpdateType"
         @update:quad="onUpdateQuad"
         @update:color="(v) => (draft!.backgroundColor = v)"
-        @update:icon="(v) => (draft!.icon = v)"
+        @update:icon="(v: IconName) => (draft!.icon = v)"
         @remove-icon="draft!.icon = null"
         @update:all-day="(v) => (draft!.allDay = v)"
         @update:date="(v) => (draft!.date = v)"
@@ -86,7 +86,7 @@
       @update:type="onUpdateType"
       @update:quad="onUpdateQuad"
       @update:color="(v) => (draft!.backgroundColor = v)"
-      @update:icon="(v) => (draft!.icon = v)"
+      @update:icon="(v: IconName) => (draft!.icon = v)"
       @remove-icon="draft!.icon = null"
       @update:all-day="(v) => (draft!.allDay = v)"
       @update:date="(v) => (draft!.date = v)"
@@ -114,6 +114,7 @@ import { quadrantOf, themeOf } from '@/composables/use-theme'
 import { defaultPoms } from '@/utils/convert-date-time'
 import { reminderLabel } from '@/utils/event-panel'
 import type { TitleSuggestion } from '@/utils/title-suggestions'
+import type { IconName } from '@/components/ui/icons'
 import type { RepeatMode, Task } from '@/types/task'
 
 // EventComposerOverlay — feature-layer composition for the handoff's New Event/Task edit card.
@@ -155,6 +156,10 @@ const isEditing = ref(false)
 // mirroring EventPreviewPopover's edit-state pattern.
 const editType = computed<'event' | 'task'>(() => (draft.value?.type === 'event' ? 'event' : 'task'))
 const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'later'))
+// One template drives both cards, so the icon prop/handlers below stay even though the v2
+// card no longer declares them (its STYLE field picks a colour only): v1 still has a full
+// icon picker, and on v2 they simply fall through as unused attrs. The `v: IconName`
+// annotation is needed because the union of the two cards no longer types the payload.
 const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
 
 // All member calendars (own and shared) as picker options, in display order. The picker only
@@ -176,9 +181,13 @@ watch(
     // DraftDrawer's seed (ui.eventComposerInitialValues from openSchedule) carries no calendarId —
     // this is the one mkTask call that has to supply it for every fresh-draft path, since
     // initialValues can come from either DraftDrawer or the plain topbar/FAB Create flow below.
+    // A fresh draft opens on EVENT, not the mkTask() 'quadrant' default: the composer is the
+    // calendar's creation surface, so scheduling something is the common case. Seeded before
+    // ...initialValues so a caller that means a task — DraftDrawer's openSchedule, promoting an
+    // inbox item — still wins by passing type explicitly.
     draft.value = existing
       ? { ...existing }
-      : mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId!, ...initialValues })
+      : mkTask({ date: ui.selectedDate, calendarId: calendarsStore.defaultCalendarId!, type: 'event', ...initialValues })
     // CdTimeDropdown expects a valid 'HH:MM' — a new draft with no time context yet (e.g. Quick-Add's
     // month-cell escalation, which carries no clicked time) falls back to a sensible default rather
     // than the empty string mkTask() otherwise leaves in place. A task's time block always shows
