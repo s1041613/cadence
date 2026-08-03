@@ -198,14 +198,26 @@ watch(
 function applySuggestion(suggestion: TitleSuggestion): void {
   if (!draft.value) return
   draft.value.title = suggestion.title
+  draft.value.reminder = suggestion.reminder
+  draft.value.location = suggestion.location
+
+  // A task has no colour, icon, calendar or all-day concept — the card hides those rows entirely.
+  // Carrying them would set state the user can't see or undo, so a task takes the title, the
+  // reminder and the time only.
+  if (draft.value.type === 'quadrant') {
+    if (!suggestion.allDay) {
+      draft.value.start = suggestion.start
+      draft.value.end = suggestion.end
+    }
+    return
+  }
+
   draft.value.allDay = suggestion.allDay
   draft.value.start = suggestion.start
   draft.value.end = suggestion.end
   draft.value.backgroundColor = suggestion.backgroundColor
   draft.value.icon = suggestion.icon
   draft.value.calendarId = suggestion.calendarId
-  draft.value.reminder = suggestion.reminder
-  draft.value.location = suggestion.location
 }
 
 // The topbar Create pill / phone FAB set ui.createOpen (no date/time context, per design.md's
