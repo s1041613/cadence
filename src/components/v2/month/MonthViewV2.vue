@@ -7,7 +7,15 @@
   <div class="mv2">
     <div class="mv2__body">
       <div class="mv2__poster">
-        <Pv2Poster :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
+        <Pv2PosterNav
+          :month-name="monthName"
+          :year="String(year)"
+          prev-label="上個月"
+          next-label="下個月"
+          @prev="stepMonthBy(-1)"
+          @next="stepMonthBy(1)"
+          @open-sheet="openSheet"
+        />
       </div>
 
       <Pv2CalStrip class="mv2__strip" :chips="chips" @toggle="onToggleCalendar" />
@@ -55,7 +63,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
-import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
+import Pv2PosterNav from '@/components/v2/ui/Pv2PosterNav.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridCell } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -172,12 +180,13 @@ function onSheetSelect(payload: { month: number; year: number }): void {
   ui.selectedDate = iso(new Date(payload.year, payload.month, 1))
 }
 
-// 便於未來接切月的既有邏輯（目前輪盤直接設 selectedDate；保留 stepMonth 重用點）
+// Month stepping (the header row's arrows). Lands on the 1st of the target month: the month view
+// only reads the month, so the day carries no meaning here, and pinning it to the 1st sidesteps
+// boundaries like stepping back from Jan 31 into a month that has no 31st.
 function stepMonthBy(delta: number): void {
   const { year: y, month: m } = stepMonth(year.value, month.value, delta)
   ui.selectedDate = iso(new Date(y, m, 1))
 }
-void stepMonthBy // 目前未在模板使用（無箭頭），保留給後續切月手勢
 </script>
 
 <style scoped>
