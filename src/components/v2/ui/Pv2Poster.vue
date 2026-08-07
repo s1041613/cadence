@@ -18,12 +18,14 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
+/* Width is assigned by the parent (Pv2PosterNav): the poster shares a row with the arrows, so it
+   is allotted width rather than claiming it. Horizontal padding is dropped so the arrows sit
+   flush with the row's edges; vertical padding is unchanged to preserve the title's breathing room. */
 .pv2-poster {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  padding: 20px;
+  padding: 20px 0;
   border: none;
   background: none;
   cursor: pointer;
