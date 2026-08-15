@@ -13,18 +13,22 @@ export interface SwipeDetails {
   distance: { x: number; y: number }
 }
 
-// The directive decides on velocity alone, so a fast flick of a few pixels would otherwise
-// count. This floor is what makes a swipe deliberate.
-export const MIN_SWIPE_DISTANCE_PX = 40
-
 // How far to move, in view-defined units: +1 forward, -1 back, 0 for "ignore this input".
 export type DateStep = 1 | 0 | -1
 
-// Pure so the whole decision — direction, distance floor, and blocking — is testable without
-// mounting a component. useDateSwipe below is only the wiring around these two.
+// No distance floor here, deliberately. Quasar calls the handler on the FIRST touchmove that
+// clears its own 6px threshold and never again (TouchSwipe.js:100-103, 116, 217-227), so
+// `distance.x` is the displacement at that instant — single digits to low twenties on a real
+// finger — not the length of the finished swipe. An earlier 40px floor therefore rejected
+// essentially every touch gesture. It could not reproduce on a desktop because the `.mouse`
+// path waits for 50px (sensitivity[2]) before firing at all. What makes a swipe deliberate is
+// the directive's own velocity test, not a floor applied to a number it never promises to
+// reach.
+//
+// Pure so the whole decision — direction and blocking — is testable without mounting a
+// component. useDateSwipe below is only the wiring around these two.
 export function resolveSwipeStep(details: SwipeDetails, blocked: boolean): DateStep {
   if (blocked) return 0
-  if (details.distance.x < MIN_SWIPE_DISTANCE_PX) return 0
   // Swiping left reveals what comes next, matching iOS Calendar.
   if (details.direction === 'left') return 1
   if (details.direction === 'right') return -1

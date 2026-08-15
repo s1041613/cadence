@@ -3,7 +3,6 @@ import {
   resolveSwipeStep,
   resolveKeyStep,
   resolveSlideDirection,
-  MIN_SWIPE_DISTANCE_PX,
   type SwipeDetails,
   type KeyIntent
 } from './use-date-swipe'
@@ -23,7 +22,8 @@ function swipe(direction: SwipeDetails['direction'], x: number): SwipeDetails {
   }
 }
 
-const FAR = MIN_SWIPE_DISTANCE_PX + 10
+// A displacement comfortably past anything either input path reports on its first fire.
+const FAR = 60
 
 describe('resolveSwipeStep', () => {
   it('advances one step when swiping left, matching iOS Calendar', () => {
@@ -34,12 +34,21 @@ describe('resolveSwipeStep', () => {
     expect(resolveSwipeStep(swipe('right', FAR), false)).toBe(-1)
   })
 
-  it('ignores a swipe shorter than the distance floor', () => {
-    expect(resolveSwipeStep(swipe('left', MIN_SWIPE_DISTANCE_PX - 1), false)).toBe(0)
+  // Quasar fires the handler on the FIRST touchmove past its own 6px threshold and never
+  // again (TouchSwipe.js:100-103, 116, 217-227), so distance.x is the displacement at that
+  // instant — single-digit to low-twenties on a real finger — not the length of the finished
+  // swipe. A distance floor above that silently rejects every touch gesture, which is exactly
+  // what shipped and what made the month view unswipeable on iOS.
+  it('acts on the small displacement Quasar reports on the first touchmove', () => {
+    expect(resolveSwipeStep(swipe('left', 6), false)).toBe(1)
+    expect(resolveSwipeStep(swipe('left', 12), false)).toBe(1)
+    expect(resolveSwipeStep(swipe('right', 20), false)).toBe(-1)
   })
 
-  it('treats the distance floor as inclusive', () => {
-    expect(resolveSwipeStep(swipe('left', MIN_SWIPE_DISTANCE_PX), false)).toBe(1)
+  // The mouse path only fires past 50px (sensitivity[2]), which is why this bug could not
+  // reproduce on a desktop and survived review.
+  it('still acts on the larger displacement the mouse path reports', () => {
+    expect(resolveSwipeStep(swipe('left', 50), false)).toBe(1)
   })
 
   it('ignores vertical swipes, which belong to the scrolling regions inside a view', () => {
