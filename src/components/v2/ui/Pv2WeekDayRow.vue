@@ -92,12 +92,12 @@ const emit = defineEmits<{
   gap: 2px;
 }
 
-/* 日期數字＝浮水印感：斜體 serif、灰階墨色，像蓋在背景上的水印。
+/* 日期數字＝浮水印感：斜體、灰階墨色，像蓋在背景上的水印。
    背景是照片＋可調白紗（scrim 0/0.5/0.8），底色亮度不固定，
    所以非今天的數字必須夠深才讀得到；今天維持全黑，兩者落差仍然明顯。
-   50px 略大於表頭 "Week N" 的 40px：表頭另有 1px 描邊加重，兩者視覺份量仍相當。 */
+   35px 略大於表頭 "Week N" 的 28px，維持原本 50/40 的比例（全站大標題同乘 0.7，見 Pv2DayHeader）。 */
 .pv2-wdr__num {
-  font: italic 400 50px var(--cd-font-serif);
+  font: italic 400 35px var(--cd-font-serif);
   line-height: 1;
   color: rgba(27, 27, 27, 0.62); /* 非今天：約 4.5:1，仍明顯淡於今天 */
 }

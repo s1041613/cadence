@@ -33,11 +33,11 @@ const emit = defineEmits<{
 
 .pv2-poster__month {
   text-align: center;
-  font: italic 400 52px var(--cd-font-ui);
+  /* 52→36px，並拿掉 1px 描邊：理由見 Pv2DayHeader。 */
+  font: italic 400 36px var(--cd-font-ui);
   letter-spacing: 0;
   line-height: 0.9;
   color: #1b1b1b;
-  -webkit-text-stroke: 1px #1b1b1b;
 }
 
 .pv2-poster__year {

@@ -62,13 +62,12 @@ const emit = defineEmits<{
   margin-bottom: 2px;
 }
 
-/* 與 month 的 "July" 一致：Instrument Serif italic + 描邊 */
+/* 與 month 的 "August" 一致：UI face 的斜體。40→28px 且拿掉描邊，理由見 Pv2DayHeader。 */
 .pv2-wh__title {
-  font: italic 400 40px var(--cd-font-serif);
+  font: italic 400 28px var(--cd-font-serif);
   letter-spacing: 0;
   line-height: 1;
   color: #1b1b1b;
-  -webkit-text-stroke: 1px #1b1b1b;
 }
 
 /* 日期區間副標：照片背景上 #9c9c9c 只有約 2.2:1，加深到 #6e6e6e，
