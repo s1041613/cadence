@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
       // v2 月曆是預設進入點；/legacy 仍可直接輸入網址造訪
       { path: '', redirect: '/v2/month' },
       { path: 'legacy', component: () => import('@/pages/IndexPage.vue') },
-      // v2 月曆頁：全新外觀、重用既有邏輯層。借 MainLayout 的 100dvh sizing（無外觀）。
+      // v2 月曆頁：全新外觀、重用既有邏輯層。借 MainLayout 的滿版 sizing（無外觀）。
       { path: 'v2/month', component: () => import('@/pages/MonthPageV2.vue') },
       { path: 'v2/week', component: () => import('@/pages/WeekPageV2.vue') },
       { path: 'v2/day', component: () => import('@/pages/DayPageV2.vue') },

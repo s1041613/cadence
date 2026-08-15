@@ -72,7 +72,7 @@ function signInWithApple(): void {
 
 <style scoped>
 .login {
-  height: 100dvh;
+  height: 100%;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -82,7 +82,7 @@ function signInWithApple(): void {
 .login__frame {
   width: 100%;
   max-width: 420px;
-  height: 100dvh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
