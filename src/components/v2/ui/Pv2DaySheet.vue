@@ -133,9 +133,9 @@ function onSwipeDown(): void {
   color: #9c9c9c;
 }
 
-/* 同 poster：Instrument Serif italic */
+/* 同 poster 的斜體，字級跟著全站大標題乘 0.7（見 Pv2DayHeader） */
 .pv2-ds__date {
-  font: italic 400 34px var(--cd-font-serif);
+  font: italic 400 24px var(--cd-font-serif);
   line-height: 1;
   color: #1b1b1b;
 }

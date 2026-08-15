@@ -59,12 +59,14 @@ const emit = defineEmits<{
   min-width: 0;
 }
 
-/* 與 month「July」一致：Instrument Serif italic + 描邊，字級放到日期海報比例 */
+/* 與 month「August」一致：UI face 的斜體，字級放到日期海報比例。
+   68→48px：UI face 是等寬字，同 px 下比原本的 Instrument Serif 寬約 1.8 倍（高度幾乎一樣），
+   維持 68 會讓數字整個橫向撐開、份量過重。描邊也一併拿掉——那是為了替纖細的襯線加粗，
+   等寬字本身筆畫就夠厚。全站大標題統一乘 0.7，層級關係不變。 */
 .pv2-dh__num {
-  font: italic 400 68px var(--cd-font-serif);
+  font: italic 400 48px var(--cd-font-serif);
   line-height: 0.8;
   color: #1b1b1b;
-  -webkit-text-stroke: 1px #1b1b1b;
 }
 
 .pv2-dh__meta {

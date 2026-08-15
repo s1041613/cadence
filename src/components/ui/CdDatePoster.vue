@@ -36,7 +36,7 @@ import { computed } from 'vue'
 import CdIcon from './CdIcon.vue'
 
 // CdDatePoster — big date navigation header, 3 variants (month/week/day). design-research-report.md §3.3.
-// Year row: 700 17px, ls .14em, --cd-ink-muted. Title: italic 400 44px --cd-font-ui, ls -.01em, lh .95.
+// Year row: 700 17px, ls .14em, --cd-ink-muted. Title: italic 400 31px --cd-font-ui, ls -.01em, lh .95.
 // Month variant has an olive caret next to the title that opens the calendar bottom-sheet (not a dropdown).
 // Chevron sizes differ per variant (month footer 30x28, day 24x28, week 30x28) but are visually identical here;
 // callers can slot day-view's week-strip cluster into #extra.
@@ -101,7 +101,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
      The weight stays at 400 — it was dropped from 800 when the title was set in a
      single-weight face, and restoring it is a design call, not a consequence of
      the family change. */
-  font: italic 400 44px var(--cd-font-ui);
+  font: italic 400 31px var(--cd-font-ui);
   letter-spacing: -0.01em;
   line-height: 0.95;
   color: var(--cd-ink);
@@ -109,7 +109,7 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
 }
 
 .cd-date-poster--month .cd-date-poster__title {
-  font-size: 44px;
+  font-size: 31px;
 }
 
 .cd-date-poster__title:hover {

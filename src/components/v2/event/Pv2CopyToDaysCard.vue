@@ -120,7 +120,8 @@ const weekdays = computed(() => {
 
 .pv2-copy-card__title {
   margin: 0;
-  font: 400 32px/1 var(--cd-font-serif);
+  /* 全站大標題同乘 0.7（見 Pv2DayHeader） */
+  font: 400 22px/1 var(--cd-font-serif);
   color: var(--cc-ink);
 }
 
@@ -154,7 +155,7 @@ const weekdays = computed(() => {
 .pv2-copy-card__month {
   min-width: 150px;
   text-align: center;
-  font: italic 400 26px/1 var(--cd-font-serif);
+  font: italic 400 18px/1 var(--cd-font-serif);
   color: var(--cc-ink);
 }
 
