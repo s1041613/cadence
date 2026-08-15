@@ -1,5 +1,5 @@
 <template>
-  <!-- 月曆海報標題：居中直排，Instrument Serif italic 大字 + mono 年份。點擊開月/年輪盤。 -->
+  <!-- 月曆海報標題：居中直排，italic 大字 + 年份，皆為 UI face。點擊開月/年輪盤。 -->
   <button type="button" class="pv2-poster" @click="emit('openSheet')">
     <span class="pv2-poster__month">{{ monthName }}</span>
     <span class="pv2-poster__year">{{ year }}</span>
@@ -33,7 +33,7 @@ const emit = defineEmits<{
 
 .pv2-poster__month {
   text-align: center;
-  font: italic 400 52px var(--cd-font-display);
+  font: italic 400 52px var(--cd-font-ui);
   letter-spacing: 0;
   line-height: 0.9;
   color: #1b1b1b;
@@ -44,7 +44,7 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   margin-top: 8px;
-  font: 400 12px var(--cd-font-display);
+  font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.16em;
   color: #6e6e6e;
 }

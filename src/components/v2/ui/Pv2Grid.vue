@@ -40,8 +40,9 @@ const emit = defineEmits<{
 }>()
 
 // v2 cell 尺寸（px）：cell 垂直 padding 4+5、head→events margin、日期藥丸高、chip 高、chip gap。
-// chip 高 ≈ 9px 字 × 1.2 行高 + 上下 padding 1+1 + 邊框 1+1 ≈ 15。
-const CELL = { cellPad: 9, headGap: 3, headH: 20, chipH: 15, chipGap: 2 } as const
+// chip 高 ≈ 7.25px 字 × 1.2 行高 + 上下 padding 1+1 + 邊框 1+1 ≈ 13。
+// 跟著 Pv2EventChip 的字級走：字級縮了 chip 就矮，這裡不同步的話每格會少放一個 chip。
+const CELL = { cellPad: 9, headGap: 3, headH: 20, chipH: 13, chipGap: 2 } as const
 
 const gridEl = ref<HTMLElement | null>(null)
 const gridHeight = ref(0)

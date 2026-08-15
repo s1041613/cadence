@@ -35,7 +35,11 @@ const timedStyle = computed(() => ({
   display: flex;
   align-items: center;
   max-width: 100%;
-  font: 700 9px/1.2 var(--cd-font-ui);
+  /* 7.25px, not the 9px this chip carried under the previous UI face. The face is
+     monospaced and ~26% wider per character, so 9px would clip two characters off
+     a title that used to fit. 7.25 is the largest size that still shows at least as
+     many characters as before, measured across 360–430px frames; 7.5 falls short. */
+  font: 700 7.25px/1.2 var(--cd-font-ui);
   letter-spacing: -0.02em;
 }
 
