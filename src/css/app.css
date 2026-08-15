@@ -6,12 +6,9 @@
  *
  * The product ships two faces only (see cadence-tokens.css --cd-font-display /
  * --cd-font-ui). JetBrains Mono is the UI face and carries every weight in use
- * (400–800; the lone 900 in CdDraftDrawer is synthesised). Two italics are
- * imported: 400 for the large date numerals (`font: italic 400 …`) and 700 for
- * the month poster's title. The bold italic is a real file rather than a
- * synthesised oblique of the upright 700 — a faux slant on a monospaced face
- * shears the glyphs without the true italic's redrawn letterforms, and the
- * poster sits directly above headings set in the genuine italic.
+ * (400–800; the lone 900 in CdDraftDrawer is synthesised). The italic is
+ * imported at 400 only, which is every weight the display titles ask for: the
+ * month poster, the week title and the day numeral are one shared spec.
  * Instrument Serif is the nav face and ships a single weight (400).
  *
  * Noto Sans TC is no longer a mere fallback: neither Latin face covers CJK, so
@@ -22,7 +19,6 @@
 @import "@fontsource/jetbrains-mono/500.css";
 @import "@fontsource/jetbrains-mono/600.css";
 @import "@fontsource/jetbrains-mono/700.css";
-@import "@fontsource/jetbrains-mono/700-italic.css";
 @import "@fontsource/jetbrains-mono/800.css";
 @import "@fontsource/instrument-serif/400.css";
 @import "@fontsource/instrument-serif/400-italic.css";

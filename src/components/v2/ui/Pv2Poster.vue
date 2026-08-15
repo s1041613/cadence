@@ -31,14 +31,13 @@ const emit = defineEmits<{
   cursor: pointer;
 }
 
-/* 字級維持 36px（全站大標題乘 0.7，見 Pv2DayHeader），但 400→700。
-   月份是整頁唯一的標題，卻是最不明顯的元素：等寬字在 400 的筆畫本來就細，
-   又疊在照片底上，36px 的細斜體被背景的紋理吃掉。把份量加在「粗細」而不是
-   「字級」上，海報不必長高就重新站得住，日檢視 48px 的大數字也仍是層級上緣。
-   700-italic 是真字檔（見 app.css），不是合成傾斜。 */
+/* 與日檢視的大日期數字同規格（Pv2DayHeader 的 italic 400 48px）。
+   月份不明顯的原因不在字重——三個檢視的主標題本來就都是 400——而在字級：
+   同一個字重下 36px 的筆畫就是比 48px 細，疊在照片底上更被背景紋理吃掉。
+   所以份量加回在字級，字重維持 400，月/週/日三個主標題的筆畫粗細因此一致。 */
 .pv2-poster__month {
   text-align: center;
-  font: italic 700 36px var(--cd-font-ui);
+  font: italic 400 48px var(--cd-font-ui);
   letter-spacing: 0;
   line-height: 0.9;
   color: #1b1b1b;

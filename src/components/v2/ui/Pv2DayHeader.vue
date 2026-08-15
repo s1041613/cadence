@@ -62,7 +62,9 @@ const emit = defineEmits<{
 /* 與 month「August」一致：UI face 的斜體，字級放到日期海報比例。
    68→48px：UI face 是等寬字，同 px 下比原本的 Instrument Serif 寬約 1.8 倍（高度幾乎一樣），
    維持 68 會讓數字整個橫向撐開、份量過重。描邊也一併拿掉——那是為了替纖細的襯線加粗，
-   等寬字本身筆畫就夠厚。全站大標題統一乘 0.7，層級關係不變。 */
+   等寬字本身筆畫就夠厚。全站大標題統一乘 0.7，層級關係不變。
+   月/週的主標題後來也收斂到這裡的 48px：三者字重同為 400，字級一有落差就會被讀成
+   粗細不同（見 Pv2Poster）。0.7 的比例仍適用於面板類標題（如 Pv2DaySheet）。 */
 .pv2-dh__num {
   font: italic 400 48px var(--cd-font-serif);
   line-height: 0.8;
