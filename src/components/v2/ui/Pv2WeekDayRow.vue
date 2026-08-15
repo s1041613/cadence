@@ -154,11 +154,11 @@ const emit = defineEmits<{
    標記做在 DOW 而非數字上，是因為週列等高：50px 的數字包圓圈需要約 66px 會超出列高，
    10px 的標籤加藥丸則完全在餘裕內。
 
-   負左邊界抵銷左 padding，讓藥丸左緣與上方數字切齊；凸出列邊界的左半圓
-   靠 .pv2-wdr 的 overflow-x: visible 才不會被裁成直角。
+   藥丸左緣＝欄位左緣，與其他天的 DOW 文字、以及上方數字切齊成同一條左界。
+   這裡曾有 margin-left:-7px 讓藥丸往左凸出：舊的襯線斜體數字墨跡本身就往左溢出約 7px，
+   凸出才對得上。現在的等寬斜體墨跡落在欄位左緣 +1px 內，再凸出就純粹是歪掉。
    0.12em 字距會在最後一個字母後面多留一份空白，右側 padding 少 1px 才左右對稱。 */
 .pv2-wdr__dow--today {
-  margin-left: -7px;
   padding: 3px 6px 3px 7px;
   border-radius: 999px;
   background: #1b1b1b;

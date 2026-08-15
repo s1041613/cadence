@@ -128,10 +128,10 @@
    * The product ships exactly two faces. Fonts are a fixed passthrough: they are
    * NOT part of the theme, so no palette may override them.
    *
-   *   --cd-font-display : Instrument Serif, reserved for navigation — v2's bottom
-   *                       nav (letter glyphs + labels), the week/day TODAY pill,
-   *                       and the day tabs. The month poster is NOT nav: its title
-   *                       and year are set in the UI face, in both generations.
+   *   --cd-font-display : Instrument Serif, reserved for the bottom nav — its letter
+   *                       glyphs and their labels, and nothing else. The month poster
+   *                       is not nav, and the week/day TODAY pill belongs to headers
+   *                       that are set in the UI face; both use --cd-font-ui.
    *                       Deliberately narrow usage: it ships a single weight (400),
    *                       so never ask it for 500+ or the browser fakes the bold.
    *                       It has no CJK coverage, but every string set in it is

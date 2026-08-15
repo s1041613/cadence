@@ -176,11 +176,15 @@ function onSwipeDown(): void {
   text-align: left;
 }
 
+/* 62px 才裝得下 "all-day"：等寬臉每字 0.6em，7 字在 14px 下約 61px，
+   舊的 48px 是照比例字身抓的，換臉後會斷成兩行。nowrap 是保險，
+   讓未來更長的標籤寧可被切也不要撐成兩行破壞列高。 */
 .pv2-ds__time {
   flex: none;
-  width: 48px;
+  width: 62px;
   font: 500 14px var(--cd-font-mono);
   letter-spacing: 0.02em;
+  white-space: nowrap;
   color: #6e6e6e;
 }
 
