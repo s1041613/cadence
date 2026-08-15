@@ -36,8 +36,7 @@ import { computed } from 'vue'
 import CdIcon from './CdIcon.vue'
 
 // CdDatePoster — big date navigation header, 3 variants (month/week/day). design-research-report.md §3.3.
-// Year row: 700 17px, ls .14em, --cd-ink-muted. Title: italic 400 44px --cd-font-display (Instrument
-// Serif, the one place in legacy that uses the display face), ls -.01em, lh .95.
+// Year row: 700 17px, ls .14em, --cd-ink-muted. Title: italic 400 44px --cd-font-ui, ls -.01em, lh .95.
 // Month variant has an olive caret next to the title that opens the calendar bottom-sheet (not a dropdown).
 // Chevron sizes differ per variant (month footer 30x28, day 24x28, week 30x28) but are visually identical here;
 // callers can slot day-view's week-strip cluster into #extra.
@@ -98,10 +97,11 @@ const todayLabel = computed(() => (props.variant === 'week' ? 'This Week' : 'Tod
   padding: 2px 4px;
   margin: 2px -4px 0;
   border-radius: 10px;
-  /* Display face: the month poster is the one place in legacy that uses it.
-     Instrument Serif ships a single weight (400), so the former 800 is dropped
-     rather than synthesised. */
-  font: italic 400 44px var(--cd-font-display);
+  /* UI face, matching v2's poster: the display face is navigation-only now.
+     The weight stays at 400 — it was dropped from 800 when the title was set in a
+     single-weight face, and restoring it is a design call, not a consequence of
+     the family change. */
+  font: italic 400 44px var(--cd-font-ui);
   letter-spacing: -0.01em;
   line-height: 0.95;
   color: var(--cd-ink);

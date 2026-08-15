@@ -129,8 +129,9 @@
    * NOT part of the theme, so no palette may override them.
    *
    *   --cd-font-display : Instrument Serif, reserved for navigation — v2's bottom
-   *                       nav (letter glyphs + labels), the month poster title and
-   *                       year in its header row, and the week/day TODAY pill.
+   *                       nav (letter glyphs + labels), the week/day TODAY pill,
+   *                       and the day tabs. The month poster is NOT nav: its title
+   *                       and year are set in the UI face, in both generations.
    *                       Deliberately narrow usage: it ships a single weight (400),
    *                       so never ask it for 500+ or the browser fakes the bold.
    *                       It has no CJK coverage, but every string set in it is
