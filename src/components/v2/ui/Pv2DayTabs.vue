@@ -51,7 +51,7 @@ const options: Array<{ value: DayTab; label: string }> = [
   border: none;
   border-radius: 10px;
   background: transparent;
-  font: 600 12px var(--cd-font-mono);
+  font: 400 12px var(--cd-font-display);
   letter-spacing: 0.1em;
   color: #6e6e6e;
   cursor: pointer;

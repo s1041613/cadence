@@ -80,7 +80,7 @@ const emit = defineEmits<{
   gap: 5px;
   padding: 0 11px;
   color: #6e6e6e;
-  font: 500 9.5px var(--cd-font-ui);
+  font: 400 9.5px var(--cd-font-display);
   letter-spacing: 0.1em;
   line-height: 1;
   text-transform: uppercase;
