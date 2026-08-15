@@ -6,16 +6,10 @@
   -->
   <div class="mv2">
     <div class="mv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
+      <!-- No prev/next arrows here: the horizontal swipe replaces them. The poster stays
+           tappable because the month/year wheel is still the only way to jump across years. -->
       <div class="mv2__poster">
-        <Pv2PosterNav
-          :month-name="monthName"
-          :year="String(year)"
-          prev-label="上個月"
-          next-label="下個月"
-          @prev="navigate(-1)"
-          @next="navigate(1)"
-          @open-sheet="openSheet"
-        />
+        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
       </div>
 
       <!-- The strip scrolls horizontally itself, so it stops touchstart before the swipe
@@ -75,7 +69,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
-import Pv2PosterNav from '@/components/v2/ui/Pv2PosterNav.vue'
+import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridCell } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -206,7 +200,9 @@ function stepMonthBy(delta: number): void {
 // Re-keying the grid on the month is what drives the slide transition.
 const monthKey = computed(() => `${year.value}-${month.value}`)
 
-const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({
+// No `navigate` here: with the arrows gone, the swipe and the arrow keys are the only steps,
+// and both go through onSwipe / the composable's own keydown listener.
+const { onSwipe, transitionName, setDirection } = useDateSwipe({
   step: stepMonthBy,
   // Only the two sheets this view owns; the page-shell overlays are handled in the composable.
   blocked: computed(() => sheetOpen.value || daySheetDate.value !== null)
@@ -232,6 +228,13 @@ const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({
   overflow: hidden;
   /* The horizontal month-swipe lives here; pan-y leaves the vertical axis to the browser. */
   touch-action: pan-y;
+}
+
+/* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.
+   With the arrows gone it has to be given the full width itself, or the title stops being
+   centred on the row and its tap target collapses to the width of the month word. */
+.mv2__poster-title {
+  width: 100%;
 }
 
 /* touch-action is intersected down the hit-test chain, so the chip row has to ask for the
