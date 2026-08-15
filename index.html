@@ -25,8 +25,187 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <link rel="icon" type="image/ico" href="favicon.ico">
+
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="<%= publicPath %>fonts/instrument-serif-italic.woff2">
+
+    <!-- ---------- Launch animation (pure CSS) ----------
+         The CSP above is script-src 'self', so no inline <script> may run here;
+         style-src allows 'unsafe-inline', so the animation is written as CSS
+         keyframes. It starts painting before the JS bundle has downloaded, so a
+         cold start is no longer a blank page. Teardown lives in the bundle, in
+         src/composables/use-app-splash.ts. -->
+    <style>
+      /* app.css imports Instrument Serif via @fontsource, but that only lands once
+         the bundle does. This copy in public/fonts/ is what makes the mark render
+         with the right face on the very first paint. */
+      @font-face {
+        font-family: 'Instrument Serif Splash';
+        src: url('<%= publicPath %>fonts/instrument-serif-italic.woff2') format('woff2');
+        font-style: italic;
+        font-weight: 400;
+        font-display: block;
+      }
+
+      #cd-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        background: #fafaf9;
+        transition:
+          opacity .42s cubic-bezier(.22, 1, .36, 1),
+          transform .42s cubic-bezier(.22, 1, .36, 1);
+        /* Fail-open. use-app-splash.ts only runs once App.vue mounts, and the auth
+           boot file awaits getSession() before that — so a hung or very slow auth
+           call means the JS fuse is never even armed, and this overlay would trap
+           the user behind a full-screen splash with no way out but a reload.
+           This timer starts at first paint and needs no JS at all, so it holds
+           even if the bundle never executes. Longer than the JS fuse (6s) so it
+           only ever fires when that path failed to arm. */
+        animation: cd-splash-failopen 1ms linear 8s forwards;
+      }
+
+      @keyframes cd-splash-failopen {
+        to {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
+      }
+
+      /* Added by use-app-splash.ts; the element is removed once the fade ends */
+      #cd-splash.is-out {
+        opacity: 0;
+        transform: scale(1.03);
+        pointer-events: none;
+      }
+
+      .cd-splash__grid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(#d8d8d2 1.6px, transparent 1.6px);
+        background-size: 28px 28px;
+        background-position: 14px 14px;
+        opacity: 0;
+        animation: cd-splash-grid .9s cubic-bezier(.22, 1, .36, 1) forwards;
+      }
+
+      .cd-splash__mark {
+        position: relative;
+        font: italic 400 150px/1 'Instrument Serif Splash', 'Instrument Serif', Georgia, serif;
+        color: #1b1b1b;
+        opacity: 0;
+        animation: cd-splash-mark .66s cubic-bezier(.22, 1, .36, 1) .26s forwards;
+      }
+
+      .cd-splash__rhythm {
+        position: absolute;
+        top: 50%;
+        margin-top: 86px;
+        width: 260px;
+        height: 12px;
+      }
+
+      .cd-splash__line {
+        position: absolute;
+        left: 50%;
+        top: 5px;
+        width: 0;
+        height: 1.5px;
+        background: var(--cd-line, #e5e3db);
+        transform: translateX(-50%);
+        animation: cd-splash-line .62s cubic-bezier(.22, 1, .36, 1) 1.12s forwards;
+      }
+
+      .cd-splash__dot {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 11px;
+        height: 11px;
+        margin-left: -5.5px;
+        border-radius: 50%;
+        opacity: 0;
+        transform: translateX(var(--x0)) scale(.4);
+        animation:
+          cd-splash-dot .5s cubic-bezier(.34, 1.56, .64, 1) var(--d) forwards,
+          cd-splash-spread .62s cubic-bezier(.22, 1, .36, 1) 1.12s forwards;
+      }
+
+      .cd-splash__word {
+        position: absolute;
+        top: 50%;
+        margin-top: 128px;
+        font: 500 13px/1 'Zen Kaku Gothic New', system-ui, sans-serif;
+        color: var(--cd-ink, #56585e);
+        letter-spacing: .66em;
+        padding-left: .66em;
+        opacity: 0;
+        animation: cd-splash-word .72s cubic-bezier(.22, 1, .36, 1) 1.24s forwards;
+      }
+
+      @keyframes cd-splash-grid {
+        from { opacity: 0; transform: scale(1.12); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      @keyframes cd-splash-mark {
+        from { opacity: 0; transform: translateY(14px) scale(.86); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      @keyframes cd-splash-dot {
+        from { opacity: 0; transform: translateX(var(--x0)) scale(.4); }
+        to   { opacity: 1; transform: translateX(var(--x0)) scale(1); }
+      }
+      @keyframes cd-splash-spread {
+        from { transform: translateX(var(--x0)) scale(1); }
+        to   { transform: translateX(var(--x1)) scale(1); }
+      }
+      @keyframes cd-splash-line {
+        from { width: 0; }
+        to   { width: 250px; }
+      }
+      @keyframes cd-splash-word {
+        from { opacity: 0; letter-spacing: .66em; padding-left: .66em; transform: translateY(10px); }
+        to   { opacity: 1; letter-spacing: .3em;  padding-left: .3em;  transform: translateY(0); }
+      }
+
+      /* Reduced-motion: jump straight to the finished state, play nothing.
+         Note this selects children only — the container keeps its fail-open
+         animation, which is a safety timer rather than a motion effect. */
+      @media (prefers-reduced-motion: reduce) {
+        #cd-splash * { animation: none !important; }
+
+        /* Dismiss by fading alone: the 3% scale-up is motion these users opted out of */
+        #cd-splash {
+          transition: opacity .42s cubic-bezier(.22, 1, .36, 1);
+        }
+        #cd-splash.is-out {
+          transform: none;
+        }
+        .cd-splash__grid,
+        .cd-splash__mark,
+        .cd-splash__word { opacity: 1; }
+        .cd-splash__line { width: 250px; }
+        .cd-splash__dot  { opacity: 1; transform: translateX(var(--x1)); }
+      }
+    </style>
   </head>
   <body>
+    <!-- Launch animation: sits outside the quasar mount point so mounting cannot replace it -->
+    <div id="cd-splash" aria-hidden="true">
+      <div class="cd-splash__grid"></div>
+      <div class="cd-splash__mark">C</div>
+      <div class="cd-splash__rhythm">
+        <span class="cd-splash__line"></span>
+        <span class="cd-splash__dot" style="--x0:-26px; --x1:-108px; --d:.74s; background:#c0564b"></span>
+        <span class="cd-splash__dot" style="--x0:0px;    --x1:0px;    --d:.82s; background:#b3ac91"></span>
+        <span class="cd-splash__dot" style="--x0:26px;   --x1:108px;  --d:.90s; background:#3a6ea5"></span>
+      </div>
+      <div class="cd-splash__word">CADENCE</div>
+    </div>
+
     <!-- quasar:entry-point -->
   </body>
 </html>
