@@ -6,7 +6,11 @@
   -->
   <div class="pv2-sheet-scrim" @click="emit('close')">
     <div class="pv2-sheet" @click.stop>
-      <div class="pv2-sheet__handle" />
+      <!-- Swipe-to-dismiss is bound to the handle zone only: the wheels below are vertical
+           scroll-snap columns, and a sheet-wide gesture would swallow them. -->
+      <div class="pv2-sheet__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
+        <div class="pv2-sheet__handle" />
+      </div>
 
       <!-- 選中列不畫高亮帶（樣式 B）：只靠中央列字最大最深區分選中 -->
       <div class="pv2-sheet__wheels">
@@ -61,6 +65,10 @@ const emit = defineEmits<{
   close: []
 }>()
 
+function onSwipeDown(): void {
+  emit('close')
+}
+
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const BASE_YEAR = 2020
 const YEAR_COUNT = 21
@@ -106,12 +114,20 @@ function onToday(): void {
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
 }
 
+/* Zone is taller than the 5px pill so the swipe target is actually hittable; the pill's former
+   bottom margin lives here to keep the rendered layout identical. */
+.pv2-sheet__handle-zone {
+  padding: 4px 0 12px;
+  touch-action: none;
+  cursor: grab;
+}
+
 .pv2-sheet__handle {
   width: 40px;
   height: 5px;
   border-radius: 3px;
   background: #dadad4;
-  margin: 0 auto 16px;
+  margin: 0 auto;
 }
 
 .pv2-sheet__wheels {

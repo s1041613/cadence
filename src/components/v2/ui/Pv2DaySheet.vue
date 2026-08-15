@@ -5,7 +5,11 @@
   -->
   <div class="pv2-ds-scrim" @click="emit('close')">
     <div class="pv2-ds" @click.stop>
-      <div class="pv2-ds__handle" />
+      <!-- Swipe-to-dismiss is bound to the handle zone only: the list below owns its own
+           overflow-y scroll, and a sheet-wide gesture would swallow it. -->
+      <div class="pv2-ds__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
+        <div class="pv2-ds__handle" />
+      </div>
 
       <div class="pv2-ds__head">
         <div class="pv2-ds__head-text">
@@ -61,6 +65,10 @@ const emit = defineEmits<{
   create: []
   eventClick: [event: Pv2DayEvent, mouseEvent: MouseEvent]
 }>()
+
+function onSwipeDown(): void {
+  emit('close')
+}
 </script>
 
 <style scoped>
@@ -84,13 +92,21 @@ const emit = defineEmits<{
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
 }
 
-.pv2-ds__handle {
+/* Zone is taller than the 5px pill so the swipe target is actually hittable; the pill's former
+   bottom margin lives here to keep the rendered layout identical. */
+.pv2-ds__handle-zone {
   flex: none;
+  padding: 4px 0 10px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.pv2-ds__handle {
   width: 40px;
   height: 5px;
   border-radius: 3px;
   background: #dadad4;
-  margin: 0 auto 14px;
+  margin: 0 auto;
 }
 
 .pv2-ds__head {
