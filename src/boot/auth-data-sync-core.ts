@@ -31,6 +31,11 @@ export interface OnAuthUserChangeDeps {
   // a failed load only means dismissed rows reappear until the next sign-in — so it loads alongside
   // tasks rather than gating anything.
   titleDismissalsStore: TitleDismissalsStoreLike
+  // Notebook notes. Same user-scoped shape as titleDismissals (hence the shared interface), so it
+  // loads in the same second phase. It differs in one respect worth knowing: its loadFromRemote
+  // surfaces its own toast on failure, because an empty notebook is indistinguishable from having
+  // lost every note. That handler is also why it never rejects — see the Promise.all note below.
+  notebookStore: TitleDismissalsStoreLike
   // Reads the *current* signed-in user id at the moment it's called (not the userId this change
   // event started with) — used only for the stale-session check below.
   getCurrentUserId: () => string | null
@@ -53,6 +58,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     calendarsStore,
     inboxStore,
     titleDismissalsStore,
+    notebookStore,
     getCurrentUserId,
     getMemberCalendarIds
   } = deps
@@ -62,6 +68,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     calendarsStore.resetLocal()
     inboxStore.resetLocal()
     titleDismissalsStore.resetLocal()
+    notebookStore.resetLocal()
     return
   }
 
@@ -76,11 +83,17 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
 
   // Calendars load first: the events fetch is scoped to the member calendar id list, which only
   // exists once the calendar list has been applied. Tasks and inbox then load in parallel — inbox
-  // has no calendar dependency, but must not race ahead of the calendars load either.
+  // has no calendar dependency, but must not race ahead of the calendars load either. Notebook is
+  // in the same position as inbox: it could load first, but a failed ensureDefaultCalendar should
+  // leave every store unloaded rather than a partial mix.
+  //
+  // Every load in this Promise.all must resolve rather than reject. onAuthUserChange is invoked
+  // with `void`, so one rejection here would throw past the boot wiring and abandon its siblings.
   await calendarsStore.loadFromRemote(userId, defaultId)
   await Promise.all([
     tasksStore.loadFromRemote(userId, defaultId, getMemberCalendarIds()),
     inboxStore.loadFromRemote(userId, defaultId),
-    titleDismissalsStore.loadFromRemote()
+    titleDismissalsStore.loadFromRemote(),
+    notebookStore.loadFromRemote()
   ])
 }

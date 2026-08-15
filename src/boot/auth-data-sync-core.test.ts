@@ -31,6 +31,7 @@ describe('onAuthUserChange', () => {
   let calendarsStore: StoreMock
   let inboxStore: StoreMock
   let titleDismissalsStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
+  let notebookStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
   let getCurrentUserId: Mock<() => string | null>
   let getMemberCalendarIds: Mock<() => string[]>
 
@@ -40,6 +41,7 @@ describe('onAuthUserChange', () => {
     calendarsStore,
     inboxStore,
     titleDismissalsStore,
+    notebookStore,
     getCurrentUserId,
     getMemberCalendarIds
   })
@@ -50,6 +52,7 @@ describe('onAuthUserChange', () => {
     calendarsStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     inboxStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     titleDismissalsStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
+    notebookStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     getCurrentUserId = vi.fn()
     getMemberCalendarIds = vi.fn().mockReturnValue(['cal-uuid-1'])
   })
@@ -66,6 +69,7 @@ describe('onAuthUserChange', () => {
     expect(tasksStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1', ['cal-uuid-1', 'cal-uuid-2'])
     expect(inboxStore.loadFromRemote).toHaveBeenCalledWith('user-1', 'cal-uuid-1')
     expect(titleDismissalsStore.loadFromRemote).toHaveBeenCalledTimes(1)
+    expect(notebookStore.loadFromRemote).toHaveBeenCalledTimes(1)
   })
 
   it('loads calendars to completion before starting the events load', async () => {
@@ -90,6 +94,7 @@ describe('onAuthUserChange', () => {
     expect(calendarsStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(inboxStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(titleDismissalsStore.resetLocal).toHaveBeenCalledTimes(1)
+    expect(notebookStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(ensureDefaultCalendar).not.toHaveBeenCalled()
   })
 
@@ -107,6 +112,7 @@ describe('onAuthUserChange', () => {
     expect(calendarsStore.loadFromRemote).not.toHaveBeenCalled()
     expect(inboxStore.loadFromRemote).not.toHaveBeenCalled()
     expect(titleDismissalsStore.loadFromRemote).not.toHaveBeenCalled()
+    expect(notebookStore.loadFromRemote).not.toHaveBeenCalled()
   })
 
   it('does not load any store when the session goes stale (signed out) while ensureDefaultCalendar is pending', async () => {
@@ -121,6 +127,7 @@ describe('onAuthUserChange', () => {
     expect(tasksStore.loadFromRemote).not.toHaveBeenCalled()
     expect(calendarsStore.loadFromRemote).not.toHaveBeenCalled()
     expect(inboxStore.loadFromRemote).not.toHaveBeenCalled()
+    expect(notebookStore.loadFromRemote).not.toHaveBeenCalled()
   })
 
   it('leaves all stores unloaded when ensureDefaultCalendar throws', async () => {
@@ -136,5 +143,7 @@ describe('onAuthUserChange', () => {
     expect(tasksStore.resetLocal).not.toHaveBeenCalled()
     expect(calendarsStore.resetLocal).not.toHaveBeenCalled()
     expect(inboxStore.resetLocal).not.toHaveBeenCalled()
+    expect(notebookStore.loadFromRemote).not.toHaveBeenCalled()
+    expect(notebookStore.resetLocal).not.toHaveBeenCalled()
   })
 })

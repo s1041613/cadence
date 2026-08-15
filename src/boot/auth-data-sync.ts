@@ -5,6 +5,7 @@ import { useTasksStore } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useInboxStore } from '@/stores/inbox-store'
 import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
+import { useNotebookStore } from '@/stores/notebook-store'
 import { ensureDefaultCalendar } from '@/services/calendars-service'
 import { onAuthUserChange } from './auth-data-sync-core'
 
@@ -20,6 +21,7 @@ export default defineBoot(({ store }) => {
   const calendarsStore = useCalendarsStore(store)
   const inboxStore = useInboxStore(store)
   const titleDismissalsStore = useTitleDismissalsStore(store)
+  const notebookStore = useNotebookStore(store)
 
   watch(
     () => auth.user?.id ?? null,
@@ -30,6 +32,7 @@ export default defineBoot(({ store }) => {
         calendarsStore,
         inboxStore,
         titleDismissalsStore,
+        notebookStore,
         getCurrentUserId: () => auth.user?.id ?? null,
         getMemberCalendarIds: () => calendarsStore.calendars.map((c) => c.id)
       })
