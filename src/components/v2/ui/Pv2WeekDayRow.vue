@@ -87,7 +87,10 @@ const emit = defineEmits<{
    相對其他天上移，七列的數字基線就參差了。 */
 .pv2-wdr__date {
   flex: none;
-  width: 74px;
+  /* 46px＝欄內最寬的東西（兩位數日期，等寬 35px 下是 42px）再加一點餘裕。
+     原本是 74px，那是照舊襯線斜體抓的——那時兩位數只有約 33px，欄寬本來就寬鬆，
+     換成等寬字又改置中之後，左側就空出一大塊。收窄同時也把寬度還給右側事件標題。 */
+  width: 46px;
   display: flex;
   flex-direction: column;
   align-items: center;
