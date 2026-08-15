@@ -125,21 +125,24 @@
    */
 
   /* ---------- Typography: families ----------
-   * The product ships exactly two faces (decided 2026-07-31). Fonts are a fixed
-   * passthrough: they are NOT part of the theme, so no palette may override them.
+   * The product ships exactly two faces. Fonts are a fixed passthrough: they are
+   * NOT part of the theme, so no palette may override them.
    *
-   *   --cd-font-display : Instrument Serif, reserved for the month poster title.
-   *                       That is its only consumer in the legacy layout, which uses
-   *                       SVG icons rather than letter glyphs in its bottom nav.
-   *                       Deliberately narrow usage: it ships a single weight (400)
-   *                       and has no CJK coverage, so Chinese text set in it falls back.
-   *   --cd-font-ui      : Zen Kaku Gothic New, everything else.
+   *   --cd-font-display : Instrument Serif, reserved for navigation — v2's bottom
+   *                       nav (letter glyphs + labels), the month poster title and
+   *                       year in its header row, and the week/day TODAY pill.
+   *                       Deliberately narrow usage: it ships a single weight (400),
+   *                       so never ask it for 500+ or the browser fakes the bold.
+   *                       It has no CJK coverage, but every string set in it is
+   *                       Latin chrome the app itself owns, never user text.
+   *   --cd-font-ui      : JetBrains Mono, everything else.
    *
-   * Zen Kaku ships 300/400/500/700/900 only. There is NO 600, so `font-weight:600`
-   * would be synthesised by the browser; use 500 or 700 instead.
+   * JetBrains Mono ships 100–800. 600 is a real weight here (it was not under the
+   * previous UI face), but there is no 900 — the one call site asking for it gets
+   * a synthesised weight.
    */
-  --cd-font-display: 'Instrument Serif', serif;
-  --cd-font-ui: 'Zen Kaku Gothic New', sans-serif;
+  --cd-font-display: 'Instrument Serif', 'Noto Sans TC', serif;
+  --cd-font-ui: 'JetBrains Mono', 'Noto Sans TC', monospace;
 
   /* Deprecated aliases — resolve onto the two faces above so existing consumers
    * keep rendering while they are migrated. Delete each once its usage hits zero.
@@ -147,19 +150,24 @@
    * --cd-font-title maps to the UI face, not the display face, despite its name:
    * its 60 call sites are body-level chrome (buttons, field labels, settings
    * rows), not poster titles. Pointing it at Instrument Serif would set the whole
-   * settings drawer in a single-weight serif with no CJK coverage. Sites that
-   * genuinely want the display face reference --cd-font-display directly. */
+   * settings drawer in a single-weight serif with no CJK coverage.
+   *
+   * --cd-font-serif maps to the UI face too, and likewise despite its name. Only
+   * navigation is set in the display face now; its other call sites — the large
+   * italic date numerals, settings section headings, event card titles — are
+   * content, not nav, and belong to the UI face. The few sites that genuinely
+   * want the display face reference --cd-font-display directly. */
   --cd-font-title: var(--cd-font-ui);
-  --cd-font-serif: var(--cd-font-display);
+  --cd-font-serif: var(--cd-font-ui);
   --cd-font-mono: var(--cd-font-ui);
   --cd-font-draft: var(--cd-font-ui);
   --cd-font-script: var(--cd-font-ui);
   --cd-font-caveat: var(--cd-font-ui);
 
-  /* Tabular figures for anything that was previously set in a monospaced face.
-   * The UI face is proportional, so digits would otherwise vary in width and
-   * ragged the clock gutter and day-number grids that relied on monospace for
-   * vertical alignment. Applied via the .cd-tnum utility below. */
+  /* Tabular figures for the clock gutter and day-number grids that rely on even
+   * digit widths for vertical alignment. Redundant while the UI face is itself
+   * monospaced, but kept: the .cd-tnum utility states the requirement, so it
+   * survives a future change of face rather than silently depending on this one. */
   --cd-numeric-aligned: tabular-nums;
 
   /* ---------- Typography: sizes (px scale used across the design) ---------- */

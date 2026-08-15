@@ -78,7 +78,7 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   height: 30px;
   border-radius: 50%;
   background: transparent;
-  font: 400 20px var(--cd-font-serif);
+  font: 400 20px var(--cd-font-display);
   line-height: 1;
   color: #6e6e6e;
 }
@@ -89,7 +89,9 @@ function onTap(n: { enabled: boolean; to?: string }): void {
 }
 
 .pv2-nav__label {
-  font: 600 9px var(--cd-font-mono);
+  /* 400, not the 600 this label used to carry: the display face ships one weight,
+     so anything heavier is a browser-synthesised fake. */
+  font: 400 9px var(--cd-font-display);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #9c9c9c;
