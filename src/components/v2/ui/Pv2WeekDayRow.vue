@@ -79,15 +79,18 @@ const emit = defineEmits<{
   overflow-y: clip;
 }
 
-/* 左側日期欄：數字在上、DOW 在下，靠左對齊共用同一條邊界。
-   靠上對齊：今天的 DOW 是藥丸、比純文字高 6px，若整欄置中會讓今天的數字
+/* 左側日期欄：數字在上、DOW 在下，兩者在 74px 欄寬內置中。
+   置中而非靠左：DOW（含今天的藥丸）要落在數字正下方才讀作同一個識別單位，
+   靠左會讓窄的 DOW 吊在寬數字的左半邊。欄寬固定，所以各列的 DOW 彼此也還是對齊的，
+   代價是個位數日期會比兩位數往右縮排。
+   垂直仍靠上對齊：今天的 DOW 是藥丸、比純文字高 6px，若垂直置中會讓今天的數字
    相對其他天上移，七列的數字基線就參差了。 */
 .pv2-wdr__date {
   flex: none;
   width: 74px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   gap: 2px;
 }
@@ -118,7 +121,7 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 4px;
-  /* 數字 50px 且 line-height:1，事件首行對齊數字視覺中線而非頂緣。 */
+  /* 數字 35px 且 line-height:1，事件首行對齊數字視覺中線而非頂緣。 */
   padding-top: 9px;
   overflow: hidden;
 }
@@ -151,12 +154,12 @@ const emit = defineEmits<{
 }
 
 /* 今天：黑底反白藥丸，沿用底部 nav 選中態的語彙（#1b1b1b 底 / #fafaf9 字）。
-   標記做在 DOW 而非數字上，是因為週列等高：50px 的數字包圓圈需要約 66px 會超出列高，
+   標記做在 DOW 而非數字上，是因為週列等高：35px 的數字包圓圈需要約 50px 會超出列高，
    10px 的標籤加藥丸則完全在餘裕內。
 
-   藥丸左緣＝欄位左緣，與其他天的 DOW 文字、以及上方數字切齊成同一條左界。
-   這裡曾有 margin-left:-7px 讓藥丸往左凸出：舊的襯線斜體數字墨跡本身就往左溢出約 7px，
-   凸出才對得上。現在的等寬斜體墨跡落在欄位左緣 +1px 內，再凸出就純粹是歪掉。
+   水平位置交給 .pv2-wdr__date 的 align-items: center，藥丸自己不再偏移。
+   這裡曾有 margin-left:-7px 讓藥丸往左凸出，那是配合舊襯線斜體數字往左溢出的墨跡；
+   換臉後墨跡不再溢出，改置中後也不需要任何補償。
    0.12em 字距會在最後一個字母後面多留一份空白，右側 padding 少 1px 才左右對稱。 */
 .pv2-wdr__dow--today {
   padding: 3px 6px 3px 7px;
