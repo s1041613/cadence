@@ -4,29 +4,34 @@
     7 天垂直列表，每天大日期數字 + 事件列；事件點擊開既有 event-preview overlay。
   -->
   <div class="wv2">
-    <div class="wv2__body">
+    <div class="wv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <div class="wv2__header">
         <Pv2WeekHeader
           :week-number="weekNumber"
           :range-label="rangeLabel"
-          @prev="stepWeekBy(-1)"
-          @next="stepWeekBy(1)"
+          @prev="navigate(-1)"
+          @next="navigate(1)"
           @today="goToday"
         />
       </div>
 
-      <!-- 7 天等高平均分攤剩餘高度（不因事件多寡而高矮不一），照設計稿 -->
-      <div class="wv2__days">
-        <Pv2WeekDayRow
-          v-for="d in weekRows"
-          :key="d.date"
-          :day-num="d.dayNum"
-          :dow-label="d.dowLabel"
-          :today="d.today"
-          :in-week-focus="true"
-          :events="d.events"
-          @event-click="onEventClick"
-        />
+      <div class="pv2-slide-viewport">
+        <Transition :name="transitionName">
+          <!-- All seven days share the remaining height equally, so a busy day is no taller
+               than a quiet one (per the design). -->
+          <div class="wv2__days" :key="weekKey">
+            <Pv2WeekDayRow
+              v-for="d in weekRows"
+              :key="d.date"
+              :day-num="d.dayNum"
+              :dow-label="d.dowLabel"
+              :today="d.today"
+              :in-week-focus="true"
+              :events="d.events"
+              @event-click="onEventClick"
+            />
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -48,6 +53,7 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, addDays, startOfWeek, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { useDateSwipe } from '@/composables/use-date-swipe'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -125,9 +131,18 @@ function stepWeekBy(delta: number): void {
   ui.selectedDate = iso(addDays(weekStart.value, delta * 7))
 }
 
-// 回本週：選今天而非本週第一天，這樣切到 day 檢視時停在今天。
+// Re-keying the day list on the week start is what drives the slide transition.
+const weekKey = computed(() => iso(weekStart.value))
+
+// No view-local overlays here — the composable already covers the page-shell overlays.
+const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({ step: stepWeekBy })
+
+// Back to this week. Selects today rather than the week's first day so switching to the day
+// view lands on today.
 function goToday(): void {
-  ui.selectedDate = iso(new Date())
+  const today = new Date()
+  setDirection(today.getTime() - weekStart.value.getTime())
+  ui.selectedDate = iso(today)
 }
 
 function onEventClick(event: Pv2WeekEvent, e: MouseEvent): void {
@@ -157,6 +172,8 @@ function onCreate(): void {
   flex-direction: column;
   padding: 6px 22px 12px;
   overflow: hidden;
+  /* The horizontal week-swipe lives here; pan-y leaves each row's own vertical scroll alone. */
+  touch-action: pan-y;
 }
 
 .wv2__header {
@@ -165,11 +182,11 @@ function onCreate(): void {
   margin-bottom: 4px;
 }
 
-/* 7 天等高塞滿畫面，整頁不捲動。每列平分高度後，靠事件 row 夠緊湊，
-   在等高的空間內至少露得出 3 件；第 4 件起在該列自身內捲（見 Pv2WeekDayRow）。 */
+/* Seven equal rows fill the screen and the page itself never scrolls. Once the height is
+   split evenly, a compact event row still reveals at least three events; from the fourth on,
+   the row scrolls within itself (see Pv2WeekDayRow).
+   Height now comes from .pv2-slide-viewport, which absolutely positions this element. */
 .wv2__days {
-  flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
 }
