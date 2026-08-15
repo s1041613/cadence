@@ -22,18 +22,23 @@
 @import "@fontsource/noto-sans-tc/500.css";
 @import "@fontsource/noto-sans-tc/700.css";
 
+/* 100%（錨定 ICB）而非 100dvh：iOS standalone 冷啟動的 viewport 單位會照整個
+ * 螢幕高解析（含 status bar），shell 因此比 webview 可視區高、整頁變得可捲。
+ * ICB 永遠等於 webview 真實大小，不受該 bug 影響。 */
 html,
 body,
 #q-app {
   width: 100%;
   min-width: 0;
-  height: 100dvh;
+  height: 100%;
   margin: 0;
   background: #fafaf9;
 }
 
 body {
-  overflow-x: hidden;
+  /* 兩軸都鎖：app shell 自己管內部捲動，document 永遠不捲、不 rubber-band */
+  overflow: hidden;
+  overscroll-behavior: none;
   color: var(--cd-ink);
   font-family: 'Zen Kaku Gothic New', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;

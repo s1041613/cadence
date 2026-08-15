@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
 // was dropped because a distinct interstitial surface is not worth a palette role for two
 // screens a user never sees beside the main UI.
 .join-calendar
-  min-height: 100dvh
+  min-height: 100%
   display: grid
   place-items: center
   background: var(--cd-surface-page)

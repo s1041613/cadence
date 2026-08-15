@@ -33,7 +33,7 @@ const pane = ref<'root' | 'customization' | 'notifications'>('root')
 <style scoped>
 .sp2 {
   width: 100%;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
 
