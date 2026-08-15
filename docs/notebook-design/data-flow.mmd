@@ -1,0 +1,77 @@
+flowchart TD
+    subgraph UI["元件層 src/components/v2/notebook/"]
+        composer["Pv2NoteComposer<br/>快速輸入 pill"]
+        card["Pv2NoteCard<br/>筆記卡片"]
+        view["NotebookViewV2<br/>組合根"]
+    end
+
+    subgraph STORE["Store 層 src/stores/notebook-store.ts"]
+        addNote["addNote(body)"]
+        trim{"trim 後<br/>是空字串？"}
+        loaded{"isLoaded？"}
+        snapshot["產生 snapshot<br/>id = crypto.randomUUID()<br/>createdAt = now"]
+        unshift["notes.unshift(snapshot)<br/>畫面立刻出現"]
+        removeNote["removeNote(id)"]
+        optimisticDel["記住 idx + removed<br/>從 notes 濾掉<br/>畫面立刻消失"]
+        queue["enqueueWrite(id, op)<br/>同一 id 的寫入排隊"]
+        genCheck{"generation<br/>對得上？"}
+    end
+
+    subgraph SERVICE["Service 層 src/services/notes-service.ts"]
+        insertSvc["insertNote()<br/>upsert ignoreDuplicates<br/>冪等、可安全重試"]
+        deleteSvc["deleteNote()<br/>.delete().eq(id)"]
+        fetchSvc["fetchNotes(ownerId)<br/>order created_at desc"]
+    end
+
+    DB{{"Supabase notes 表<br/>RLS: user_id = auth.uid()<br/>CHECK: body 非空"}}
+
+    subgraph BOOT["登入生命週期 src/boot/auth-data-sync-core.ts"]
+        signin["onAuthUserChange(userId)"]
+        signout["onAuthUserChange(null)"]
+        loadRemote["notebookStore.loadFromRemote()"]
+        resetLocal["resetLocal()<br/>generation++ / notes = []<br/>isLoaded = false<br/>writeChains.clear()"]
+    end
+
+    composer -->|"按 + 或 Enter<br/>emit submit"| view
+    view --> addNote
+    addNote --> trim
+    trim -->|"是"| silent["靜默 return<br/>不跳 toast"]:::skip
+    trim -->|"否"| loaded
+    loaded -->|"否"| reject["rejectUnsyncedWrite<br/>提示稍後再試"]:::fail
+    loaded -->|"是"| snapshot
+    snapshot --> unshift
+    unshift --> queue
+
+    card -->|"點垃圾桶<br/>emit delete"| view
+    view --> removeNote
+    removeNote --> optimisticDel
+    optimisticDel --> queue
+
+    queue --> genCheck
+    genCheck -->|"否 已登出"| drop["放棄寫入<br/>不上網"]:::skip
+    genCheck -->|"是"| insertSvc
+    genCheck -->|"是"| deleteSvc
+
+    insertSvc --> DB
+    deleteSvc --> DB
+
+    DB -->|"成功"| done["完成<br/>畫面已是最終狀態"]:::ok
+    DB -->|"失敗"| rollbackGen{"generation<br/>對得上？"}
+    rollbackGen -->|"否"| skipRollback["不回滾<br/>否則會復活他人筆記"]:::skip
+    rollbackGen -->|"是 新增失敗"| rbAdd["移除該卡<br/>notifySyncError<br/>重試重送同一 snapshot"]:::fail
+    rollbackGen -->|"是 刪除失敗"| rbDel["splice 回原 idx<br/>min(idx, length) 夾住<br/>notifySyncError"]:::fail
+
+    signin --> loadRemote
+    loadRemote --> fetchSvc
+    fetchSvc --> DB
+    DB -->|"回傳 rows"| applyGen{"generation<br/>對得上？"}
+    applyGen -->|"否"| skipApply["放棄套用<br/>防過期 session"]:::skip
+    applyGen -->|"是"| apply["notes = rows.map(rowToNote)<br/>isLoaded = true"]:::ok
+    apply --> view
+
+    signout --> resetLocal
+    resetLocal --> view
+
+    classDef ok fill:#d8ede0,stroke:#4a7c59,color:#1b1b1b
+    classDef fail fill:#f4dcdc,stroke:#a35050,color:#1b1b1b
+    classDef skip fill:#e8e8e5,stroke:#9c9c9c,color:#4a4a4a

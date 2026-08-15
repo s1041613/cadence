@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 
-type NavKey = 'month' | 'week' | 'draft' | 'setting'
+type NavKey = 'month' | 'week' | 'draft' | 'notes' | 'setting'
 
 defineProps<{
   active: NavKey
@@ -34,6 +34,7 @@ const items: Array<{ key: NavKey; glyph: string; label: string; enabled: boolean
   { key: 'month', glyph: 'm', label: 'month', enabled: true, to: '/v2/month' },
   { key: 'week', glyph: 'w', label: 'week', enabled: true, to: '/v2/week' },
   { key: 'draft', glyph: 'd', label: 'day', enabled: true, to: '/v2/day' },
+  { key: 'notes', glyph: 'n', label: 'notes', enabled: true, to: '/v2/notebook' },
   { key: 'setting', glyph: 's', label: 'setting', enabled: true, to: '/v2/settings' }
 ]
 
@@ -47,11 +48,13 @@ function onTap(n: { enabled: boolean; to?: string }): void {
 .pv2-nav {
   flex: none;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   /* 底部 30px：為 home indicator 讓開，避免導覽文字被系統橫條壓到。
      改這裡的 padding 就要同步改 --pv2-nav-h（見 cadence-tokens.css），
      否則各檢視的 FAB 會壓到 nav。 */
-  padding: 12px 18px 30px;
+  /* Five columns leave each cell ~71px, down from ~89px at four. Trimming the horizontal
+     padding buys that space back; the label font size stays put. */
+  padding: 12px 10px 30px;
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }

@@ -14,6 +14,10 @@ const routes: RouteRecordRaw[] = [
       { path: 'v2/month', component: () => import('@/pages/MonthPageV2.vue') },
       { path: 'v2/week', component: () => import('@/pages/WeekPageV2.vue') },
       { path: 'v2/day', component: () => import('@/pages/DayPageV2.vue') },
+      // Path is 'notebook' rather than 'notes' so it doesn't read as the NOTES section that
+      // already exists inside DayMyDay. The nav key stays 'notes' — key and path differ here
+      // deliberately, exactly as 'draft' maps to /v2/day.
+      { path: 'v2/notebook', component: () => import('@/pages/NotebookPageV2.vue') },
       { path: 'v2/settings', component: () => import('@/pages/SettingsPageV2.vue') },
     ],
   },
