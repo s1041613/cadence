@@ -71,10 +71,12 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   cursor: pointer;
 }
 
+/* center，不是 space-between：head 目前只有日期藥丸一個子元素，space-between 等同 flex-start，
+   藥丸貼欄左緣、每欄右側空一截，整個月曆讀起來偏左。日後若補右側元素再回頭調整。 */
 .pv2-cell__head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .pv2-cell__num {

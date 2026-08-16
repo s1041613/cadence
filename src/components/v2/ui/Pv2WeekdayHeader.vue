@@ -39,8 +39,10 @@ const labels = computed(() =>
   padding-bottom: 6px;
 }
 
+/* 置中：欄寬 ~54px、日期藥丸只佔前 22px，靠左的話每欄右側都空一截，整排數字的重心
+   會比框中心偏左約 16px（空月份最明顯）。置中後表頭字也與日期數字對齊。 */
 .pv2-wd__cell {
-  text-align: left;
+  text-align: center;
   font: 600 9px var(--cd-font-mono);
   letter-spacing: 0.03em;
   color: #6e6e6e;
