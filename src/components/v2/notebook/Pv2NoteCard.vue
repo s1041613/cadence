@@ -49,12 +49,12 @@
         class="nbk__quad"
         type="button"
         :style="{ background: quadTint, color: quad.backgroundColor }"
-        :aria-label="`Quadrant: ${quad.name}. Tap to change.`"
+        :aria-label="`Quadrant: ${quad.enName}. Tap to change.`"
         @click="cycleQuadrant"
       >
         <span class="nbk__quad-dot" :style="{ background: quad.backgroundColor }" />
         <!-- aria-hidden for the same reason as the duration: the button's label carries it. -->
-        <span class="nbk__quad-label" aria-hidden="true">{{ quad.name }}</span>
+        <span class="nbk__quad-label" aria-hidden="true">{{ quad.enName }}</span>
       </button>
 
       <div class="nbk__len" role="group" aria-label="Planned length">
@@ -296,8 +296,9 @@ function commit(): void {
 
 .nbk__quad-label {
   /* Fixed floor so the pill does not resize as the label cycles between quadrant names —
-     a control that moves under your finger between taps is hard to tap twice. */
-  min-width: 62px;
+     a control that moves under your finger between taps is hard to tap twice. Sized for
+     "Do Now", the longest of the four at 11px mono. */
+  min-width: 52px;
   text-align: center;
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.02em;

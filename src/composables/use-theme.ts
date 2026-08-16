@@ -9,6 +9,12 @@ export interface Appearance {
 export interface Quadrant extends Appearance {
   key: 'do' | 'plan' | 'quick' | 'later'
   name: string
+  /** The English label. Not a translation of `name` — the two are the app's two registers, and
+   *  surfaces pick the one that matches their own copy (the v2 pickers and the Notebook card are
+   *  English; the older popovers show `name`). Kept here rather than re-declared per component:
+   *  Pv2EventEditCard, CdEventEditCard and CdDraftDrawer each carried an identical private copy
+   *  of these four strings, which is exactly how the four spellings drift apart. */
+  enName: string
   description: string
   important: boolean
   urgent: boolean
@@ -32,6 +38,7 @@ export const QUADRANTS: Quadrant[] = [
   {
     key: 'do',
     name: '馬上做',
+    enName: 'Do Now',
     description: '重要又緊急',
     important: true,
     urgent: true,
@@ -42,6 +49,7 @@ export const QUADRANTS: Quadrant[] = [
   {
     key: 'plan',
     name: '排時間做',
+    enName: 'Plan',
     description: '重要不緊急',
     important: true,
     urgent: false,
@@ -52,6 +60,7 @@ export const QUADRANTS: Quadrant[] = [
   {
     key: 'quick',
     name: '快速處理',
+    enName: 'Quick',
     description: '緊急不重要',
     important: false,
     urgent: true,
@@ -62,6 +71,7 @@ export const QUADRANTS: Quadrant[] = [
   {
     key: 'later',
     name: '之後再說',
+    enName: 'Later',
     description: '不重要不緊急',
     important: false,
     urgent: false,
