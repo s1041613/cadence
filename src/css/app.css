@@ -143,3 +143,52 @@ a,
     transition: none;
   }
 }
+
+/* Bottom-sheet overlay: the backdrop fades while the panel slides up from its
+ * own height, both starting together. Transitions rather than keyframes so a
+ * sheet dismissed mid-open retargets from where it is instead of restarting.
+ * translateY(100%) is the panel's own height, so this survives the sheet being
+ * resized without a hardcoded offset to keep in sync.
+ *
+ * Neither animated layer is the transition root: the backdrop fades on a
+ * ::before and the panel slides on a child, so Vue cannot detect either by
+ * sniffing the root's computed style, and it only counts transitionend events
+ * whose target is the root. The mount site therefore passes an explicit
+ * :duration matching --cd-duration-sheet (300) — see MonthViewV2.vue. Keep the
+ * two in sync: a shorter :duration cuts the motion off partway. */
+.pv2-sheet-enter-active::before,
+.pv2-sheet-leave-active::before {
+  transition: opacity var(--cd-duration-sheet) var(--cd-ease-standard);
+}
+
+.pv2-sheet-enter-active > *,
+.pv2-sheet-leave-active > * {
+  transition: transform var(--cd-duration-sheet) var(--cd-ease-standard);
+}
+
+/* Fade the backdrop via its own pseudo-element rather than the root's opacity:
+ * opacity on the root composites the whole subtree, so the panel would fade
+ * along with the backdrop instead of staying solid while it travels. */
+.pv2-sheet-enter-from::before,
+.pv2-sheet-leave-to::before {
+  opacity: 0;
+}
+
+.pv2-sheet-enter-from > *,
+.pv2-sheet-leave-to > * {
+  transform: translateY(100%);
+}
+
+/* Reduced motion keeps the scrim fade (it explains that a layer opened) and
+ * drops the panel's travel, per the usual "fewer and gentler, not none". */
+@media (prefers-reduced-motion: reduce) {
+  .pv2-sheet-enter-active > *,
+  .pv2-sheet-leave-active > * {
+    transition: none;
+  }
+
+  .pv2-sheet-enter-from > *,
+  .pv2-sheet-leave-to > * {
+    transform: none;
+  }
+}
