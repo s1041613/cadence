@@ -74,8 +74,27 @@ export const QUADRANTS: Quadrant[] = [
 const FALLBACK_QUADRANT = QUADRANTS[3]!
 const FALLBACK_EVENT_COLOR = '#6E839B'
 
-export function quadrantOf(task: Pick<Task, 'important' | 'urgent'>): Quadrant {
-  return QUADRANTS.find((q) => q.important === task.important && q.urgent === task.urgent) ?? FALLBACK_QUADRANT
+/** The two axes that identify a quadrant. Named rather than written as Pick<Task, …> because
+ *  notes carry the same pair and are not tasks — the matrix is a property of the encoding, not
+ *  of the record type that happens to use it. */
+export interface QuadrantAxes {
+  important: boolean
+  urgent: boolean
+}
+
+export function quadrantOf(axes: QuadrantAxes): Quadrant {
+  return QUADRANTS.find((q) => q.important === axes.important && q.urgent === axes.urgent) ?? FALLBACK_QUADRANT
+}
+
+/** The quadrant after this one, wrapping. Order is QUADRANTS' own order (do → plan → quick →
+ *  later), so a control that cycles moves through the matrix in the same sequence the pickers
+ *  list it in. Returns the axes rather than the Quadrant: callers persist the pair. */
+export function nextQuadrantAxes(axes: QuadrantAxes): QuadrantAxes {
+  const index = QUADRANTS.findIndex((q) => q.important === axes.important && q.urgent === axes.urgent)
+  // -1 (an unreachable pair) lands on QUADRANTS[0], which is the useful answer: cycling from an
+  // unrecognized state should reach a known one rather than stick.
+  const next = QUADRANTS[(index + 1) % QUADRANTS.length]!
+  return { important: next.important, urgent: next.urgent }
 }
 
 // Single theme-resolution function: quadrant tasks derive their appearance at render time (nothing

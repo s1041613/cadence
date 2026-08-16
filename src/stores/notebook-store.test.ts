@@ -9,6 +9,7 @@ vi.mock('@/services/notes-service', () => ({
   fetchNotes: vi.fn(),
   insertNote: vi.fn(),
   updateNote: vi.fn(),
+  updateNoteSettings: vi.fn(),
   deleteNote: vi.fn()
 }))
 vi.mock('@/lib/notify', () => ({
@@ -21,6 +22,7 @@ vi.mock('./auth-store', () => ({
 const fetchNotesMock = vi.mocked(notesService.fetchNotes)
 const insertNoteMock = vi.mocked(notesService.insertNote)
 const updateNoteMock = vi.mocked(notesService.updateNote)
+const updateNoteSettingsMock = vi.mocked(notesService.updateNoteSettings)
 const deleteNoteMock = vi.mocked(notesService.deleteNote)
 const notifySyncErrorMock = vi.mocked(notifySyncError)
 
@@ -49,7 +51,10 @@ const note = (id: string, body = `body ${id}`): Note => ({
   id,
   body,
   createdAt: '2026-03-04T09:00:00.000Z',
-  updatedAt: null
+  updatedAt: null,
+  important: false,
+  urgent: false,
+  durationMin: 15
 })
 
 /** Loads the store against the mocked services, then clears the fetch call from the
@@ -275,6 +280,100 @@ describe('notebook-store', () => {
       store.editNote('a', 'after')
       await flush()
       expect(updateNoteMock).toHaveBeenCalledTimes(1)
+
+      store.resetLocal()
+      failing.reject(new Error('offline'))
+      await flush()
+
+      expect(store.notes).toEqual([])
+    })
+  })
+
+  describe('setNoteSettings', () => {
+    const settings = (over: Partial<notesService.NoteSettings> = {}): notesService.NoteSettings => ({
+      important: false,
+      urgent: false,
+      durationMin: 15,
+      ...over
+    })
+
+    it('applies the quadrant and duration optimistically and persists them', async () => {
+      const store = await loadedStore([note('a')])
+
+      store.setNoteSettings('a', settings({ important: true, urgent: true, durationMin: 60 }))
+
+      expect(store.notes[0]).toMatchObject({ important: true, urgent: true, durationMin: 60 })
+      await flush()
+      expect(updateNoteSettingsMock).toHaveBeenCalledWith('a', {
+        important: true,
+        urgent: true,
+        durationMin: 60
+      })
+    })
+
+    // The check constraint mirrors this clamp; a value it would reject must not reach the
+    // optimistic render either, or the card shows a duration the row can never hold.
+    it('clamps an out-of-range duration onto the stepper grid before storing or sending', async () => {
+      const store = await loadedStore([note('a')])
+
+      store.setNoteSettings('a', settings({ durationMin: 999 }))
+      await flush()
+
+      expect(store.notes[0]?.durationMin).toBe(480)
+      expect(updateNoteSettingsMock).toHaveBeenCalledWith('a', expect.objectContaining({ durationMin: 480 }))
+    })
+
+    it('skips the write when nothing actually changed', async () => {
+      const store = await loadedStore([note('a')])
+
+      store.setNoteSettings('a', settings())
+      await flush()
+
+      expect(updateNoteSettingsMock).not.toHaveBeenCalled()
+      expect(notifySyncErrorMock).not.toHaveBeenCalled()
+    })
+
+    it('leaves the body and timestamps alone', async () => {
+      const store = await loadedStore([note('a', 'unchanged')])
+
+      store.setNoteSettings('a', settings({ durationMin: 30 }))
+      await flush()
+
+      expect(store.notes[0]).toMatchObject({
+        body: 'unchanged',
+        createdAt: '2026-03-04T09:00:00.000Z',
+        updatedAt: null
+      })
+    })
+
+    it('reverts both controls together when the write fails', async () => {
+      const store = await loadedStore([note('a')])
+      updateNoteSettingsMock.mockRejectedValueOnce(new Error('offline'))
+
+      store.setNoteSettings('a', settings({ important: true, durationMin: 90 }))
+      await flush()
+
+      expect(store.notes[0]).toMatchObject({ important: false, urgent: false, durationMin: 15 })
+      expect(notifySyncErrorMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('refuses the write before the first load', () => {
+      const store = useNotebookStore()
+
+      store.setNoteSettings('a', settings({ durationMin: 60 }))
+
+      expect(updateNoteSettingsMock).not.toHaveBeenCalled()
+    })
+
+    // Same resurrection hazard as editNote: a rejection landing after sign-out must not write
+    // the previous session's settings back into a cleared feed.
+    it('does not revert settings when the failure settles after resetLocal', async () => {
+      const store = await loadedStore([note('a')])
+      const failing = deferred<void>()
+      updateNoteSettingsMock.mockReturnValueOnce(failing.promise)
+
+      store.setNoteSettings('a', settings({ durationMin: 60 }))
+      await flush()
 
       store.resetLocal()
       failing.reject(new Error('offline'))
