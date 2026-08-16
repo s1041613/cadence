@@ -15,7 +15,7 @@
       :aria-activedescendant="activeDescendant"
       autocomplete="off"
       @input="onTitleInput"
-      @focus="onTitleFocus"
+      @click="onTitleActivate"
       @blur="closeSuggestions"
       @keydown="onTitleKeydown"
       @compositionstart="onCompositionStart"
@@ -436,7 +436,16 @@ function onTitleCompositionEnd(e: CompositionEvent): void {
   suggestionsOpen.value = true
 }
 
-function onTitleFocus(): void {
+// Bound to `click`, not `focus`: `:autofocus="isNew"` focuses this field the moment the card
+// mounts, which on phone is mid-way through the sheet's .3s cd-sheetUp slide. The list is
+// teleported to <body> and positioned from a one-shot getBoundingClientRect of this input
+// (Pv2TitleSuggestions), and a CSS transform fires none of the scroll/resize/visualViewport
+// events that would re-measure it — so opening on that programmatic focus pinned the list to
+// wherever the still-sliding sheet happened to be. Only the first open per page load was
+// affected: the document's autofocus-processed flag makes `autofocus` a once-per-document
+// affair, so later opens already waited for a real tap. A click is that real tap, by which
+// point the sheet has settled. Typing still opens the list via onTitleInput.
+function onTitleActivate(): void {
   committedQuery.value = props.title
   activeIndex.value = -1
   suggestionsOpen.value = true
