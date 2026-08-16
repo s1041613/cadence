@@ -8,6 +8,7 @@ import type { Note } from '@/types/note'
 vi.mock('@/services/notes-service', () => ({
   fetchNotes: vi.fn(),
   insertNote: vi.fn(),
+  updateNote: vi.fn(),
   deleteNote: vi.fn()
 }))
 vi.mock('@/lib/notify', () => ({
@@ -19,6 +20,7 @@ vi.mock('./auth-store', () => ({
 
 const fetchNotesMock = vi.mocked(notesService.fetchNotes)
 const insertNoteMock = vi.mocked(notesService.insertNote)
+const updateNoteMock = vi.mocked(notesService.updateNote)
 const deleteNoteMock = vi.mocked(notesService.deleteNote)
 const notifySyncErrorMock = vi.mocked(notifySyncError)
 
@@ -46,7 +48,8 @@ function flush(): Promise<void> {
 const note = (id: string, body = `body ${id}`): Note => ({
   id,
   body,
-  createdAt: '2026-03-04T09:00:00.000Z'
+  createdAt: '2026-03-04T09:00:00.000Z',
+  updatedAt: null
 })
 
 /** Loads the store against the mocked services, then clears the fetch call from the
@@ -65,6 +68,7 @@ describe('notebook-store', () => {
     vi.resetAllMocks()
     fetchNotesMock.mockResolvedValue([])
     insertNoteMock.mockResolvedValue(undefined)
+    updateNoteMock.mockResolvedValue(undefined)
     deleteNoteMock.mockResolvedValue(undefined)
   })
 
@@ -185,6 +189,98 @@ describe('notebook-store', () => {
       await flush()
 
       expect(store.notes.map((n) => n.body)).toEqual(['twice failed'])
+    })
+  })
+
+  describe('editNote', () => {
+    it('rewrites the body optimistically and persists the trimmed text', async () => {
+      const store = await loadedStore([note('a', 'before')])
+
+      store.editNote('a', '  after  ')
+      await flush()
+
+      expect(store.notes[0]?.body).toBe('after')
+      expect(updateNoteMock).toHaveBeenCalledTimes(1)
+      expect(updateNoteMock.mock.calls[0]?.[0]).toBe('a')
+      expect(updateNoteMock.mock.calls[0]?.[1]).toBe('after')
+    })
+
+    it('stamps updatedAt while leaving createdAt alone', async () => {
+      const store = await loadedStore([note('a', 'before')])
+
+      store.editNote('a', 'after')
+      await flush()
+
+      expect(store.notes[0]?.createdAt).toBe('2026-03-04T09:00:00.000Z')
+      expect(store.notes[0]?.updatedAt).not.toBeNull()
+    })
+
+    // Editing must not reorder the feed — a note keeps the position it was written in.
+    it('does not move the note within the feed', async () => {
+      const store = await loadedStore([note('a'), note('b'), note('c')])
+
+      store.editNote('b', 'edited')
+      await flush()
+
+      expect(store.notes.map((n) => n.id)).toEqual(['a', 'b', 'c'])
+    })
+
+    // Clearing the field is not a delete: the trash glyph is the only way to remove a note,
+    // and silently destroying the text would not be recoverable.
+    it('ignores an emptied body rather than deleting the note', async () => {
+      const store = await loadedStore([note('a', 'keep me')])
+
+      store.editNote('a', '   ')
+      await flush()
+
+      expect(store.notes[0]?.body).toBe('keep me')
+      expect(updateNoteMock).not.toHaveBeenCalled()
+    })
+
+    it('skips the write when the body is unchanged', async () => {
+      const store = await loadedStore([note('a', 'same')])
+
+      store.editNote('a', 'same')
+      await flush()
+
+      expect(updateNoteMock).not.toHaveBeenCalled()
+    })
+
+    it('restores the previous body when the write fails', async () => {
+      const store = await loadedStore([note('a', 'before')])
+      updateNoteMock.mockRejectedValueOnce(new Error('offline'))
+
+      store.editNote('a', 'after')
+      await flush()
+
+      expect(store.notes[0]?.body).toBe('before')
+      expect(notifySyncErrorMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('refuses to edit before the first load', () => {
+      const store = useNotebookStore()
+
+      store.editNote('a', 'anything')
+
+      expect(updateNoteMock).not.toHaveBeenCalled()
+    })
+
+    // Same resurrection hazard as removeNote: a rejection landing after sign-out must not
+    // write the previous session's text back into a cleared feed.
+    it('does not restore the old body when the failure settles after resetLocal', async () => {
+      const store = await loadedStore([note('a', 'before')])
+      const failing = deferred<void>()
+      updateNoteMock.mockReturnValueOnce(failing.promise)
+
+      store.editNote('a', 'after')
+      await flush()
+      expect(updateNoteMock).toHaveBeenCalledTimes(1)
+
+      store.resetLocal()
+      failing.reject(new Error('offline'))
+      await flush()
+
+      expect(store.notes).toEqual([])
     })
   })
 

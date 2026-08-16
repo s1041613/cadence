@@ -21,13 +21,16 @@ export interface NoteRow {
   user_id: string
   body: string
   created_at: string
+  updated_at: string | null
 }
 
 export function rowToNote(row: NoteRow): Note {
   return {
     id: row.id,
     body: row.body,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    // Rows written before notes became editable have no column value at all.
+    updatedAt: row.updated_at ?? null
   }
 }
 
@@ -36,7 +39,8 @@ export function noteToRow(note: Note, ownerId: string): NoteRow {
     id: note.id,
     user_id: ownerId,
     body: note.body,
-    created_at: note.createdAt
+    created_at: note.createdAt,
+    updated_at: note.updatedAt
   }
 }
 
@@ -70,6 +74,18 @@ export async function insertNote(note: Note, ownerId: string): Promise<void> {
   const { error } = await requireSupabase()
     .from('notes')
     .upsert(noteToRow(note, ownerId), { ignoreDuplicates: true })
+    .abortSignal(timeoutSignal())
+  if (error) throw error
+}
+
+/** Edits one note's body. An update rather than an upsert: the row is known to exist, and
+ *  narrowing the write to the two columns that change means a stale snapshot can never
+ *  rewrite created_at or reassign user_id. */
+export async function updateNote(id: string, body: string, updatedAt: string): Promise<void> {
+  const { error } = await requireSupabase()
+    .from('notes')
+    .update({ body, updated_at: updatedAt })
+    .eq('id', id)
     .abortSignal(timeoutSignal())
   if (error) throw error
 }

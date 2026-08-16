@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Note } from '@/types/note'
-import { fetchNotes, insertNote, deleteNote } from '@/services/notes-service'
+import { fetchNotes, insertNote, updateNote, deleteNote } from '@/services/notes-service'
 import { notifySyncError } from '@/lib/notify'
 import { useAuthStore } from './auth-store'
 
-/** Plain-text notes shown on the Notebook page. Add and delete only — the card has no edit
- *  affordance, and the table has no UPDATE policy to back one. */
+/** Plain-text notes shown on the Notebook page. Add, edit and delete; every write is
+ *  optimistic and rolls back on failure. */
 export const useNotebookStore = defineStore('notebook', () => {
   // Newest-first: the feed renders in array order, and addNote prepends.
   const notes = ref<Note[]>([])
@@ -151,10 +151,47 @@ export const useNotebookStore = defineStore('notebook', () => {
     const snapshot: Note = {
       id: crypto.randomUUID(),
       body: text,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      // Never edited yet; the column is nullable for exactly this case.
+      updatedAt: null
     }
     notes.value.unshift(snapshot)
     persistInsert(snapshot)
+  }
+
+  /**
+   * Rewrites one note's body in place. Optimistic like the other actions: the card shows the
+   * new text immediately and reverts to the previous body if the write fails.
+   *
+   * createdAt is deliberately untouched, so editing never moves a note within the feed — the
+   * position a note was written in is the position it keeps.
+   */
+  function editNote(id: string, body: string): void {
+    const text = body.trim()
+    const idx = notes.value.findIndex((n) => n.id === id)
+    if (idx === -1) return
+    const previous = notes.value[idx]!
+
+    // An emptied note is a no-op, not a delete: the trash glyph is the way to remove one, and
+    // silently destroying text because the field was cleared is not recoverable.
+    if (text === '' || text === previous.body) return
+
+    if (!isLoaded.value || syncUserId === null) {
+      rejectUnsyncedWrite(() => editNote(id, body))
+      return
+    }
+    const version = generation
+    const updatedAt = new Date().toISOString()
+    const next: Note = { ...previous, body: text, updatedAt }
+    notes.value = notes.value.map((n) => (n.id === id ? next : n))
+
+    void enqueueWrite(id, () => updateNote(id, text, updatedAt)).catch(() => {
+      if (version !== generation) return
+      // Restore by id rather than by index: the feed may have shifted while the write was in
+      // flight, and only this note's body should revert.
+      notes.value = notes.value.map((n) => (n.id === id ? previous : n))
+      notifySyncError('更新失敗', () => editNote(id, body))
+    })
   }
 
   function removeNote(id: string): void {
@@ -187,6 +224,7 @@ export const useNotebookStore = defineStore('notebook', () => {
     loadFromRemote,
     resetLocal,
     addNote,
+    editNote,
     removeNote
   }
 })

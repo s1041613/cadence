@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchNotes, insertNote, deleteNote } from './notes-service'
+import { fetchNotes, insertNote, updateNote, deleteNote } from './notes-service'
 import type { Note } from '@/types/note'
 
 const requireSupabaseMock = vi.fn()
@@ -30,6 +30,10 @@ function makeBuilder(result: { data: unknown; error: unknown }): {
       calls.push(['insert', row])
       return builder
     }),
+    update: vi.fn((row: unknown) => {
+      calls.push(['update', row])
+      return builder
+    }),
     delete: vi.fn(() => {
       calls.push(['delete'])
       return builder
@@ -47,7 +51,12 @@ function makeBuilder(result: { data: unknown; error: unknown }): {
   return { builder, calls }
 }
 
-const NOTE: Note = { id: 'note-1', body: 'Kyoto — book the ryokan', createdAt: '2026-03-04T09:00:00.000Z' }
+const NOTE: Note = {
+  id: 'note-1',
+  body: 'Kyoto — book the ryokan',
+  createdAt: '2026-03-04T09:00:00.000Z',
+  updatedAt: null
+}
 
 describe('notes-service', () => {
   beforeEach(() => {
@@ -58,8 +67,14 @@ describe('notes-service', () => {
     it('reads this user rows newest-first and maps them to the domain shape', async () => {
       const { builder, calls } = makeBuilder({
         data: [
-          { id: 'note-1', user_id: 'user-1', body: 'first', created_at: '2026-03-04T09:00:00.000Z' },
-          { id: 'note-2', user_id: 'user-1', body: 'second', created_at: '2026-03-03T09:00:00.000Z' }
+          { id: 'note-1', user_id: 'user-1', body: 'first', created_at: '2026-03-04T09:00:00.000Z', updated_at: null },
+          {
+            id: 'note-2',
+            user_id: 'user-1',
+            body: 'second',
+            created_at: '2026-03-03T09:00:00.000Z',
+            updated_at: '2026-03-05T09:00:00.000Z'
+          }
         ],
         error: null
       })
@@ -67,8 +82,13 @@ describe('notes-service', () => {
       requireSupabaseMock.mockReturnValue(supabase)
 
       await expect(fetchNotes('user-1')).resolves.toEqual([
-        { id: 'note-1', body: 'first', createdAt: '2026-03-04T09:00:00.000Z' },
-        { id: 'note-2', body: 'second', createdAt: '2026-03-03T09:00:00.000Z' }
+        { id: 'note-1', body: 'first', createdAt: '2026-03-04T09:00:00.000Z', updatedAt: null },
+        {
+          id: 'note-2',
+          body: 'second',
+          createdAt: '2026-03-03T09:00:00.000Z',
+          updatedAt: '2026-03-05T09:00:00.000Z'
+        }
       ])
 
       expect(supabase.from).toHaveBeenCalledWith('notes')
@@ -118,7 +138,8 @@ describe('notes-service', () => {
             id: 'note-1',
             user_id: 'user-1',
             body: 'Kyoto — book the ryokan',
-            created_at: '2026-03-04T09:00:00.000Z'
+            created_at: '2026-03-04T09:00:00.000Z',
+            updated_at: null
           },
           { ignoreDuplicates: true }
         ]
@@ -131,6 +152,34 @@ describe('notes-service', () => {
       requireSupabaseMock.mockReturnValue({ from: vi.fn(() => builder) })
 
       await expect(insertNote(NOTE, 'user-1')).rejects.toBe(error)
+    })
+  })
+
+  describe('updateNote', () => {
+    // An update, not an upsert: the row is known to exist, and narrowing the write to the two
+    // columns that change means a stale snapshot can never rewrite created_at or reassign
+    // user_id to somebody else.
+    it('writes only the body and updated_at, scoped by id', async () => {
+      const { builder, calls } = makeBuilder({ data: null, error: null })
+      const supabase = { from: vi.fn(() => builder) }
+      requireSupabaseMock.mockReturnValue(supabase)
+
+      await updateNote('note-1', 'edited', '2026-03-06T10:00:00.000Z')
+
+      expect(supabase.from).toHaveBeenCalledWith('notes')
+      expect(builder.upsert).not.toHaveBeenCalled()
+      expect(calls).toEqual([
+        ['update', { body: 'edited', updated_at: '2026-03-06T10:00:00.000Z' }],
+        ['eq', 'id', 'note-1']
+      ])
+    })
+
+    it('rethrows the raw supabase error', async () => {
+      const error = { message: 'boom' }
+      const { builder } = makeBuilder({ data: null, error })
+      requireSupabaseMock.mockReturnValue({ from: vi.fn(() => builder) })
+
+      await expect(updateNote('note-1', 'edited', '2026-03-06T10:00:00.000Z')).rejects.toBe(error)
     })
   })
 
