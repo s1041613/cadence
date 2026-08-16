@@ -1,14 +1,20 @@
 <template>
   <!--
-    v2 設定頁殼。桌面把 393px 手機 frame 置中（同 MonthPageV2）。
-    目前只有 root 主選單 + Customization 子頁；其他子頁尚未實作。
-    pane 用本地狀態切換（root ↔ customization）；底部 nav 共用元件，setting active。
+    v2 settings shell. On desktop the 393px phone frame is centred (as in MonthPageV2).
+    Panes: root menu + Customization / Notifications, with Tab bar nested under
+    Customization. Switching is local state; the bottom nav is the shared component.
   -->
   <div class="sp2" :class="{ 'sp2--desktop': isDesktop }">
     <div class="sp2__frame">
       <div class="sp2__content">
         <Pv2SettingsRoot v-if="pane === 'root'" @open="pane = $event" />
-        <Pv2SettingsCustomization v-else-if="pane === 'customization'" @back="pane = 'root'" />
+        <Pv2SettingsCustomization
+          v-else-if="pane === 'customization'"
+          @back="pane = 'root'"
+          @open-tabs="pane = 'tabs'"
+        />
+        <!-- Tab bar is entered from Customization, so Back returns there, not to root -->
+        <Pv2SettingsTabBar v-else-if="pane === 'tabs'" @back="pane = 'customization'" />
         <Pv2SettingsNotifications v-else-if="pane === 'notifications'" @back="pane = 'root'" />
       </div>
       <Pv2BottomNav active="setting" />
@@ -22,12 +28,13 @@ import { useBreakpoint } from '@/composables/use-breakpoint'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2SettingsRoot from '@/components/v2/settings/Pv2SettingsRoot.vue'
 import Pv2SettingsCustomization from '@/components/v2/settings/Pv2SettingsCustomization.vue'
+import Pv2SettingsTabBar from '@/components/v2/settings/Pv2SettingsTabBar.vue'
 import Pv2SettingsNotifications from '@/components/v2/settings/Pv2SettingsNotifications.vue'
 
 const { isDesktop } = useBreakpoint()
 
-// root、customization、notifications；其餘子頁尚未實作
-const pane = ref<'root' | 'customization' | 'notifications'>('root')
+// root, customization, tabs, notifications; the remaining sub-pages are unimplemented
+const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
 </script>
 
 <style scoped>
