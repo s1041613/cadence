@@ -1,15 +1,15 @@
 <template>
   <!--
-    v2 共用底部 nav。month / week / draft / setting 皆可點（router push 到對應 v2 route）。
+    Shared v2 bottom nav. Which tabs show and in what order comes from
+    v2-tabs-store (configurable in Settings › Customization › Tab bar);
+    the column count follows.
   -->
-  <nav class="pv2-nav">
+  <nav class="pv2-nav" :style="{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }">
     <button
       v-for="n in items"
       :key="n.key"
       type="button"
       class="pv2-nav__item"
-      :class="{ 'pv2-nav__item--disabled': !n.enabled }"
-      :disabled="!n.enabled"
       @click="onTap(n)"
     >
       <span class="pv2-nav__glyph" :class="{ 'pv2-nav__glyph--on': n.key === active }">{{ n.glyph }}</span>
@@ -19,42 +19,59 @@
 </template>
 
 <script setup lang="ts">
+import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useV2TabsStore, type NavKey, type V2Tab } from '@/stores/v2-tabs-store'
 
-type NavKey = 'month' | 'week' | 'draft' | 'notes' | 'setting'
-
-defineProps<{
+const props = defineProps<{
   active: NavKey
 }>()
 
 const router = useRouter()
+const tabs = useV2TabsStore()
 
-// enabled 的項目才可點
-const items: Array<{ key: NavKey; glyph: string; label: string; enabled: boolean; to?: string }> = [
-  { key: 'month', glyph: 'm', label: 'month', enabled: true, to: '/v2/month' },
-  { key: 'week', glyph: 'w', label: 'week', enabled: true, to: '/v2/week' },
-  { key: 'draft', glyph: 'd', label: 'day', enabled: true, to: '/v2/day' },
-  { key: 'notes', glyph: 'n', label: 'notes', enabled: true, to: '/v2/notebook' },
-  { key: 'setting', glyph: 's', label: 'setting', enabled: true, to: '/v2/settings' }
-]
+const items = computed<V2Tab[]>(() => tabs.shownTabs)
 
-function onTap(n: { enabled: boolean; to?: string }): void {
-  if (!n.enabled || !n.to) return
-  void router.push(n.to)
+function onTap(tab: V2Tab): void {
+  void router.push(tab.to)
 }
+
+// If the current page isn't on the nav (the user hid it, or reached a hidden page
+// straight from a URL), send them to the first tab — otherwise they sit on a screen
+// where no cell is lit, which reads as broken.
+//
+// This lives here rather than in the Tab bar pane's commit: /v2/settings is a single
+// route and the settings sub-pages are local pane switches, so at commit time
+// route.path is always /v2/settings and the matching key is always 'setting' — which
+// is mandatory and can never be hidden, making that condition a constant false.
+//
+// replace, not push: this is a corrective redirect, so the un-landable page must not
+// stay on the history stack. With push, Back returns to the hidden page and the
+// watcher bounces the user forward again — a trap.
+watch(
+  () => [props.active, items.value] as const,
+  ([active, shown]) => {
+    if (!shown.length) return
+    if (shown.some((t) => t.key === active)) return
+    const first = shown[0]
+    if (first) void router.replace(first.to)
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
 .pv2-nav {
   flex: none;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  /* 底部 30px：為 home indicator 讓開，避免導覽文字被系統橫條壓到。
-     改這裡的 padding 就要同步改 --pv2-nav-h（見 cadence-tokens.css），
-     否則各檢視的 FAB 會壓到 nav。 */
-  /* Five columns leave each cell ~71px, down from ~89px at four. Trimming the horizontal
-     padding buys that space back; the label font size stays put. */
-  padding: 12px 10px 30px;
+  /* Column count is bound in the template (it follows v2-tabs-store), not fixed here */
+  /* 30px at the bottom clears the home indicator so the labels aren't covered by the
+     system bar. Changing this padding means changing --pv2-nav-h too (see
+     cadence-tokens.css), or the FABs in each view will overlap the nav. */
+  /* Four columns is now the hard ceiling (MAX_SHOWN_TABS), leaving ~89px per cell at
+     393px — roomier than the old five-column case, so the horizontal padding that was
+     trimmed for five can go back. */
+  padding: 12px 18px 30px;
   border-top: 1px solid #e2e2e2;
   background: #fff;
 }
@@ -68,10 +85,6 @@ function onTap(n: { enabled: boolean; to?: string }): void {
   border: none;
   background: none;
   cursor: pointer;
-}
-
-.pv2-nav__item--disabled {
-  cursor: default;
 }
 
 .pv2-nav__glyph {

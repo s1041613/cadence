@@ -200,9 +200,12 @@
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
   /* ---------- v2 layout ---------- */
-  /* Pv2BottomNav 的實際高度：12 上 + 30 圖示 + 6 間距 + 11 標籤 + 30 下 + 1 邊框。
-     各檢視的 FAB 用它算離底距離；改 Pv2BottomNav 的 padding 要同步改這裡，
-     否則 FAB 會壓到 nav（FAB 那側不會有任何錯誤提示）。 */
+  /* Pv2BottomNav's real height: 12 top + 30 glyph + 6 gap + 11 label + 30 bottom + 1
+     border. Each view's FAB uses it to clear the nav; changing Pv2BottomNav's padding
+     means changing this too, or the FAB overlaps the nav (with no error on that side).
+     This height is independent of the configurable tab count: the count only affects
+     the column count (horizontal), and each cell is a fixed-height column — so adding
+     or removing tabs in the Tab bar settings never requires touching this value. */
   --pv2-nav-h: 90px;
 
   /* ---------- Radius ---------- */

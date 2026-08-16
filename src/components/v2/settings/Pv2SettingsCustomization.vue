@@ -33,7 +33,7 @@
         <p class="pv2-cust__caption">Drop or tap the preview to replace · hover it to reframe</p>
       </div>
 
-      <!-- 顯示強度：連續滑桿，拖曳時預覽即時跟著變濛 -->
+      <!-- Display intensity: a continuous slider; the preview above fades as it moves -->
       <p class="pv2-cust__group-label">Display Intensity</p>
       <div class="pv2-cust__card">
         <div class="pv2-cust__slider-row">
@@ -53,6 +53,25 @@
           Higher intensity fades the photo behind a lighter veil, keeping dates and events easy to read.
         </p>
       </div>
+
+      <!-- Navigation: opens the Tab bar sub-page for configuring the bottom tabs.
+           Sits last because it navigates away, while the sections above edit in place. -->
+      <p class="pv2-cust__group-label">Navigation</p>
+      <div class="pv2-cust__card pv2-cust__card--rows">
+        <button type="button" class="pv2-cust__row" @click="emit('openTabs')">
+          <span class="pv2-cust__row-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2.5" y="7" width="19" height="10" rx="3" />
+              <path d="M8.5 7 V17 M15.5 7 V17" />
+            </svg>
+          </span>
+          <span class="pv2-cust__row-text">
+            <span class="pv2-cust__row-label">Tab bar</span>
+            <span class="pv2-cust__row-sub">{{ tabSummary }}</span>
+          </span>
+          <span class="pv2-cust__chev" aria-hidden="true">›</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -61,10 +80,16 @@
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
+import { useV2TabsStore } from '@/stores/v2-tabs-store'
 
 const emit = defineEmits<{
   back: []
+  openTabs: []
 }>()
+
+// The summary shows the committed tab order, not the Tab bar pane's in-progress draft
+const tabsStore = useV2TabsStore()
+const tabSummary = computed(() => tabsStore.shownTabs.map((t) => t.title).join(' · '))
 
 // 接 v2 外觀 store（月曆頁讀同一份，即時反映）
 const appearance = useV2AppearanceStore()
@@ -161,6 +186,62 @@ function onFileChange(e: Event): void {
   border-radius: 16px;
   background: #fff;
   padding: 16px;
+}
+
+/* This card's rows are tappable edge to edge, so the card itself carries no padding */
+.pv2-cust__card--rows {
+  padding: 0;
+  overflow: hidden;
+}
+
+.pv2-cust__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pv2-cust__row-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+}
+
+.pv2-cust__row-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pv2-cust__row-label {
+  display: block;
+  font: 600 13px var(--cd-font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #1b1b1b;
+}
+
+.pv2-cust__row-sub {
+  display: block;
+  margin-top: 3px;
+  font: 400 11px var(--cd-font-mono);
+  color: #9c9c9c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pv2-cust__chev {
+  flex: none;
+  font-size: 18px;
+  line-height: 1;
+  color: #c4c4c4;
 }
 
 /* 背景圖預覽：固定 190px 高，照設計稿 */
