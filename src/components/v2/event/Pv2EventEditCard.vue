@@ -71,6 +71,7 @@
               type="button"
               class="pv2-edit-card__matrix-cell"
               :class="{ 'pv2-edit-card__matrix-cell--selected': quad === q.k }"
+              :style="quad === q.k ? { background: quadColor(q.k), borderColor: quadColor(q.k) } : undefined"
               @click="emit('update:quad', q.k)"
             >
               <span>{{ q.l }}</span>
@@ -224,6 +225,7 @@ import { eventColorNameOf } from '@/components/v2/ui/event-colors'
 import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
 import { buildTitleSuggestions, type TitleSuggestion } from '@/utils/title-suggestions'
 import { useImeSafeEnter } from '@/composables/use-ime-safe-enter'
+import { QUADRANTS } from '@/composables/use-theme'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
@@ -517,10 +519,13 @@ const pomodoroCount = computed(() =>
   estPomsOf({ estimatedPomodoros: props.estimatedPomodoros ?? 0, allDay: false, start: props.start, end: props.end })
 )
 
-// No per-quadrant colour here: selection is signalled by the shared v2 filled-ink
-// treatment (see .pv2-edit-card__matrix-cell--selected), matching Pv2Chip's "on" state
-// and Pv2MonthSheet's done button. The quadrant hues in use-theme.ts stay the authority
-// for how a task renders in the month/week/day views — this picker only records a choice.
+// The selected cell fills with its own quadrant hue rather than the shared v2 ink, so the
+// picker previews the colour the task will carry in the month/week/day views — the same
+// treatment CdEventEditCard uses. Colours come from QUADRANTS (the authority) instead of a
+// local copy, so a palette change reaches this card too. Unselected cells stay neutral.
+const quadColor = (k: string): string =>
+  QUADRANTS.find((q) => q.key === k)?.backgroundColor ?? '#9A988F'
+
 const matrixOptions = [
   { k: 'do' as const, l: 'Do Now', s: 'Right away' },
   { k: 'plan' as const, l: 'Plan', s: 'Schedule it' },
@@ -852,18 +857,17 @@ const matrixOptions = [
   font: 400 11px var(--cd-font-ui);
 }
 
-/* Selection = filled ink, the same "on" treatment as Pv2Chip and Pv2MonthSheet's done
-   button, so the chosen quadrant is the most prominent cell rather than the palest.
-   The subtitle lifts to #d7d7d5 (not the base --pv2-ink-2, which would be unreadable on
-   ink) to keep it secondary to the title while clearing WCAG AA. */
+/* Selection = the quadrant's own hue, filled. Background and border come from the inline
+   style in the template (see quadColor); only the type colours live here, since they are
+   the same on all four hues. The subtitle sits at .82 alpha so it stays secondary to the
+   title. On the paler hues (quick, later) white type lands under WCAG AA — an accepted
+   trade for matching CdEventEditCard's treatment; darken the hues, not this rule, to fix. */
 .pv2-edit-card__matrix-cell--selected {
-  background: var(--pv2-ink);
-  border-color: var(--pv2-ink);
-  color: var(--pv2-paper);
+  color: #fff;
 }
 
 .pv2-edit-card__matrix-cell--selected small {
-  color: #d7d7d5;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .pv2-edit-card__time-controls {
