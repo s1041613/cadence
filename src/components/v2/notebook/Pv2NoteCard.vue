@@ -1,48 +1,84 @@
 <template>
   <!--
-    One note. The card itself is not clickable — there is no edit affordance, so it must not
-    suggest one with cursor:pointer.
+    One note. The body is edit-in-place: clicking it swaps the text for a textarea, and
+    blurring or pressing Escape commits. There is no explicit save button — the note is the
+    only content on the card, so leaving the field is an unambiguous "done".
   -->
   <article class="nbk">
-    <div class="nbk__head">
-      <span class="nbk__when">{{ label }}</span>
-      <button class="nbk__delete" type="button" aria-label="Delete note" @click="emit('delete')">
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#c4c4c4"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M4 7 H20" />
-          <path d="M9 7 V5 a1.5 1.5 0 0 1 1.5 -1.5 H13.5 A1.5 1.5 0 0 1 15 5 V7" />
-          <path d="M6.5 7 L7.5 20 a1.5 1.5 0 0 0 1.5 1.4 H15 a1.5 1.5 0 0 0 1.5 -1.4 L17.5 7" />
-        </svg>
-      </button>
-    </div>
-    <p class="nbk__body">{{ note.body }}</p>
+    <button class="nbk__delete" type="button" aria-label="Delete note" @click="emit('delete')">
+      <svg
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#c4c4c4"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M4 7 H20" />
+        <path d="M9 7 V5 a1.5 1.5 0 0 1 1.5 -1.5 H13.5 A1.5 1.5 0 0 1 15 5 V7" />
+        <path d="M6.5 7 L7.5 20 a1.5 1.5 0 0 0 1.5 1.4 H15 a1.5 1.5 0 0 0 1.5 -1.4 L17.5 7" />
+      </svg>
+    </button>
+
+    <textarea
+      v-if="isEditing"
+      ref="field"
+      v-model="buffer"
+      class="nbk__body nbk__body--editing"
+      rows="1"
+      aria-label="Edit note"
+      @blur="commit"
+      @keydown.esc.prevent="commit"
+      @input="autoGrow"
+    />
+    <p v-else class="nbk__body" @click="startEditing">{{ note.body }}</p>
   </article>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { nextTick, ref, useTemplateRef } from 'vue'
 import type { Note } from '@/types/note'
-import { relativeDayLabel } from '@/utils/relative-day'
 
-const props = defineProps<{
-  note: Note
-  /** Shared ticking clock (see NotebookViewV2). A per-card new Date() would let labels in a
-   *  single render disagree with each other. */
-  now: Date
+const props = defineProps<{ note: Note }>()
+
+const emit = defineEmits<{
+  delete: []
+  edit: [body: string]
 }>()
 
-const emit = defineEmits<{ delete: [] }>()
+const isEditing = ref(false)
+const buffer = ref('')
+const field = useTemplateRef<HTMLTextAreaElement>('field')
 
-const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
+async function startEditing(): Promise<void> {
+  buffer.value = props.note.body
+  isEditing.value = true
+  // Wait for the textarea to exist before focusing it, and size it to the text it already
+  // holds so entering edit mode doesn't collapse a multi-line note to one row.
+  await nextTick()
+  field.value?.focus()
+  autoGrow()
+}
+
+/** Grows the textarea to fit its content. Reset to auto first, or the height only ever
+ *  ratchets upward as text is deleted. */
+function autoGrow(): void {
+  const el = field.value
+  if (!el) return
+  el.style.height = 'auto'
+  el.style.height = `${el.scrollHeight}px`
+}
+
+function commit(): void {
+  if (!isEditing.value) return
+  isEditing.value = false
+  // The store ignores an unchanged or emptied body; emitting unconditionally keeps that
+  // single rule in one place rather than duplicating it here.
+  emit('edit', buffer.value)
+}
 </script>
 
 <style scoped>
@@ -58,21 +94,12 @@ const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.nbk__head {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 9px;
-}
-
-.nbk__when {
-  flex: 1;
-  font: 500 10px var(--cd-font-mono);
-  color: #b2b2b2;
-}
-
+/* Floated out of the text flow rather than sitting in a header row: with the timestamp gone
+   there is no second element to lay out against, and the body should start at the top. */
 .nbk__delete {
-  flex: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -84,6 +111,8 @@ const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
 
 .nbk__body {
   margin: 0;
+  /* Keeps the text clear of the delete glyph in the corner. */
+  padding-right: 22px;
   font: 400 15px var(--cd-font-mono);
   line-height: 1.4;
   color: #1b1b1b;
@@ -91,5 +120,18 @@ const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
      one line, and without overflow-wrap a long URL bursts the card's bounds. */
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  cursor: text;
+}
+
+/* Matches the paragraph exactly, so entering edit mode does not shift the text by a pixel. */
+.nbk__body--editing {
+  display: block;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
 }
 </style>
