@@ -178,7 +178,7 @@ function onCreate(): void {
 
 .wv2__header {
   flex: none;
-  padding-top: 8px;
+  padding-top: 15px;
   margin-bottom: 4px;
 }
 
