@@ -4,7 +4,9 @@
     事件列＝時間 + 象限直條 + 標題 + 象限標籤。空日顯示 nothing planned。
   -->
   <div class="pv2-ds-scrim" @click="emit('close')">
-    <div class="pv2-ds" @click.stop>
+    <!-- Horizontal swipe walks the day (left = next, matching the month grid and iOS Calendar);
+         the vertical axis stays with the list's own scroll via touch-action: pan-y. -->
+    <div class="pv2-ds" @click.stop v-touch-swipe.horizontal.mouse="onSwipeHorizontal">
       <!-- Swipe-to-dismiss is bound to the handle zone only: the list below owns its own
            overflow-y scroll, and a sheet-wide gesture would swallow it. -->
       <div class="pv2-ds__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
@@ -23,29 +25,43 @@
         </button>
       </div>
 
-      <div class="pv2-ds__list">
-        <template v-if="events.length">
-          <button
-            v-for="ev in events"
-            :key="ev.id"
-            type="button"
-            class="pv2-ds__row"
-            @click="(e) => emit('eventClick', ev, e)"
-          >
-            <span class="pv2-ds__time">{{ ev.timeLabel }}</span>
-            <span class="pv2-ds__bar" :style="{ background: ev.quadColor }" />
-            <span class="pv2-ds__row-text">
-              <span class="pv2-ds__title">{{ ev.title }}</span>
-            </span>
-          </button>
-        </template>
-        <span v-else class="pv2-ds__empty">nothing planned</span>
+      <!-- Re-keying the pane on the date is what drives the slide, the same way the month
+           grid re-keys on its month (pv2-slide-* / .pv2-slide-viewport live in app.css). -->
+      <div class="pv2-ds__list pv2-slide-viewport">
+        <Transition :name="transitionName">
+          <div :key="dateLabel" class="pv2-ds__pane">
+            <template v-if="events.length">
+              <button
+                v-for="ev in events"
+                :key="ev.id"
+                type="button"
+                class="pv2-ds__row"
+                @click="(e) => emit('eventClick', ev, e)"
+              >
+                <span class="pv2-ds__time">{{ ev.timeLabel }}</span>
+                <span class="pv2-ds__bar" :style="{ background: ev.quadColor }" />
+                <span class="pv2-ds__row-text">
+                  <span class="pv2-ds__title">{{ ev.title }}</span>
+                </span>
+              </button>
+            </template>
+            <span v-else class="pv2-ds__empty">nothing planned</span>
+          </div>
+        </Transition>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue'
+import {
+  resolveSlideDirection,
+  resolveSwipeStep,
+  type SlideDirection,
+  type SwipeDetails
+} from '@/composables/use-date-swipe'
+
 export interface Pv2DayEvent {
   id: string
   title: string
@@ -64,10 +80,26 @@ const emit = defineEmits<{
   close: []
   create: []
   eventClick: [event: Pv2DayEvent, mouseEvent: MouseEvent]
+  // ±1 day. The sheet owns the gesture; the view owns what a day step means to the rest
+  // of the screen (whether the grid behind has to follow into another month).
+  step: [delta: number]
 }>()
 
 function onSwipeDown(): void {
   emit('close')
+}
+
+// Direction of the last step, so the pane slides the way the user moved through time.
+// `false` for `blocked`: this sheet is the topmost surface whenever it is mounted — the
+// overlays the composable guards against (preview, composer, quick add) all close it first.
+const direction = ref<SlideDirection>('next')
+const transitionName = computed(() => `pv2-slide-${direction.value}`)
+
+function onSwipeHorizontal(details: SwipeDetails): void {
+  const delta = resolveSwipeStep(details, false)
+  if (delta === 0) return
+  direction.value = resolveSlideDirection(delta, direction.value)
+  emit('step', delta)
 }
 </script>
 
@@ -106,6 +138,9 @@ function onSwipeDown(): void {
   border-radius: 24px 24px 0 0;
   padding: 14px 24px 30px;
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
+  /* The horizontal day-swipe lives here; pan-y leaves the vertical axis to the list's
+     own scroll (and to the handle zone's swipe-to-dismiss, which opts out with none). */
+  touch-action: pan-y;
 }
 
 /* Zone is taller than the 5px pill so the swipe target is actually hittable; the pill's former
@@ -168,14 +203,15 @@ function onSwipeDown(): void {
   cursor: pointer;
 }
 
-.pv2-ds__list {
-  flex: 1;
-  min-height: 0;
+/* .pv2-slide-viewport (app.css) supplies flex/min-height/overflow-hidden and absolutely
+   positions the pane, so the outgoing day can slide out without widening the sheet. The
+   scroll therefore belongs to the pane, not to this clipping box. */
+.pv2-ds__pane {
   overflow-y: auto;
   scrollbar-width: none;
 }
 
-.pv2-ds__list::-webkit-scrollbar {
+.pv2-ds__pane::-webkit-scrollbar {
   display: none;
 }
 

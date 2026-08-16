@@ -64,6 +64,7 @@
           @close="daySheetDate = null"
           @create="onDaySheetCreate"
           @event-click="onDaySheetEventClick"
+          @step="onDaySheetStep"
         />
       </Transition>
     </Teleport>
@@ -88,7 +89,7 @@ import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
-import { useDateSwipe } from '@/composables/use-date-swipe'
+import { resolveDaySheetStep, useDateSwipe } from '@/composables/use-date-swipe'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -175,6 +176,18 @@ function onDaySheetCreate(): void {
   if (daySheetDate.value) ui.selectedDate = daySheetDate.value
   daySheetDate.value = null
   ui.createOpen = true
+}
+
+// 面板左右滑：換日（左＝下一天）。跨月時才把底下的 grid 一起帶過去，
+// 同月內換日 grid 不動，避免每滑一天就重繪並重播一次月份滑動動畫。
+function onDaySheetStep(delta: number): void {
+  if (!daySheetDate.value) return
+  const next = resolveDaySheetStep(daySheetDate.value, delta, year.value, month.value)
+  daySheetDate.value = next.date
+  if (next.viewChanged) {
+    setDirection(delta)
+    ui.selectedDate = next.date
+  }
 }
 
 function onDaySheetEventClick(event: Pv2DayEvent, e: MouseEvent): void {

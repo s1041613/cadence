@@ -1,5 +1,6 @@
 import { computed, onBeforeUnmount, onMounted, ref, type ComputedRef, type Ref } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
+import { addDays, iso, parseISO } from '@/utils/convert-date-time'
 
 // Payload shape of Quasar's v-touch-swipe handler (quasar/src/directives/touch-swipe).
 // Quasar's own TouchSwipeValue types these fields as optional, so the runtime shape is
@@ -72,6 +73,31 @@ export type SlideDirection = 'next' | 'prev'
 export function resolveSlideDirection(delta: number, current: SlideDirection): SlideDirection {
   if (delta === 0) return current
   return delta > 0 ? 'next' : 'prev'
+}
+
+export interface DaySheetStep {
+  // The day the sheet moves to.
+  date: string
+  // Whether the month behind the sheet has to follow. The grid is driven by
+  // ui.selectedDate, so re-anchoring it on every day step would re-render (and re-slide)
+  // it for a move it does not show; only a step that lands in another month does.
+  viewChanged: boolean
+}
+
+// A day step taken from inside the month view's day sheet: the sheet walks ±1 day while the
+// grid behind it stays put until the day crosses into a neighbouring month. Pure so the
+// boundary case — Aug 31 → Sep 1, Jan 1 → Dec 31 — is testable without mounting the view.
+export function resolveDaySheetStep(
+  date: string,
+  delta: number,
+  viewYear: number,
+  viewMonth: number
+): DaySheetStep {
+  const next = addDays(parseISO(date), delta)
+  return {
+    date: iso(next),
+    viewChanged: next.getFullYear() !== viewYear || next.getMonth() !== viewMonth
+  }
 }
 
 export interface DateSwipeOptions {

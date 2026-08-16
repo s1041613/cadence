@@ -3,6 +3,7 @@ import {
   resolveSwipeStep,
   resolveKeyStep,
   resolveSlideDirection,
+  resolveDaySheetStep,
   type SwipeDetails,
   type KeyIntent
 } from './use-date-swipe'
@@ -111,5 +112,55 @@ describe('resolveKeyStep', () => {
     // also move the calendar.
     expect(resolveKeyStep(key('ArrowLeft', { fromEditable: true }), false)).toBe(0)
     expect(resolveKeyStep(key('ArrowRight', { fromEditable: true }), false)).toBe(0)
+  })
+})
+
+describe('resolveDaySheetStep', () => {
+  it('walks one day forward and back', () => {
+    expect(resolveDaySheetStep('2026-08-13', 1, 2026, 7).date).toBe('2026-08-14')
+    expect(resolveDaySheetStep('2026-08-13', -1, 2026, 7).date).toBe('2026-08-12')
+  })
+
+  it('leaves the grid alone while the step stays inside the shown month', () => {
+    // The grid renders the whole month either way, so re-anchoring ui.selectedDate on every
+    // day step would only re-key the grid and replay its slide for a move it does not show.
+    expect(resolveDaySheetStep('2026-08-13', 1, 2026, 7).viewChanged).toBe(false)
+    expect(resolveDaySheetStep('2026-08-01', 1, 2026, 7).viewChanged).toBe(false)
+  })
+
+  it('takes the grid along when the day crosses into the next month', () => {
+    const result = resolveDaySheetStep('2026-08-31', 1, 2026, 7)
+    expect(result.date).toBe('2026-09-01')
+    expect(result.viewChanged).toBe(true)
+  })
+
+  it('takes the grid along when the day crosses back into the previous month', () => {
+    const result = resolveDaySheetStep('2026-08-01', -1, 2026, 7)
+    expect(result.date).toBe('2026-07-31')
+    expect(result.viewChanged).toBe(true)
+  })
+
+  it('carries the year across the Dec/Jan boundary', () => {
+    expect(resolveDaySheetStep('2026-12-31', 1, 2026, 11)).toEqual({
+      date: '2027-01-01',
+      viewChanged: true
+    })
+    expect(resolveDaySheetStep('2026-01-01', -1, 2026, 0)).toEqual({
+      date: '2025-12-31',
+      viewChanged: true
+    })
+  })
+
+  it('notices a same-numbered month a year away', () => {
+    // Comparing the month index alone would call this an in-month step and strand the grid
+    // a year behind the sheet.
+    expect(resolveDaySheetStep('2026-08-13', 365, 2026, 7).viewChanged).toBe(true)
+  })
+
+  it('crosses a DST boundary without landing on the same day twice', () => {
+    // addDays is calendar arithmetic (setDate), not +86400000, so a spring-forward day
+    // still advances exactly one date.
+    expect(resolveDaySheetStep('2026-03-08', -1, 2026, 2).date).toBe('2026-03-07')
+    expect(resolveDaySheetStep('2026-03-07', 1, 2026, 2).date).toBe('2026-03-08')
   })
 })
