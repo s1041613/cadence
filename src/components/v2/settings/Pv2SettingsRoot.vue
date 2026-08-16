@@ -117,10 +117,12 @@ const prefRows: PrefRow[] = [
   background: transparent;
 }
 
+/* Horizontal padding is 22, not 24, so the title starts on the same column as the rows
+   below it — .pv2-set__scroll has always been 22, and the sub-panes match. */
 .pv2-set__title {
   flex: none;
   margin: 0;
-  padding: 16px 24px 16px;
+  padding: 16px 22px 16px;
   font: 400 30px var(--cd-font-serif);
   line-height: 1;
   color: #1b1b1b;

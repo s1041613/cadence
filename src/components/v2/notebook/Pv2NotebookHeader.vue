@@ -11,9 +11,14 @@
 <script setup lang="ts"></script>
 
 <style scoped>
+/* padding-top is 17 rather than 14 so the title's *visual* top lands 20px below the frame,
+   matching Day, Week and Settings. The face is JetBrains Mono (every --cd-font-* token
+   aliases to it), whose normal line-height is 1.32em, so a line-height under that pulls the
+   glyphs above their line box: capTop = paddingTop + fontSize × (lineHeight/2 − 0.37).
+   Horizontal padding drops 26 → 22 to sit on the same column as the composer and the feed. */
 .nbh {
   flex: none;
-  padding: 14px 26px;
+  padding: 17px 22px 14px;
 }
 
 .nbh__title {

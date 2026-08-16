@@ -118,9 +118,14 @@ function onCreate(): void {
   margin-top: 18px;
 }
 
+/* 6 (body) + 9 lands the day numeral's visual top 20px below the frame, level with Week,
+   Notebook and Settings. Unlike the other three this one is not pure line-box arithmetic: the
+   numeral is bottom-aligned in .pv2-dh__row (align-items: flex-end) against the taller
+   DOW/month-year column, which pushes it a further ~3.6px down. That offset was measured in the
+   browser, so re-check it if the meta column's size or spacing changes. */
 .dv2__header {
   flex: none;
-  padding-top: 8px;
+  padding-top: 9px;
 }
 
 .dv2__goal {
