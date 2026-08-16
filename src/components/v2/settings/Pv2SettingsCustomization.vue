@@ -108,12 +108,14 @@ function onFileChange(e: Event): void {
   background: transparent;
 }
 
+/* Same 22px column as Pv2SettingsRoot's title, so the header does not shift sideways when
+   the pane switches. */
 .pv2-cust__head {
   flex: none;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 24px 16px;
+  padding: 16px 22px 16px;
   border-bottom: 1px solid #e2e2e2;
 }
 

@@ -170,10 +170,15 @@ function onCreate(): void {
   touch-action: pan-y;
 }
 
+/* 6 (body) + 9 puts "Week N"'s visual top 20px below the frame, level with Day, Notebook and
+   Settings. It is not the same number as theirs because the four titles run at different sizes
+   and line-heights over the same face: capTop = paddingTop + fontSize × (lineHeight/2 − 0.37).
+   margin-bottom absorbs the 6px the padding gave up — .wv2__days splits the remaining height
+   into seven equal rows, so moving the viewport's start would resize every row. */
 .wv2__header {
   flex: none;
-  padding-top: 15px;
-  margin-bottom: 4px;
+  padding-top: 9px;
+  margin-bottom: 10px;
 }
 
 /* Seven equal rows fill the screen and the page itself never scrolls. Once the height is
