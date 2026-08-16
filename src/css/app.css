@@ -37,7 +37,7 @@ body,
   min-width: 0;
   height: 100%;
   margin: 0;
-  background: #fafaf9;
+  background: var(--cd-surface-canvas);
 }
 
 body {
@@ -84,7 +84,11 @@ a,
   -webkit-touch-callout: none;
 }
 
-/* Kept in sync with src/css/quasar.variables.sass — quadrant colors excluded (JS single source in use-theme.ts) */
+/* Kept in sync with src/css/quasar.variables.sass — quadrant colors excluded (JS single source in use-theme.ts)
+ *
+ * These stay literal even where a --cd-* token now holds the same value (--color-bg vs
+ * --cd-surface-canvas): Tailwind resolves @theme at build time and cannot read a runtime
+ * custom property. Referencing one here would produce utilities with no colour at all. */
 @theme {
   --color-bg: #fafaf9;
   --color-bar: #F2F1EC;

@@ -44,6 +44,9 @@ const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
   overflow: hidden;
 }
 
+/* No Pv2PageBackdrop here on purpose: Settings is a tool page, and the bare canvas is
+   the rule, not an omission. The wallpaper belongs to the content pages (Month / Day /
+   Week / Notes) — see the comment on Pv2PageBackdrop. */
 .sp2__frame {
   position: relative;
   width: 100%;
@@ -51,7 +54,7 @@ const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fafaf9;
+  background: var(--cd-surface-canvas);
 }
 
 .sp2__content {

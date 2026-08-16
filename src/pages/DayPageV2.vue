@@ -1,21 +1,11 @@
 <template>
   <!--
-    v2 日檢視頁殼。結構同 WeekPageV2：背景圖 + 白紗遮罩（共用 v2-appearance-store）、
+    v2 日檢視頁殼。結構同 WeekPageV2：共用桌布層（Pv2PageBackdrop）、
     data-poster-root（overlay 定位）、桌面手機 frame 置中。
   -->
   <div class="dp2" :class="{ 'dp2--desktop': isDesktop }">
     <div class="dp2__frame" data-poster-root>
-      <img
-        v-if="appearance.backgroundImage"
-        :src="appearance.backgroundImage"
-        alt=""
-        class="dp2__bg"
-      />
-      <div
-        v-if="appearance.backgroundImage"
-        class="dp2__scrim"
-        :style="{ opacity: appearance.scrimOpacity }"
-      />
+      <Pv2PageBackdrop />
 
       <div v-if="tasksStore.isLoading" class="dp2__loading">載入中…</div>
       <DayViewV2 v-else />
@@ -33,7 +23,7 @@ import { onBeforeUnmount } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
-import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
+import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 import DayViewV2 from '@/components/v2/day/DayViewV2.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopoverV2 from '@/components/v2/event/EventPreviewPopoverV2.vue'
@@ -41,7 +31,6 @@ import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
-const appearance = useV2AppearanceStore()
 const { isDesktop } = useBreakpoint()
 
 onBeforeUnmount(() => {
@@ -62,55 +51,18 @@ onBeforeUnmount(() => {
 }
 
 .dp2__frame {
-  /* --dp2-safe-top 供背景層抵銷 padding 用（見 __bg / __scrim 的負 top）。
+  /* --pv2-safe-top 供 Pv2PageBackdrop 抵銷 padding 用（見該元件的負 top）。
      手機是 0：safe-area 策略待重新設計，這裡不再自行讓位。桌面 device frame 另有覆寫。 */
-  --dp2-safe-top: 0px;
+  --pv2-safe-top: 0px;
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #fafaf9;
+  background: var(--cd-surface-canvas);
   isolation: isolate;
-  padding-top: var(--dp2-safe-top);
-}
-
-/* 背景層錨定 padding-box 內緣，用負 top 抵回 padding-top 讓圖鋪到 frame 頂，
-   否則頂部 safe-area 會露出底色（白帶）。 */
-.dp2__bg {
-  position: absolute;
-  top: calc(-1 * var(--dp2-safe-top));
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  width: 100%;
-  /* An <img> with only top/bottom insets falls back to its intrinsic (auto) height
-     because width:100% is set, so it must get an explicit height to fill the frame
-     plus the negated safe-area — otherwise object-fit:cover has nothing to cover and
-     the picture stops partway down. */
-  height: calc(100% + var(--dp2-safe-top));
-  object-fit: cover;
-  pointer-events: none;
-}
-
-.dp2__scrim {
-  position: absolute;
-  top: calc(-1 * var(--dp2-safe-top));
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  background: #fafaf9;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dp2__scrim {
-    transition: none;
-  }
+  padding-top: var(--pv2-safe-top);
 }
 
 .dp2--desktop {
@@ -129,8 +81,8 @@ onBeforeUnmount(() => {
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
   isolation: isolate;
-  --dp2-safe-top: 44px;
-  padding-top: var(--dp2-safe-top);
+  --pv2-safe-top: 44px;
+  padding-top: var(--pv2-safe-top);
 }
 
 .dp2__loading {

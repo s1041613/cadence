@@ -33,6 +33,14 @@
    * ========================================================================== */
 
   /* ---------- Surfaces ---------- */
+  /* --cd-surface-canvas is NOT a lighter --cd-surface-page. The two are different
+   * generations' page bases and they are not interchangeable: --cd-surface-page is
+   * what the legacy layout's text contrast was measured against, --cd-surface-canvas
+   * is what the v2 page shells paint and what the backdrop's scrim fades towards.
+   * They will reconcile when one generation retires; until then, replacing either
+   * with the other moves measured contrast, so pick by which shell you are in.
+   * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
+  --cd-surface-canvas: #fafaf9;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
