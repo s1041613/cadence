@@ -13,6 +13,7 @@
         v-for="note in store.notes"
         :key="note.id"
         :note="note"
+        :now="now"
         @edit="store.editNote(note.id, $event)"
         @delete="store.removeNote(note.id)"
       />
@@ -22,11 +23,16 @@
 
 <script setup lang="ts">
 import { useNotebookStore } from '@/stores/notebook-store'
+import { useCurrentTime } from '@/composables/use-current-time'
 import Pv2NotebookHeader from './Pv2NotebookHeader.vue'
 import Pv2NoteComposer from './Pv2NoteComposer.vue'
 import Pv2NoteCard from './Pv2NoteCard.vue'
 
 const store = useNotebookStore()
+
+// Shared module-level ticking singleton, so Today/Yesterday roll over at midnight on their
+// own. A local ref(new Date()) would be static and freeze every label at first render.
+const now = useCurrentTime()
 
 function onSubmit(): void {
   // The store silently refuses an empty draft (pressing + on an empty pill is not an error);

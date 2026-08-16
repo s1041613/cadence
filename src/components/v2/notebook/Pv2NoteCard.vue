@@ -5,23 +5,26 @@
     only content on the card, so leaving the field is an unambiguous "done".
   -->
   <article class="nbk">
-    <button class="nbk__delete" type="button" aria-label="Delete note" @click="emit('delete')">
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#c4c4c4"
-        stroke-width="1.8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M4 7 H20" />
-        <path d="M9 7 V5 a1.5 1.5 0 0 1 1.5 -1.5 H13.5 A1.5 1.5 0 0 1 15 5 V7" />
-        <path d="M6.5 7 L7.5 20 a1.5 1.5 0 0 0 1.5 1.4 H15 a1.5 1.5 0 0 0 1.5 -1.4 L17.5 7" />
-      </svg>
-    </button>
+    <div class="nbk__head">
+      <span class="nbk__when">{{ label }}</span>
+      <button class="nbk__delete" type="button" aria-label="Delete note" @click="emit('delete')">
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#c4c4c4"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7 H20" />
+          <path d="M9 7 V5 a1.5 1.5 0 0 1 1.5 -1.5 H13.5 A1.5 1.5 0 0 1 15 5 V7" />
+          <path d="M6.5 7 L7.5 20 a1.5 1.5 0 0 0 1.5 1.4 H15 a1.5 1.5 0 0 0 1.5 -1.4 L17.5 7" />
+        </svg>
+      </button>
+    </div>
 
     <textarea
       v-if="isEditing"
@@ -39,10 +42,20 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, ref, useTemplateRef } from 'vue'
 import type { Note } from '@/types/note'
+import { relativeDayLabel } from '@/utils/relative-day'
 
-const props = defineProps<{ note: Note }>()
+const props = defineProps<{
+  note: Note
+  /** Shared ticking clock (see NotebookViewV2). A per-card new Date() would let labels in a
+   *  single render disagree with each other, and would freeze at first paint. */
+  now: Date
+}>()
+
+// Always the capture day, never the edit time: a note's timestamp answers "when did I write
+// this", and editing deliberately leaves createdAt alone.
+const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
 
 const emit = defineEmits<{
   delete: []
@@ -94,12 +107,21 @@ function commit(): void {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-/* Floated out of the text flow rather than sitting in a header row: with the timestamp gone
-   there is no second element to lay out against, and the body should start at the top. */
+.nbk__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+
+.nbk__when {
+  flex: 1;
+  font: 500 10px var(--cd-font-mono);
+  color: #b2b2b2;
+}
+
 .nbk__delete {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -111,8 +133,6 @@ function commit(): void {
 
 .nbk__body {
   margin: 0;
-  /* Keeps the text clear of the delete glyph in the corner. */
-  padding-right: 22px;
   font: 400 15px var(--cd-font-mono);
   line-height: 1.4;
   color: #1b1b1b;
