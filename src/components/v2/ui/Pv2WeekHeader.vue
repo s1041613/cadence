@@ -1,7 +1,6 @@
 <template>
   <!--
-    週檢視標題（照設計稿）：Week N（Instrument Serif）+ 日期區間（Zen Kaku 副標）
-    + 右側上/下週圓框箭頭 + 底部黑線。
+    週檢視標題：Week N（Instrument Serif）+ 日期區間（Zen Kaku 副標）+ 右側 TODAY 鈕。
   -->
   <div class="pv2-wh">
     <div class="pv2-wh__row">
@@ -9,15 +8,7 @@
         <span class="pv2-wh__title">Week {{ weekNumber }}</span>
         <span class="pv2-wh__range">{{ rangeLabel }}</span>
       </div>
-      <Pv2HeaderNav
-        class="pv2-wh__nav"
-        prev-label="上一週"
-        next-label="下一週"
-        today-label="回到本週"
-        @prev="emit('prev')"
-        @next="emit('next')"
-        @today="emit('today')"
-      />
+      <Pv2HeaderNav class="pv2-wh__nav" today-label="回到本週" @today="emit('today')" />
     </div>
   </div>
 </template>
@@ -31,15 +22,12 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  prev: []
-  next: []
   today: []
 }>()
 </script>
 
 <style scoped>
 .pv2-wh {
-  border-bottom: 1.5px solid #1b1b1b;
   padding-bottom: 14px;
 }
 

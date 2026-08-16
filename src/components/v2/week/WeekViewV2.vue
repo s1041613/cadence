@@ -6,13 +6,7 @@
   <div class="wv2">
     <div class="wv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <div class="wv2__header">
-        <Pv2WeekHeader
-          :week-number="weekNumber"
-          :range-label="rangeLabel"
-          @prev="navigate(-1)"
-          @next="navigate(1)"
-          @today="goToday"
-        />
+        <Pv2WeekHeader :week-number="weekNumber" :range-label="rangeLabel" @today="goToday" />
       </div>
 
       <div class="pv2-slide-viewport">
@@ -135,7 +129,7 @@ function stepWeekBy(delta: number): void {
 const weekKey = computed(() => iso(weekStart.value))
 
 // No view-local overlays here — the composable already covers the page-shell overlays.
-const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({ step: stepWeekBy })
+const { onSwipe, transitionName, setDirection } = useDateSwipe({ step: stepWeekBy })
 
 // Back to this week. Selects today rather than the week's first day so switching to the day
 // view lands on today.

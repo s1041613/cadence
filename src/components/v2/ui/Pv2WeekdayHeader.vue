@@ -36,7 +36,6 @@ const labels = computed(() =>
 .pv2-wd {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1.5px solid #1b1b1b;
   padding-bottom: 6px;
 }
 
