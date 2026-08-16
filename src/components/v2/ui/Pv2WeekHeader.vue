@@ -62,12 +62,12 @@ const emit = defineEmits<{
   margin-bottom: 2px;
 }
 
-/* 與 month 的 "August"、day 的大日期數字同規格：UI face 斜體 400 48px。
-   28→48px：三個檢視各有一個主標題，字重相同時筆畫粗細只由字級決定，字級不同
-   就會讀成粗細不同。"Week 52" 最寬 7 字，等寬字身約 202px，加上右側導覽鈕
-   （約 132px）仍在 360px 寬的機身內。 */
+/* Italic 400, matching month's "August" and day's big numeral in weight and style.
+   Sized 40px rather than their 48px: "Week 52" is seven glyphs of a monospace face, so it
+   runs far wider than a month name at the same size and crowds the nav buttons to its right.
+   Weight stays 400 so the stroke still reads as one family with the other two titles. */
 .pv2-wh__title {
-  font: italic 400 48px var(--cd-font-serif);
+  font: italic 400 40px var(--cd-font-serif);
   letter-spacing: 0;
   line-height: 1;
   color: #1b1b1b;
