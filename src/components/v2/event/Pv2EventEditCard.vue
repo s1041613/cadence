@@ -44,9 +44,12 @@
 
       <div v-if="calendarOptions && calendarOptions.length > 1" class="pv2-edit-card__line">
         <span class="pv2-edit-card__label">CALENDAR</span>
-        <select class="pv2-edit-card__select" :value="calendarId ?? ''" @change="emit('update:calendarId', ($event.target as HTMLSelectElement).value)">
-          <option v-for="option in calendarOptions" :key="option.id" :value="option.id">{{ option.name }}</option>
-        </select>
+        <Pv2SelectField
+          :model-value="calendarId ?? ''"
+          :options="calendarSelectOptions"
+          ariaLabel="Calendar"
+          @update:model-value="(v) => emit('update:calendarId', v)"
+        />
       </div>
 
       <div v-if="type === 'event'" class="pv2-edit-card__line">
@@ -84,7 +87,7 @@
            sit in the row's value column, and the wrapper doubles as the containment boundary
            for the outside-click that closes it. -->
       <div ref="startFieldEl" class="pv2-edit-card__time-field">
-        <div class="pv2-edit-card__line pv2-edit-card__line--time">
+        <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">STARTS</span>
           <div class="pv2-edit-card__time-controls">
             <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
@@ -107,7 +110,7 @@
         />
       </div>
       <div ref="endFieldEl" class="pv2-edit-card__time-field">
-        <div class="pv2-edit-card__line pv2-edit-card__line--time">
+        <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">ENDS</span>
           <div class="pv2-edit-card__time-controls">
             <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
@@ -145,15 +148,14 @@
           <button
             type="button"
             class="pv2-edit-card__style"
+            :class="{ 'pv2-edit-card__style--open': colorOpen }"
             aria-label="Edit colour"
             :aria-expanded="colorOpen"
             @click="colorOpen = !colorOpen"
           >
             <span class="pv2-edit-card__style-dot" :style="{ background: color }" />
             <span class="pv2-edit-card__style-name">{{ colorName ?? 'Custom' }}</span>
-            <svg class="pv2-edit-card__more-icon" :class="{ 'pv2-edit-card__more-icon--open': colorOpen }" width="11" height="7" viewBox="0 0 11 7" fill="none" aria-hidden="true">
-              <path d="M1 1.5 L5.5 5.5 L10 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+            <Pv2Chevron class="pv2-edit-card__style-chevron" :open="colorOpen" />
           </button>
         </div>
         <Pv2ColorList
@@ -165,17 +167,20 @@
         />
       </div>
 
-      <div class="pv2-edit-card__line pv2-edit-card__line--pill">
+      <div class="pv2-edit-card__line">
         <span class="pv2-edit-card__label">REMINDER</span>
-        <CdReminderPill :model-value="reminder" @update:model-value="(v) => emit('update:reminder', v)" />
+        <Pv2SelectField
+          :model-value="reminder ?? REMINDER_NONE"
+          :options="reminderSelectOptions"
+          ariaLabel="Reminder"
+          @update:model-value="onReminderChange"
+        />
       </div>
 
       <button type="button" class="pv2-edit-card__more" @click="moreOpen = !moreOpen">
         <span class="pv2-edit-card__more-text">
           {{ moreOpen ? 'FEWER OPTIONS' : 'MORE OPTIONS' }}
-          <svg class="pv2-edit-card__more-icon" :class="{ 'pv2-edit-card__more-icon--open': moreOpen }" width="11" height="7" viewBox="0 0 11 7" fill="none" aria-hidden="true">
-            <path d="M1 1.5 L5.5 5.5 L10 1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
+          <Pv2Chevron class="pv2-edit-card__more-chevron" :open="moreOpen" />
         </span>
       </button>
 
@@ -213,15 +218,17 @@ import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
 import Pv2TitleSuggestions from './Pv2TitleSuggestions.vue'
 import CdDatePicker from '@/components/ui/CdDatePicker.vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
-import CdReminderPill from '@/components/ui/CdReminderPill.vue'
 import CdRepeatPill from '@/components/ui/CdRepeatPill.vue'
 import CdSegmented from '@/components/ui/CdSegmented.vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
+import Pv2Chevron from '@/components/v2/ui/Pv2Chevron.vue'
 import Pv2ColorList from '@/components/v2/ui/Pv2ColorList.vue'
+import Pv2SelectField from '@/components/v2/ui/Pv2SelectField.vue'
 import Pv2TimeChip from '@/components/v2/ui/Pv2TimeChip.vue'
 import Pv2TimeWheel from '@/components/v2/ui/Pv2TimeWheel.vue'
 import { eventColorNameOf } from '@/components/v2/ui/event-colors'
 import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
+import { REMINDER_OPTIONS } from '@/utils/event-panel'
 import { buildTitleSuggestions, type TitleSuggestion } from '@/utils/title-suggestions'
 import { useImeSafeEnter } from '@/composables/use-ime-safe-enter'
 import { useAuthStore } from '@/stores/auth-store'
@@ -276,6 +283,26 @@ const emit = defineEmits<{
 
 const moreOpen = ref(false)
 const colorOpen = ref(false)
+
+// CALENDAR and REMINDER both render through Pv2SelectField, which speaks plain
+// strings so one control can serve every dropdown row on the card. Reminder's model
+// is `ReminderPreset | null`, and a <select> cannot carry null as an option value —
+// hence the sentinel, mapped back on the way out. Same technique CdReminderPill used
+// internally; it just lives here now that the shell is shared.
+const REMINDER_NONE = '__none__'
+
+const calendarSelectOptions = computed(() =>
+  (props.calendarOptions ?? []).map((option) => ({ value: option.id, label: option.name }))
+)
+
+const reminderSelectOptions = REMINDER_OPTIONS.map((option) => ({
+  value: option.value ?? REMINDER_NONE,
+  label: option.label
+}))
+
+function onReminderChange(value: string): void {
+  emit('update:reminder', value === REMINDER_NONE ? null : (value as ReminderPreset))
+}
 
 // Which time wheel is expanded. Only one at a time: the card is fixed-height, and two open
 // wheels would push the footer out of reach.
@@ -546,11 +573,42 @@ const matrixOptions = [
 
   --pv2-label-col: 92px;
   --pv2-gap: 12px;
-  /* Shared row height for every __line, set by the tallest control on the card (the
-     STARTS/ENDS date/time pills). See .pv2-edit-card__line for the derivation. */
-  --pv2-row-h: 62.67px;
-  /* Shared width for the REMINDER / REPEAT / CALENDAR value pills so they align as
-     one column; wide enough for the longest preset label ("Does not repeat"). */
+
+  /* ---------- The value-control contract ----------
+   * Every control in a row's value column resolves its geometry and colour from
+   * these, and nothing else declares its own. Before this existed the card held
+   * five controls at three different heights (36px, 42.67px, and whatever the UA
+   * chose for a bare <select>), two font sizes and three chevrons — each one
+   * correct in isolation and none of them agreeing.
+   *
+   * They are custom properties rather than a shared class because the controls are
+   * not the same kind of element (an <input>, a <button>, a <label> wrapping a
+   * <select>) and three of them are components shared with the legacy CdEventEditCard,
+   * which must keep its own look. Inheritance crosses those boundaries; a class
+   * cannot. Each consumer writes `var(--pv2-control-x, <fallback>)` so it still
+   * renders standalone — the same guarding Pv2ColorList does.
+   *
+   * No border: the row already draws a divider, so an outline around every control
+   * meant the card was ruled twice over. Separation comes from the fill, and the
+   * "this is interactive" signal moves into the states below. Consumers still
+   * declare `border: 1px solid transparent` to keep the border box, so restoring an
+   * outline later is a colour change rather than a 1px reflow of the whole card. */
+  --pv2-control-h: 40px;
+  --pv2-control-r: var(--cd-radius-sm);
+  --pv2-control-fs: 14px;
+  --pv2-control-fw: 500;
+  --pv2-control-px: 12px;
+  --pv2-control-bg: #f0f0ed;
+  --pv2-control-bg-hover: #e8e8e4;
+  --pv2-control-bg-open: #e2e2de;
+
+  /* Derived, not measured. This was pinned at 62.67px — the height the tallest
+     control happened to render at — so every other row's rhythm depended on a
+     number nobody could change safely. 20px is the row's own 10px top and bottom
+     padding. */
+  --pv2-row-h: calc(var(--pv2-control-h) + 20px);
+  /* Shared width for the REMINDER / REPEAT / CALENDAR / STYLE value pills so they
+     align as one column; wide enough for the longest preset label ("Does not repeat"). */
   --pv2-pill-w: 156px;
   width: 388px;
   height: min(640px, calc(100dvh - 24px));
@@ -605,19 +663,23 @@ const matrixOptions = [
   scrollbar-width: thin;
 }
 
-.pv2-edit-card__type {
-  margin-bottom: 12px;
-}
-
 /* Match the design's segmented control: a taller neutral-grey track wrapping a white,
    softly-outlined active pill, with uppercased mono labels on wide tracking so
-   Event|Task reads like the card's other meta labels. Scoped via :deep so the
-   shared CdSegmented stays untouched elsewhere. */
-.pv2-edit-card__type:deep(.cd-segmented) {
-  /* Same neutral fill as the pomodoro estimate chip (#F3F3F1) — overrides the shared
-     CdSegmented's warm #f1efe8 track. Written literally rather than via --pv2-fill so
-     the value resolves reliably across the :deep boundary. */
-  background: #f3f3f1;
+   Event|Task reads like the card's other meta labels.
+ *
+ * NOT :deep(.cd-segmented) — `.cd-segmented` is CdSegmented's ROOT element, and the
+ * `pv2-edit-card__type` class lands on that same element, so :deep compiled to
+ * `.pv2-edit-card__type .cd-segmented`, a descendant selector that matched nothing.
+ * The track had been rendering in the shared component's warm #f1efe8 at radius 11px
+ * the whole time — invisible while the value controls were white, conspicuous once
+ * they became cool grey. A parent's scoped styles reach a child component's root
+ * directly, so the class alone is what applies. The buttons below genuinely are
+ * descendants and do still need :deep. */
+.pv2-edit-card__type {
+  margin-bottom: 12px;
+  /* Same neutral fill as the pomodoro estimate chip — one cool grey family across the
+     card, rather than one warm element among the cool value controls. */
+  background: var(--pv2-fill);
   border-radius: 14px;
   padding: 5px;
 }
@@ -643,55 +705,88 @@ const matrixOptions = [
   grid-template-columns: var(--pv2-label-col) minmax(0, 1fr);
   align-items: center;
   gap: var(--pv2-gap);
-  /* One shared height floor for every row (STYLE, ALL-DAY, STARTS/ENDS, and the
-     MORE OPTIONS rows) so the dividers keep an even rhythm no matter which control
-     a row holds. 62.67px is what the STARTS/ENDS rows measure naturally: 10px top +
-     10px bottom padding around a 42.67px date/time pill (15.5px mono text + 9px
-     vertical padding + 1px border, both sides). Expressed as a min-height rather
-     than a fixed height so a row whose content grows — a wrapped value, or the NOTES
-     textarea dragged taller — still expands instead of overflowing. */
+  /* One shared height floor for every row (CALENDAR, ALL-DAY, STARTS/ENDS, STYLE,
+     REMINDER and the MORE OPTIONS rows) so the dividers keep an even rhythm no
+     matter which control a row holds. Derived from --pv2-control-h, so the rhythm
+     follows the controls rather than the other way round. Expressed as a min-height
+     rather than a fixed height so a row whose content grows — a wrapped value, or
+     the NOTES textarea dragged taller — still expands instead of overflowing. */
   min-height: var(--pv2-row-h);
   padding: 10px 0;
   border-bottom: 1px solid var(--pv2-line);
 }
 
-.pv2-edit-card__line--time {
-  align-items: start;
-}
-
-/* REMINDER / REPEAT pills, restyled to the design's white chip with a thin neutral
-   border and a chevron affordance — the v2 palette, not the warm cd-* default.
-   Scoped via :deep so the shared CdReminderPill / CdRepeatPill keep their own look
-   elsewhere. */
-.pv2-edit-card__line--pill:deep(.cd-reminder-pill),
-.pv2-edit-card__line--pill:deep(.cd-repeat-pill) {
-  border: 1px solid var(--pv2-line-strong);
-  /* Square-round like the STARTS/ENDS time pills, not the components' default 999px
-     ellipse — one radius family across every value control on the card. */
-  border-radius: var(--cd-radius-sm);
-  background: #fff;
+/* ==========================================================================
+ * THE VALUE CONTROLS — every control in a row's value column, in one place.
+ *
+ * They used to be specified in four separate blocks scattered through this file,
+ * which is precisely how they drifted to three different heights, two font sizes
+ * and three chevrons: nothing ever put them side by side where a mismatch was
+ * visible. Adding a control now means adding a selector here, not inventing a
+ * fourth set of numbers.
+ *
+ * Only two need :deep — CdRepeatPill and CdDatePicker are shared with the legacy
+ * CdEventEditCard and must keep their own look there, so they are re-skinned from
+ * the outside rather than changed at source. Pv2SelectField (CALENDAR, REMINDER)
+ * and Pv2TimeChip are v2-only, so they read the same --pv2-control-* properties
+ * directly and need no override at all.
+ * ========================================================================== */
+.pv2-edit-card__style,
+.pv2-edit-card__line--pill:deep(.cd-repeat-pill),
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger) {
+  box-sizing: border-box;
+  height: var(--pv2-control-h);
+  padding: 0 var(--pv2-control-px);
+  /* Transparent, not absent: the row already draws a divider, so an outline here
+     ruled the card twice. Keeping the border box means restoring an outline later
+     is a colour change, not a 1px reflow of every row. */
+  border: 1px solid transparent;
+  border-radius: var(--pv2-control-r);
+  background: var(--pv2-control-bg);
   color: var(--pv2-ink);
-  min-height: 36px;
-  /* Shared width so REMINDER / REPEAT / CALENDAR line up as one column of equal
-     pills — the shortest value ("None") stretches to the widest ("Does not repeat")
-     instead of each pill hugging its own text. */
-  min-width: var(--pv2-pill-w);
-  justify-content: center;
+  font: var(--pv2-control-fw) var(--pv2-control-fs) var(--cd-font-ui);
+  transition:
+    background var(--cd-duration-micro-3),
+    box-shadow var(--cd-duration-micro-3);
 }
 
-.pv2-edit-card__line--pill:deep(.cd-reminder-pill:hover),
-.pv2-edit-card__line--pill:deep(.cd-repeat-pill:hover) {
-  background: var(--pv2-fill);
-  border-color: var(--pv2-line-strong);
+.pv2-edit-card__style:hover,
+.pv2-edit-card__line--pill:deep(.cd-repeat-pill:hover),
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger:hover) {
+  background: var(--pv2-control-bg-hover);
 }
 
-.pv2-edit-card__line--pill:deep(.cd-reminder-pill__text) {
-  font-weight: 500;
+.pv2-edit-card__style:active,
+.pv2-edit-card__line--pill:deep(.cd-repeat-pill:active),
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger:active) {
+  background: var(--pv2-control-bg-open);
 }
 
+/* With no border to darken, the ring carries the whole focus signal. Four of the
+   five controls had no focus state at all before, and the one that did used an
+   off-palette rgba(31,41,51,.18) inherited from CdReminderPill. */
+.pv2-edit-card__style:focus-visible,
+.pv2-edit-card__line--pill:deep(.cd-repeat-pill:focus-visible),
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger:focus-visible) {
+  outline: 2px solid var(--pv2-ink);
+  outline-offset: 2px;
+}
+
+/* Open = an inset ring, the same one Pv2TimeChip draws, so "this control is
+   expanded" reads identically whichever one you opened. Inset because there is no
+   border left to colour, and because painting inside the box reflows nothing. */
+.pv2-edit-card__style--open,
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger--open) {
+  background: var(--pv2-control-bg-open);
+  box-shadow: inset 0 0 0 1.5px var(--pv2-ink);
+}
+
+/* Shared width so CALENDAR / STYLE / REMINDER / REPEAT line up as one column — the
+   shortest value ("None") stretches to the widest ("Does not repeat") instead of
+   each pill hugging its own text. The date/time controls are deliberately excluded:
+   they share a row and hug their content. */
 .pv2-edit-card__line--pill:deep(.cd-repeat-pill) {
-  padding: 9px 14px;
-  font-weight: 500;
+  min-width: var(--pv2-pill-w);
 }
 
 /* Every row's value (the non-label second column) hugs the right edge, matching the
@@ -722,34 +817,27 @@ const matrixOptions = [
   flex-direction: column;
 }
 
-/* The style value reads as a pill, matching the design: a white rounded container holding
-   the colour dot, the colour's name and a chevron affordance, echoing the STARTS/ENDS and
-   REMINDER/REPEAT pills so the whole right column is one family — including their shared
-   --pv2-pill-w width, so STYLE lines up with REMINDER/REPEAT/CALENDAR. */
+/* Geometry, colour and states come from the shared value-control block above; only
+   the layout of its three parts belongs here. */
 .pv2-edit-card__style {
   justify-self: end;
   display: inline-flex;
   align-items: center;
   gap: 10px;
   min-width: var(--pv2-pill-w);
-  min-height: 36px;
-  padding: 7px 12px;
-  border: 1px solid var(--pv2-line-strong);
-  border-radius: var(--cd-radius-sm);
-  background: #fff;
-  color: var(--pv2-ink-3);
   cursor: pointer;
-  transition: background var(--cd-duration-micro-3);
 }
 
-.pv2-edit-card__style:hover {
-  background: var(--pv2-fill-hover);
+.pv2-edit-card__style-chevron {
+  color: var(--pv2-ink-3);
 }
 
+/* 16px rather than 18px: the dot is now read against 14px text instead of the old
+   13px, and at 18px it outweighed the colour's name it is meant to annotate. */
 .pv2-edit-card__style-dot {
   flex: none;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
 }
 
@@ -762,8 +850,6 @@ const matrixOptions = [
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  color: var(--pv2-ink);
-  font: 500 13px var(--cd-font-ui);
 }
 
 .pv2-edit-card__matrix {
@@ -879,29 +965,18 @@ const matrixOptions = [
   flex: none;
 }
 
-/* STARTS/ENDS pills per the design: white fill with a thin neutral border, no
-   calendar icon — just the mono date text in v2 ink. Scoped via :deep so the shared
-   CdDatePicker keeps its own look everywhere else. The time chip is a v2 component and
-   styles itself. */
-.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger) {
-  border: 1px solid var(--pv2-line-strong);
-  background: #fff;
-  border-radius: var(--cd-radius-sm);
-  padding: 9px 14px;
-  color: var(--pv2-ink);
-}
-
-.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger:hover) {
-  background: var(--pv2-fill);
-}
-
-/* Neutralize the shared picker's olive open-state accent — off the v2 palette. */
-.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger--open) {
-  border-color: var(--pv2-ink);
-}
-
+/* No calendar icon — just the mono date text. The trigger's geometry, fill and
+   states (including neutralising the shared picker's olive open-state accent, which
+   is off the v2 palette) come from the shared value-control block above. */
 .pv2-edit-card__time-controls:deep(.cd-date-picker__trigger .cd-icon) {
   display: none;
+}
+
+/* The date text needs tabular figures so STARTS and ENDS stay the same width and
+   their left edges line up; CdDatePicker sets this itself, but the shared block
+   above replaces its `font` shorthand, which would otherwise reset it. */
+.pv2-edit-card__time-controls:deep(.cd-date-picker__trigger) {
+  font-variant-numeric: var(--cd-numeric-aligned);
 }
 
 /* The row keeps its own divider; the wrapper only groups it with the wheel below, so the
@@ -997,30 +1072,13 @@ const matrixOptions = [
   font: 700 10px var(--cd-font-ui);
 }
 
-.pv2-edit-card__more-icon {
-  display: block;
-  flex: none;
-  /* Optical nudge: the SVG box centers on the text's line box, but the uppercase
-     mono cap-height sits above that, so lift the chevron a hair to line up with
-     the letters' visual middle. */
+/* Optical nudge: the SVG box centers on the text's line box, but the uppercase mono
+   cap-height sits above that, so lift the chevron a hair to line up with the letters'
+   visual middle. Only MORE OPTIONS needs it — it is the one place the chevron sits
+   beside all-caps text. Applied from here because a component's root element carries
+   its parent's scope id, so no :deep is required. */
+.pv2-edit-card__more-chevron {
   margin-top: -1px;
-  transition: transform var(--cd-duration-micro-3);
-}
-
-.pv2-edit-card__more-icon--open {
-  transform: rotate(180deg);
-}
-
-.pv2-edit-card__select {
-  min-height: 36px;
-  min-width: var(--pv2-pill-w);
-  padding: 0 12px;
-  border: 1px solid var(--pv2-line-strong);
-  border-radius: var(--cd-radius-sm);
-  background: #fff;
-  color: var(--pv2-ink);
-  font: 700 13px var(--cd-font-ui);
-  text-align: center;
 }
 
 /* LOCATION / NOTES: right-aligned, frameless text that reads as a placeholder value,
