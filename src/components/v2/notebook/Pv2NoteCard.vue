@@ -96,14 +96,23 @@ function commit(): void {
 
 <style scoped>
 .nbk {
-  /* Stacks above the dotted-paper backdrop. */
-  position: relative;
-  z-index: 1;
   padding: 16px 18px;
   margin-bottom: 14px;
   border: 1px solid #e2e2e2;
   border-radius: 16px;
-  background: #fff;
+  /*
+    Dotted paper. This used to be the notebook PAGE's background; it now belongs to the
+    card, so the note reads as a sheet of paper lying on the shared canvas rather than
+    the whole tab being made of a different material than every other tab.
+    The dots ride on background-image above the white background-color, so they clip to
+    the card's radius for free. Lighter than the old page-level #c7c7c2: that value was
+    tuned against the #fafaf9 canvas, and the same ink on white reads much heavier.
+    Grid geometry (20px pitch, 14px offset) is carried over unchanged.
+  */
+  background-color: #fff;
+  background-image: radial-gradient(#e6e6e3 1.1px, transparent 1.1px);
+  background-size: 20px 20px;
+  background-position: 14px 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
