@@ -1,6 +1,6 @@
 <template>
   <!--
-    日檢視標題（照設計稿）：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側前/後日圓框箭頭 + 底部黑線。
+    日檢視標題：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側 TODAY 鈕。
   -->
   <div class="pv2-dh">
     <div class="pv2-dh__row">
@@ -11,14 +11,7 @@
           <span class="pv2-dh__my">{{ monthYear }}</span>
         </span>
       </div>
-      <Pv2HeaderNav
-        prev-label="前一天"
-        next-label="後一天"
-        today-label="回到今天"
-        @prev="emit('prev')"
-        @next="emit('next')"
-        @today="emit('today')"
-      />
+      <Pv2HeaderNav today-label="回到今天" @today="emit('today')" />
     </div>
   </div>
 </template>
@@ -33,15 +26,12 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  prev: []
-  next: []
   today: []
 }>()
 </script>
 
 <style scoped>
 .pv2-dh {
-  border-bottom: 1.5px solid #1b1b1b;
   padding-bottom: 14px;
 }
 

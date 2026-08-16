@@ -7,14 +7,7 @@
   <div class="dv2">
     <div class="dv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <div class="dv2__header">
-        <Pv2DayHeader
-          :day-num="dayNum"
-          :dow="dow"
-          :month-year="monthYear"
-          @prev="navigate(-1)"
-          @next="navigate(1)"
-          @today="goToday"
-        />
+        <Pv2DayHeader :day-num="dayNum" :dow="dow" :month-year="monthYear" @today="goToday" />
       </div>
 
       <!-- TEMP: MY GOAL card hidden while the timeline is being reworked -->
@@ -77,7 +70,7 @@ const dayKey = computed(() => ui.selectedDate)
 
 // No view-local overlays here — the composable already covers the page-shell overlays
 // (this view opens QuickAdd from DaySchedule.vue).
-const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({ step: stepDayBy })
+const { onSwipe, transitionName, setDirection } = useDateSwipe({ step: stepDayBy })
 
 function goToday(): void {
   const today = new Date()
