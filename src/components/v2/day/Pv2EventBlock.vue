@@ -102,6 +102,14 @@ const blockStyle = computed(() => ({
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  /* The in-progress flip is driven by the clock, not by the user: when the minute ticks
+     across the event boundary blockStyle rebinds background and color at once. Snapping
+     with no input from the user reads as the screen glitching rather than as a state
+     change. The inline :style writes the `background` shorthand, but interpolation happens
+     on the resolved background-color — both values are flat colours, so it interpolates. */
+  transition:
+    background-color var(--cd-duration-micro-5) var(--cd-ease-standard),
+    color var(--cd-duration-micro-5) var(--cd-ease-standard);
 }
 
 /* The title/time row keeps the original one-line baseline treatment; any subtask lines
@@ -127,6 +135,12 @@ const blockStyle = computed(() => ({
   font-variant-numeric: var(--cd-numeric-aligned);
   color: #6e6e6e;
   white-space: nowrap;
+  /* Inverting swaps this line's colour and opacity too. Same duration as the block itself,
+     so the whole thing turns over at once instead of the fill leading and the text
+     trailing half a beat behind. */
+  transition:
+    color var(--cd-duration-micro-5) var(--cd-ease-standard),
+    opacity var(--cd-duration-micro-5) var(--cd-ease-standard);
 }
 
 /* In-progress blocks invert to a solid fill, so the time line rides the inherited white. */
@@ -149,6 +163,9 @@ const blockStyle = computed(() => ({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition:
+    color var(--cd-duration-micro-5) var(--cd-ease-standard),
+    opacity var(--cd-duration-micro-5) var(--cd-ease-standard);
 }
 
 .pv2-event-block__subs li[data-done='true'] {
@@ -164,5 +181,13 @@ const blockStyle = computed(() => ({
 .pv2-event-block--active .pv2-event-block__subs li {
   color: inherit;
   opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv2-event-block,
+  .pv2-event-block__time,
+  .pv2-event-block__subs li {
+    transition: none;
+  }
 }
 </style>

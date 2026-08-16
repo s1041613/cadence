@@ -45,6 +45,9 @@ const emit = defineEmits<{
   border: none;
   background: none;
   cursor: pointer;
+  /* :active 只換底色，沒有 transition 時是硬切——按下與放開都像閃一下而不是按壓。
+     補一段 micro 時長讓兩個方向都收斂。 */
+  transition: background-color var(--cd-duration-micro-1) var(--cd-ease-standard);
 }
 
 .pv2-hn__seg--today {
@@ -69,5 +72,11 @@ const emit = defineEmits<{
 
 .pv2-hn__seg:active {
   background: #f0efec;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv2-hn__seg {
+    transition: none;
+  }
 }
 </style>
