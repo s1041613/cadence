@@ -51,17 +51,21 @@
       />
     </Teleport>
 
-    <!-- 當日事件面板（cell 點擊長出），同樣 teleport 到 frame 讓 scrim 蓋滿；defer 理由同上 -->
+    <!-- 當日事件面板（cell 點擊長出），同樣 teleport 到 frame 讓 scrim 蓋滿；defer 理由同上。
+         Transition sits inside the Teleport so the sheet still resolves its target the
+         deferred way; pv2-sheet (app.css) fades the scrim and slides the panel together. -->
     <Teleport defer to="#mp2-root">
-      <Pv2DaySheet
-        v-if="daySheetDate"
-        :dow="daySheetDow"
-        :date-label="daySheetLabel"
-        :events="daySheetEvents"
-        @close="daySheetDate = null"
-        @create="onDaySheetCreate"
-        @event-click="onDaySheetEventClick"
-      />
+      <Transition name="pv2-sheet" :duration="300">
+        <Pv2DaySheet
+          v-if="daySheetDate"
+          :dow="daySheetDow"
+          :date-label="daySheetLabel"
+          :events="daySheetEvents"
+          @close="daySheetDate = null"
+          @create="onDaySheetCreate"
+          @event-click="onDaySheetEventClick"
+        />
+      </Transition>
     </Teleport>
   </div>
 </template>
