@@ -80,6 +80,9 @@ const emit = defineEmits<{
   gap: 5px;
   padding: 0 11px;
   color: #6e6e6e;
+  /* UI face, not the display face the bottom nav uses: this pill belongs to the week
+     and day headers, which are set in the UI face throughout. Weight goes back to 500
+     — the display face only ships 400, this one has a real 500. */
   font: 500 9.5px var(--cd-font-ui);
   letter-spacing: 0.1em;
   line-height: 1;

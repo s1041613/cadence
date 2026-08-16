@@ -5,21 +5,26 @@
 /* 自架字體（取代 demo 版本的 Google Fonts CDN，符合 CSP self-only 限制）
  *
  * The product ships two faces only (see cadence-tokens.css --cd-font-display /
- * --cd-font-ui). Zen Kaku carries every weight the UI uses; note it has NO 600,
- * so use 500 or 700 rather than letting the browser synthesise one.
- * Instrument Serif is the display face and ships a single weight.
+ * --cd-font-ui). JetBrains Mono is the UI face and carries every weight in use
+ * (400–800; the lone 900 in CdDraftDrawer is synthesised). The italic is
+ * imported at 400 only, which is every weight the display titles ask for: the
+ * month poster, the week title and the day numeral are one shared spec.
+ * Instrument Serif is the nav face and ships a single weight (400).
  *
- * Noto Sans TC stays imported purely as the CJK fallback behind Instrument
- * Serif, which has no CJK coverage. */
-@import "@fontsource/zen-kaku-gothic-new/300.css";
-@import "@fontsource/zen-kaku-gothic-new/400.css";
-@import "@fontsource/zen-kaku-gothic-new/500.css";
-@import "@fontsource/zen-kaku-gothic-new/700.css";
-@import "@fontsource/zen-kaku-gothic-new/900.css";
+ * Noto Sans TC is no longer a mere fallback: neither Latin face covers CJK, so
+ * every Chinese glyph in the app — event titles above all — renders in it. Its
+ * weight coverage therefore has to track what the UI actually asks for. */
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/400-italic.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "@fontsource/jetbrains-mono/800.css";
 @import "@fontsource/instrument-serif/400.css";
 @import "@fontsource/instrument-serif/400-italic.css";
 @import "@fontsource/noto-sans-tc/400.css";
 @import "@fontsource/noto-sans-tc/500.css";
+@import "@fontsource/noto-sans-tc/600.css";
 @import "@fontsource/noto-sans-tc/700.css";
 
 /* 100%（錨定 ICB）而非 100dvh：iOS standalone 冷啟動的 viewport 單位會照整個
@@ -40,7 +45,7 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   color: var(--cd-ink);
-  font-family: 'Zen Kaku Gothic New', 'Noto Sans TC', 'Inter', system-ui, sans-serif;
+  font-family: 'JetBrains Mono', 'Noto Sans TC', monospace;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -68,4 +73,45 @@ body {
   --color-now: #E88B9C;
   --color-sat: #3A6EA5;
   --color-sun: #C0564B;
+}
+
+/* Directional date slide, shared by the month, week and day views. Lives here rather than in
+   a view's scoped block because all three use it, and quasar.config.ts loads only this file. */
+
+/* The entering and leaving panes are both in the DOM during the slide. Each is flex:1 in its
+   view, so as siblings they would split the height and the pane would visibly collapse; the
+   viewport owns the flex slot and stacks them on top of each other instead. */
+.pv2-slide-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden; /* clips the off-screen pane so it cannot widen the frame */
+}
+
+.pv2-slide-viewport > * {
+  position: absolute;
+  inset: 0;
+}
+
+.pv2-slide-next-enter-active,
+.pv2-slide-next-leave-active,
+.pv2-slide-prev-enter-active,
+.pv2-slide-prev-leave-active {
+  /* ease-out: a gesture-initiated move should decelerate into place */
+  transition: transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.pv2-slide-next-enter-from { transform: translateX(100%); }
+.pv2-slide-next-leave-to   { transform: translateX(-100%); }
+.pv2-slide-prev-enter-from { transform: translateX(-100%); }
+.pv2-slide-prev-leave-to   { transform: translateX(100%); }
+
+/* Reduced motion gets an instant swap; the swipe itself still works. */
+@media (prefers-reduced-motion: reduce) {
+  .pv2-slide-next-enter-active,
+  .pv2-slide-next-leave-active,
+  .pv2-slide-prev-enter-active,
+  .pv2-slide-prev-leave-active {
+    transition: none;
+  }
 }

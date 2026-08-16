@@ -116,7 +116,10 @@ export default defineConfig((/* ctx */) => {
       // you can manually specify Quasar components/directives to be available everywhere:
       //
       // components: [],
-      // directives: [],
+
+      // Directives are NOT auto-imported by @quasar/app-vite — only components are. Every
+      // v-touch-swipe in src silently resolves to nothing unless it is listed here.
+      directives: ['TouchSwipe'],
 
       // Quasar plugins
       plugins: ['Notify']

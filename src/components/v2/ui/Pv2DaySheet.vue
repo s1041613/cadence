@@ -5,7 +5,11 @@
   -->
   <div class="pv2-ds-scrim" @click="emit('close')">
     <div class="pv2-ds" @click.stop>
-      <div class="pv2-ds__handle" />
+      <!-- Swipe-to-dismiss is bound to the handle zone only: the list below owns its own
+           overflow-y scroll, and a sheet-wide gesture would swallow it. -->
+      <div class="pv2-ds__handle-zone" v-touch-swipe.down.mouse="onSwipeDown">
+        <div class="pv2-ds__handle" />
+      </div>
 
       <div class="pv2-ds__head">
         <div class="pv2-ds__head-text">
@@ -61,6 +65,10 @@ const emit = defineEmits<{
   create: []
   eventClick: [event: Pv2DayEvent, mouseEvent: MouseEvent]
 }>()
+
+function onSwipeDown(): void {
+  emit('close')
+}
 </script>
 
 <style scoped>
@@ -84,13 +92,21 @@ const emit = defineEmits<{
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
 }
 
-.pv2-ds__handle {
+/* Zone is taller than the 5px pill so the swipe target is actually hittable; the pill's former
+   bottom margin lives here to keep the rendered layout identical. */
+.pv2-ds__handle-zone {
   flex: none;
+  padding: 4px 0 10px;
+  touch-action: none;
+  cursor: grab;
+}
+
+.pv2-ds__handle {
   width: 40px;
   height: 5px;
   border-radius: 3px;
   background: #dadad4;
-  margin: 0 auto 14px;
+  margin: 0 auto;
 }
 
 .pv2-ds__head {
@@ -117,9 +133,9 @@ const emit = defineEmits<{
   color: #9c9c9c;
 }
 
-/* 同 poster：Instrument Serif italic */
+/* 同 poster 的斜體，字級跟著全站大標題乘 0.7（見 Pv2DayHeader） */
 .pv2-ds__date {
-  font: italic 400 34px var(--cd-font-serif);
+  font: italic 400 24px var(--cd-font-serif);
   line-height: 1;
   color: #1b1b1b;
 }
@@ -160,11 +176,15 @@ const emit = defineEmits<{
   text-align: left;
 }
 
+/* 62px 才裝得下 "all-day"：等寬臉每字 0.6em，7 字在 14px 下約 61px，
+   舊的 48px 是照比例字身抓的，換臉後會斷成兩行。nowrap 是保險，
+   讓未來更長的標籤寧可被切也不要撐成兩行破壞列高。 */
 .pv2-ds__time {
   flex: none;
-  width: 48px;
+  width: 62px;
   font: 500 14px var(--cd-font-mono);
   letter-spacing: 0.02em;
+  white-space: nowrap;
   color: #6e6e6e;
 }
 

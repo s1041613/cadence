@@ -5,26 +5,32 @@
     cell 點擊語義未定（Zoe 未決），暫不綁；event chip 點擊開既有 event-preview overlay。
   -->
   <div class="mv2">
-    <div class="mv2__body">
+    <div class="mv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
+      <!-- No prev/next arrows here: the horizontal swipe replaces them. The poster stays
+           tappable because the month/year wheel is still the only way to jump across years. -->
       <div class="mv2__poster">
-        <Pv2PosterNav
-          :month-name="monthName"
-          :year="String(year)"
-          prev-label="上個月"
-          next-label="下個月"
-          @prev="stepMonthBy(-1)"
-          @next="stepMonthBy(1)"
-          @open-sheet="openSheet"
-        />
+        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
       </div>
 
-      <Pv2CalStrip class="mv2__strip" :chips="chips" @toggle="onToggleCalendar" />
+      <!-- The strip scrolls horizontally itself, so it stops touchstart before the swipe
+           directive on .mv2__body can claim a gesture that started inside the chip row. -->
+      <Pv2CalStrip
+        class="mv2__strip"
+        :chips="chips"
+        @toggle="onToggleCalendar"
+        @touchstart.stop
+        @mousedown.stop
+      />
 
       <div class="mv2__weekdays">
         <Pv2WeekdayHeader :first-day="settings.firstDay" />
       </div>
 
-      <Pv2Grid :cells="gridCells" @cell-click="onCellClick" />
+      <div class="pv2-slide-viewport">
+        <Transition :name="transitionName">
+          <Pv2Grid :key="monthKey" :cells="gridCells" @cell-click="onCellClick" />
+        </Transition>
+      </div>
     </div>
 
     <!-- 底部 nav：共用元件，month active -->
@@ -63,7 +69,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
-import Pv2PosterNav from '@/components/v2/ui/Pv2PosterNav.vue'
+import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridCell } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -78,6 +84,7 @@ import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
+import { useDateSwipe } from '@/composables/use-date-swipe'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -177,6 +184,8 @@ function openSheet(): void {
   sheetOpen.value = true
 }
 function onSheetSelect(payload: { month: number; year: number }): void {
+  // Slide the way the user moved through time, so a wheel jump reads like a swipe.
+  setDirection(payload.year * 12 + payload.month - (year.value * 12 + month.value))
   ui.selectedDate = iso(new Date(payload.year, payload.month, 1))
 }
 
@@ -187,6 +196,17 @@ function stepMonthBy(delta: number): void {
   const { year: y, month: m } = stepMonth(year.value, month.value, delta)
   ui.selectedDate = iso(new Date(y, m, 1))
 }
+
+// Re-keying the grid on the month is what drives the slide transition.
+const monthKey = computed(() => `${year.value}-${month.value}`)
+
+// No `navigate` here: with the arrows gone, the swipe and the arrow keys are the only steps,
+// and both go through onSwipe / the composable's own keydown listener.
+const { onSwipe, transitionName, setDirection } = useDateSwipe({
+  step: stepMonthBy,
+  // Only the two sheets this view owns; the page-shell overlays are handled in the composable.
+  blocked: computed(() => sheetOpen.value || daySheetDate.value !== null)
+})
 </script>
 
 <style scoped>
@@ -206,6 +226,21 @@ function stepMonthBy(delta: number): void {
   flex-direction: column;
   padding: 6px 8px 12px;
   overflow: hidden;
+  /* The horizontal month-swipe lives here; pan-y leaves the vertical axis to the browser. */
+  touch-action: pan-y;
+}
+
+/* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.
+   With the arrows gone it has to be given the full width itself, or the title stops being
+   centred on the row and its tap target collapses to the width of the month word. */
+.mv2__poster-title {
+  width: 100%;
+}
+
+/* touch-action is intersected down the hit-test chain, so the chip row has to ask for the
+   horizontal axis back or its own overflow-x scroll stops working. */
+.mv2__strip :deep(.pv2-strip__row) {
+  touch-action: pan-x;
 }
 
 /* 標題與 chip 列之間留白（headline 在上，chip 列不與標題相黏） */

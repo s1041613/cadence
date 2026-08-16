@@ -5,14 +5,14 @@
     範圍（本階段）：SCHEDULE 用真實 tasksStore；MY GOAL 固定預設圖；MY DAY 只做 UI（寫死示範資料）。
   -->
   <div class="dv2">
-    <div class="dv2__body">
+    <div class="dv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <div class="dv2__header">
         <Pv2DayHeader
           :day-num="dayNum"
           :dow="dow"
           :month-year="monthYear"
-          @prev="stepDayBy(-1)"
-          @next="stepDayBy(1)"
+          @prev="navigate(-1)"
+          @next="navigate(1)"
           @today="goToday"
         />
       </div>
@@ -23,10 +23,14 @@
       <!-- TEMP: tabs hidden while the timeline rendering is reworked; restore with the panel switch below -->
       <!-- <Pv2DayTabs v-model="activeTab" class="dv2__tabs" /> -->
 
-      <div class="dv2__panel">
-        <DaySchedule />
-        <!-- <DaySchedule v-if="activeTab === 'schedule'" /> -->
-        <!-- <DayMyDay v-else /> -->
+      <div class="pv2-slide-viewport dv2__viewport">
+        <Transition :name="transitionName">
+          <div class="dv2__panel" :key="dayKey">
+            <DaySchedule />
+            <!-- <DaySchedule v-if="activeTab === 'schedule'" /> -->
+            <!-- <DayMyDay v-else /> -->
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -49,6 +53,7 @@ import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { parseISO, iso, addDays, WD_CAP } from '@/utils/convert-date-time'
+import { useDateSwipe } from '@/composables/use-date-swipe'
 // TEMP: restore alongside the MY GOAL card
 // import { publicAssetPath } from '@/utils/public-assets'
 
@@ -62,13 +67,22 @@ const monthYear = computed(() =>
   new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(cur.value).toUpperCase()
 )
 
-// Day 就是單純 ±1 天（不同於 week 對 weekStart 加減）
+// A day step is just ±1 day, unlike week's arithmetic against weekStart.
 function stepDayBy(delta: number): void {
   ui.selectedDate = iso(addDays(cur.value, delta))
 }
 
+// Re-keying the panel on the date is what drives the slide transition.
+const dayKey = computed(() => ui.selectedDate)
+
+// No view-local overlays here — the composable already covers the page-shell overlays
+// (this view opens QuickAdd from DaySchedule.vue).
+const { onSwipe, transitionName, navigate, setDirection } = useDateSwipe({ step: stepDayBy })
+
 function goToday(): void {
-  ui.selectedDate = iso(new Date())
+  const today = new Date()
+  setDirection(today.getTime() - cur.value.getTime())
+  ui.selectedDate = iso(today)
 }
 
 // TEMP: tab 切換：元件 local state，切日期不重置
@@ -101,6 +115,14 @@ function onCreate(): void {
   flex-direction: column;
   padding: 6px 22px 12px;
   overflow: hidden;
+  /* The horizontal day-swipe lives here; pan-y leaves the time grid's vertical scroll alone. */
+  touch-action: pan-y;
+}
+
+/* The panel is absolutely positioned inside the viewport, so its own margin would not apply —
+   the gap under the header belongs to the viewport now. */
+.dv2__viewport {
+  margin-top: 18px;
 }
 
 .dv2__header {
@@ -118,12 +140,10 @@ function onCreate(): void {
   margin-top: 18px;
 }
 
-/* 分頁內容撐滿剩餘高度。時間軸自己是捲動容器（ALL-DAY 列要固定在軸上方不跟著捲），
-   所以這層只給高度、不再自捲，避免巢狀捲動。 */
+/* The time grid is its own scroll container (the ALL-DAY row has to stay pinned above the
+   axis rather than scroll with it), so this layer never scrolls — that would nest scrollers.
+   Height and offset now come from .pv2-slide-viewport, which absolutely positions this. */
 .dv2__panel {
-  flex: 1;
-  min-height: 0;
-  margin-top: 18px;
   display: flex;
   flex-direction: column;
   overflow: hidden;

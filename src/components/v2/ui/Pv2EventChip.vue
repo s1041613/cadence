@@ -39,17 +39,23 @@ const timedStyle = computed(() => ({
   letter-spacing: -0.02em;
 }
 
-/* Inner label does the single-line, whole-character clip: per-character wrapping,
-   then the box is clamped to one line-height and overflow hidden — a glyph that
-   doesn't fully fit wraps to the (hidden) next line instead of being sliced or given
-   an ellipsis. The flex parent vertically centers it so top/bottom spacing is even. */
+/* Hard single line, sliced at the box edge.
+ *
+ * This used to wrap per character (word-break: break-all) and hide everything past
+ * one line-height, so a glyph that didn't fully fit moved to a hidden second line
+ * rather than being cut. That never actually held: the label's box rounds up to a
+ * whole pixel while the line does not (9px against 8.7px at the old size), and the
+ * top of the second line bled through that gap as a row of specks under the title.
+ *
+ * nowrap removes the second line altogether, which is the only way to guarantee the
+ * bleed cannot come back at some other size. Slicing the last glyph is the cost, and
+ * it buys back the width the whole-character rule wasted: the chip now fills its box,
+ * so roughly as much of a Chinese title is legible at 9px as was at 7.25px.
+ * The flex parent vertically centers it so top/bottom spacing is even. */
 .pv2-chip__label {
   display: block;
   width: 100%;
-  white-space: normal;
-  word-break: break-all;
-  overflow-wrap: anywhere;
-  max-height: 1.2em;
+  white-space: nowrap;
   overflow: hidden;
 }
 
