@@ -42,49 +42,58 @@
       @apply-suggestion="applySuggestion"
     />
   </CdPopover>
-  <CdDrawerOrSheet v-else-if="ui.qaPop" presentation="sheet" scrim-color="var(--cd-scrim)" @scrim-click="close" @dismiss="close">
-    <component
-      :is="editCardComponent"
-      is-new
-      :title="title"
-      :type="type"
-      :quad="quad"
-      :color="color"
-      :icon="icon"
-      :all-day="allDay"
-      :date="date"
-      :start="start"
-      :end="end"
-      alert-label="No reminder"
-      :reminder="reminder"
-      :repeat-label="repeatLabel"
-      :location="location"
-      notes=""
-      :time-format="settings.timeFormat"
-      :calendar-options="calendarOptions"
-      :calendar-id="calendarId"
-      @update:calendar-id="(v) => (calendarId = v)"
-      @back="close"
-      @close="close"
-      @cancel="close"
-      @update:title="(v) => (title = v)"
-      @update:type="(v) => (type = v)"
-      @update:quad="(v) => (quad = v)"
-      @update:color="(v) => (color = v)"
-      @update:icon="(v: IconName) => (icon = v)"
-      @remove-icon="icon = null"
-      @update:all-day="(v) => (allDay = v)"
-      @update:date="(v) => (date = v)"
-      @update:start="(v) => (start = v)"
-      @update:end="(v) => (end = v)"
-      @update:reminder="(v) => (reminder = v)"
-      @cycle-repeat="cycleRepeat"
-      @update:location="(v) => (location = v)"
-      @update:notes="() => undefined"
-      @save="onAdd"
-      @apply-suggestion="applySuggestion"
-    />
-  </CdDrawerOrSheet>
+  <!-- This file renders for BOTH routes — legacy mounts it bare, v2 passes variant="v2" —
+       so the sheet transition is gated on `variant` and legacy keeps CdSheet's original
+       keyframe. Both bindings must be gated: an empty `name` matches no CSS, but a
+       hardcoded :duration is a JS timer that would still hold the leaving node (and its
+       click-eating scrim) mounted for 300ms on legacy.
+       The condition sits on <Transition> because CdDrawerOrSheet is the v-else-if half of
+       a pair whose v-if is the CdPopover above; a wrapper between them severs that chain. -->
+  <Transition v-else-if="ui.qaPop" v-bind="sheetTransitionAttrs">
+    <CdDrawerOrSheet presentation="sheet" scrim-color="var(--cd-scrim)" @scrim-click="close" @dismiss="close">
+      <component
+        :is="editCardComponent"
+        is-new
+        :title="title"
+        :type="type"
+        :quad="quad"
+        :color="color"
+        :icon="icon"
+        :all-day="allDay"
+        :date="date"
+        :start="start"
+        :end="end"
+        alert-label="No reminder"
+        :reminder="reminder"
+        :repeat-label="repeatLabel"
+        :location="location"
+        notes=""
+        :time-format="settings.timeFormat"
+        :calendar-options="calendarOptions"
+        :calendar-id="calendarId"
+        @update:calendar-id="(v) => (calendarId = v)"
+        @back="close"
+        @close="close"
+        @cancel="close"
+        @update:title="(v) => (title = v)"
+        @update:type="(v) => (type = v)"
+        @update:quad="(v) => (quad = v)"
+        @update:color="(v) => (color = v)"
+        @update:icon="(v: IconName) => (icon = v)"
+        @remove-icon="icon = null"
+        @update:all-day="(v) => (allDay = v)"
+        @update:date="(v) => (date = v)"
+        @update:start="(v) => (start = v)"
+        @update:end="(v) => (end = v)"
+        @update:reminder="(v) => (reminder = v)"
+        @cycle-repeat="cycleRepeat"
+        @update:location="(v) => (location = v)"
+        @update:notes="() => undefined"
+        @save="onAdd"
+        @apply-suggestion="applySuggestion"
+      />
+    </CdDrawerOrSheet>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -149,6 +158,16 @@ const calendarOptions = computed(() =>
 // picker, and on v2 they simply fall through as unused attrs. The `v: IconName` annotation
 // is needed because the union of the two cards no longer types the payload.
 const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
+
+// Sheet open/close transition, v2 only — legacy keeps CdSheet's original enter-only keyframe.
+// Both attributes have to be withheld together: an empty `name` matches no CSS, but `duration`
+// is a JS timer independent of it, so passing one alone would hold the leaving node (and its
+// click-eating scrim) mounted for 300ms on legacy. `exactOptionalPropertyTypes` rejects passing
+// `duration: undefined`, so this omits the keys entirely — same workaround as CdDrawerOrSheet's
+// scrimColorAttr. 300 tracks --cd-duration-sheet (.3s); the transition classes live in CdSheet.
+const sheetTransitionAttrs = computed(() =>
+  props.variant === 'v2' ? { name: 'cd-sheet', duration: 300 } : {}
+)
 
 watch(
   () => ui.qaPop,

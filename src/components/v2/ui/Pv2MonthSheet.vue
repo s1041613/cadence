@@ -101,12 +101,28 @@ function onToday(): void {
   position: absolute;
   inset: 0;
   z-index: 30;
-  background: rgba(27, 27, 27, 0.32);
   display: flex;
   align-items: flex-end;
 }
 
+/* The backdrop is a pseudo-element, not this element's own background, so the
+ * pv2-sheet transition (app.css) can fade it without fighting this scoped rule's
+ * higher specificity — and without an ancestor opacity that would fade the panel
+ * along with it. */
+.pv2-sheet-scrim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 27, 27, 0.32);
+  /* A positioned generated box paints above non-positioned siblings and would
+     otherwise cover the panel and swallow its clicks; the panel is given its own
+     positioned context below, and this stays transparent to hit-testing so the
+     root's click-to-close still fires on the backdrop itself. */
+  pointer-events: none;
+}
+
 .pv2-sheet {
+  position: relative; /* paint above ::before, which is positioned and would otherwise cover it */
   width: 100%;
   background: #fafaf9;
   border-radius: 24px 24px 0 0;
