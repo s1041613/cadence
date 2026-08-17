@@ -3,19 +3,44 @@
     格子內事件 chip，兩種呈現（照 handoff §05 Calendar · Event display）：
     - 整天（allDay）：實心飽和事件色填滿 + 白字，連續 bar。
     - 定時（timed）：白底 + 事件色描邊 + 同色文字，單格 pill。
+
+    A multi-day event is ONE chip stretched across its columns by the week row, not one chip per
+    day — so the title renders once and there is no seam to hide. The continues flags only square
+    off the end that a week boundary cut, leaving the real start and end rounded.
   -->
-  <span v-if="allDay" class="pv2-chip pv2-chip--allday" :style="allDayStyle"><span class="pv2-chip__label">{{ title }}</span></span>
-  <span v-else class="pv2-chip pv2-chip--timed" :style="timedStyle"><span class="pv2-chip__label">{{ title }}</span></span>
+  <span
+    v-if="allDay"
+    class="pv2-chip pv2-chip--allday"
+    :class="edgeClass"
+    :style="allDayStyle"
+  ><span class="pv2-chip__label">{{ title }}</span></span>
+  <span
+    v-else
+    class="pv2-chip pv2-chip--timed"
+    :class="edgeClass"
+    :style="timedStyle"
+  ><span class="pv2-chip__label">{{ title }}</span></span>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps<{
-  title: string
-  color: string
-  allDay: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    title: string
+    color: string
+    allDay: boolean
+    /** The span carries on past this week row, so this end is cut rather than finished. */
+    continuesLeft?: boolean
+    continuesRight?: boolean
+  }>(),
+  { continuesLeft: false, continuesRight: false }
+)
+
+const edgeClass = computed(() => ({
+  'pv2-chip--cut-left': props.continuesLeft,
+  'pv2-chip--cut-right': props.continuesRight
+}))
 
 // 整天：實心事件色填滿、白字
 const allDayStyle = computed(() => ({
@@ -71,5 +96,17 @@ const timedStyle = computed(() => ({
   border-radius: 6px;
   padding: 1px 3px;
   background: #fff;
+}
+
+/* A cut end is square: the rounded end is what says "the event starts/ends here", so leaving it
+   rounded at a week boundary would read as two separate events rather than one continuing. */
+.pv2-chip--cut-left {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pv2-chip--cut-right {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 </style>

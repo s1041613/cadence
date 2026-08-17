@@ -1,7 +1,11 @@
 <template>
   <!--
     月曆單日格。日期數字 Caveat 藥丸：today 黑底白字、非 today 深色 + 可讀陰影、外月淡色。
-    cell 點擊 → 開當日事件面板；event chip 點擊 stop propagation 走 eventClick。
+    cell 點擊 → 開當日事件面板。
+
+    Events are NOT rendered here: a multi-day event has to be one element crossing several
+    columns, which a cell cannot do, so the week row draws them in an overlay above these cells.
+    The cell keeps the day number, the click target, and the "+N" overflow count.
   -->
   <div class="pv2-cell" @click="emit('cellClick')">
     <div class="pv2-cell__head">
@@ -15,49 +19,22 @@
         {{ dayNum }}
       </span>
     </div>
-    <div class="pv2-cell__events">
-      <!-- chip 不自己處理點擊：讓事件冒泡到 cell → 開當日 day sheet（避免與 detail 打架） -->
-      <Pv2EventChip
-        v-for="ev in visibleEvents"
-        :key="ev.id"
-        :title="ev.title"
-        :color="ev.color"
-        :all-day="ev.allDay"
-      />
-      <span v-if="hiddenCount > 0" class="pv2-cell__more">+{{ hiddenCount }}</span>
-    </div>
+    <span v-if="hiddenCount > 0" class="pv2-cell__more">+{{ hiddenCount }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import Pv2EventChip from './Pv2EventChip.vue'
-
-export interface Pv2CellEvent {
-  id: string
-  title: string
-  color: string
-  allDay: boolean
-}
-
-const props = defineProps<{
+defineProps<{
   dayNum: number
   today: boolean
   outsideMonth: boolean
-  events: Pv2CellEvent[]
-  maxChips: number
+  /** Events on this day the week's lane budget could not fit. */
+  hiddenCount: number
 }>()
 
 const emit = defineEmits<{
   cellClick: []
 }>()
-
-const visibleEvents = computed(() =>
-  props.events.length <= props.maxChips
-    ? props.events
-    : props.events.slice(0, Math.max(0, props.maxChips - 1))
-)
-const hiddenCount = computed(() => props.events.length - visibleEvents.value.length)
 </script>
 
 <style scoped>
@@ -103,16 +80,12 @@ const hiddenCount = computed(() => props.events.length - visibleEvents.value.len
   text-shadow: none;
 }
 
-.pv2-cell__events {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 3px;
-  min-height: 0;
-  overflow: hidden;
-}
-
+/* Pinned to the bottom of the cell rather than following a chip list — the chips live in the
+   week's overlay now, so there is nothing here for it to sit after. */
 .pv2-cell__more {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
   font: 400 8px var(--cd-font-mono);
   color: #b2b2b2;
 }
