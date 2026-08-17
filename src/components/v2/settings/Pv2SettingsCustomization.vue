@@ -23,13 +23,32 @@
           <!-- 白紗遮罩即時預覽：切 intensity 時這裡的圖就跟著變濛（與月曆頁同一份 scrimOpacity） -->
           <div class="pv2-cust__preview-scrim" :style="{ opacity: appearance.scrimOpacity }" />
         </div>
-        <button type="button" class="pv2-cust__upload" @click="onUploadClick">
+        <button type="button" class="pv2-cust__upload" :disabled="busy" @click="onUploadClick">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 16 V4 M7 9 l5-5 5 5 M5 20 h14" />
           </svg>
-          Upload image
+          {{ uploading ? 'Uploading…' : 'Upload image' }}
         </button>
-        <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileChange" />
+        <!-- Only the formats the public bucket will serve safely; see ACCEPTED_TYPES.
+             The attribute is a picker hint, and the handler re-checks. -->
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          @change="onFileChange"
+        />
+        <!-- Shown only when there is something to reset. Without it the Upload button
+             is one-way: a photo the user regrets can only be covered, never removed. -->
+        <button
+          v-if="hasCustomBackground"
+          type="button"
+          class="pv2-cust__reset"
+          :disabled="busy"
+          @click="onResetBackground"
+        >
+          Reset to default
+        </button>
         <p class="pv2-cust__caption">Drop or tap the preview to replace · hover it to reframe</p>
       </div>
 
@@ -77,10 +96,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
 import { useV2TabsStore } from '@/stores/v2-tabs-store'
+import { notifySyncError } from '@/lib/notify'
 
 const emit = defineEmits<{
   back: []
@@ -93,7 +113,9 @@ const tabSummary = computed(() => tabsStore.shownTabs.map((t) => t.title).join('
 
 // 接 v2 外觀 store（月曆頁讀同一份，即時反映）
 const appearance = useV2AppearanceStore()
-const { backgroundImage: bgPreview, scrimOpacity } = storeToRefs(appearance)
+// backgroundImage is a computed on the store now (path → public URL, or the bundled
+// default), so it is read-only here; uploads and resets go through actions.
+const { backgroundImage: bgPreview, scrimOpacity, hasCustomBackground } = storeToRefs(appearance)
 
 // store 存 0–1 的 opacity，滑桿以 0–100 呈現：讀寫都在此換算，store 不需要知道 UI 單位。
 const intensityPercent = computed({
@@ -106,19 +128,70 @@ const intensityPercent = computed({
 // step="any" 會給出小數，顯示時取整數避免數字跳動看起來雜亂。
 const intensityLabel = computed(() => Math.round(intensityPercent.value))
 const fileInput = ref<HTMLInputElement | null>(null)
+// Which operation is running, not merely whether one is. Both buttons disable
+// together — two concurrent writes to the same row would race — but only the
+// upload button relabels, because "Uploading…" on a reset would be a lie.
+const pending = ref<'upload' | 'reset' | null>(null)
+const busy = computed(() => pending.value !== null)
+const uploading = computed(() => pending.value === 'upload')
+
+// The store debounces the slider's write by 500ms. Leaving the pane within that
+// window would otherwise drop a deliberate adjustment, so flush on the way out.
+// Best-effort only: it cannot cover a hard tab close.
+onBeforeUnmount(() => {
+  appearance.flushScrimOpacity()
+})
+
+// Accepted upload formats. SVG is deliberately excluded: backgrounds live in a
+// public bucket, and a user-supplied SVG served from our own origin is a stored
+// XSS vector if it is ever opened as a top-level document.
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+// Ceiling on the *picked* file. The store downscales before upload, so this only
+// exists to stop a pathological input from OOMing the decode on a phone.
+const MAX_FILE_BYTES = 25 * 1024 * 1024
 
 function onUploadClick(): void {
+  if (busy.value) return
   fileInput.value?.click()
 }
 
-function onFileChange(e: Event): void {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    bgPreview.value = reader.result as string
+async function onFileChange(e: Event): Promise<void> {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  // Clearing the value lets the same file be picked twice in a row; without it a
+  // retry after a failed upload silently fires no change event at all.
+  input.value = ''
+  if (!file || busy.value) return
+
+  if (!ACCEPTED_TYPES.includes(file.type)) {
+    notifySyncError('That file type is not supported — use a JPEG, PNG or WebP.', () => {
+      onUploadClick()
+    })
+    return
   }
-  reader.readAsDataURL(file)
+  if (file.size > MAX_FILE_BYTES) {
+    notifySyncError('That image is too large — pick one under 25 MB.', () => {
+      onUploadClick()
+    })
+    return
+  }
+
+  pending.value = 'upload'
+  try {
+    await appearance.uploadBackground(file)
+  } finally {
+    pending.value = null
+  }
+}
+
+async function onResetBackground(): Promise<void> {
+  if (busy.value) return
+  pending.value = 'reset'
+  try {
+    await appearance.clearBackground()
+  } finally {
+    pending.value = null
+  }
 }
 </script>
 
@@ -296,6 +369,35 @@ function onFileChange(e: Event): void {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.pv2-cust__upload:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Reset: deliberately the quietest thing in the card. It borrows the caption's grey
+   rather than the upload button's fill, because resetting is a rare, recoverable
+   action that should not compete with the primary one. */
+.pv2-cust__reset {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: #9c9c9c;
+  font: 600 11px var(--cd-font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pv2-cust__reset:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .pv2-cust__caption {

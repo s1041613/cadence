@@ -6,6 +6,8 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { useInboxStore } from '@/stores/inbox-store'
 import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
 import { useNotebookStore } from '@/stores/notebook-store'
+import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
+import { useV2TabsStore } from '@/stores/v2-tabs-store'
 import { ensureDefaultCalendar } from '@/services/calendars-service'
 import { onAuthUserChange } from './auth-data-sync-core'
 
@@ -22,6 +24,8 @@ export default defineBoot(({ store }) => {
   const inboxStore = useInboxStore(store)
   const titleDismissalsStore = useTitleDismissalsStore(store)
   const notebookStore = useNotebookStore(store)
+  const v2AppearanceStore = useV2AppearanceStore(store)
+  const v2TabsStore = useV2TabsStore(store)
 
   watch(
     () => auth.user?.id ?? null,
@@ -33,6 +37,8 @@ export default defineBoot(({ store }) => {
         inboxStore,
         titleDismissalsStore,
         notebookStore,
+        v2AppearanceStore,
+        v2TabsStore,
         getCurrentUserId: () => auth.user?.id ?? null,
         getMemberCalendarIds: () => calendarsStore.calendars.map((c) => c.id)
       })

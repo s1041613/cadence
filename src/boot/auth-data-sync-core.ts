@@ -36,6 +36,12 @@ export interface OnAuthUserChangeDeps {
   // surfaces its own toast on failure, because an empty notebook is indistinguishable from having
   // lost every note. That handler is also why it never rejects — see the Promise.all note below.
   notebookStore: TitleDismissalsStoreLike
+  // v2 background photo + scrim opacity, and the v2 bottom-nav tab list. Two stores sharing one
+  // user_settings row (see stores/user-settings-sync.ts). Same user-scoped shape as titleDismissals,
+  // and both fail silently: falling back to the bundled wallpaper and the default nav is cosmetic,
+  // and every tab stays reachable through Settings regardless.
+  v2AppearanceStore: TitleDismissalsStoreLike
+  v2TabsStore: TitleDismissalsStoreLike
   // Reads the *current* signed-in user id at the moment it's called (not the userId this change
   // event started with) — used only for the stale-session check below.
   getCurrentUserId: () => string | null
@@ -59,6 +65,8 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore,
     titleDismissalsStore,
     notebookStore,
+    v2AppearanceStore,
+    v2TabsStore,
     getCurrentUserId,
     getMemberCalendarIds
   } = deps
@@ -69,6 +77,10 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore.resetLocal()
     titleDismissalsStore.resetLocal()
     notebookStore.resetLocal()
+    // Also cancels the appearance store's pending slider debounce, so a write armed
+    // just before sign-out cannot stamp this user's opacity onto the next session.
+    v2AppearanceStore.resetLocal()
+    v2TabsStore.resetLocal()
     return
   }
 
@@ -94,6 +106,11 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     tasksStore.loadFromRemote(userId, defaultId, getMemberCalendarIds()),
     inboxStore.loadFromRemote(userId, defaultId),
     titleDismissalsStore.loadFromRemote(),
-    notebookStore.loadFromRemote()
+    notebookStore.loadFromRemote(),
+    // Both read the same user_settings row, so this is two round trips for one row.
+    // Left as-is rather than merged: sharing a fetch would couple two stores that
+    // otherwise know nothing about each other, to save one request on sign-in only.
+    v2AppearanceStore.loadFromRemote(),
+    v2TabsStore.loadFromRemote()
   ])
 }
