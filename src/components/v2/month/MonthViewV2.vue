@@ -28,7 +28,7 @@
 
       <div class="pv2-slide-viewport">
         <Transition :name="transitionName">
-          <Pv2Grid :key="monthKey" :cells="gridCells" @cell-click="onCellClick" />
+          <Pv2Grid :key="monthKey" :weeks="gridWeeks" @cell-click="onCellClick" />
         </Transition>
       </div>
     </div>
@@ -78,11 +78,10 @@ import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
 import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
-import Pv2Grid, { type Pv2GridCell } from '@/components/v2/ui/Pv2Grid.vue'
+import Pv2Grid, { type Pv2GridWeek } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2DaySheet, { type Pv2DayEvent } from '@/components/v2/ui/Pv2DaySheet.vue'
-import type { Pv2CellEvent } from '@/components/v2/ui/Pv2Cell.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useSettingsStore } from '@/stores/settings-store'
@@ -90,6 +89,9 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { spansDate } from '@/utils/event-span'
+import { compareForLane, layoutWeek, weekRows } from '@/utils/month-lanes'
+import type { Task } from '@/types/task'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
 import { resolveDaySheetStep, useDateSwipe } from '@/composables/use-date-swipe'
 
@@ -114,22 +116,45 @@ function onToggleCalendar(id: string): void {
   calendarsStore.toggleSelected(id)
 }
 
-// 某日的事件（過濾隱藏日曆），色點取 themeOf。
-function eventsForDate(date: string): Pv2CellEvent[] {
-  return tasksStore.tasks
-    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
-    .map((t) => ({ id: t.id, title: t.title, color: themeOf(t).backgroundColor, allDay: t.allDay }))
+// Events covering this day whose calendar is visible. The grid and the day sheet share
+// one predicate so they can never disagree about what a day contains; spansDate puts a
+// multi-day event on every day it covers.
+function visibleTasksForDate(date: string): Task[] {
+  return tasksStore.tasks.filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
 }
 
-const gridCells = computed<Pv2GridCell[]>(() =>
-  monthGridCells(year.value, month.value, settings.firstDay).map((c) => ({
-    date: c.date,
-    dayNum: c.dayNum,
-    today: c.date === iso(new Date()),
-    outsideMonth: c.outsideMonth,
-    events: eventsForDate(c.date)
-  }))
-)
+// One layout pass per week row; a multi-day event gets one bar spanning its columns there.
+// Lanes are assigned once per week rather than per day, which is what keeps a span on the same
+// row in every cell it covers — assigning per cell let the same event sit on different rows on
+// consecutive days, so it never read as one bar.
+const gridWeeks = computed<Pv2GridWeek[]>(() => {
+  const today = iso(new Date())
+  const visible = tasksStore.tasks.filter((t) => calendarsStore.isVisible(t.calendarId))
+
+  return weekRows(monthGridCells(year.value, month.value, settings.firstDay)).map((week) => {
+    const dates = week.map((c) => c.date)
+    return {
+      key: dates[0]!,
+      cells: week.map((c) => ({
+        date: c.date,
+        dayNum: c.dayNum,
+        today: c.date === today,
+        outsideMonth: c.outsideMonth
+      })),
+      bars: layoutWeek(visible, dates).bars.map((bar) => ({
+        id: bar.task.id,
+        title: bar.task.title,
+        color: themeOf(bar.task).backgroundColor,
+        allDay: bar.task.allDay,
+        startCol: bar.startCol,
+        span: bar.span,
+        lane: bar.lane,
+        continuesLeft: bar.continuesLeft,
+        continuesRight: bar.continuesRight
+      }))
+    }
+  })
+})
 
 // ── 當日事件面板（cell 點擊）──────────────────────────────
 const daySheetDate = ref<string | null>(null)
@@ -145,17 +170,14 @@ const daySheetLabel = computed(() =>
     : ''
 )
 
-// 當日事件：重用 themeOf 取象限色/標籤；排序 all-day 最前，其餘按 start 昇序。
+// 當日事件：重用 themeOf 取象限色/標籤。
+// compareForLane is the grid's own ordering, shared deliberately: the sheet lists the same day
+// the grid just drew, so sorting them differently would show the same events in two orders.
 const daySheetEvents = computed<Pv2DayEvent[]>(() => {
   if (!daySheetDate.value) return []
-  return tasksStore.tasks
-    .filter((t) => t.date === daySheetDate.value && calendarsStore.isVisible(t.calendarId))
+  return visibleTasksForDate(daySheetDate.value)
     .slice()
-    .sort((a, b) => {
-      const at = a.allDay || !a.start ? '' : a.start
-      const bt = b.allDay || !b.start ? '' : b.start
-      return at.localeCompare(bt)
-    })
+    .sort(compareForLane)
     .map((t) => {
       const theme = themeOf(t)
       return {
