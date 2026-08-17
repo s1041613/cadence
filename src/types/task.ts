@@ -5,7 +5,12 @@ export type ReminderPreset = 'at-time' | '5-min' | '15-min' | '30-min' | '1-hour
 export interface Task {
   id: string
   title: string
+  /** Inclusive start date, 'YYYY-MM-DD'. */
   date: string
+  /** Inclusive END date. Absent — or equal to `date` — means a single-day entry. Never before
+   * `date`: the mapper and the edit card both normalize, so readers can compare it directly.
+   * Read it through endDateOf() rather than touching it, which keeps the absent case in one place. */
+  endDate?: string
   start: string
   end: string
   allDay: boolean

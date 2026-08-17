@@ -25,7 +25,8 @@ import { useSettingsStore } from '@/stores/settings-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
-import { minutes, hasTimeRange, quickAddTimeRange, iso } from '@/utils/convert-date-time'
+import { hasTimeRange, quickAddTimeRange, iso } from '@/utils/convert-date-time'
+import { clipToDay, spansDate } from '@/utils/event-span'
 import type { Task } from '@/types/task'
 
 const ui = useUiStore()
@@ -35,8 +36,10 @@ const settings = useSettingsStore()
 const now = useCurrentTime()
 
 // 當日、可見日曆的事件（過濾隱藏日曆），與 month/week 同源。
+// spansDate rather than an equality check: a multi-day event belongs to every day it covers,
+// not only its start day.
 const dayTasks = computed<Task[]>(() =>
-  tasksStore.tasks.filter((t) => t.date === ui.selectedDate && calendarsStore.isVisible(t.calendarId))
+  tasksStore.tasks.filter((t) => spansDate(t, ui.selectedDate) && calendarsStore.isVisible(t.calendarId))
 )
 
 const isToday = computed(() => ui.selectedDate === iso(new Date()))
@@ -49,16 +52,18 @@ const nowMinutes = computed(() => now.value.getHours() * 60 + now.value.getMinut
 const timedEvents = computed<Pv2GridEvent[]>(() =>
   dayTasks.value
     .filter((t) => !t.allDay && hasTimeRange(t))
-    .slice()
-    .sort((a, b) => a.start.localeCompare(b.start))
     .map((t) => ({
       id: t.id,
       title: t.title,
       color: themeOf(t).backgroundColor,
-      start: minutes(t.start),
-      end: minutes(t.end),
+      // Clipped to the rendered day: a span reaching into the next day would otherwise
+      // subtract to a negative height (22:00 -> 02:00 = -1200 minutes).
+      ...clipToDay(t, ui.selectedDate),
       subtasks: tasksStore.subtasksFor(t.id)
     }))
+    // Sorted on the clipped start, not the stored one: a span's middle day begins at
+    // midnight, and ordering it by its original 22:00 would place it after the whole day.
+    .sort((a, b) => a.start - b.start)
 )
 
 const allDayEvents = computed<Pv2GridAllDayEvent[]>(() =>

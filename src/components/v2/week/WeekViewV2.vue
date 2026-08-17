@@ -48,6 +48,7 @@ import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, addDays, startOfWeek, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { useDateSwipe } from '@/composables/use-date-swipe'
+import { spansDate } from '@/utils/event-span'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -90,9 +91,10 @@ const rangeLabel = computed(() => {
 const WEEK_SUBTASK_PREVIEW = 3
 
 // 某日事件（過濾隱藏日曆），色點取 themeOf，時間標籤 all-day / HH:MM / —
+// spansDate rather than an equality check: a multi-day event belongs to every day it covers.
 function eventsForDate(date: string): Pv2WeekEvent[] {
   return tasksStore.tasks
-    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
+    .filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
     .map((t) => {
       const timeLabel = t.allDay ? 'all-day' : t.start ? formatTime(t.start, settings.timeFormat) : '—'
       const subtasks = tasksStore.subtasksFor(t.id)

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
 import type { Subtask } from '@/types/subtask'
-import { defaultPoms, estPomsOf } from '@/utils/convert-date-time'
+import { addDays, defaultPoms, estPomsOf, iso, parseISO, spanDayCount } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
 import * as subtasksService from '@/services/subtasks-service'
@@ -15,6 +15,9 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
   const start = overrides.start ?? ''
   const end = overrides.end ?? ''
   const allDay = overrides.allDay ?? false
+  // The span has to reach defaultPoms: a multi-day entry estimates 1, and without the dates
+  // it would instead derive a count from the clock times as if it ran on a single day.
+  const span = { date: overrides.date, ...(overrides.endDate !== undefined ? { endDate: overrides.endDate } : {}) }
 
   return {
     id: crypto.randomUUID(),
@@ -28,7 +31,7 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
     important: false,
     urgent: false,
     done: false,
-    estimatedPomodoros: defaultPoms({ allDay, start, end }),
+    estimatedPomodoros: defaultPoms({ allDay, start, end, ...span }),
     completedPomodoros: 0,
     type: 'quadrant',
     backgroundColor: null,
@@ -417,11 +420,16 @@ export const useTasksStore = defineStore('tasks', () => {
   }
 
   function copyToDays(task: Task, dates: string[]): Task[] {
+    // A multi-day source carries its span length, not its literal end date: spreading the
+    // source's endDate onto a later start day would produce an inverted span.
+    const spanLength = spanDayCount(task) - 1
+    const { endDate: _sourceEndDate, ...base } = task
     const created = dates.map((date) =>
       mkTask({
-        ...task,
+        ...base,
         id: crypto.randomUUID(),
         date,
+        ...(spanLength > 0 ? { endDate: iso(addDays(parseISO(date), spanLength)) } : {}),
         done: false,
         completedPomodoros: 0
       })

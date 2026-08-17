@@ -139,6 +139,7 @@ import { useBreakpoint } from '@/composables/use-breakpoint'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { spansDate } from '@/utils/event-span'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
 import { defaultMonthPhotoPath, defaultMonthPhotoPaths } from '@/utils/public-assets'
 
@@ -249,9 +250,10 @@ function goToday(): void {
 }
 
 // calendar-management spec "Calendar visibility filters all views".
+// spansDate rather than an equality check: a multi-day event belongs to every day it covers.
 function eventsForDate(date: string): MonthCellEvent[] {
   return tasksStore.tasks
-    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
+    .filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
     .map((t) => {
       const theme = themeOf(t)
       return {

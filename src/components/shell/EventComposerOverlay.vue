@@ -11,6 +11,7 @@
         :icon="draft.icon"
         :all-day="draft.allDay"
         :date="draft.date"
+        v-bind="isV2 ? { endDate: draft.endDate ?? draft.date } : {}"
         :start="draft.start"
         :end="draft.end"
         :alert-label="alertLabel"
@@ -35,7 +36,8 @@
         @update:icon="(v: IconName) => (draft!.icon = v)"
         @remove-icon="draft!.icon = null"
         @update:all-day="(v) => (draft!.allDay = v)"
-        @update:date="(v) => (draft!.date = v)"
+        @update:date="(v: string) => setDraftDate(v)"
+        @update:end-date="(v: string) => setDraftEndDate(v)"
         @update:start="(v) => (draft!.start = v)"
         @update:end="(v) => (draft!.end = v)"
         @update:reminder="(v) => (draft!.reminder = v)"
@@ -71,6 +73,7 @@
         :icon="draft.icon"
         :all-day="draft.allDay"
         :date="draft.date"
+        v-bind="isV2 ? { endDate: draft.endDate ?? draft.date } : {}"
         :start="draft.start"
         :end="draft.end"
         :alert-label="alertLabel"
@@ -96,7 +99,8 @@
         @update:icon="(v: IconName) => (draft!.icon = v)"
         @remove-icon="draft!.icon = null"
         @update:all-day="(v) => (draft!.allDay = v)"
-        @update:date="(v) => (draft!.date = v)"
+        @update:date="(v: string) => setDraftDate(v)"
+        @update:end-date="(v: string) => setDraftEndDate(v)"
         @update:start="(v) => (draft!.start = v)"
         @update:end="(v) => (draft!.end = v)"
         @update:reminder="(v) => (draft!.reminder = v)"
@@ -168,7 +172,8 @@ const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'la
 // card no longer declares them (its STYLE field picks a colour only): v1 still has a full
 // icon picker, and on v2 they simply fall through as unused attrs. The `v: IconName`
 // annotation is needed because the union of the two cards no longer types the payload.
-const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
+const isV2 = computed(() => props.variant === 'v2')
+const editCardComponent = computed(() => (isV2.value ? Pv2EventEditCard : CdEventEditCard))
 
 // Sheet open/close transition, v2 phone only — legacy keeps CdSheet's original enter-only
 // keyframe, and the desktop branch renders a CdDrawer whose root the cd-sheet classes don't
@@ -291,6 +296,21 @@ function cycleRepeat(): void {
   if (!draft.value) return
   const next = (REPEAT_CYCLE.indexOf(draft.value.repeat) + 1) % REPEAT_CYCLE.length
   draft.value.repeat = REPEAT_CYCLE[next]!
+}
+
+// The card always sees a concrete end date, but the draft stores absence for a single-day
+// entry — writing date === endDate would persist a redundant field on the overwhelming
+// majority of events.
+function setDraftDate(value: string): void {
+  if (!draft.value) return
+  draft.value.date = value
+  if (draft.value.endDate !== undefined && draft.value.endDate <= value) delete draft.value.endDate
+}
+
+function setDraftEndDate(value: string): void {
+  if (!draft.value) return
+  if (value <= draft.value.date) delete draft.value.endDate
+  else draft.value.endDate = value
 }
 
 function trySave(): void {

@@ -22,6 +22,7 @@
       :color="editColor"
       :all-day="editAllDay"
       :date="editDate"
+      :end-date="editEndDate"
       :start="editStart"
       :end="editEnd"
       :alert-label="alertLabel"
@@ -41,6 +42,7 @@
       @update:color="(v) => (editColor = v)"
       @update:all-day="(v) => (editAllDay = v)"
       @update:date="(v) => (editDate = v)"
+      @update:end-date="(v: string) => (editEndDate = v)"
       @update:start="(v) => (editStart = v)"
       @update:end="(v) => (editEnd = v)"
       @update:reminder="(v) => (editReminder = v)"
@@ -102,6 +104,7 @@
         :color="editColor"
         :all-day="editAllDay"
         :date="editDate"
+        :end-date="editEndDate"
         :start="editStart"
         :end="editEnd"
         :alert-label="alertLabel"
@@ -121,6 +124,7 @@
         @update:color="(v) => (editColor = v)"
         @update:all-day="(v) => (editAllDay = v)"
         @update:date="(v) => (editDate = v)"
+        @update:end-date="(v: string) => (editEndDate = v)"
         @update:start="(v) => (editStart = v)"
         @update:end="(v) => (editEnd = v)"
         @update:reminder="(v) => (editReminder = v)"
@@ -170,7 +174,7 @@ import { useTasksStore } from '@/stores/tasks-store'
 import { useUiStore } from '@/stores/ui-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
-import { autoPoms, formatTime, parseISO } from '@/utils/convert-date-time'
+import { autoPoms, endDateOf, formatTime, parseISO } from '@/utils/convert-date-time'
 import { buildCopyToDaysCells, reminderLabel, type CopyToDaysCell } from '@/utils/event-panel'
 import type { ReminderPreset, RepeatMode, Task } from '@/types/task'
 
@@ -252,6 +256,8 @@ const editColor = ref<string>('#4A8B85')
 const editIcon = ref<string | null>(null)
 const editAllDay = ref(false)
 const editDate = ref('')
+// Always a concrete date while editing; saveEdit drops it again when the span is one day.
+const editEndDate = ref('')
 const editStart = ref('')
 const editEnd = ref('')
 const editLocation = ref('')
@@ -276,6 +282,7 @@ function seedEditState(t: Task): void {
   editIcon.value = t.icon
   editAllDay.value = t.allDay
   editDate.value = t.date
+  editEndDate.value = endDateOf(t)
   editStart.value = t.start
   editEnd.value = t.end
   editLocation.value = t.location
@@ -342,6 +349,9 @@ function saveEdit(): void {
     icon: editType.value === 'event' ? editIcon.value : null,
     allDay: editType.value === 'event' ? editAllDay.value : false,
     date: editDate.value,
+    // Absent rather than equal to the start date, so a single-day event keeps the shape it
+    // has always had; delete below covers the multi-day -> single-day edit.
+    ...(editEndDate.value > editDate.value ? { endDate: editEndDate.value } : {}),
     start: editType.value === 'event' && editAllDay.value ? '' : editStart.value,
     end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value,
     location: editLocation.value,
@@ -355,9 +365,16 @@ function saveEdit(): void {
     estimatedPomodoros: autoPoms({
       allDay: editType.value === 'event' && editAllDay.value,
       start: editType.value === 'event' && editAllDay.value ? '' : editStart.value,
-      end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value
+      end: editType.value === 'event' && editAllDay.value ? '' : editEnd.value,
+      // Without the dates a multi-day span would be estimated from its clock times alone.
+      date: editDate.value,
+      ...(editEndDate.value > editDate.value ? { endDate: editEndDate.value } : {})
     })
   }
+
+  // Shrinking a span back to one day has to remove the field: the spread above carried the
+  // previous endDate in, and the conditional spread cannot overwrite it with absence.
+  if (editEndDate.value <= editDate.value) delete updated.endDate
 
   tasksStore.saveTask(updated)
   backToPreview()

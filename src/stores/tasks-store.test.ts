@@ -124,6 +124,32 @@ describe('tasks-store', () => {
       expect(store.tasks).toHaveLength(2)
     })
 
+    // Copying a span carries its LENGTH, not its literal end date: spreading the source's
+    // endDate onto a later start day would leave every copy inverted (end before start).
+    it('re-bases the span of a multi-day source onto each target date', async () => {
+      const store = await signedInStore()
+      const source = mkTask({
+        date: '2026-07-10',
+        endDate: '2026-07-12',
+        start: '09:00',
+        end: '17:00',
+        calendarId: DEFAULT_CALENDAR_UUID
+      })
+
+      const created = store.copyToDays(source, ['2026-07-20', '2026-07-30'])
+
+      expect(created.map((t) => t.endDate)).toEqual(['2026-07-22', '2026-08-01'])
+    })
+
+    it('leaves copies of a single-day source without an endDate', async () => {
+      const store = await signedInStore()
+      const source = mkTask({ date: '2026-07-10', start: '09:00', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
+
+      const created = store.copyToDays(source, ['2026-07-20'])
+
+      expect(created[0]).not.toHaveProperty('endDate')
+    })
+
     it('resets completion state on copied tasks while preserving task details', async () => {
       const store = await signedInStore()
       const source = mkTask({

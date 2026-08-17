@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, pomsInSlot, defaultPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime, snapToStep, shiftRange } from './convert-date-time'
+import { pad, iso, parseISO, addDays, startOfWeek, minutes, hasTimeRange, toHM, fmtDur, autoPoms, pomsInSlot, defaultPoms, estPomsOf, slotEndAt, isSlotOver, quickAddTimeRange, formatTime, snapToStep, shiftRange, daysBetween, endDateOf, spanDayCount, isMultiDay } from './convert-date-time'
 import { DEFAULT_FOCUS_MS, DEFAULT_REST_MS } from './focus-timer'
 
 describe('pad', () => {
@@ -85,6 +85,70 @@ describe('hasTimeRange', () => {
     expect(hasTimeRange({ start: '09:30', end: '09:00' })).toBe(false)
     expect(hasTimeRange({ start: 'nope', end: '09:30' })).toBe(false)
   })
+
+  // 22:00 -> 02:00 is inverted within one day but legitimate across two.
+  it('accepts an inverted clock range when the span crosses days', () => {
+    expect(hasTimeRange({ start: '22:00', end: '02:00', date: '2026-07-10', endDate: '2026-07-11' })).toBe(true)
+    expect(hasTimeRange({ start: '22:00', end: '02:00', date: '2026-07-10' })).toBe(false)
+  })
+
+  // Times still have to be real values, span or no span.
+  it('still rejects unparseable times on a multi-day span', () => {
+    expect(hasTimeRange({ start: 'nope', end: '02:00', date: '2026-07-10', endDate: '2026-07-11' })).toBe(false)
+  })
+})
+
+describe('daysBetween', () => {
+  it('counts whole days forward and backward', () => {
+    expect(daysBetween('2026-07-10', '2026-07-12')).toBe(2)
+    expect(daysBetween('2026-07-10', '2026-07-10')).toBe(0)
+    expect(daysBetween('2026-07-12', '2026-07-10')).toBe(-2)
+  })
+
+  it('crosses month, year and leap-day boundaries', () => {
+    expect(daysBetween('2026-07-31', '2026-08-02')).toBe(2)
+    expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1)
+    expect(daysBetween('2028-02-28', '2028-03-01')).toBe(2)
+  })
+})
+
+describe('endDateOf', () => {
+  it('falls back to the start date when there is no end date', () => {
+    expect(endDateOf({ date: '2026-07-10' })).toBe('2026-07-10')
+    expect(endDateOf({ date: '2026-07-10', endDate: '2026-07-10' })).toBe('2026-07-10')
+  })
+
+  it('returns a later end date', () => {
+    expect(endDateOf({ date: '2026-07-10', endDate: '2026-07-12' })).toBe('2026-07-12')
+  })
+
+  // Repairing an inverted span here means no downstream consumer has to re-check it.
+  it('normalizes an inverted end date back to single-day', () => {
+    expect(endDateOf({ date: '2026-07-10', endDate: '2026-07-08' })).toBe('2026-07-10')
+  })
+})
+
+describe('spanDayCount', () => {
+  it('counts a single day as one', () => {
+    expect(spanDayCount({ date: '2026-07-10' })).toBe(1)
+    expect(spanDayCount({ date: '2026-07-10', endDate: '2026-07-08' })).toBe(1)
+  })
+
+  it('counts inclusively across boundaries', () => {
+    expect(spanDayCount({ date: '2026-07-10', endDate: '2026-07-12' })).toBe(3)
+    expect(spanDayCount({ date: '2026-07-31', endDate: '2026-08-02' })).toBe(3)
+    expect(spanDayCount({ date: '2026-12-31', endDate: '2027-01-01' })).toBe(2)
+    expect(spanDayCount({ date: '2028-02-28', endDate: '2028-03-01' })).toBe(3)
+  })
+})
+
+describe('isMultiDay', () => {
+  it('is true only when the span extends past the start date', () => {
+    expect(isMultiDay({ date: '2026-07-10' })).toBe(false)
+    expect(isMultiDay({ date: '2026-07-10', endDate: '2026-07-10' })).toBe(false)
+    expect(isMultiDay({ date: '2026-07-10', endDate: '2026-07-08' })).toBe(false)
+    expect(isMultiDay({ date: '2026-07-10', endDate: '2026-07-11' })).toBe(true)
+  })
 })
 
 describe('toHM', () => {
@@ -122,6 +186,16 @@ describe('autoPoms', () => {
     expect(autoPoms({ allDay: false, start: '09:00', end: '09:25' })).toBe(1)
     expect(autoPoms({ allDay: false, start: '09:00', end: '10:30' })).toBe(4)
   })
+
+  // A multi-day span is a container, not a focus session. Deriving from the clock times
+  // alone would give a four-day trip 231 pomodoros, and that number gets persisted.
+  it('returns 1 for a multi-day span', () => {
+    expect(autoPoms({ allDay: false, start: '09:00', end: '17:00', date: '2026-07-10', endDate: '2026-07-13' })).toBe(1)
+  })
+
+  it('still derives from the slot for a single-day span', () => {
+    expect(autoPoms({ allDay: false, start: '09:00', end: '10:30', date: '2026-07-10', endDate: '2026-07-10' })).toBe(4)
+  })
 })
 
 describe('estPomsOf', () => {
@@ -143,6 +217,12 @@ describe('estPomsOf', () => {
   it('ignores a negative stored estimate', () => {
     expect(estPomsOf({ estimatedPomodoros: -3, allDay: false, start: '09:00', end: '09:30' })).toBe(2)
   })
+
+  it('falls back to 1 for a multi-day span with no stored estimate', () => {
+    expect(
+      estPomsOf({ estimatedPomodoros: 0, allDay: false, start: '09:00', end: '17:00', date: '2026-07-10', endDate: '2026-07-13' })
+    ).toBe(1)
+  })
 })
 
 describe('slotEndAt', () => {
@@ -162,6 +242,14 @@ describe('slotEndAt', () => {
   it('has no end instant when the time was never filled in', () => {
     expect(slotEndAt({ allDay: false, date: '2026-07-31', end: '' })).toBeNull()
   })
+
+  // A multi-day event ends on its LAST day. Anchoring to `date` would place the end instant
+  // on the first day and mark the event over from that evening onward.
+  it('anchors the end time to the end date of a multi-day span', () => {
+    const at = slotEndAt({ allDay: false, date: '2026-07-10', endDate: '2026-07-12', end: '02:00' })
+    expect(at?.getDate()).toBe(12)
+    expect(at?.getHours()).toBe(2)
+  })
 })
 
 describe('isSlotOver', () => {
@@ -179,6 +267,14 @@ describe('isSlotOver', () => {
   // Comparing only HH:MM would make yesterday's morning event look current again today.
   it('stays over on a later day, whatever the clock says', () => {
     expect(isSlotOver(event, new Date(2026, 7, 1, 8, 0))).toBe(true)
+  })
+
+  // The regression multi-day support would otherwise introduce: a trip running the 10th to
+  // the 12th must not read as finished on the 11th just because its end time has passed.
+  it('is not over on a middle day of a multi-day span', () => {
+    const trip = { allDay: false, date: '2026-07-10', endDate: '2026-07-12', end: '17:00' }
+    expect(isSlotOver(trip, new Date(2026, 6, 11, 23, 0))).toBe(false)
+    expect(isSlotOver(trip, new Date(2026, 6, 12, 17, 0))).toBe(true)
   })
 
   it('is not over on an earlier day', () => {
@@ -222,6 +318,12 @@ describe('pomsInSlot', () => {
 
   it('gives an all-day event one pomodoro, matching autoPoms', () => {
     expect(pomsInSlot({ allDay: true, start: '', end: '' }, FOCUS, REST)).toBe(1)
+  })
+
+  it('gives a multi-day span one pomodoro, matching autoPoms', () => {
+    expect(
+      pomsInSlot({ allDay: false, start: '09:00', end: '17:00', date: '2026-07-10', endDate: '2026-07-13' }, FOCUS, REST)
+    ).toBe(1)
   })
 
   // The distinction from autoPoms is the whole point of the function existing.
