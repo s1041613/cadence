@@ -1,7 +1,15 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Note } from '@/types/note'
-import { fetchNotes, insertNote, updateNote, deleteNote } from '@/services/notes-service'
+import {
+  fetchNotes,
+  insertNote,
+  updateNote,
+  updateNoteSettings,
+  deleteNote,
+  type NoteSettings
+} from '@/services/notes-service'
+import { clampDuration, MIN_DURATION } from '@/utils/note-duration'
 import { notifySyncError } from '@/lib/notify'
 import { useAuthStore } from './auth-store'
 
@@ -153,7 +161,12 @@ export const useNotebookStore = defineStore('notebook', () => {
       body: text,
       createdAt: new Date().toISOString(),
       // Never edited yet; the column is nullable for exactly this case.
-      updatedAt: null
+      updatedAt: null,
+      // false/false is the `later` quadrant — the least-committed of the four, and the right
+      // default for something just jotted down: capture should not force a triage decision.
+      important: false,
+      urgent: false,
+      durationMin: MIN_DURATION
     }
     notes.value.unshift(snapshot)
     persistInsert(snapshot)
@@ -194,6 +207,69 @@ export const useNotebookStore = defineStore('notebook', () => {
     })
   }
 
+  /**
+   * Rewrites one note's quadrant and duration. Optimistic like the other actions: the pill and
+   * stepper move immediately and revert together if the write fails.
+   *
+   * Takes the whole settings triple rather than a partial patch. The card's two controls are
+   * adjacent and get tapped in quick succession, and each tap enqueues a write on this note's
+   * chain — sending the full resolved state means a write that lands out of order still leaves
+   * the row equal to what the card shows, where merging partials could interleave into a state
+   * the user never chose.
+   *
+   * updatedAt is deliberately untouched (see updateNoteSettings): that column tracks edits to
+   * what a note says, and re-filing it says nothing new.
+   */
+  function setNoteSettings(id: string, settings: NoteSettings): void {
+    const idx = notes.value.findIndex((n) => n.id === id)
+    if (idx === -1) return
+    const previous = notes.value[idx]!
+
+    // Clamped here rather than trusted from the caller: this is the boundary the check
+    // constraint mirrors, so a value that would be rejected by the database never reaches the
+    // optimistic render either.
+    const next: Note = {
+      ...previous,
+      important: settings.important,
+      urgent: settings.urgent,
+      durationMin: clampDuration(settings.durationMin)
+    }
+
+    // A no-op tap (the − at the floor, say) should not cost a round trip or a toast.
+    if (
+      next.important === previous.important &&
+      next.urgent === previous.urgent &&
+      next.durationMin === previous.durationMin
+    ) {
+      return
+    }
+
+    if (!isLoaded.value || syncUserId === null) {
+      rejectUnsyncedWrite(() => setNoteSettings(id, settings))
+      return
+    }
+    const version = generation
+    notes.value = notes.value.map((n) => (n.id === id ? next : n))
+
+    void enqueueWrite(id, () =>
+      updateNoteSettings(id, {
+        important: next.important,
+        urgent: next.urgent,
+        durationMin: next.durationMin
+      })
+    ).catch(() => {
+      if (version !== generation) return
+      // Revert only this note's settings, by id: the feed may have shifted while the write was
+      // in flight, and the body may have been edited independently in the meantime.
+      notes.value = notes.value.map((n) =>
+        n.id === id
+          ? { ...n, important: previous.important, urgent: previous.urgent, durationMin: previous.durationMin }
+          : n
+      )
+      notifySyncError('更新失敗', () => setNoteSettings(id, settings))
+    })
+  }
+
   function removeNote(id: string): void {
     if (!isLoaded.value || syncUserId === null) {
       rejectUnsyncedWrite(() => removeNote(id))
@@ -225,6 +301,7 @@ export const useNotebookStore = defineStore('notebook', () => {
     resetLocal,
     addNote,
     editNote,
+    setNoteSettings,
     removeNote
   }
 })

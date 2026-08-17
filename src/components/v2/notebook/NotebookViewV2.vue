@@ -15,6 +15,7 @@
         :note="note"
         :now="now"
         @edit="store.editNote(note.id, $event)"
+        @settings="store.setNoteSettings(note.id, $event)"
         @delete="store.removeNote(note.id)"
       />
     </div>

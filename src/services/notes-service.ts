@@ -1,5 +1,6 @@
 import type { Note } from '@/types/note'
 import { requireSupabase } from '@/lib/supabase'
+import { clampDuration, MIN_DURATION } from '@/utils/note-duration'
 
 // Pure I/O layer, matching subtasks-service: no store access, no concurrency control.
 // Callers pass immutable snapshots; ordering, rollback and notifications live in the
@@ -22,6 +23,9 @@ export interface NoteRow {
   body: string
   created_at: string
   updated_at: string | null
+  important: boolean
+  urgent: boolean
+  duration_min: number
 }
 
 export function rowToNote(row: NoteRow): Note {
@@ -30,7 +34,16 @@ export function rowToNote(row: NoteRow): Note {
     body: row.body,
     createdAt: row.created_at,
     // Rows written before notes became editable have no column value at all.
-    updatedAt: row.updated_at ?? null
+    updatedAt: row.updated_at ?? null,
+    // Both columns are NOT NULL with defaults, so a row can only be missing them if it was
+    // read through an older projection. Falling back to the `later` quadrant matches both the
+    // column default and quadrantOf's fallback, so the two never disagree.
+    important: row.important ?? false,
+    urgent: row.urgent ?? false,
+    // Clamped rather than trusted: the check constraint guarantees the range for rows this
+    // client wrote, and clamping means an off-grid legacy value renders on the stepper's grid
+    // instead of showing a duration the ± buttons can never return to.
+    durationMin: clampDuration(row.duration_min ?? MIN_DURATION)
   }
 }
 
@@ -40,7 +53,10 @@ export function noteToRow(note: Note, ownerId: string): NoteRow {
     user_id: ownerId,
     body: note.body,
     created_at: note.createdAt,
-    updated_at: note.updatedAt
+    updated_at: note.updatedAt,
+    important: note.important,
+    urgent: note.urgent,
+    duration_min: note.durationMin
   }
 }
 
@@ -85,6 +101,33 @@ export async function updateNote(id: string, body: string, updatedAt: string): P
   const { error } = await requireSupabase()
     .from('notes')
     .update({ body, updated_at: updatedAt })
+    .eq('id', id)
+    .abortSignal(timeoutSignal())
+  if (error) throw error
+}
+
+/** The per-note card settings: quadrant axes and planned length. */
+export interface NoteSettings {
+  important: boolean
+  urgent: boolean
+  durationMin: number
+}
+
+/**
+ * Writes one note's quadrant and duration. Separate from updateNote rather than folded into
+ * it: the two are edited by different controls with different failure messages, and narrowing
+ * each write to the columns its control owns means a stale snapshot of one can never clobber
+ * the other. Notably it leaves updated_at alone — that column records body edits, and
+ * re-filing a note into another quadrant is not a change to what it says.
+ */
+export async function updateNoteSettings(id: string, settings: NoteSettings): Promise<void> {
+  const { error } = await requireSupabase()
+    .from('notes')
+    .update({
+      important: settings.important,
+      urgent: settings.urgent,
+      duration_min: settings.durationMin
+    })
     .eq('id', id)
     .abortSignal(timeoutSignal())
   if (error) throw error
