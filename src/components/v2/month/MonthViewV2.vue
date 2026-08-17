@@ -42,13 +42,15 @@
          重掛的時序會讓 Teleport 一次性解析拿到失效節點且不再重解，面板遂打不開。
          defer 讓目標解析延到整個 render cycle 之後，確保 remount 時拿到當前的 #mp2-root。 -->
     <Teleport defer to="#mp2-root">
-      <Pv2MonthSheet
-        v-if="sheetOpen"
-        :month="month"
-        :year="year"
-        @select="onSheetSelect"
-        @close="sheetOpen = false"
-      />
+      <Transition name="pv2-sheet" :duration="300">
+        <Pv2MonthSheet
+          v-if="sheetOpen"
+          :month="month"
+          :year="year"
+          @select="onSheetSelect"
+          @close="sheetOpen = false"
+        />
+      </Transition>
     </Teleport>
 
     <!-- 當日事件面板（cell 點擊長出），同樣 teleport 到 frame 讓 scrim 蓋滿；defer 理由同上。

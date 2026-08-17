@@ -122,4 +122,80 @@ function onSwipeDown(): void {
   background: #ddd9cf;
   margin: 0 auto;
 }
+
+/* ---------- Opt-in open/close transition ----------
+ *
+ * `cd-sheetUp` above is enter-only and, being a keyframe, restarts from
+ * translateY(100%) every time it plays — a close interrupted by a re-open drops
+ * the panel off-screen and replays instead of retargeting from where it is.
+ * These classes replace it with transitions, which interpolate from the current
+ * value and so survive interruption, and add the leave the keyframe never had.
+ *
+ * OPT-IN, and deliberately so. Of CdSheet's render sites only three are
+ * reachable from the v2 routes; the rest are reachable only via /legacy, which
+ * can't be exercised in normal use and therefore can't be verified on a device.
+ * Wrapping a mount site in <Transition name="cd-sheet"> converts it; every site
+ * without that wrapper keeps the keyframe above, unchanged. Two mechanisms
+ * coexist on purpose — deleting the keyframe to "unify" them would silently
+ * strip the enter animation from every unconverted sheet.
+ *
+ * Scoped rather than global on purpose. Vue applies these classes to
+ * .cd-sheet-root, which is this component's own root, so the compiled selector
+ * carries the scope attribute and lands at (0,3,0) — beating the base
+ * `.cd-sheet` rule's (0,2,0). The same rules written in app.css would tie at
+ * (0,2,0) and resolve by stylesheet order, which is a build-order-dependent
+ * silent failure. */
+.cd-sheet-root.cd-sheet-enter-active .cd-sheet,
+.cd-sheet-root.cd-sheet-leave-active .cd-sheet {
+  /* Kill the keyframe, or it fights the transition over transform. */
+  animation: none;
+  transition: transform var(--cd-duration-sheet) var(--cd-ease-standard);
+}
+
+/* The scrim fades on the same clock as the panel. Its own cd-scrimIn is
+ * enter-only and runs at --cd-duration-scrim, so on the way out it would simply
+ * disappear, and on the way in it would finish while the panel was still
+ * travelling. CdScrim itself is untouched — this override only reaches the
+ * mount sites that opted in. */
+.cd-sheet-root.cd-sheet-enter-active .cd-scrim,
+.cd-sheet-root.cd-sheet-leave-active .cd-scrim {
+  animation: none;
+  transition: opacity var(--cd-duration-sheet) var(--cd-ease-standard);
+}
+
+.cd-sheet-root.cd-sheet-enter-from .cd-sheet,
+.cd-sheet-root.cd-sheet-leave-to .cd-sheet {
+  /* Panel's own height, so this needs no hardcoded offset and self-corrects on
+     rotation or resize. */
+  transform: translateY(100%);
+}
+
+.cd-sheet-root.cd-sheet-enter-from .cd-scrim,
+.cd-sheet-root.cd-sheet-leave-to .cd-scrim {
+  opacity: 0;
+}
+
+/* Fullscreen sheets are edge-to-edge and opt out of the keyframe above; they
+ * must opt out of the travel too or they would slide as a full-height panel.
+ * No v2 mount site passes `fullscreen` today, so this cannot fire yet — it is
+ * here so converting a legacy site later doesn't quietly inherit the wrong
+ * motion. */
+.cd-sheet-root.cd-sheet-enter-from .cd-sheet--fullscreen,
+.cd-sheet-root.cd-sheet-leave-to .cd-sheet--fullscreen {
+  transform: none;
+}
+
+/* Reduced motion keeps the scrim fade (it explains that a layer opened) and
+ * drops the panel's travel, per the usual "fewer and gentler, not none". */
+@media (prefers-reduced-motion: reduce) {
+  .cd-sheet-root.cd-sheet-enter-active .cd-sheet,
+  .cd-sheet-root.cd-sheet-leave-active .cd-sheet {
+    transition: none;
+  }
+
+  .cd-sheet-root.cd-sheet-enter-from .cd-sheet,
+  .cd-sheet-root.cd-sheet-leave-to .cd-sheet {
+    transform: none;
+  }
+}
 </style>

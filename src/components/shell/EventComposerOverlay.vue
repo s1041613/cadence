@@ -45,58 +45,66 @@
       />
     </div>
   </div>
-  <CdDrawerOrSheet
-    v-else-if="draft"
-    :presentation="isDesktop ? 'drawer' : 'sheet'"
-    :width="editorWidth"
-    scrim-color="var(--cd-scrim)"
-    :raised="!!ui.draftConv"
-    @scrim-click="close"
-    @dismiss="close"
-  >
-    <component
-      :is="editCardComponent"
-      is-new
-      :title="draft.title"
-      :type="editType"
-      :quad="editQuad"
-      :color="draft.backgroundColor ?? FALLBACK_EVENT_COLOR"
-      :icon="draft.icon"
-      :all-day="draft.allDay"
-      :date="draft.date"
-      :start="draft.start"
-      :end="draft.end"
-      :alert-label="alertLabel"
-      :reminder="draft.reminder"
-      :repeat-label="repeatLabel"
-      :location="draft.location"
-      :notes="draft.notes"
-      :estimated-pomodoros="estimatedPomodoros"
-      :time-format="settings.timeFormat"
-      :calendar-options="calendarOptions"
-      :calendar-id="draft.calendarId"
-      @update:calendar-id="(v) => (draft!.calendarId = v)"
-      @back="close"
-      @close="close"
-      @cancel="close"
-      @save="trySave"
-      @apply-suggestion="applySuggestion"
-      @cycle-repeat="cycleRepeat"
-      @update:title="(v) => (draft!.title = v)"
-      @update:type="onUpdateType"
-      @update:quad="onUpdateQuad"
-      @update:color="(v) => (draft!.backgroundColor = v)"
-      @update:icon="(v: IconName) => (draft!.icon = v)"
-      @remove-icon="draft!.icon = null"
-      @update:all-day="(v) => (draft!.allDay = v)"
-      @update:date="(v) => (draft!.date = v)"
-      @update:start="(v) => (draft!.start = v)"
-      @update:end="(v) => (draft!.end = v)"
-      @update:reminder="(v) => (draft!.reminder = v)"
-      @update:location="(v) => (draft!.location = v)"
-      @update:notes="(v) => (draft!.notes = v)"
-    />
-  </CdDrawerOrSheet>
+  <!-- This file renders for BOTH routes — legacy mounts it bare, v2 passes variant="v2" — so
+       the sheet transition is gated on `variant` and legacy keeps CdSheet's original keyframe.
+       It is additionally gated on !isDesktop: the desktop branch renders a CdDrawer, whose root
+       the cd-sheet classes don't match, but :duration is a JS timer that would still hold a
+       leaving drawer mounted for 300ms. Both bindings must be gated for the same reason.
+       The condition sits on <Transition> because CdDrawerOrSheet is the v-else-if half of a
+       pair whose v-if is the desktop dock above; a wrapper between them severs that chain. -->
+  <Transition v-else-if="draft" v-bind="sheetTransitionAttrs">
+    <CdDrawerOrSheet
+      :presentation="isDesktop ? 'drawer' : 'sheet'"
+      :width="editorWidth"
+      scrim-color="var(--cd-scrim)"
+      :raised="!!ui.draftConv"
+      @scrim-click="close"
+      @dismiss="close"
+    >
+      <component
+        :is="editCardComponent"
+        is-new
+        :title="draft.title"
+        :type="editType"
+        :quad="editQuad"
+        :color="draft.backgroundColor ?? FALLBACK_EVENT_COLOR"
+        :icon="draft.icon"
+        :all-day="draft.allDay"
+        :date="draft.date"
+        :start="draft.start"
+        :end="draft.end"
+        :alert-label="alertLabel"
+        :reminder="draft.reminder"
+        :repeat-label="repeatLabel"
+        :location="draft.location"
+        :notes="draft.notes"
+        :estimated-pomodoros="estimatedPomodoros"
+        :time-format="settings.timeFormat"
+        :calendar-options="calendarOptions"
+        :calendar-id="draft.calendarId"
+        @update:calendar-id="(v) => (draft!.calendarId = v)"
+        @back="close"
+        @close="close"
+        @cancel="close"
+        @save="trySave"
+        @apply-suggestion="applySuggestion"
+        @cycle-repeat="cycleRepeat"
+        @update:title="(v) => (draft!.title = v)"
+        @update:type="onUpdateType"
+        @update:quad="onUpdateQuad"
+        @update:color="(v) => (draft!.backgroundColor = v)"
+        @update:icon="(v: IconName) => (draft!.icon = v)"
+        @remove-icon="draft!.icon = null"
+        @update:all-day="(v) => (draft!.allDay = v)"
+        @update:date="(v) => (draft!.date = v)"
+        @update:start="(v) => (draft!.start = v)"
+        @update:end="(v) => (draft!.end = v)"
+        @update:reminder="(v) => (draft!.reminder = v)"
+        @update:location="(v) => (draft!.location = v)"
+        @update:notes="(v) => (draft!.notes = v)"
+      />
+    </CdDrawerOrSheet>
+  </Transition>
 </template>
 
 <script setup lang="ts">
@@ -161,6 +169,17 @@ const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'la
 // icon picker, and on v2 they simply fall through as unused attrs. The `v: IconName`
 // annotation is needed because the union of the two cards no longer types the payload.
 const editCardComponent = computed(() => (props.variant === 'v2' ? Pv2EventEditCard : CdEventEditCard))
+
+// Sheet open/close transition, v2 phone only — legacy keeps CdSheet's original enter-only
+// keyframe, and the desktop branch renders a CdDrawer whose root the cd-sheet classes don't
+// match. Both attributes have to be withheld together: an empty `name` matches no CSS, but
+// `duration` is a JS timer independent of it, so passing one alone would hold a leaving drawer
+// or legacy sheet mounted for 300ms. `exactOptionalPropertyTypes` rejects passing
+// `duration: undefined`, so this omits the keys entirely — same workaround as CdDrawerOrSheet's
+// scrimColorAttr. 300 tracks --cd-duration-sheet (.3s); the transition classes live in CdSheet.
+const sheetTransitionAttrs = computed(() =>
+  props.variant === 'v2' && !isDesktop.value ? { name: 'cd-sheet', duration: 300 } : {}
+)
 
 // All member calendars (own and shared) as picker options, in display order. The picker only
 // renders for 2+ options; the draft defaults to the user's default calendar.
