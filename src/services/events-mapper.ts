@@ -1,6 +1,6 @@
 import type { RepeatMode, ReminderPreset, Task } from '@/types/task'
 import { QUADRANTS, quadrantOf, type Quadrant } from '@/composables/use-theme'
-import { hasTimeRange, iso, pad } from '@/utils/convert-date-time'
+import { endDateOf, hasTimeRange, iso, pad } from '@/utils/convert-date-time'
 
 export interface MapContext {
   ownerId: string
@@ -68,37 +68,60 @@ export function minutesToReminder(minutes: number): ReminderPreset | null {
 
 const TASK_TIME_FALLBACK = { start: '09:00', end: '10:00' }
 
+// A same-day range that arrived inverted is widened to this rather than being rejected: the
+// DB's end_after_start would refuse the row, and losing the write is worse than a short slot.
+const INVERTED_RANGE_REPAIR_MS = 5 * 60_000
+
 // All-day events are encoded at UTC midnight so the calendar date survives
 // timezone changes; timed entries are local wall time converted to UTC.
+//
+// A multi-day span encodes ends_at against the INCLUSIVE end day. The alternative — an
+// exclusive end, as iCal uses — would rewrite every existing all-day row (they store
+// starts_at === ends_at) and force a backfill. Inclusive also keeps "the first 10 characters
+// are the calendar date" true of both columns, so decode stays symmetric and timezone-proof.
+// The cost is that a future ICS exporter has to add a day at the boundary.
 function encodeInterval(task: Task, isTask: boolean): { all_day: boolean; starts_at: string; ends_at: string } {
   // Tasks can never be all-day (task_has_no_allday constraint).
   const allDay = isTask ? false : task.allDay
+  const endDate = endDateOf(task)
 
   if (allDay) {
-    const utcMidnight = `${task.date}T00:00:00.000Z`
-    return { all_day: true, starts_at: utcMidnight, ends_at: utcMidnight }
+    // A single-day all-day event still encodes starts_at === ends_at, exactly as it did
+    // before spans existed. end_after_start is waived for all_day, so equal ends are legal.
+    return { all_day: true, starts_at: `${task.date}T00:00:00.000Z`, ends_at: `${endDate}T00:00:00.000Z` }
   }
 
   // Tasks with missing times receive a fallback that satisfies end_after_start.
   const { start, end } = isTask && !hasTimeRange(task) ? TASK_TIME_FALLBACK : task
+  const startsAt = new Date(`${task.date}T${start}:00`)
+  const endsAt = new Date(`${endDate}T${end}:00`)
   return {
     all_day: false,
-    starts_at: new Date(`${task.date}T${start}:00`).toISOString(),
-    ends_at: new Date(`${task.date}T${end}:00`).toISOString()
+    starts_at: startsAt.toISOString(),
+    // Only a same-day inverted range can reach the repair — a cross-day span is ordered by
+    // construction, which is why 22:00 -> 02:00 the next day survives intact.
+    ends_at: (endsAt > startsAt ? endsAt : new Date(startsAt.getTime() + INVERTED_RANGE_REPAIR_MS)).toISOString()
   }
 }
 
-function decodeInterval(row: EventRow): { date: string; start: string; end: string } {
+// endDate is omitted for a single-day span, so a row written before spans existed decodes to
+// exactly the shape it always had — that is what makes this change need no backfill.
+function decodeInterval(row: EventRow): { date: string; endDate?: string; start: string; end: string } {
   if (row.all_day) {
     // UTC-midnight encoding: the first 10 characters are the calendar date,
-    // independent of the reader's timezone.
-    return { date: row.starts_at.slice(0, 10), start: '', end: '' }
+    // independent of the reader's timezone. True of both columns.
+    const date = row.starts_at.slice(0, 10)
+    const endDate = row.ends_at.slice(0, 10)
+    return { date, start: '', end: '', ...(endDate > date ? { endDate } : {}) }
   }
 
   const startsAt = new Date(row.starts_at)
   const endsAt = new Date(row.ends_at)
+  const date = iso(startsAt)
+  const endDate = iso(endsAt)
   return {
-    date: iso(startsAt),
+    date,
+    ...(endDate > date ? { endDate } : {}),
     start: `${pad(startsAt.getHours())}:${pad(startsAt.getMinutes())}`,
     end: `${pad(endsAt.getHours())}:${pad(endsAt.getMinutes())}`
   }

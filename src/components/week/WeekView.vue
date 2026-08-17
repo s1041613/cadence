@@ -26,6 +26,7 @@ import { useCurrentTime } from '@/composables/use-current-time'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { themeOf } from '@/composables/use-theme'
 import { parseISO, iso, addDays, startOfWeek, minutes, hasTimeRange, quickAddTimeRange, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { spansDate } from '@/utils/event-span'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 
 // WeekView — desktop 7-column CdTimeGrid, phone per-day agenda list, rebuilt against the CADENCE
@@ -65,9 +66,10 @@ function goToday(): void {
 }
 
 // calendar-management spec "Calendar visibility filters all views".
+// spansDate rather than an equality check: a multi-day event belongs to every day it covers.
 function eventsForDate(date: string) {
   return tasksStore.tasks
-    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
+    .filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
     .map((t) => {
       const theme = themeOf(t)
       return { id: t.id, title: t.title, color: theme.backgroundColor, start: t.start, end: t.end, allDay: t.allDay }

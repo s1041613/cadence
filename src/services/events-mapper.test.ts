@@ -276,6 +276,96 @@ describe('events-mapper', () => {
     })
   })
 
+  describe('multi-day spans', () => {
+    it('round-trips a timed span that crosses midnight', () => {
+      const task = mkTask({
+        date: '2026-07-10',
+        endDate: '2026-07-12',
+        calendarId: CAL_ID,
+        type: 'event',
+        title: 'Conference',
+        start: '22:00',
+        end: '02:00',
+        // Reminders round-trip through the event_reminders embed, which roundTrip omits.
+        reminder: null
+      })
+
+      expect(roundTrip(task)).toEqual({ ...task, ownerId: ctx.ownerId })
+    })
+
+    it('anchors starts_at to the start date and ends_at to the end date', () => {
+      const row = taskToRow(
+        mkTask({ date: '2026-07-10', endDate: '2026-07-12', calendarId: CAL_ID, type: 'event', start: '22:00', end: '02:00' }),
+        ctx
+      )
+
+      expect(new Date(row.starts_at).getDate()).toBe(10)
+      expect(new Date(row.ends_at).getDate()).toBe(12)
+      // The end_after_start constraint the DB enforces.
+      expect(new Date(row.ends_at).getTime()).toBeGreaterThan(new Date(row.starts_at).getTime())
+    })
+
+    it('encodes an all-day span at UTC midnight on both ends, the end day inclusive', () => {
+      const row = taskToRow(
+        mkTask({ date: '2026-07-12', endDate: '2026-07-15', calendarId: CAL_ID, allDay: true, type: 'event' }),
+        ctx
+      )
+
+      expect(row.starts_at).toBe('2026-07-12T00:00:00.000Z')
+      expect(row.ends_at).toBe('2026-07-15T00:00:00.000Z')
+    })
+
+    it('reads an all-day span from the first 10 characters of both columns', () => {
+      const row: EventRow = {
+        ...taskToRow(mkTask({ date: '2026-07-12', calendarId: CAL_ID, allDay: true, type: 'event' }), ctx),
+        starts_at: '2026-07-12T00:00:00+00:00',
+        ends_at: '2026-07-15T00:00:00+00:00'
+      }
+
+      const restored = rowToTask(row, ctx)
+      expect(restored.date).toBe('2026-07-12')
+      expect(restored.endDate).toBe('2026-07-15')
+    })
+
+    // The guard that proves no backfill was needed: rows written before spans existed must
+    // decode to exactly the shape they always had, with no endDate key at all.
+    it('leaves a single-day all-day event encoded and decoded exactly as before', () => {
+      const task = mkTask({ date: '2026-07-12', calendarId: CAL_ID, allDay: true, type: 'event' })
+      const row = taskToRow(task, ctx)
+
+      expect(row.starts_at).toBe(row.ends_at)
+      expect(rowToTask(row, ctx)).not.toHaveProperty('endDate')
+    })
+
+    it('leaves a single-day timed event without an endDate key', () => {
+      const row = taskToRow(mkTask({ date: '2026-07-10', calendarId: CAL_ID, start: '09:00', end: '10:00' }), ctx)
+
+      expect(rowToTask(row, ctx)).not.toHaveProperty('endDate')
+    })
+
+    // hasTimeRange treats 22:00 -> 02:00 as inverted within one day; across two it is valid,
+    // and the task must keep its own times instead of the 09:00-10:00 fallback.
+    it('does not apply the task time fallback to a task whose times cross days', () => {
+      const row = taskToRow(
+        mkTask({ date: '2026-07-10', endDate: '2026-07-11', calendarId: CAL_ID, type: 'quadrant', start: '22:00', end: '02:00' }),
+        ctx
+      )
+
+      const restored = rowToTask(row, ctx)
+      expect(restored.start).toBe('22:00')
+      expect(restored.end).toBe('02:00')
+    })
+
+    it('repairs an inverted span into a row the end_after_start constraint accepts', () => {
+      const row = taskToRow(
+        mkTask({ date: '2026-07-10', endDate: '2026-07-08', calendarId: CAL_ID, type: 'event', start: '10:00', end: '09:00' }),
+        ctx
+      )
+
+      expect(new Date(row.ends_at).getTime()).toBeGreaterThan(new Date(row.starts_at).getTime())
+    })
+  })
+
   describe('reminder presets', () => {
     it.each<[ReminderPreset, number]>([
       ['at-time', 0],

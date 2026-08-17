@@ -32,6 +32,7 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { themeOf } from '@/composables/use-theme'
 import { parseISO, iso, addDays, startOfWeek, minutes, hasTimeRange, quickAddTimeRange, WD_CAP } from '@/utils/convert-date-time'
+import { spansDate } from '@/utils/event-span'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 
 // DayView — single-column CdTimeGrid + poster header + week-strip cluster, rebuilt against the
@@ -81,9 +82,10 @@ const stripDays = computed<WeekStripDay[]>(() => {
 
 // calendar-management spec "Calendar visibility filters all views": hidden calendars' tasks
 // disappear immediately from Day, Week, and Month — display-only, tasksStore.tasks is untouched.
+// spansDate rather than an equality check: a multi-day event belongs to every day it covers.
 function eventsForDate(date: string) {
   return tasksStore.tasks
-    .filter((t) => t.date === date && calendarsStore.isVisible(t.calendarId))
+    .filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
     .map((t) => {
       const theme = themeOf(t)
       return { id: t.id, title: t.title, color: theme.backgroundColor, start: t.start, end: t.end, allDay: t.allDay }

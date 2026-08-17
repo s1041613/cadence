@@ -91,7 +91,7 @@
         <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">STARTS</span>
           <div class="pv2-edit-card__time-controls">
-            <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
+            <CdDatePicker :model-value="date" @update:model-value="(v) => commitDate('start', v)" />
             <Pv2TimeChip
               v-if="!effectiveAllDay"
               :model-value="start"
@@ -114,7 +114,7 @@
         <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">ENDS</span>
           <div class="pv2-edit-card__time-controls">
-            <CdDatePicker :model-value="date" @update:model-value="(v) => emit('update:date', v)" />
+            <CdDatePicker :model-value="endDate" @update:model-value="(v) => commitDate('end', v)" />
             <Pv2TimeChip
               v-if="!effectiveAllDay"
               :model-value="end"
@@ -228,7 +228,7 @@ import Pv2SelectField from '@/components/v2/ui/Pv2SelectField.vue'
 import Pv2TimeChip from '@/components/v2/ui/Pv2TimeChip.vue'
 import Pv2TimeWheel from '@/components/v2/ui/Pv2TimeWheel.vue'
 import { eventColorNameOf } from '@/components/v2/ui/event-colors'
-import { estPomsOf, minutes, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
+import { addDays, daysBetween, estPomsOf, iso, minutes, parseISO, shiftRange, type TimeFormatName } from '@/utils/convert-date-time'
 import { REMINDER_OPTIONS } from '@/utils/event-panel'
 import { buildTitleSuggestions, type TitleSuggestion } from '@/utils/title-suggestions'
 import { useImeSafeEnter } from '@/composables/use-ime-safe-enter'
@@ -247,6 +247,8 @@ const props = withDefaults(
     color?: string
     allDay: boolean
     date: string
+    /** Inclusive end date. The host resolves the absent case, so this is always a real date. */
+    endDate: string
     start: string
     end: string
     alertLabel: string
@@ -273,6 +275,7 @@ const emit = defineEmits<{
   'update:color': [value: string]
   'update:allDay': [value: boolean]
   'update:date': [value: string]
+  'update:endDate': [value: string]
   'update:start': [value: string]
   'update:end': [value: string]
   'update:reminder': [value: ReminderPreset | null]
@@ -315,10 +318,43 @@ const styleFieldEl = ref<HTMLElement | null>(null)
 
 // Moving one edge carries the other, so the picker can't strand the user in the
 // "end must be after start" state. shiftRange owns the arithmetic and the day-boundary clamp.
+//
+// Across days each edge belongs to its own date, so dragging one must not drag the other:
+// shiftRange's carry exists to escape the same-day "end before start" trap, and that trap
+// cannot occur once the dates differ.
 function commitTime(edge: 'start' | 'end', value: string): void {
+  if (props.endDate !== props.date) {
+    if (edge === 'start') emit('update:start', value)
+    else emit('update:end', value)
+    return
+  }
   const next = shiftRange({ start: props.start, end: props.end }, edge, value)
   if (next.start !== props.start) emit('update:start', next.start)
   if (next.end !== props.end) emit('update:end', next.end)
+}
+
+// The date analogue of commitTime: moving one end carries the other rather than blocking,
+// preserving the span's length. The user therefore cannot land on an inverted range, which
+// is why the card needs no "end before start" date warning.
+// Emit order matters: the host stores a single-day span as an absent endDate, so it drops
+// any end that is not after the current start. Moving the start first means the end is
+// judged against where the span is going, not where it was.
+function commitDate(edge: 'start' | 'end', value: string): void {
+  const spanDays = Math.max(0, daysBetween(props.date, props.endDate))
+  if (edge === 'start') {
+    // The end always follows, in every direction. Carrying it only when it would be left
+    // inverted (endDate < value) made every smaller move silently resize the event instead of
+    // moving it: Jul 10-12 restarted on the 11th became Jul 11-12, and on the 8th became
+    // Jul 8-12. Moving the start means moving the event.
+    emit('update:date', value)
+    emit('update:endDate', iso(addDays(parseISO(value), spanDays)))
+    return
+  }
+  // Dragging the END is a resize — the user is picking a new end date, so the length is meant
+  // to change. Only an end pulled before the start carries the start along, which is what
+  // keeps the range from inverting.
+  if (value < props.date) emit('update:date', iso(addDays(parseISO(value), -spanDays)))
+  emit('update:endDate', value)
 }
 
 // Deliberately NOT closed on the chip's blur: moving a finger from the chip to the wheel
@@ -539,7 +575,12 @@ const effectiveAllDay = computed(() => (props.type === 'task' ? false : props.al
 
 // An all-day event must not leave an orphaned wheel behind after its chip is gone.
 watch(effectiveAllDay, (v) => { if (v) openWheel.value = null })
-const timeInvalid = computed(() => !effectiveAllDay.value && minutes(props.end) <= minutes(props.start))
+// Only meaningful within a single day: 22:00 -> 02:00 across two dates is a legitimate
+// overnight event, and the date rows already say which day each edge belongs to. This also
+// gates the Save button, so treating a cross-day span as invalid would make it unsaveable.
+const timeInvalid = computed(
+  () => !effectiveAllDay.value && props.endDate === props.date && minutes(props.end) <= minutes(props.start)
+)
 // estPomsOf, not `?? autoPoms`: a stored 0 must fall through to the derived count, or the
 // card shows 0 while the focus session shows the real total.
 const pomodoroCount = computed(() =>

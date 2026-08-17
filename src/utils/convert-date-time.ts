@@ -37,9 +37,41 @@ export const minutes = (t: string): number => {
   return h * 60 + m
 }
 
+// Whole days from a to b, both "YYYY-MM-DD". Negative when b precedes a. Goes through
+// parseISO rather than subtracting timestamps directly so a DST boundary inside the span
+// cannot round the quotient down to the previous day.
+export const daysBetween = (a: string, b: string): number =>
+  Math.round((parseISO(b).getTime() - parseISO(a).getTime()) / 86_400_000)
+
+/** An inclusive calendar-date range. Absent `endDate` means the entry occupies one day. */
+export type DateSpan = { date: string; endDate?: string }
+
+/**
+ * An entry's inclusive end date. Absent `endDate` — or one that does not extend past
+ * `date` — means a single-day entry, so the start date is the answer.
+ *
+ * Zero-padded "YYYY-MM-DD" compares correctly as a string, so this needs no Date parsing.
+ * An inverted `endDate` normalizes back to single-day rather than yielding a negative span:
+ * every consumer downstream assumes end >= start, and repairing it here means none of them
+ * has to re-check.
+ */
+export const endDateOf = (t: DateSpan): string => (t.endDate && t.endDate > t.date ? t.endDate : t.date)
+
+/** Inclusive length of a span in days. Always >= 1; a single-day entry is 1. */
+export const spanDayCount = (t: DateSpan): number => daysBetween(t.date, endDateOf(t)) + 1
+
+/** True when a span covers more than one calendar day. */
+export const isMultiDay = (t: DateSpan): boolean => endDateOf(t) > t.date
+
 export const isTimeValue = (t: string): boolean => /^([01]\d|2[0-3]):[0-5]\d$/.test(t)
 
-export const hasTimeRange = (t: { start: string; end: string }): boolean => isTimeValue(t.start) && isTimeValue(t.end) && minutes(t.end) > minutes(t.start)
+// The "end after start" requirement only holds within a single day: 22:00 -> 02:00 on the
+// next day is a legitimate overnight span, not an inverted range. Callers that pass no dates
+// (the plain { start, end } shape) keep the original same-day meaning.
+export const hasTimeRange = (t: { start: string; end: string } & Partial<DateSpan>): boolean =>
+  isTimeValue(t.start) &&
+  isTimeValue(t.end) &&
+  (minutes(t.end) > minutes(t.start) || (t.date !== undefined && isMultiDay({ ...t, date: t.date })))
 
 export const toHM = (mins: number): string => `${pad(Math.floor(mins / 60))}:${pad(mins % 60)}`
 
@@ -111,8 +143,14 @@ export const fmtDur = (m: number): string => (m >= 60 ? `${(m / 60).toFixed(m % 
 // Pomodoro count derived from slot length: 1 = 25 min, rounded up (all-day = 1).
 const POM_MIN = 25
 
-export const autoPoms = (t: { allDay: boolean; start: string; end: string }): number => {
-  if (t.allDay || !t.start || !t.end) return 1
+// A slot that spans more than one day is a container, not a focus session — a four-day trip
+// would otherwise derive 231 pomodoros and persist that into estimated_pomodoros. Multi-day
+// entries answer 1, on the same reasoning already applied to all-day.
+const isUnbounded = (t: { allDay: boolean; start: string; end: string } & Partial<DateSpan>): boolean =>
+  t.allDay || !t.start || !t.end || (t.date !== undefined && isMultiDay({ ...t, date: t.date }))
+
+export const autoPoms = (t: { allDay: boolean; start: string; end: string } & Partial<DateSpan>): number => {
+  if (isUnbounded(t)) return 1
   const dur = minutes(t.end) - minutes(t.start)
   return Math.max(1, Math.ceil(dur / POM_MIN))
 }
@@ -129,11 +167,11 @@ export const autoPoms = (t: { allDay: boolean; start: string; end: string }): nu
 // focusMs/restMs are parameters rather than imports: this module must not depend on
 // focus-timer, and passing them keeps the arithmetic testable at any pomodoro length.
 export const pomsInSlot = (
-  t: { allDay: boolean; start: string; end: string },
+  t: { allDay: boolean; start: string; end: string } & Partial<DateSpan>,
   focusMs: number,
   restMs: number
 ): number => {
-  if (t.allDay || !t.start || !t.end) return 1
+  if (isUnbounded(t)) return 1
   const slotMs = (minutes(t.end) - minutes(t.start)) * 60_000
   // The trailing break never has to be served, so it is credited to the slot before dividing.
   return Math.max(1, Math.floor((slotMs + restMs) / (focusMs + restMs)))
@@ -146,7 +184,7 @@ export const pomsInSlot = (
 const DEFAULT_POM_FOCUS_MS = 25 * 60_000
 const DEFAULT_POM_REST_MS = 5 * 60_000
 
-export const defaultPoms = (t: { allDay: boolean; start: string; end: string }): number =>
+export const defaultPoms = (t: { allDay: boolean; start: string; end: string } & Partial<DateSpan>): number =>
   pomsInSlot(t, DEFAULT_POM_FOCUS_MS, DEFAULT_POM_REST_MS)
 
 // Single source of truth for "how many pomodoros does this task need". The stored estimate
@@ -154,25 +192,28 @@ export const defaultPoms = (t: { allDay: boolean; start: string; end: string }):
 // differently drift apart once an event's times are edited, which stalls or short-circuits
 // progress. Every caller must go through here.
 export const estPomsOf = (
-  t: { estimatedPomodoros: number; allDay: boolean; start: string; end: string }
+  t: { estimatedPomodoros: number; allDay: boolean; start: string; end: string } & Partial<DateSpan>
 ): number => (t.estimatedPomodoros > 0 ? t.estimatedPomodoros : autoPoms(t))
 
 // Wall-clock instant an event's slot ends, or null when it has no bounded slot (all-day
 // events, or times that were never filled in). Date and time are combined deliberately:
 // comparing only HH:MM would make yesterday's 09:00-10:00 event look "not yet over" this
 // morning. `now` is a parameter so callers stay testable.
+//
+// The END date carries the time, not the start date: a multi-day event ends on its last day,
+// and anchoring to `date` would mark every such event over from its first evening onward.
 export const slotEndAt = (
-  t: { allDay: boolean; date: string; end: string }
+  t: { allDay: boolean; date: string; end: string } & Partial<DateSpan>
 ): Date | null => {
   if (t.allDay || !t.date || !t.end) return null
-  const d = parseISO(t.date)
+  const d = parseISO(endDateOf(t))
   d.setMinutes(minutes(t.end))
   return d
 }
 
 /** True once an event's scheduled slot has passed. All-day events never count as over. */
 export const isSlotOver = (
-  t: { allDay: boolean; date: string; end: string },
+  t: { allDay: boolean; date: string; end: string } & Partial<DateSpan>,
   now: Date
 ): boolean => {
   const endsAt = slotEndAt(t)
