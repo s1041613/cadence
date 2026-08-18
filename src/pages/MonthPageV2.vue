@@ -7,8 +7,8 @@
   -->
   <div class="mp2" :class="{ 'mp2--desktop': isDesktop }">
     <div id="mp2-root" class="mp2__frame" data-poster-root>
-      <!-- 共用桌布層：內容頁一律掛這個，Settings 不掛。設定在 Customization。 -->
-      <Pv2PageBackdrop />
+      <!-- 月檢視不掛共用桌布層：使用者的照片改由 MonthViewV2 自己收進頂部 header band，
+           不再鋪滿全頁——見該元件的 .mv2__band。Day / Week / Notes 仍用 Pv2PageBackdrop。 -->
 
       <div v-if="tasksStore.isLoading" class="mp2__loading">載入中…</div>
       <MonthViewV2 v-else />
@@ -29,7 +29,6 @@ import { onBeforeUnmount } from 'vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
-import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 import MonthViewV2 from '@/components/v2/month/MonthViewV2.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopoverV2 from '@/components/v2/event/EventPreviewPopoverV2.vue'

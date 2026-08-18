@@ -76,14 +76,5 @@ const hiddenPerDayFor = (week: Pv2GridWeek) => overflowFor(week).hiddenPerDay
   display: grid;
   grid-template-columns: 1fr;
   grid-auto-rows: 1fr;
-  border-top: 1px solid #e2e2e2;
-}
-
-/* 最後一列不收底線，月曆下緣開放。Cells are now nested inside week rows rather than being
-   siblings across the whole grid, so this targets the last WEEK — the old
-   `.pv2-cell:nth-last-child(-n+7)` would match the last cells of every week and strip
-   every row's border. border-bottom is defined in Pv2Cell's scoped style, hence :deep(). */
-.pv2-grid > :last-child :deep(.pv2-cell) {
-  border-bottom: none;
 }
 </style>

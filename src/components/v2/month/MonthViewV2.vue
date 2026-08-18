@@ -5,12 +5,20 @@
     cell 點擊語義未定（Zoe 未決），暫不綁；event chip 點擊開既有 event-preview overlay。
   -->
   <div class="mv2">
+    <!-- 頂部 header band：使用者背景圖收在這個固定高度區塊裡，不再鋪滿全頁——
+         往下用同色系漸層淡到 --cd-surface-canvas，跟下面的純色格線區無縫接上。
+         band 在 .mv2__body 之外，所以月滑動手勢不覆蓋這塊，只覆蓋下面的格線區。 -->
+    <div class="mv2__band">
+      <img :src="appearance.backgroundImage" alt="" class="mv2__band-image" />
+      <div class="mv2__band-veil" :style="{ '--pv2-band-scrim': appearance.scrimOpacity }" />
+      <div class="mv2__band-poster">
+        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
+      </div>
+    </div>
+
     <div class="mv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <!-- No prev/next arrows here: the horizontal swipe replaces them. The poster stays
            tappable because the month/year wheel is still the only way to jump across years. -->
-      <div class="mv2__poster">
-        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
-      </div>
 
       <!-- The strip scrolls horizontally itself, so it stops touchstart before the swipe
            directive on .mv2__body can claim a gesture that started inside the chip row. -->
@@ -86,6 +94,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
+import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
@@ -99,6 +108,7 @@ const ui = useUiStore()
 const tasksStore = useTasksStore()
 const settings = useSettingsStore()
 const calendarsStore = useCalendarsStore()
+const appearance = useV2AppearanceStore()
 
 const cur = computed(() => parseISO(ui.selectedDate))
 const year = computed(() => cur.value.getFullYear())
@@ -258,6 +268,52 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+/* 頂部照片 header band：固定高度、bleed 到 frame 邊緣（不吃 .mv2__body 的內距）。
+   高度是抓一個可調的值——夠讓照片讀出來，又不吃掉太多留給格線區的高度（Pv2Grid 自己會用
+   ResizeObserver 量剩餘高度去排 lane，所以這裡改高度不需要另外調格線邏輯）。 */
+.mv2__band {
+  position: relative;
+  flex: none;
+  height: 210px;
+  overflow: hidden;
+}
+
+.mv2__band-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 輕量模糊：band 矮，讀作「一張照片」而非材質，模糊值遠低於全頁桌布那種處理。
+     scale 蓋掉模糊在邊緣露出的透明/鋸齒邊。 */
+  filter: blur(6px);
+  transform: scale(1.08);
+}
+
+/* 白紗漸層：上緣到下緣都是同一個顏色（--cd-surface-canvas），只有 alpha 在變——
+   同色漸層不會在中間讀出髒灰色，跟「transparent 到某色」那種漸層不一樣。
+   下緣落在完全不透明，跟下面的純色格線區無縫接上；上緣的透明度交給使用者原有的
+   scrimOpacity 設定（Settings › Customization 的「顯示強度」滑桿），值愈高照片愈被蓋住。 */
+.mv2__band-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--cd-surface-canvas-rgb), calc(var(--pv2-band-scrim) * 0.55)) 0%,
+    rgba(var(--cd-surface-canvas-rgb), calc(var(--pv2-band-scrim) * 0.85)) 60%,
+    rgba(var(--cd-surface-canvas-rgb), 1) 100%
+  );
+}
+
+.mv2__band-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
 }
 
 .mv2__body {

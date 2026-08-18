@@ -39,8 +39,12 @@
    * is what the v2 page shells paint and what the backdrop's scrim fades towards.
    * They will reconcile when one generation retires; until then, replacing either
    * with the other moves measured contrast, so pick by which shell you are in.
-   * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
+   * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body.
+   * -rgb triple: needed wherever a wash fades the alpha of this exact colour
+   * (e.g. MonthViewV2's header-band veil) rather than compositing white over
+   * an unrelated hue — see the COLOUR ROLES rule above on translucent roles. */
   --cd-surface-canvas: #fafaf9;
+  --cd-surface-canvas-rgb: 250, 250, 249;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */

@@ -42,7 +42,6 @@ const emit = defineEmits<{
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-bottom: 1px solid #cdcdcd;
   padding: 4px 2px 5px;
   box-sizing: border-box;
   cursor: pointer;
@@ -59,25 +58,22 @@ const emit = defineEmits<{
 .pv2-cell__num {
   display: inline-grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
+  min-width: 24px;
+  height: 24px;
   padding: 0 3px;
   border-radius: 999px;
-  font: 700 13px var(--cd-font-caveat);
+  font: 700 17px var(--cd-font-caveat);
   line-height: 1;
   color: #1b1b1b;
-  text-shadow: 0 1px 3px rgba(250, 250, 249, 0.9), 0 0 2px rgba(250, 250, 249, 0.9);
 }
 
 .pv2-cell__num--today {
   background: #1b1b1b;
   color: #fafaf9;
-  text-shadow: none;
 }
 
 .pv2-cell__num--outside {
   color: #cdcdcd;
-  text-shadow: none;
 }
 
 /* Pinned to the bottom of the cell rather than following a chip list — the chips live in the

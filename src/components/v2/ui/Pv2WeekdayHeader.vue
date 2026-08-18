@@ -43,7 +43,7 @@ const labels = computed(() =>
    會比框中心偏左約 16px（空月份最明顯）。置中後表頭字也與日期數字對齊。 */
 .pv2-wd__cell {
   text-align: center;
-  font: 600 9px var(--cd-font-mono);
+  font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.03em;
   color: #6e6e6e;
 }
