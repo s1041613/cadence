@@ -1,0 +1,882 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notebook 資料夾</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;800&display=swap">
+
+<style>
+  /* ==========================================================================
+     設計稿頁面（文件外殼）的 token。
+     產品畫面本身（.dev 手機框內）刻意寫死 Cadence 的淺色值 —— 那是「內容」，
+     不是頁面主題：v2 只有淺色一套皮膚，深色模式下把它一起翻黑會變成在提案
+     一個不存在的設計。外殼跟著閱讀者的主題走，手機框永遠是產品的樣子。
+     ========================================================================== */
+  :root {
+    --font-display: 'Instrument Serif', Georgia, serif;
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+    --ground: #efeeea;
+    --ground-raised: #f7f6f3;
+    --doc-ink: #1f1e1b;
+    --doc-ink-soft: #5f5d57;
+    --doc-ink-faint: #8d8b83;
+    --doc-line: #dcdad2;
+    --doc-accent: #6e6a52;
+    --doc-accent-soft: #e7e4d6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --ground: #17171a;
+      --ground-raised: #1f1f22;
+      --doc-ink: #ecebe6;
+      --doc-ink-soft: #a9a7a0;
+      --doc-ink-faint: #7c7a74;
+      --doc-line: #32322f;
+      --doc-accent: #c3bc9d;
+      --doc-accent-soft: #2a2a24;
+    }
+  }
+
+  :root[data-theme='dark'] {
+    --ground: #17171a;
+    --ground-raised: #1f1f22;
+    --doc-ink: #ecebe6;
+    --doc-ink-soft: #a9a7a0;
+    --doc-ink-faint: #7c7a74;
+    --doc-line: #32322f;
+    --doc-accent: #c3bc9d;
+    --doc-accent-soft: #2a2a24;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--doc-ink);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 46px 24px 90px; }
+
+  .eyebrow {
+    margin: 0 0 12px;
+    font: 800 10px var(--font-mono);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--doc-ink-faint);
+  }
+
+  h1 {
+    margin: 0 0 14px;
+    font: 400 46px/1.05 var(--font-display);
+    text-wrap: balance;
+  }
+
+  .lede { margin: 0; max-width: 64ch; font-size: 15.5px; line-height: 1.65; color: var(--doc-ink-soft); }
+  .lede + .lede { margin-top: 12px; }
+
+  h2 {
+    margin: 0 0 6px;
+    font: 400 27px/1.2 var(--font-display);
+  }
+
+  .rule { height: 1px; background: var(--doc-line); border: 0; margin: 46px 0 30px; }
+
+  /* ---------- 設計決策卡 ---------- */
+  .decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 24px; }
+
+  .decision {
+    padding: 16px 18px 18px;
+    background: var(--ground-raised);
+    border: 1px solid var(--doc-line);
+    border-radius: 12px;
+  }
+
+  .decision h3 { margin: 0 0 8px; font: 800 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--doc-accent); }
+  .decision p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--doc-ink-soft); }
+
+  /* ---------- 畫板 ---------- */
+  .boards { display: grid; grid-template-columns: repeat(auto-fill, minmax(393px, 1fr)); gap: 40px 34px; margin-top: 26px; }
+  @media (max-width: 460px) { .boards { grid-template-columns: 1fr; } }
+
+  .board { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+
+  .board__caption { display: flex; flex-direction: column; gap: 8px; max-width: 393px; }
+  .board__step { font: 800 10px var(--font-mono); letter-spacing: 0.16em; color: var(--doc-accent); }
+  .board__title { font: 600 15px var(--font-ui); }
+  .board__notes { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+  .board__notes li { position: relative; padding-left: 15px; font-size: 13px; line-height: 1.55; color: var(--doc-ink-soft); }
+  .board__notes li::before { content: '—'; position: absolute; left: 0; color: var(--doc-ink-faint); }
+
+  /* ==========================================================================
+     以下皆為產品畫面：值直接對齊 src/components/v2 與 cadence-tokens.css
+     （canvas #fafaf9、卡片 #fff、線 #e2e2e2、字 JetBrains Mono、FAB 64px 黑圓）。
+     ========================================================================== */
+  .dev {
+    position: relative;
+    width: 393px;
+    height: 852px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 44px;
+    background: #fafaf9;
+    color: #1b1b1b;
+    font-family: var(--font-mono);
+    box-shadow: 0 24px 54px rgba(0, 0, 0, 0.24);
+    isolation: isolate;
+  }
+
+  .status {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 30px 2px;
+    font: 600 13px var(--font-mono);
+    color: #1b1b1b;
+  }
+  .status__right { display: flex; gap: 5px; align-items: center; color: #9c9c9c; font-size: 10px; letter-spacing: 0.08em; }
+
+  /* --- header --- */
+  .hd { flex: none; display: flex; align-items: flex-start; justify-content: space-between; padding: 17px 22px 12px; }
+  .hd__title { margin: 0; font: 400 34px/0.92 var(--font-mono); }
+  .hd__eyebrow { margin: 8px 0 0; font: 500 10px var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: #9c9c9c; }
+  .hd__more {
+    flex: none; width: 34px; height: 34px; margin-top: 2px;
+    display: grid; place-items: center;
+    border: 1px solid #e2e2e2; border-radius: 50%; background: #fff;
+    font: 600 15px var(--font-mono); color: #6e6e6e; letter-spacing: 0.06em;
+  }
+
+  /* --- 資料夾分頁列 --- */
+  .tabs { flex: none; position: relative; display: flex; align-items: center; gap: 8px; padding: 2px 22px 10px; }
+  .tabs__scroll { display: flex; align-items: center; gap: 7px; overflow: hidden; flex: 1; }
+  .tab {
+    flex: none; display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: 999px;
+    border: 1px solid #d5d4cd; background: transparent;
+    font: 600 11px/1 var(--font-mono); color: #6e6e6e; letter-spacing: 0.02em;
+  }
+  .tab__count { font: 600 10px/1 var(--font-mono); color: #b2b2b2; }
+  .tab--on { background: #1b1b1b; border-color: #1b1b1b; color: #fafaf9; }
+  .tab--on .tab__count { color: rgba(250, 250, 249, 0.62); }
+  /* 分頁列右緣的漸層，說明「還有更多資料夾可以往左滑」 */
+  .tabs__fade { position: absolute; right: 56px; top: 2px; bottom: 10px; width: 26px; background: linear-gradient(90deg, rgba(250,250,249,0), #fafaf9); }
+  .tabs__add {
+    flex: none; width: 30px; height: 30px; display: grid; place-items: center;
+    border: 1px dashed #c9c8c1; border-radius: 50%; background: #fff; color: #6e6e6e;
+  }
+
+  /* --- feed --- */
+  .feed { flex: 1; min-height: 0; overflow: hidden; padding: 8px 22px 0; }
+
+  .note {
+    padding: 15px 17px; margin-bottom: 13px;
+    border: 1px solid #e2e2e2; border-radius: 16px;
+    background-color: #fff;
+    background-image: radial-gradient(#e6e6e3 1.1px, transparent 1.1px);
+    background-size: 20px 20px;
+    background-position: 14px 14px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .note__head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .note__when { font: 500 10px var(--font-mono); color: #b2b2b2; }
+  .note__folder {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 999px;
+    background: #f1efe8; color: #6e6a52;
+    font: 600 9px/1 var(--font-mono); letter-spacing: 0.06em;
+  }
+  .note__spacer { flex: 1; }
+  .note__body { margin: 0; font: 400 15px/1.42 var(--font-mono); color: #1b1b1b; white-space: pre-wrap; }
+
+  .empty { padding: 40px 8px 0; text-align: center; }
+  .empty__glyph { font: 400 30px var(--font-mono); color: #d6d5cd; }
+  .empty__line { margin: 12px 0 0; font: 500 12px var(--font-mono); color: #b2b2b2; }
+  .empty__hint { margin: 6px 0 0; font: 500 11px var(--font-mono); color: #cbcac2; }
+
+  /* --- FAB --- */
+  .fab {
+    position: absolute; right: 22px; bottom: 112px; z-index: 10;
+    width: 64px; height: 64px; display: grid; place-items: center;
+    border-radius: 50%; background: #1b1b1b;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  }
+
+  /* --- bottom nav（照 Pv2BottomNav：字母 glyph + 小寫 label） --- */
+  .nav {
+    flex: none; display: grid; grid-template-columns: repeat(4, 1fr);
+    padding: 12px 18px 30px; border-top: 1px solid #e2e2e2; background: #fff;
+  }
+  .nav__item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .nav__glyph { font: 400 19px/1 var(--font-mono); color: #b2b2b2; }
+  .nav__label { font: 600 8px/1 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: #b2b2b2; }
+  .nav__glyph--on, .nav__label--on { color: #1b1b1b; }
+
+  /* --- 底部面板 --- */
+  .scrim { position: absolute; inset: 0; z-index: 20; background: rgba(40, 38, 30, 0.32); }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 21;
+    padding: 0 22px 30px;
+    background: #fafaf9;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
+  }
+  .sheet__handle { width: 42px; height: 5px; margin: 9px auto 4px; border-radius: 3px; background: #dadad4; }
+  .sheet__head { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 14px; }
+  .sheet__title { font: 600 13px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6e6e6e; }
+  .sheet__close { font: 500 12px var(--font-mono); color: #9c9c9c; }
+
+  .field {
+    min-height: 116px; padding: 15px 16px;
+    border: 1.5px solid #1b1b1b; border-radius: 16px; background: #fff;
+    font: 400 15px/1.45 var(--font-mono);
+  }
+  .field--typing { color: #1b1b1b; }
+  .field__caret { display: inline-block; width: 1.5px; height: 17px; margin-left: 1px; background: #1b1b1b; vertical-align: -3px; }
+  .field__ph { color: #b2b2b2; }
+  .field--name { min-height: 0; display: flex; align-items: center; }
+
+  .toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 0 0; }
+  .picker {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 13px; border: 1px solid #d5d4cd; border-radius: 999px; background: #fff;
+    font: 600 11px/1 var(--font-mono); color: #1b1b1b;
+  }
+  .picker__caret { color: #9c9c9c; font-size: 9px; }
+  .toolbar__spacer { flex: 1; }
+  .toolbar__save {
+    width: 44px; height: 44px; display: grid; place-items: center;
+    border-radius: 50%; background: #1b1b1b;
+  }
+
+  /* --- 資料夾清單（選擇 / 管理共用） --- */
+  .rows { display: grid; }
+  .row {
+    display: flex; align-items: center; gap: 12px;
+    min-height: 54px; padding: 0 2px;
+    border-bottom: 1px solid #e2e2e2;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row__emoji { flex: none; width: 26px; text-align: center; font-size: 17px; line-height: 1; }
+  .row__name { flex: 1; min-width: 0; font: 500 14px var(--font-mono); color: #1b1b1b; }
+  .row__count { font: 500 11px var(--font-mono); color: #b2b2b2; }
+  .row__tick { width: 20px; text-align: center; font: 600 13px var(--font-mono); color: #6e6a52; }
+  .row__grip { flex: none; width: 18px; color: #c9c8c1; font-size: 13px; line-height: 1; letter-spacing: 0.06em; }
+  .row__act { display: flex; gap: 8px; }
+  .row__act span {
+    display: inline-grid; place-items: center; width: 30px; height: 30px;
+    border: 1px solid #e2e2e2; border-radius: 8px; background: #fff;
+    font: 500 10px var(--font-mono); color: #6e6e6e;
+  }
+  .row--danger .row__name { color: #c0564b; }
+  .row--add { color: #6e6a52; }
+  .row--add .row__name { color: #6e6a52; }
+
+  .sheet__foot { margin: 14px 0 0; font: 500 10px/1.5 var(--font-mono); color: #9c9c9c; }
+
+  /* 新增資料夾：emoji 選擇 + 即時預覽 */
+  .emoji-row { display: flex; gap: 8px; padding: 4px 0 14px; }
+  .emoji-row span {
+    width: 40px; height: 40px; display: grid; place-items: center;
+    border: 1px solid #e2e2e2; border-radius: 12px; background: #fff; font-size: 18px;
+  }
+  .emoji-row span.on { border-color: #1b1b1b; border-width: 1.5px; background: #f1efe8; }
+  .preview { display: flex; align-items: center; gap: 9px; padding: 14px 0 0; }
+  .preview__label { font: 500 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #b2b2b2; }
+  .sheet__cta {
+    display: grid; place-items: center; height: 48px; margin-top: 18px;
+    border-radius: 14px; background: #1b1b1b; color: #fafaf9;
+    font: 600 13px var(--font-mono); letter-spacing: 0.06em;
+  }
+  .sheet__cta--ghost { background: transparent; border: 1px solid #d5d4cd; color: #6e6e6e; margin-top: 10px; }
+
+  /* 卡片長按選單 */
+  .menu {
+    position: absolute; z-index: 22; right: 26px; top: 300px; width: 186px;
+    padding: 6px; border: 1px solid #e2e2e2; border-radius: 14px; background: #fff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
+  }
+  .menu__item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 10px; font: 500 12px var(--font-mono); color: #1b1b1b; }
+  .menu__item + .menu__item { border-top: 1px solid #f0efeb; }
+  .menu__item--on { background: #f1efe8; }
+  .menu__item--danger { color: #c0564b; }
+
+  /* ---------- 規格表 ---------- */
+  .table-scroll { overflow-x: auto; margin-top: 18px; }
+  table { border-collapse: collapse; width: 100%; min-width: 560px; }
+  th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--doc-line); font-size: 13.5px; line-height: 1.55; vertical-align: top; }
+  th { font: 800 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--doc-ink-faint); }
+  td:first-child { font: 600 12.5px var(--font-mono); white-space: nowrap; color: var(--doc-ink); }
+  td { color: var(--doc-ink-soft); }
+  code { font: 500 12.5px var(--font-mono); background: var(--doc-accent-soft); color: var(--doc-accent); padding: 1px 5px; border-radius: 5px; }
+
+  .open-qs { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 68ch; }
+  .open-qs li { position: relative; padding-left: 26px; font-size: 14px; line-height: 1.6; color: var(--doc-ink-soft); }
+  .open-qs li::before {
+    content: '?'; position: absolute; left: 0; top: 1px;
+    width: 18px; height: 18px; display: grid; place-items: center;
+    border-radius: 50%; background: var(--doc-accent-soft); color: var(--doc-accent);
+    font: 800 10px var(--font-mono);
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="eyebrow">Cadence · Notebook · 設計稿</p>
+  <h1>便條加上資料夾</h1>
+  <p class="lede">
+    現在的 Notebook 是一條沒有盡頭的時間軸：所有便條依寫下的時間新到舊排列，只能往下捲找。
+    便條一多，「上週那個點子」就等於找不到。這份設計把參考畫面裡的分頁式分類搬進 Cadence——
+    頁首下方一排資料夾分頁，最右邊的 <strong>＋</strong> 開新資料夾，新增便條時就決定它落在哪一格。
+  </p>
+  <p class="lede">
+    參考畫面是深色、圓角、粉紅重點色的清單 app；這裡只借它的<strong>資訊結構</strong>（分頁列 ＋ 尾端新增 ＋ FAB 新增），
+    外觀維持 Cadence v2 既有的語彙：#fafaf9 畫布、白色點紙卡片、JetBrains Mono、黑色 64px FAB。
+    分頁藥丸直接沿用 <code>Pv2Chip</code> 的黑底 / 描邊兩態，FAB 沿用 <code>Pv2Fab</code>，面板沿用 <code>Pv2DaySheet</code> 的圓角與把手。
+  </p>
+
+  <div class="decisions">
+    <div class="decision">
+      <h3>一個新增手勢</h3>
+      <p>現有的「速記藥丸」由 FAB ＋ 底部面板取代，跟 Day / Month 的新增方式一致，也對齊參考畫面。面板一打開就聚焦、Enter 直接存檔，少掉的那一次點擊由此補回。</p>
+    </div>
+    <div class="decision">
+      <h3>分頁只放文字</h3>
+      <p>emoji 留在資料夾清單與管理頁；分頁列以密度優先，一屏能露出四到五個資料夾。名稱右邊的數字是該資料夾的便條數，順手也回答了「這裡是不是空的」。</p>
+    </div>
+    <div class="decision">
+      <h3>永遠有地方可去</h3>
+      <p><strong>全部</strong>固定在最左邊、不能改名或刪除；沒有指定資料夾的便條落在<strong>未分類</strong>。刪掉資料夾時便條不會跟著消失，一律退回未分類。</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="boards">
+
+    <!-- 1 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:43</span><span class="status__right">▮▮▯ ⌁ 31</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">A place for your thoughts</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab tab--on">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head">
+              <span class="note__when">Today</span>
+              <span class="note__spacer"></span>
+              <span class="note__folder">工作</span>
+            </div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+
+          <article class="note">
+            <div class="note__head">
+              <span class="note__when">Today</span>
+              <span class="note__spacer"></span>
+              <span class="note__folder">想法</span>
+            </div>
+            <p class="note__body">如果番茄鐘結束時直接問「剛剛在做什麼」，日記就自己寫好了</p>
+          </article>
+
+          <article class="note">
+            <div class="note__head">
+              <span class="note__when">Yesterday</span>
+              <span class="note__spacer"></span>
+              <span class="note__folder">讀書</span>
+            </div>
+            <p class="note__body">《深度工作力》p.87 — 注意力殘留</p>
+          </article>
+
+          <article class="note">
+            <div class="note__head">
+              <span class="note__when">Yesterday</span>
+              <span class="note__spacer"></span>
+              <span class="note__folder">未分類</span>
+            </div>
+            <p class="note__body">牙醫 → 回診記得帶健保卡</p>
+          </article>
+        </div>
+
+        <div class="fab">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+        </div>
+
+        <nav class="nav">
+          <span class="nav__item"><span class="nav__glyph">m</span><span class="nav__label">month</span></span>
+          <span class="nav__item"><span class="nav__glyph">w</span><span class="nav__label">week</span></span>
+          <span class="nav__item"><span class="nav__glyph nav__glyph--on">n</span><span class="nav__label nav__label--on">notes</span></span>
+          <span class="nav__item"><span class="nav__glyph">s</span><span class="nav__label">setting</span></span>
+        </nav>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 01</span>
+        <span class="board__title">全部 — 預設進站的樣子</span>
+        <ul class="board__notes">
+          <li>分頁列夾在頁首與 feed 之間，橫向捲動；右緣的漸層是「還有更多」的訊號，＋ 固定不捲走。</li>
+          <li>在「全部」時每張卡右上角標出所屬資料夾；進到單一資料夾後這個標籤會收起來（見畫面 02）。</li>
+          <li>沒有資料夾時整條分頁列不出現，畫面與今天一模一樣——分類是選配，不是必修。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 2 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:44</span><span class="status__right">▮▮▯ ⌁ 31</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">工作 · 4 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab tab--on">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+          <article class="note">
+            <div class="note__head"><span class="note__when">Yesterday</span></div>
+            <p class="note__body">跟 A 對過了：排程 API 先出 v0，之後再談批次</p>
+          </article>
+          <article class="note">
+            <div class="note__head"><span class="note__when">Aug 14</span></div>
+            <p class="note__body">面試回饋要在 48 小時內送出</p>
+          </article>
+        </div>
+
+        <div class="menu">
+          <div class="menu__item">✎&nbsp; 編輯</div>
+          <div class="menu__item menu__item--on">⇄&nbsp; 移動到…</div>
+          <div class="menu__item menu__item--danger">⌫&nbsp; 刪除</div>
+        </div>
+
+        <div class="fab">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+        </div>
+
+        <nav class="nav">
+          <span class="nav__item"><span class="nav__glyph">m</span><span class="nav__label">month</span></span>
+          <span class="nav__item"><span class="nav__glyph">w</span><span class="nav__label">week</span></span>
+          <span class="nav__item"><span class="nav__glyph nav__glyph--on">n</span><span class="nav__label nav__label--on">notes</span></span>
+          <span class="nav__item"><span class="nav__glyph">s</span><span class="nav__label">setting</span></span>
+        </nav>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 02</span>
+        <span class="board__title">單一資料夾 ＋ 卡片長按選單</span>
+        <ul class="board__notes">
+          <li>選了資料夾後，副標題從固定文案換成「資料夾 · N 則」，讓標題列也回答「我現在在哪」。</li>
+          <li>長按卡片開選單：編輯、移動到…、刪除。刪除鍵從卡片右上角收進這裡，誤觸就少了。</li>
+          <li>「移動到…」開的是畫面 04 的同一張資料夾清單，只是標題不同——一個元件，兩個入口。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 3 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:47</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">工作 · 4 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab tab--on">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+          <article class="note">
+            <div class="note__head"><span class="note__when">Yesterday</span></div>
+            <p class="note__body">跟 A 對過了：排程 API 先出 v0，之後再談批次</p>
+          </article>
+        </div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sheet__handle"></div>
+          <div class="sheet__head">
+            <span class="sheet__title">新的便條</span>
+            <span class="sheet__close">取消</span>
+          </div>
+          <div class="field field--typing">下週跟 B 討論 onboarding：先看留存數字再談文案<span class="field__caret"></span></div>
+          <div class="toolbar">
+            <span class="picker">📁 工作 <span class="picker__caret">▾</span></span>
+            <span class="toolbar__spacer"></span>
+            <span class="toolbar__save">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 L10 17.5 L19 7"/></svg>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 03</span>
+        <span class="board__title">新增便條 — FAB 長出的面板</span>
+        <ul class="board__notes">
+          <li>資料夾預設等於目前分頁；在「全部」按 ＋ 則預設「未分類」。左下角的藥丸隨時可改，改了不影響分頁。</li>
+          <li>面板一開就聚焦、鍵盤直接升起，跟參考畫面同一個節奏；Enter 送出，往下滑或按取消關閉。</li>
+          <li>欄位只有內文一格。便條沒有標題是刻意的（見 <code>src/types/note.ts</code>），這次不改。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 4 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:47</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">工作 · 4 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab tab--on">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+        </div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sheet__handle"></div>
+          <div class="sheet__head">
+            <span class="sheet__title">放到哪個資料夾</span>
+            <span class="sheet__close">取消</span>
+          </div>
+          <div class="rows">
+            <div class="row"><span class="row__emoji">📥</span><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__tick"></span></div>
+            <div class="row"><span class="row__emoji">💡</span><span class="row__name">想法</span><span class="row__count">5</span><span class="row__tick"></span></div>
+            <div class="row"><span class="row__emoji">💼</span><span class="row__name">工作</span><span class="row__count">4</span><span class="row__tick">✓</span></div>
+            <div class="row"><span class="row__emoji">📖</span><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__tick"></span></div>
+            <div class="row row--add"><span class="row__emoji">＋</span><span class="row__name">新增資料夾</span><span class="row__tick"></span></div>
+          </div>
+          <p class="sheet__foot">「全部」不是資料夾，所以不在這張清單上。</p>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 04</span>
+        <span class="board__title">選資料夾 — 新增與移動共用</span>
+        <ul class="board__notes">
+          <li>右側打勾標出目前所在；點任一列即選定並關閉，不需要再按確認。</li>
+          <li>最後一列的「新增資料夾」讓人不必退回主畫面就能開新分類，開完直接選中它。</li>
+          <li>未分類永遠排第一，其餘照使用者在管理頁排的順序。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 5 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:48</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">A place for your thoughts</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab tab--on">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+        </div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sheet__handle"></div>
+          <div class="sheet__head">
+            <span class="sheet__title">新的資料夾</span>
+            <span class="sheet__close">取消</span>
+          </div>
+          <div class="emoji-row">
+            <span class="on">🌱</span><span>💡</span><span>💼</span><span>📖</span><span>✈️</span><span>⋯</span>
+          </div>
+          <div class="field field--name">旅行<span class="field__caret"></span></div>
+          <div class="preview">
+            <span class="preview__label">分頁預覽</span>
+            <span class="tab tab--on">旅行<span class="tab__count">0</span></span>
+          </div>
+          <div class="sheet__cta">建立</div>
+          <p class="sheet__foot">建立後會直接切到這個資料夾，你剛想到的事可以馬上寫進去。</p>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 05</span>
+        <span class="board__title">新增資料夾 — 分頁列尾端的 ＋</span>
+        <ul class="board__notes">
+          <li>只問兩件事：一個 emoji（可略過）跟一個名稱。顏色不開放，讓分頁列維持黑白一致。</li>
+          <li>名稱旁邊即時預覽分頁藥丸——太長的名字在這裡就看得出來會被截斷。</li>
+          <li>名稱重複時 CTA 停用並在下方說明「已經有同名的資料夾」，而不是建立第二個難以分辨的分頁。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 6 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:50</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">A place for your thoughts</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab tab--on">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed"></div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sheet__handle"></div>
+          <div class="sheet__head">
+            <span class="sheet__title">管理資料夾</span>
+            <span class="sheet__close">完成</span>
+          </div>
+          <div class="rows">
+            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">💡</span><span class="row__name">想法</span><span class="row__count">5</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">💼</span><span class="row__name">工作</span><span class="row__count">4</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">📖</span><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip"></span><span class="row__emoji">📥</span><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__act"><span>—</span><span>—</span></span></div>
+          </div>
+          <p class="sheet__foot">未分類固定在最後，不能改名、排序或刪除。<br>刪除資料夾時，裡面的便條會移到未分類，不會一起消失。</p>
+          <div class="sheet__cta sheet__cta--ghost">＋ 新增資料夾</div>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 06</span>
+        <span class="board__title">管理資料夾 — 頁首「···」</span>
+        <ul class="board__notes">
+          <li>拖曳把手決定分頁列的順序，也就是使用者自己的優先順序。</li>
+          <li>刪除是這裡唯一的破壞性操作，二次確認寫明「N 則便條會移到未分類」。</li>
+          <li>長按分頁藥丸也會直接開到這裡並highlight該列，省去先找「···」。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 7 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:52</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">旅行 · 0 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+            <span class="tab tab--on">旅行<span class="tab__count">0</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="feed">
+          <div class="empty">
+            <div class="empty__glyph">🌱</div>
+            <p class="empty__line">旅行 還是空的</p>
+            <p class="empty__hint">按右下角的 ＋ 寫下第一則</p>
+          </div>
+        </div>
+
+        <div class="fab">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+        </div>
+
+        <nav class="nav">
+          <span class="nav__item"><span class="nav__glyph">m</span><span class="nav__label">month</span></span>
+          <span class="nav__item"><span class="nav__glyph">w</span><span class="nav__label">week</span></span>
+          <span class="nav__item"><span class="nav__glyph nav__glyph--on">n</span><span class="nav__label nav__label--on">notes</span></span>
+          <span class="nav__item"><span class="nav__glyph">s</span><span class="nav__label">setting</span></span>
+        </nav>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 07</span>
+        <span class="board__title">空資料夾 — 剛建好的樣子</span>
+        <ul class="board__notes">
+          <li>空狀態借用資料夾自己的 emoji，讓「我在哪個空資料夾」一眼看得出來。</li>
+          <li>目前 feed 的空狀態文案是 <code>Nothing yet.</code>；分類之後空的機會變多，值得寫得明確一點。</li>
+          <li>新資料夾建立後直接切到這裡，接著就是畫面 03 的新增流程。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+  </div>
+
+  <hr class="rule">
+
+  <h2>要動到的東西</h2>
+  <p class="lede">這份設計是視覺提案，不是實作規格；下面只列出它必然牽動的既有檔案與行為，方便估工。</p>
+
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>位置</th><th>需要的改動</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>src/types/note.ts</td>
+          <td>便條多一個 <code>folderId: string | null</code>；<code>null</code> 就是「未分類」，所以既有便條不必資料遷移，也不必先建一個實體資料夾。</td>
+        </tr>
+        <tr>
+          <td>新增 note_folders</td>
+          <td>使用者層級的資料夾：<code>id</code>、<code>name</code>、<code>emoji</code>、<code>sortOrder</code>。刪除時把該資料夾的便條 <code>folderId</code> 設回 <code>null</code>（不是連帶刪除）。</td>
+        </tr>
+        <tr>
+          <td>notebook-store.ts</td>
+          <td>沿用既有的樂觀寫入 ＋ 逐 id 佇列模式：新增 <code>addFolder</code> / <code>renameFolder</code> / <code>removeFolder</code> / <code>moveNote</code>，選中的分頁是本機 UI 狀態，不進 DB。</td>
+        </tr>
+        <tr>
+          <td>NotebookViewV2.vue</td>
+          <td>feed 改成依選中的資料夾過濾（<code>全部</code> 不過濾），排序邏輯不變：仍然嚴格以 <code>createdAt</code> 新到舊。</td>
+        </tr>
+        <tr>
+          <td>Pv2NoteComposer.vue</td>
+          <td>速記藥丸退場，改為 <code>Pv2Fab</code> ＋ 底部面板；面板內文欄位與資料夾藥丸同一列工具列。</td>
+        </tr>
+        <tr>
+          <td>Pv2NoteCard.vue</td>
+          <td>右上角的垃圾桶收進長按選單；在「全部」時多顯示一顆資料夾標籤。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 style="margin-top:36px">還沒決定的</h2>
+  <ul class="open-qs">
+    <li>資料夾要不要有數量上限？分頁列一屏約放得下四到五個，超過就只能靠橫捲找，十個以上會開始難用。</li>
+    <li>「全部」要不要記住上次選的分頁？記住對常用單一資料夾的人比較順，但每次回來看到的畫面就不一定相同。</li>
+    <li>便條要不要能同時屬於多個資料夾？現在的設計是一則一格——若要多對多，分頁列的語意就得從「資料夾」改成「標籤」。</li>
+  </ul>
+</div>
+
+</body>
+</html>
