@@ -62,18 +62,36 @@ watch(
 
 <style scoped>
 .pv2-nav {
-  flex: none;
+  /* Floating glass card, not a flow element: every view's frame ancestor (.mv2 / .wv2 /
+     .dv2 / .nb2__frame / .sp2__frame) is `position: relative; overflow: hidden` and
+     doubles as the desktop phone-frame box, so `position: fixed` would escape that box
+     and anchor to the real browser viewport instead — `absolute` is the one that stays
+     inside the frame on both mobile and the centred desktop mock. Content now extends
+     the full frame height behind it and shows through the blur (LINE's floating tab
+     bar is the reference), rather than stopping short the way a flow nav would.
+     Changing the bottom gap or padding means changing --pv2-nav-h too (see
+     cadence-tokens.css), or the FABs in each view will overlap the nav. */
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 24px;
+  z-index: 5;
   display: grid;
   /* Column count is bound in the template (it follows v2-tabs-store), not fixed here */
-  /* 30px at the bottom clears the home indicator so the labels aren't covered by the
-     system bar. Changing this padding means changing --pv2-nav-h too (see
-     cadence-tokens.css), or the FABs in each view will overlap the nav. */
   /* Four columns is now the hard ceiling (MAX_SHOWN_TABS), leaving ~89px per cell at
      393px — roomier than the old five-column case, so the horizontal padding that was
      trimmed for five can go back. */
-  padding: 12px 18px 30px;
-  border-top: 1px solid #e2e2e2;
-  background: #fff;
+  padding: 14px 18px;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* No design token for a glass surface yet — this is the only frosted material in the
+     app so far, so it's a one-off rather than something worth generalising. */
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .pv2-nav__item {

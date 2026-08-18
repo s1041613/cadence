@@ -58,7 +58,9 @@ function onSubmit(): void {
   /* Load-bearing: without it the flex child refuses to shrink and the whole frame scrolls. */
   min-height: 0;
   overflow-y: auto;
-  padding: 12px 22px 24px;
+  /* Bottom padding is --pv2-nav-h, not 24: the floating glass nav now overlaps this
+     list rather than sitting below it, so the last card needs room to scroll clear. */
+  padding: 12px 22px var(--pv2-nav-h);
   /* Repo idiom (see DayViewV2): hide the scrollbar while keeping the scroll. */
   scrollbar-width: none;
 }

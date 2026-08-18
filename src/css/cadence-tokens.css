@@ -208,13 +208,17 @@
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
   /* ---------- v2 layout ---------- */
-  /* Pv2BottomNav's real height: 12 top + 30 glyph + 6 gap + 11 label + 30 bottom + 1
-     border. Each view's FAB uses it to clear the nav; changing Pv2BottomNav's padding
-     means changing this too, or the FAB overlaps the nav (with no error on that side).
-     This height is independent of the configurable tab count: the count only affects
-     the column count (horizontal), and each cell is a fixed-height column — so adding
-     or removing tabs in the Tab bar settings never requires touching this value. */
-  --pv2-nav-h: 90px;
+  /* Distance from the frame's bottom edge to the top of the floating glass nav: 24
+     bottom gap + 14 top pad + 30 glyph + 6 gap + 11 label + 14 bottom pad + 2 border
+     (1px top + 1px bottom) = 101. Each view's FAB uses it to clear the nav; changing
+     Pv2BottomNav's bottom gap or padding means changing this too, or the FAB overlaps
+     the nav (with no error on that side). This height is independent of the
+     configurable tab count: the count only affects the column count (horizontal), and
+     each cell is a fixed-height column — so adding or removing tabs in the Tab bar
+     settings never requires touching this value. It is also the figure scrollable
+     lists (Notebook feed, Settings panes) pad their bottom by, so the last row can
+     scroll clear of the floating nav instead of staying trapped under it. */
+  --pv2-nav-h: 101px;
 
   /* ---------- Radius ---------- */
   --cd-radius-pill: 999px;
