@@ -74,32 +74,17 @@
     color: var(--doc-ink-faint);
   }
 
-  h1 {
-    margin: 0 0 14px;
-    font: 400 46px/1.05 var(--font-display);
-    text-wrap: balance;
-  }
+  h1 { margin: 0 0 14px; font: 400 46px/1.05 var(--font-display); text-wrap: balance; }
+  h2 { margin: 0 0 6px; font: 400 27px/1.2 var(--font-display); }
 
   .lede { margin: 0; max-width: 64ch; font-size: 15.5px; line-height: 1.65; color: var(--doc-ink-soft); }
   .lede + .lede { margin-top: 12px; }
-
-  h2 {
-    margin: 0 0 6px;
-    font: 400 27px/1.2 var(--font-display);
-  }
 
   .rule { height: 1px; background: var(--doc-line); border: 0; margin: 46px 0 30px; }
 
   /* ---------- 設計決策卡 ---------- */
   .decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; margin-top: 24px; }
-
-  .decision {
-    padding: 16px 18px 18px;
-    background: var(--ground-raised);
-    border: 1px solid var(--doc-line);
-    border-radius: 12px;
-  }
-
+  .decision { padding: 16px 18px 18px; background: var(--ground-raised); border: 1px solid var(--doc-line); border-radius: 12px; }
   .decision h3 { margin: 0 0 8px; font: 800 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--doc-accent); }
   .decision p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--doc-ink-soft); }
 
@@ -108,7 +93,6 @@
   @media (max-width: 460px) { .boards { grid-template-columns: 1fr; } }
 
   .board { margin: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
-
   .board__caption { display: flex; flex-direction: column; gap: 8px; max-width: 393px; }
   .board__step { font: 800 10px var(--font-mono); letter-spacing: 0.16em; color: var(--doc-accent); }
   .board__title { font: 600 15px var(--font-ui); }
@@ -122,28 +106,18 @@
      ========================================================================== */
   .dev {
     position: relative;
-    width: 393px;
-    height: 852px;
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    width: 393px; height: 852px; flex: none;
+    display: flex; flex-direction: column; overflow: hidden;
     border-radius: 44px;
-    background: #fafaf9;
-    color: #1b1b1b;
+    background: #fafaf9; color: #1b1b1b;
     font-family: var(--font-mono);
     box-shadow: 0 24px 54px rgba(0, 0, 0, 0.24);
     isolation: isolate;
   }
 
   .status {
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 30px 2px;
-    font: 600 13px var(--font-mono);
-    color: #1b1b1b;
+    flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 30px 2px; font: 600 13px var(--font-mono);
   }
   .status__right { display: flex; gap: 5px; align-items: center; color: #9c9c9c; font-size: 10px; letter-spacing: 0.08em; }
 
@@ -152,8 +126,7 @@
   .hd__title { margin: 0; font: 400 34px/0.92 var(--font-mono); }
   .hd__eyebrow { margin: 8px 0 0; font: 500 10px var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: #9c9c9c; }
   .hd__more {
-    flex: none; width: 34px; height: 34px; margin-top: 2px;
-    display: grid; place-items: center;
+    flex: none; width: 34px; height: 34px; margin-top: 2px; display: grid; place-items: center;
     border: 1px solid #e2e2e2; border-radius: 50%; background: #fff;
     font: 600 15px var(--font-mono); color: #6e6e6e; letter-spacing: 0.06em;
   }
@@ -177,6 +150,21 @@
     border: 1px dashed #c9c8c1; border-radius: 50%; background: #fff; color: #6e6e6e;
   }
 
+  /* --- 搜尋列（常駐，結構照參考畫面） --- */
+  .search { flex: none; padding: 0 22px 10px; }
+  .search__box {
+    display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 13px;
+    border: 1px solid #e2e2e2; border-radius: 12px; background: #fff;
+  }
+  .search__box--on { border-color: #1b1b1b; border-width: 1.5px; }
+  .search__ph { font: 400 13px var(--font-mono); color: #b2b2b2; }
+  .search__val { font: 400 13px var(--font-mono); color: #1b1b1b; }
+  .search__clear { margin-left: auto; font: 500 13px var(--font-mono); color: #b2b2b2; }
+  /* 搜尋進行中，分頁列退場但不消失：結果本來就跨所有資料夾 */
+  .tabs--off { opacity: 0.4; }
+  .srch-meta { margin: 2px 2px 12px; font: 500 10px var(--font-mono); letter-spacing: 0.06em; color: #9c9c9c; }
+  .hl { background: #ece7d5; border-radius: 3px; padding: 0 1px; }
+
   /* --- feed --- */
   .feed { flex: 1; min-height: 0; overflow: hidden; padding: 8px 22px 0; }
 
@@ -185,24 +173,31 @@
     border: 1px solid #e2e2e2; border-radius: 16px;
     background-color: #fff;
     background-image: radial-gradient(#e6e6e3 1.1px, transparent 1.1px);
-    background-size: 20px 20px;
-    background-position: 14px 14px;
+    background-size: 20px 20px; background-position: 14px 14px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   }
   .note__head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
   .note__when { font: 500 10px var(--font-mono); color: #b2b2b2; }
+  .note__spacer { flex: 1; }
   .note__folder {
-    display: inline-flex; align-items: center; gap: 4px;
+    display: inline-flex; align-items: center;
     padding: 3px 8px; border-radius: 999px;
     background: #f1efe8; color: #6e6a52;
     font: 600 9px/1 var(--font-mono); letter-spacing: 0.06em;
   }
-  .note__spacer { flex: 1; }
+  .note__folder::before { content: '#'; opacity: 0.55; margin-right: 2px; }
+  .note__title { margin: 0 0 5px; font: 600 15px/1.35 var(--font-mono); color: #1b1b1b; }
   .note__body { margin: 0; font: 400 15px/1.42 var(--font-mono); color: #1b1b1b; white-space: pre-wrap; }
+  /* 有標題時，內文退成第二層，卡片才有主從 */
+  .note__title + .note__body { font-size: 13.5px; line-height: 1.5; color: #6e6e6e; }
 
-  .empty { padding: 40px 8px 0; text-align: center; }
-  .empty__glyph { font: 400 30px var(--font-mono); color: #d6d5cd; }
-  .empty__line { margin: 12px 0 0; font: 500 12px var(--font-mono); color: #b2b2b2; }
+  .empty { padding: 44px 8px 0; text-align: center; }
+  .empty__glyph {
+    width: 46px; height: 46px; margin: 0 auto; display: grid; place-items: center;
+    border: 1.5px dashed #dcdbd3; border-radius: 14px;
+    font: 600 15px var(--font-mono); color: #cbcac2;
+  }
+  .empty__line { margin: 14px 0 0; font: 500 12px var(--font-mono); color: #b2b2b2; }
   .empty__hint { margin: 6px 0 0; font: 500 11px var(--font-mono); color: #cbcac2; }
 
   /* --- FAB --- */
@@ -227,79 +222,98 @@
   .scrim { position: absolute; inset: 0; z-index: 20; background: rgba(40, 38, 30, 0.32); }
   .sheet {
     position: absolute; left: 0; right: 0; bottom: 0; z-index: 21;
-    padding: 0 22px 30px;
-    background: #fafaf9;
-    border-radius: 24px 24px 0 0;
+    padding: 0 22px 26px;
+    background: #fafaf9; border-radius: 24px 24px 0 0;
     box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
   }
   .sheet__handle { width: 42px; height: 5px; margin: 9px auto 4px; border-radius: 3px; background: #dadad4; }
   .sheet__head { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 14px; }
   .sheet__title { font: 600 13px var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #6e6e6e; }
   .sheet__close { font: 500 12px var(--font-mono); color: #9c9c9c; }
+  .sheet__foot { margin: 14px 0 0; font: 500 10px/1.6 var(--font-mono); color: #9c9c9c; }
 
-  .field {
-    min-height: 116px; padding: 15px 16px;
-    border: 1.5px solid #1b1b1b; border-radius: 16px; background: #fff;
-    font: 400 15px/1.45 var(--font-mono);
-  }
-  .field--typing { color: #1b1b1b; }
-  .field__caret { display: inline-block; width: 1.5px; height: 17px; margin-left: 1px; background: #1b1b1b; vertical-align: -3px; }
-  .field__ph { color: #b2b2b2; }
-  .field--name { min-height: 0; display: flex; align-items: center; }
+  /* --- 新增便條：標題行 + 說明行 + 工具列（結構照參考畫面） --- */
+  .compose { padding: 16px 2px 4px; }
+  .compose__title { font: 600 17px/1.4 var(--font-mono); color: #1b1b1b; }
+  .compose__desc { margin-top: 12px; font: 400 14px/1.45 var(--font-mono); color: #b2b2b2; }
+  .caret { display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; background: #1b1b1b; vertical-align: -3px; }
+  .tok { color: #6e6a52; }
 
-  .toolbar { display: flex; align-items: center; gap: 10px; padding: 14px 0 0; }
-  .picker {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 9px 13px; border: 1px solid #d5d4cd; border-radius: 999px; background: #fff;
+  .tools { display: flex; align-items: center; gap: 9px; padding: 18px 0 0; border-top: 1px solid #e9e8e2; margin-top: 16px; }
+  .tools__spacer { flex: 1; }
+  .tool {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 32px; padding: 0 12px;
+    border: 1px solid #d5d4cd; border-radius: 999px; background: #fff;
     font: 600 11px/1 var(--font-mono); color: #1b1b1b;
   }
-  .picker__caret { color: #9c9c9c; font-size: 9px; }
-  .toolbar__spacer { flex: 1; }
-  .toolbar__save {
-    width: 44px; height: 44px; display: grid; place-items: center;
-    border-radius: 50%; background: #1b1b1b;
-  }
+  .tool--muted { color: #9c9c9c; border-style: dashed; }
+  .tool::before { content: '#'; color: #9c9c9c; }
+  .tool--plain::before { content: none; }
+  .send { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: #1b1b1b; }
 
-  /* --- 資料夾清單（選擇 / 管理共用） --- */
-  .rows { display: grid; }
-  .row {
-    display: flex; align-items: center; gap: 12px;
-    min-height: 54px; padding: 0 2px;
-    border-bottom: 1px solid #e2e2e2;
+  /* # 觸發的資料夾候選：貼著輸入行浮出來，不蓋住正在打的字 */
+  .sug {
+    position: absolute; left: 22px; right: 22px; z-index: 22;
+    padding: 6px; border: 1px solid #e2e2e2; border-radius: 14px; background: #fff;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
   }
+  .sug__row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font: 500 12px var(--font-mono); color: #1b1b1b; }
+  .sug__row--on { background: #f1efe8; }
+  .sug__row--new { color: #6e6a52; }
+  .sug__count { margin-left: auto; font: 500 10px var(--font-mono); color: #b2b2b2; }
+  .sug__hash { color: #9c9c9c; }
+
+  /* --- 資料夾清單（移動 / 管理共用） --- */
+  .rows { display: grid; }
+  .row { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 0 2px; border-bottom: 1px solid #e2e2e2; }
   .row:last-child { border-bottom: 0; }
-  .row__emoji { flex: none; width: 26px; text-align: center; font-size: 17px; line-height: 1; }
   .row__name { flex: 1; min-width: 0; font: 500 14px var(--font-mono); color: #1b1b1b; }
+  .row__name::before { content: '#'; color: #c4c3bb; margin-right: 3px; }
+  .row__name--plain::before { content: none; }
   .row__count { font: 500 11px var(--font-mono); color: #b2b2b2; }
   .row__tick { width: 20px; text-align: center; font: 600 13px var(--font-mono); color: #6e6a52; }
-  .row__grip { flex: none; width: 18px; color: #c9c8c1; font-size: 13px; line-height: 1; letter-spacing: 0.06em; }
+  .row__grip { flex: none; width: 18px; color: #c9c8c1; font-size: 13px; line-height: 1; }
   .row__act { display: flex; gap: 8px; }
   .row__act span {
-    display: inline-grid; place-items: center; width: 30px; height: 30px;
+    display: inline-grid; place-items: center; width: 34px; height: 30px;
     border: 1px solid #e2e2e2; border-radius: 8px; background: #fff;
     font: 500 10px var(--font-mono); color: #6e6e6e;
   }
-  .row--danger .row__name { color: #c0564b; }
-  .row--add { color: #6e6a52; }
   .row--add .row__name { color: #6e6a52; }
 
-  .sheet__foot { margin: 14px 0 0; font: 500 10px/1.5 var(--font-mono); color: #9c9c9c; }
-
-  /* 新增資料夾：emoji 選擇 + 即時預覽 */
-  .emoji-row { display: flex; gap: 8px; padding: 4px 0 14px; }
-  .emoji-row span {
-    width: 40px; height: 40px; display: grid; place-items: center;
-    border: 1px solid #e2e2e2; border-radius: 12px; background: #fff; font-size: 18px;
-  }
-  .emoji-row span.on { border-color: #1b1b1b; border-width: 1.5px; background: #f1efe8; }
-  .preview { display: flex; align-items: center; gap: 9px; padding: 14px 0 0; }
-  .preview__label { font: 500 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #b2b2b2; }
   .sheet__cta {
-    display: grid; place-items: center; height: 48px; margin-top: 18px;
-    border-radius: 14px; background: #1b1b1b; color: #fafaf9;
-    font: 600 13px var(--font-mono); letter-spacing: 0.06em;
+    display: grid; place-items: center; height: 46px; margin-top: 16px;
+    border-radius: 14px; border: 1px solid #d5d4cd; background: transparent;
+    font: 600 12px var(--font-mono); letter-spacing: 0.06em; color: #6e6e6e;
   }
-  .sheet__cta--ghost { background: transparent; border: 1px solid #d5d4cd; color: #6e6e6e; margin-top: 10px; }
+
+  /* --- 跳窗（新增 / 改名資料夾） --- */
+  .dialog {
+    position: absolute; z-index: 21; left: 30px; right: 30px; top: 268px;
+    border: 1px solid #e2e2e2; border-radius: 20px; background: #fafaf9; overflow: hidden;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+  }
+  .dialog__title { padding: 22px 22px 0; text-align: center; font: 600 15px var(--font-mono); }
+  .dialog__field {
+    margin: 18px 22px 0; padding: 13px 14px;
+    border: 1.5px solid #1b1b1b; border-radius: 12px; background: #fff;
+    font: 400 15px var(--font-mono);
+  }
+  .dialog__ph { color: #b2b2b2; }
+  .dialog__hint { margin: 10px 22px 20px; text-align: center; font: 500 10px/1.5 var(--font-mono); color: #9c9c9c; }
+  .dialog__acts { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid #e2e2e2; }
+  .dialog__act { padding: 15px 0; text-align: center; font: 600 13px var(--font-mono); color: #6e6e6e; }
+  .dialog__act--ok { border-left: 1px solid #e2e2e2; color: #1b1b1b; }
+  .dialog__act--off { color: #c4c3bb; }
+
+  /* 鍵盤：只畫出上緣，說明跳窗與面板都是在鍵盤升起的狀態下操作 */
+  .kbd {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 232px; z-index: 21;
+    border-top: 1px solid #e2e2e2; background: #eceae4;
+    display: grid; place-items: start center; padding-top: 12px;
+    font: 500 9px var(--font-mono); letter-spacing: 0.18em; text-transform: uppercase; color: #b4b2aa;
+  }
 
   /* 卡片長按選單 */
   .menu {
@@ -317,8 +331,8 @@
   table { border-collapse: collapse; width: 100%; min-width: 560px; }
   th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--doc-line); font-size: 13.5px; line-height: 1.55; vertical-align: top; }
   th { font: 800 10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--doc-ink-faint); }
-  td:first-child { font: 600 12.5px var(--font-mono); white-space: nowrap; color: var(--doc-ink); }
   td { color: var(--doc-ink-soft); }
+  td:first-child { font: 600 12.5px var(--font-mono); white-space: nowrap; color: var(--doc-ink); }
   code { font: 500 12.5px var(--font-mono); background: var(--doc-accent-soft); color: var(--doc-accent); padding: 1px 5px; border-radius: 5px; }
 
   .open-qs { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; max-width: 68ch; }
@@ -338,27 +352,43 @@
   <h1>便條加上資料夾</h1>
   <p class="lede">
     現在的 Notebook 是一條沒有盡頭的時間軸：所有便條依寫下的時間新到舊排列，只能往下捲找。
-    便條一多，「上週那個點子」就等於找不到。這份設計把參考畫面裡的分頁式分類搬進 Cadence——
-    頁首下方一排資料夾分頁，最右邊的 <strong>＋</strong> 開新資料夾，新增便條時就決定它落在哪一格。
+    便條一多，「上週那個點子」就等於找不到。這份設計把參考畫面裡的分類方式搬進 Cadence——
+    頁首下方一排資料夾分頁、最右邊的 <strong>＋</strong> 開新資料夾、
+    右下角的 <strong>＋</strong> 長出新增面板，在送出前就決定這則便條落在哪一格。
   </p>
   <p class="lede">
-    參考畫面是深色、圓角、粉紅重點色的清單 app；這裡只借它的<strong>資訊結構</strong>（分頁列 ＋ 尾端新增 ＋ FAB 新增），
-    外觀維持 Cadence v2 既有的語彙：#fafaf9 畫布、白色點紙卡片、JetBrains Mono、黑色 64px FAB。
-    分頁藥丸直接沿用 <code>Pv2Chip</code> 的黑底 / 描邊兩態，FAB 沿用 <code>Pv2Fab</code>，面板沿用 <code>Pv2DaySheet</code> 的圓角與把手。
+    新增流程照著參考 app 的做法走：<strong>標題行 ＋ 說明行 ＋ 一列工具 ＋ 右下圓形送出鍵</strong>，
+    而且在標題行打 <code>#</code> 就會即時跳出資料夾候選，不必先去點選單。
+    新增資料夾則刻意退回到最小的形式——<strong>一個置中跳窗、一格輸入框、取消 / 建立</strong>，
+    跟參考畫面的 Add Section 一樣，不做選色、選 emoji 那些會拖慢一次性動作的東西。
+  </p>
+  <p class="lede">
+    分頁列下方是常駐的<strong>搜尋列</strong>：分類解決「我知道它在哪一格」，查詢解決「我忘了放在哪一格」，
+    兩件事都得有，缺一個就得靠捲動硬找。至於既有的操作習慣一概不動——
+    <strong>點便條內文就直接就地編輯</strong>，不多一顆編輯按鈕、也不另開頁面。
+  </p>
+  <p class="lede">
+    借的是結構，不是外觀：深色底、粉紅重點色留在參考 app，這裡維持 Cadence v2 的語彙——
+    #fafaf9 畫布、白色點紙卡片、JetBrains Mono，分頁藥丸沿用 <code>Pv2Chip</code> 的黑底 / 描邊兩態，
+    FAB 沿用 <code>Pv2Fab</code>，面板沿用 <code>Pv2DaySheet</code> 的圓角與把手。
   </p>
 
   <div class="decisions">
     <div class="decision">
-      <h3>一個新增手勢</h3>
-      <p>現有的「速記藥丸」由 FAB ＋ 底部面板取代，跟 Day / Month 的新增方式一致，也對齊參考畫面。面板一打開就聚焦、Enter 直接存檔，少掉的那一次點擊由此補回。</p>
+      <h3># 是同一個字</h3>
+      <p>Cadence 的日曆 chip 本來就以 <code>#</code> 開頭。新增時在文字裡打 <code>#</code> 指定資料夾、工具列的資料夾藥丸、卡片上的標籤，用的是同一個符號，所以不必額外學。</p>
     </div>
     <div class="decision">
-      <h3>分頁只放文字</h3>
-      <p>emoji 留在資料夾清單與管理頁；分頁列以密度優先，一屏能露出四到五個資料夾。名稱右邊的數字是該資料夾的便條數，順手也回答了「這裡是不是空的」。</p>
+      <h3>新增資料夾＝跳窗</h3>
+      <p>建資料夾是一次性的雜務，不值得一整張面板。置中跳窗、一格輸入框、取消 / 建立，名稱空白或重複時「建立」保持停用。</p>
+    </div>
+    <div class="decision">
+      <h3>查詢不看分頁</h3>
+      <p>搜尋一律跨所有資料夾，結果卡片標出各自的資料夾。會用搜尋，多半正是因為不確定放在哪一格；先限縮在目前分頁只會讓人找不到。</p>
     </div>
     <div class="decision">
       <h3>永遠有地方可去</h3>
-      <p><strong>全部</strong>固定在最左邊、不能改名或刪除；沒有指定資料夾的便條落在<strong>未分類</strong>。刪掉資料夾時便條不會跟著消失，一律退回未分類。</p>
+      <p><strong>全部</strong>固定在最左邊、不能改名或刪除；沒指定資料夾的便條落在<strong>未分類</strong>。刪掉資料夾時便條不會跟著消失，一律退回未分類。</p>
     </div>
   </div>
 
@@ -366,7 +396,7 @@
 
   <div class="boards">
 
-    <!-- 1 ─────────────────────────────────────────────── -->
+    <!-- 01 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:43</span><span class="status__right">▮▮▯ ⌁ 31</span></div>
@@ -392,40 +422,33 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <article class="note">
-            <div class="note__head">
-              <span class="note__when">Today</span>
-              <span class="note__spacer"></span>
-              <span class="note__folder">工作</span>
-            </div>
-            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
           </article>
 
           <article class="note">
-            <div class="note__head">
-              <span class="note__when">Today</span>
-              <span class="note__spacer"></span>
-              <span class="note__folder">想法</span>
-            </div>
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">想法</span></div>
             <p class="note__body">如果番茄鐘結束時直接問「剛剛在做什麼」，日記就自己寫好了</p>
           </article>
 
           <article class="note">
-            <div class="note__head">
-              <span class="note__when">Yesterday</span>
-              <span class="note__spacer"></span>
-              <span class="note__folder">讀書</span>
-            </div>
-            <p class="note__body">《深度工作力》p.87 — 注意力殘留</p>
+            <div class="note__head"><span class="note__when">Yesterday</span><span class="note__spacer"></span><span class="note__folder">讀書</span></div>
+            <p class="note__title">注意力殘留</p>
+            <p class="note__body">《深度工作力》p.87 — 切換任務後，前一件事會在腦裡續住二十分鐘</p>
           </article>
 
           <article class="note">
-            <div class="note__head">
-              <span class="note__when">Yesterday</span>
-              <span class="note__spacer"></span>
-              <span class="note__folder">未分類</span>
-            </div>
+            <div class="note__head"><span class="note__when">Yesterday</span><span class="note__spacer"></span><span class="note__folder">未分類</span></div>
             <p class="note__body">牙醫 → 回診記得帶健保卡</p>
           </article>
         </div>
@@ -448,12 +471,13 @@
         <ul class="board__notes">
           <li>分頁列夾在頁首與 feed 之間，橫向捲動；右緣的漸層是「還有更多」的訊號，＋ 固定不捲走。</li>
           <li>在「全部」時每張卡右上角標出所屬資料夾；進到單一資料夾後這個標籤會收起來（見畫面 02）。</li>
-          <li>沒有資料夾時整條分頁列不出現，畫面與今天一模一樣——分類是選配，不是必修。</li>
+          <li>有標題的卡片標題在上、內文退成第二層；沒下標題的便條維持今天的樣子，一行就是一行。</li>
+          <li>沒有資料夾時整條分頁列不出現——分類是選配，不是必修。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 2 ─────────────────────────────────────────────── -->
+    <!-- 02 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:44</span><span class="status__right">▮▮▯ ⌁ 31</span></div>
@@ -479,10 +503,18 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
           </article>
           <article class="note">
             <div class="note__head"><span class="note__when">Yesterday</span></div>
@@ -495,7 +527,6 @@
         </div>
 
         <div class="menu">
-          <div class="menu__item">✎&nbsp; 編輯</div>
           <div class="menu__item menu__item--on">⇄&nbsp; 移動到…</div>
           <div class="menu__item menu__item--danger">⌫&nbsp; 刪除</div>
         </div>
@@ -516,14 +547,89 @@
         <span class="board__step">畫面 02</span>
         <span class="board__title">單一資料夾 ＋ 卡片長按選單</span>
         <ul class="board__notes">
-          <li>選了資料夾後，副標題從固定文案換成「資料夾 · N 則」，讓標題列也回答「我現在在哪」。</li>
-          <li>長按卡片開選單：編輯、移動到…、刪除。刪除鍵從卡片右上角收進這裡，誤觸就少了。</li>
-          <li>「移動到…」開的是畫面 04 的同一張資料夾清單，只是標題不同——一個元件，兩個入口。</li>
+          <li>選了資料夾後，副標題換成「資料夾 · N 則」，標題列也回答「我現在在哪」。</li>
+          <li>點內文就地編輯，維持現在的做法——沒有「編輯」按鈕，也不另開頁面。長按才出選單，裡面只有移動與刪除。</li>
+          <li>刪除鍵從卡片右上角收進長按選單，誤觸就少了。</li>
+          <li>「移動到…」開的是畫面 07 的資料夾清單。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 3 ─────────────────────────────────────────────── -->
+    <!-- 03 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:46</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">搜尋 · 3 則符合</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs tabs--off">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="search">
+          <div class="search__box search__box--on">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__val">onboarding<span class="caret"></span></span>
+            <span class="search__clear">✕</span>
+          </div>
+        </div>
+
+        <div class="feed">
+          <p class="srch-meta">3 則符合 · 所有資料夾</p>
+
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
+            <p class="note__title">下週跟 B 討論 <span class="hl">onboarding</span></p>
+            <p class="note__body">先看留存數字再談文案</p>
+          </article>
+
+          <article class="note">
+            <div class="note__head"><span class="note__when">Aug 12</span><span class="note__spacer"></span><span class="note__folder">想法</span></div>
+            <p class="note__body">新使用者的 <span class="hl">onboarding</span> 可以只留三步，第一步就讓他建一個 timebox</p>
+          </article>
+
+          <article class="note">
+            <div class="note__head"><span class="note__when">Aug 5</span><span class="note__spacer"></span><span class="note__folder">讀書</span></div>
+            <p class="note__body">看到一句：好的 <span class="hl">onboarding</span> 不是教學，是讓人第一次就成功</p>
+          </article>
+        </div>
+
+        <nav class="nav">
+          <span class="nav__item"><span class="nav__glyph">m</span><span class="nav__label">month</span></span>
+          <span class="nav__item"><span class="nav__glyph">w</span><span class="nav__label">week</span></span>
+          <span class="nav__item"><span class="nav__glyph nav__glyph--on">n</span><span class="nav__label nav__label--on">notes</span></span>
+          <span class="nav__item"><span class="nav__glyph">s</span><span class="nav__label">setting</span></span>
+        </nav>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 03</span>
+        <span class="board__title">查詢 — 一律跨所有資料夾</span>
+        <ul class="board__notes">
+          <li>搜尋列常駐在分頁列下方（照參考畫面）。一開始打字，分頁列就淡下去：會來搜尋，通常正是因為不知道東西被放在哪一格。</li>
+          <li>每張結果卡都標出所屬資料夾，找到之後也就知道下次該去哪裡翻。命中的字以淡色底標出。</li>
+          <li>比對標題與內文，不分大小寫；沒有結果時顯示「找不到含有『onboarding』的便條」，並保留清除鍵讓人改字。</li>
+          <li>FAB 在搜尋時收起來——這個狀態是在找東西，不是在寫東西。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 04 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:47</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
@@ -549,47 +655,51 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
-          </article>
-          <article class="note">
-            <div class="note__head"><span class="note__when">Yesterday</span></div>
-            <p class="note__body">跟 A 對過了：排程 API 先出 v0，之後再談批次</p>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
           </article>
         </div>
 
         <div class="scrim"></div>
-        <div class="sheet">
+        <div class="kbd">鍵盤</div>
+        <div class="sheet" style="bottom: 232px; border-radius: 24px 24px 0 0;">
           <div class="sheet__handle"></div>
-          <div class="sheet__head">
-            <span class="sheet__title">新的便條</span>
-            <span class="sheet__close">取消</span>
+          <div class="compose">
+            <div class="compose__title">下週跟 B 討論 onboarding<span class="caret"></span></div>
+            <div class="compose__desc">補充說明</div>
           </div>
-          <div class="field field--typing">下週跟 B 討論 onboarding：先看留存數字再談文案<span class="field__caret"></span></div>
-          <div class="toolbar">
-            <span class="picker">📁 工作 <span class="picker__caret">▾</span></span>
-            <span class="toolbar__spacer"></span>
-            <span class="toolbar__save">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5 L10 17.5 L19 7"/></svg>
+          <div class="tools">
+            <span class="tool">工作</span>
+            <span class="tools__spacer"></span>
+            <span class="send">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19 V5 M6 11 L12 5 L18 11"/></svg>
             </span>
           </div>
         </div>
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 03</span>
-        <span class="board__title">新增便條 — FAB 長出的面板</span>
+        <span class="board__step">畫面 04</span>
+        <span class="board__title">新增便條 — 照參考畫面的結構</span>
         <ul class="board__notes">
-          <li>資料夾預設等於目前分頁；在「全部」按 ＋ 則預設「未分類」。左下角的藥丸隨時可改，改了不影響分頁。</li>
-          <li>面板一開就聚焦、鍵盤直接升起，跟參考畫面同一個節奏；Enter 送出，往下滑或按取消關閉。</li>
-          <li>欄位只有內文一格。便條沒有標題是刻意的（見 <code>src/types/note.ts</code>），這次不改。</li>
+          <li>上面一行是便條本身（送出後成為卡片標題），下面一行是選填的補充說明；只寫一行就存，卡片跟今天一模一樣。</li>
+          <li>工具列只有一顆資料夾藥丸：預設等於目前分頁，在「全部」按 ＋ 則預設「未分類」。參考畫面的日期、旗標、清單等 icon 對純文字便條沒有對應功能，寧可留白也不擺死的按鈕。</li>
+          <li>右下圓形箭頭送出，Enter 也送出；面板一開就聚焦、鍵盤直接升起。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 4 ─────────────────────────────────────────────── -->
+    <!-- 05 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:47</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
@@ -615,46 +725,62 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
           </article>
         </div>
 
         <div class="scrim"></div>
-        <div class="sheet">
+        <div class="kbd">鍵盤</div>
+
+        <div class="sug" style="bottom: 372px;">
+          <div class="sug__row sug__row--on"><span class="sug__hash">#</span>想法<span class="sug__count">5</span></div>
+          <div class="sug__row"><span class="sug__hash">#</span>工作<span class="sug__count">4</span></div>
+          <div class="sug__row"><span class="sug__hash">#</span>讀書<span class="sug__count">2</span></div>
+          <div class="sug__row sug__row--new">＋&nbsp; 新增資料夾…</div>
+        </div>
+
+        <div class="sheet" style="bottom: 232px;">
           <div class="sheet__handle"></div>
-          <div class="sheet__head">
-            <span class="sheet__title">放到哪個資料夾</span>
-            <span class="sheet__close">取消</span>
+          <div class="compose">
+            <div class="compose__title">週日想去看那間展 <span class="tok">#</span><span class="caret"></span></div>
+            <div class="compose__desc">補充說明</div>
           </div>
-          <div class="rows">
-            <div class="row"><span class="row__emoji">📥</span><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__tick"></span></div>
-            <div class="row"><span class="row__emoji">💡</span><span class="row__name">想法</span><span class="row__count">5</span><span class="row__tick"></span></div>
-            <div class="row"><span class="row__emoji">💼</span><span class="row__name">工作</span><span class="row__count">4</span><span class="row__tick">✓</span></div>
-            <div class="row"><span class="row__emoji">📖</span><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__tick"></span></div>
-            <div class="row row--add"><span class="row__emoji">＋</span><span class="row__name">新增資料夾</span><span class="row__tick"></span></div>
+          <div class="tools">
+            <span class="tool tool--muted">工作</span>
+            <span class="tools__spacer"></span>
+            <span class="send">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19 V5 M6 11 L12 5 L18 11"/></svg>
+            </span>
           </div>
-          <p class="sheet__foot">「全部」不是資料夾，所以不在這張清單上。</p>
         </div>
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 04</span>
-        <span class="board__title">選資料夾 — 新增與移動共用</span>
+        <span class="board__step">畫面 05</span>
+        <span class="board__title">打 # 直接選資料夾</span>
         <ul class="board__notes">
-          <li>右側打勾標出目前所在；點任一列即選定並關閉，不需要再按確認。</li>
-          <li>最後一列的「新增資料夾」讓人不必退回主畫面就能開新分類，開完直接選中它。</li>
-          <li>未分類永遠排第一，其餘照使用者在管理頁排的順序。</li>
+          <li>打出 <code>#</code> 就跳出候選，繼續打字即篩選；選中後 <code>#</code> 連同輸入的字從內文消失，改成工具列上的藥丸——便條內容不會被指令弄髒。</li>
+          <li>最後一列的「新增資料夾…」開畫面 06 的跳窗，建完直接套用到這則便條。</li>
+          <li>候選浮在輸入行上方而不是蓋住它，打到一半仍看得見自己寫了什麼。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 5 ─────────────────────────────────────────────── -->
+    <!-- 06 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
-        <div class="status"><span>11:48</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+        <div class="status"><span>12:06</span><span class="status__right">▮▮▯ ⌁ 27</span></div>
 
         <div class="hd">
           <div>
@@ -677,10 +803,87 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
-            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+          </article>
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">想法</span></div>
+            <p class="note__body">如果番茄鐘結束時直接問「剛剛在做什麼」，日記就自己寫好了</p>
+          </article>
+        </div>
+
+        <div class="scrim"></div>
+        <div class="kbd">鍵盤</div>
+        <div class="dialog">
+          <p class="dialog__title">新增資料夾</p>
+          <div class="dialog__field"><span class="caret"></span><span class="dialog__ph">資料夾名稱</span></div>
+          <p class="dialog__hint">建立後會直接切到這個資料夾</p>
+          <div class="dialog__acts">
+            <span class="dialog__act">取消</span>
+            <span class="dialog__act dialog__act--ok dialog__act--off">建立</span>
+          </div>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 06</span>
+        <span class="board__title">新增資料夾 — 一個跳窗就夠</span>
+        <ul class="board__notes">
+          <li>只問名稱。沒有顏色、沒有 emoji、沒有預覽——建資料夾是一次性的雜務，愈快結束愈好。</li>
+          <li>名稱空白時「建立」停用（如圖）；名稱與現有資料夾重複時也停用，並在下方換成「已經有同名的資料夾」。</li>
+          <li>兩個入口共用同一個跳窗：分頁列尾端的 ＋，以及畫面 05 候選清單裡的「新增資料夾…」。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 07 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:49</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">工作 · 4 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab tab--on">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span></div>
+            <p class="note__title">週會前先寫一頁</p>
+            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
           </article>
         </div>
 
@@ -688,34 +891,32 @@
         <div class="sheet">
           <div class="sheet__handle"></div>
           <div class="sheet__head">
-            <span class="sheet__title">新的資料夾</span>
+            <span class="sheet__title">移動到</span>
             <span class="sheet__close">取消</span>
           </div>
-          <div class="emoji-row">
-            <span class="on">🌱</span><span>💡</span><span>💼</span><span>📖</span><span>✈️</span><span>⋯</span>
+          <div class="rows">
+            <div class="row"><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__tick"></span></div>
+            <div class="row"><span class="row__name">想法</span><span class="row__count">5</span><span class="row__tick"></span></div>
+            <div class="row"><span class="row__name">工作</span><span class="row__count">4</span><span class="row__tick">✓</span></div>
+            <div class="row"><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__tick"></span></div>
+            <div class="row row--add"><span class="row__name row__name--plain">＋&nbsp; 新增資料夾</span><span class="row__tick"></span></div>
           </div>
-          <div class="field field--name">旅行<span class="field__caret"></span></div>
-          <div class="preview">
-            <span class="preview__label">分頁預覽</span>
-            <span class="tab tab--on">旅行<span class="tab__count">0</span></span>
-          </div>
-          <div class="sheet__cta">建立</div>
-          <p class="sheet__foot">建立後會直接切到這個資料夾，你剛想到的事可以馬上寫進去。</p>
+          <p class="sheet__foot">「全部」不是資料夾，所以不在這張清單上。</p>
         </div>
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 05</span>
-        <span class="board__title">新增資料夾 — 分頁列尾端的 ＋</span>
+        <span class="board__step">畫面 07</span>
+        <span class="board__title">移動便條到別的資料夾</span>
         <ul class="board__notes">
-          <li>只問兩件事：一個 emoji（可略過）跟一個名稱。顏色不開放，讓分頁列維持黑白一致。</li>
-          <li>名稱旁邊即時預覽分頁藥丸——太長的名字在這裡就看得出來會被截斷。</li>
-          <li>名稱重複時 CTA 停用並在下方說明「已經有同名的資料夾」，而不是建立第二個難以分辨的分頁。</li>
+          <li>從卡片長按選單的「移動到…」進來。右側打勾標出目前所在，點任一列即移動並關閉，不必再按確認。</li>
+          <li>移動只換資料夾，不動 <code>createdAt</code>，所以便條在 feed 裡的位置不會跳掉。</li>
+          <li>未分類永遠排第一，其餘照使用者在管理頁排的順序。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 6 ─────────────────────────────────────────────── -->
+    <!-- 08 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:50</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
@@ -741,6 +942,13 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed"></div>
 
         <div class="scrim"></div>
@@ -751,28 +959,28 @@
             <span class="sheet__close">完成</span>
           </div>
           <div class="rows">
-            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">💡</span><span class="row__name">想法</span><span class="row__count">5</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
-            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">💼</span><span class="row__name">工作</span><span class="row__count">4</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
-            <div class="row"><span class="row__grip">⠿</span><span class="row__emoji">📖</span><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
-            <div class="row"><span class="row__grip"></span><span class="row__emoji">📥</span><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__act"><span>—</span><span>—</span></span></div>
+            <div class="row"><span class="row__grip">⠿</span><span class="row__name">想法</span><span class="row__count">5</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip">⠿</span><span class="row__name">工作</span><span class="row__count">4</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip">⠿</span><span class="row__name">讀書</span><span class="row__count">2</span><span class="row__act"><span>改名</span><span>刪除</span></span></div>
+            <div class="row"><span class="row__grip"></span><span class="row__name">未分類</span><span class="row__count">3</span><span class="row__act"><span>—</span><span>—</span></span></div>
           </div>
           <p class="sheet__foot">未分類固定在最後，不能改名、排序或刪除。<br>刪除資料夾時，裡面的便條會移到未分類，不會一起消失。</p>
-          <div class="sheet__cta sheet__cta--ghost">＋ 新增資料夾</div>
+          <div class="sheet__cta">＋ 新增資料夾</div>
         </div>
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 06</span>
+        <span class="board__step">畫面 08</span>
         <span class="board__title">管理資料夾 — 頁首「···」</span>
         <ul class="board__notes">
           <li>拖曳把手決定分頁列的順序，也就是使用者自己的優先順序。</li>
-          <li>刪除是這裡唯一的破壞性操作，二次確認寫明「N 則便條會移到未分類」。</li>
-          <li>長按分頁藥丸也會直接開到這裡並highlight該列，省去先找「···」。</li>
+          <li>「改名」開的是畫面 06 那個跳窗，只是標題換成「重新命名」、輸入框帶入原名。</li>
+          <li>刪除是唯一的破壞性操作，二次確認寫明「N 則便條會移到未分類」。長按分頁藥丸也能直接開到這裡。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 7 ─────────────────────────────────────────────── -->
+    <!-- 09 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:52</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
@@ -798,9 +1006,16 @@
           </div>
         </div>
 
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
         <div class="feed">
           <div class="empty">
-            <div class="empty__glyph">🌱</div>
+            <div class="empty__glyph">#</div>
             <p class="empty__line">旅行 還是空的</p>
             <p class="empty__hint">按右下角的 ＋ 寫下第一則</p>
           </div>
@@ -819,12 +1034,11 @@
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 07</span>
+        <span class="board__step">畫面 09</span>
         <span class="board__title">空資料夾 — 剛建好的樣子</span>
         <ul class="board__notes">
-          <li>空狀態借用資料夾自己的 emoji，讓「我在哪個空資料夾」一眼看得出來。</li>
+          <li>建立完直接切到新資料夾，接著就是畫面 04 的新增流程。</li>
           <li>目前 feed 的空狀態文案是 <code>Nothing yet.</code>；分類之後空的機會變多，值得寫得明確一點。</li>
-          <li>新資料夾建立後直接切到這裡，接著就是畫面 03 的新增流程。</li>
         </ul>
       </figcaption>
     </figure>
@@ -844,27 +1058,35 @@
       <tbody>
         <tr>
           <td>src/types/note.ts</td>
-          <td>便條多一個 <code>folderId: string | null</code>；<code>null</code> 就是「未分類」，所以既有便條不必資料遷移，也不必先建一個實體資料夾。</td>
+          <td>多一個 <code>folderId: string | null</code>，<code>null</code> 就是「未分類」——既有便條零遷移，也不必先建一個實體資料夾。<strong>另外多一個選填 <code>title</code></strong>：這是採用參考畫面「標題行 ＋ 說明行」的代價，該檔目前明寫「no title」，要一起更新那段註解。不想動模型的話，面板留一欄就好，其餘設計不受影響。</td>
         </tr>
         <tr>
           <td>新增 note_folders</td>
-          <td>使用者層級的資料夾：<code>id</code>、<code>name</code>、<code>emoji</code>、<code>sortOrder</code>。刪除時把該資料夾的便條 <code>folderId</code> 設回 <code>null</code>（不是連帶刪除）。</td>
+          <td>使用者層級的資料夾：<code>id</code>、<code>name</code>、<code>sortOrder</code>。刪除時把該資料夾的便條 <code>folderId</code> 設回 <code>null</code>（不是連帶刪除）。</td>
         </tr>
         <tr>
           <td>notebook-store.ts</td>
-          <td>沿用既有的樂觀寫入 ＋ 逐 id 佇列模式：新增 <code>addFolder</code> / <code>renameFolder</code> / <code>removeFolder</code> / <code>moveNote</code>，選中的分頁是本機 UI 狀態，不進 DB。</td>
+          <td>沿用既有的樂觀寫入 ＋ 逐 id 佇列模式，新增 <code>addFolder</code> / <code>renameFolder</code> / <code>removeFolder</code> / <code>moveNote</code>；目前選中的分頁是本機 UI 狀態，不寫進 DB。</td>
         </tr>
         <tr>
           <td>NotebookViewV2.vue</td>
-          <td>feed 改成依選中的資料夾過濾（<code>全部</code> 不過濾），排序邏輯不變：仍然嚴格以 <code>createdAt</code> 新到舊。</td>
+          <td>feed 依選中的資料夾過濾（<code>全部</code> 不過濾）；排序邏輯不變，仍嚴格以 <code>createdAt</code> 新到舊。</td>
         </tr>
         <tr>
           <td>Pv2NoteComposer.vue</td>
-          <td>速記藥丸退場，改為 <code>Pv2Fab</code> ＋ 底部面板；面板內文欄位與資料夾藥丸同一列工具列。</td>
+          <td>速記藥丸退場，改為 <code>Pv2Fab</code> ＋ 底部面板：標題行、說明行、資料夾藥丸、圓形送出鍵，外加 <code>#</code> 的即時候選。</td>
+        </tr>
+        <tr>
+          <td>搜尋（新元件）</td>
+          <td>常駐搜尋列 ＋ 前端純本機比對：便條全數已在 store 裡，<code>title</code> 與 <code>body</code> 做不分大小寫的子字串比對即可，不必打 API。有查詢字串時忽略選中的分頁、收起 FAB。</td>
         </tr>
         <tr>
           <td>Pv2NoteCard.vue</td>
-          <td>右上角的垃圾桶收進長按選單；在「全部」時多顯示一顆資料夾標籤。</td>
+          <td>就地編輯的行為原封不動（點內文＝進入編輯、失焦或 Esc 送出）。右上角的垃圾桶收進長按選單；有標題時分兩層排版；在「全部」與搜尋結果裡多顯示一顆資料夾標籤。</td>
+        </tr>
+        <tr>
+          <td>缺一個跳窗元件</td>
+          <td>repo 目前只有底部面板（<code>Pv2DaySheet</code> / <code>Pv2MonthSheet</code>）與 <code>CdPopover</code>，沒有置中的 alert 式跳窗。新增資料夾、改名、刪除確認都要用它，值得做成共用元件。</td>
         </tr>
       </tbody>
     </table>
@@ -872,9 +1094,11 @@
 
   <h2 style="margin-top:36px">還沒決定的</h2>
   <ul class="open-qs">
-    <li>資料夾要不要有數量上限？分頁列一屏約放得下四到五個，超過就只能靠橫捲找，十個以上會開始難用。</li>
-    <li>「全部」要不要記住上次選的分頁？記住對常用單一資料夾的人比較順，但每次回來看到的畫面就不一定相同。</li>
-    <li>便條要不要能同時屬於多個資料夾？現在的設計是一則一格——若要多對多，分頁列的語意就得從「資料夾」改成「標籤」。</li>
+    <li>要不要真的加標題欄？加了新增體驗跟參考畫面一致、卡片也更好掃；不加則 Note 維持「一段純文字」的極簡設定，改動小很多。</li>
+    <li>搜尋要不要記住最近查過的字？空查詢時列出最近幾筆很方便，但也等於把使用者找過什麼留在畫面上。</li>
+    <li>資料夾要不要有數量上限？分頁列一屏約放得下四到五個，十個以上就只能靠橫捲找。</li>
+    <li>「全部」要不要記住上次選的分頁？記住對長期待在單一資料夾的人比較順，但每次回來看到的畫面就不一定相同。</li>
+    <li>便條要不要能同時屬於多個資料夾？現在是一則一格——若要多對多，分頁列的語意就得從「資料夾」改成「標籤」，<code>#</code> 的寫法倒是已經預留了這條路。</li>
   </ul>
 </div>
 
