@@ -91,7 +91,7 @@
         <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">STARTS</span>
           <div class="pv2-edit-card__time-controls">
-            <CdDatePicker :model-value="date" @update:model-value="(v) => commitDate('start', v)" />
+            <CdDatePicker variant="v2" :model-value="date" @update:model-value="(v) => commitDate('start', v)" />
             <Pv2TimeChip
               v-if="!effectiveAllDay"
               :model-value="start"
@@ -114,7 +114,7 @@
         <div class="pv2-edit-card__line">
           <span class="pv2-edit-card__label">ENDS</span>
           <div class="pv2-edit-card__time-controls">
-            <CdDatePicker :model-value="endDate" @update:model-value="(v) => commitDate('end', v)" />
+            <CdDatePicker variant="v2" :model-value="endDate" @update:model-value="(v) => commitDate('end', v)" />
             <Pv2TimeChip
               v-if="!effectiveAllDay"
               :model-value="end"

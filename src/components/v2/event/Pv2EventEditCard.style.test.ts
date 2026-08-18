@@ -10,6 +10,7 @@ import { readFile } from 'node:fs/promises'
 let card = ''
 let selectField = ''
 let timeChip = ''
+let datePicker = ''
 
 beforeAll(async () => {
   card = await readFile(new URL('./Pv2EventEditCard.vue', import.meta.url), 'utf8')
@@ -18,6 +19,10 @@ beforeAll(async () => {
     'utf8'
   )
   timeChip = await readFile(new URL('../ui/Pv2TimeChip.vue', import.meta.url), 'utf8')
+  datePicker = await readFile(
+    new URL('../../ui/CdDatePicker.vue', import.meta.url),
+    'utf8'
+  )
 })
 
 /**
@@ -113,5 +118,24 @@ describe('Pv2TimeChip · joins the same contract', () => {
     for (const match of block.matchAll(/var\((--pv2-[a-z-]+)([^)]*)\)/g)) {
       expect(match[2], `${match[1]} has no fallback`).toMatch(/^,\s*\S/)
     }
+  })
+})
+
+describe('CdDatePicker · the popover follows the host generation', () => {
+  it('asks the shared picker for the v2 palette on both date rows', () => {
+    // The card can re-skin the trigger with :deep, but not the popover: it is
+    // teleported to <body>, so it is nobody's descendant and the variant has to be
+    // passed as a prop.
+    expect(card.match(/<CdDatePicker variant="v2"/g)).toHaveLength(2)
+  })
+
+  it('paints the v2 popover in ink-on-paper, not the warm accent', () => {
+    const start = datePicker.indexOf('.cd-date-picker__popover--v2 {')
+    expect(start).toBeGreaterThan(-1)
+    const v2Block = datePicker.slice(start)
+    // The exact symptom this fixes: the selected day was a --cd-accent-mid olive disc
+    // inside an otherwise neutral card.
+    expect(v2Block).not.toMatch(/--cd-accent/)
+    expect(v2Block).toMatch(/\.cd-date-picker__popover--v2 \.cd-date-picker__cell--selected \{[^}]*background: var\(--dp-ink\)/)
   })
 })
