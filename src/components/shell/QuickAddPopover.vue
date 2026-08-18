@@ -10,6 +10,7 @@
       :icon="icon"
       :all-day="allDay"
       :date="date"
+      v-bind="variant === 'v2' ? { endDate } : {}"
       :start="start"
       :end="end"
       alert-label="No reminder"
@@ -32,6 +33,7 @@
       @remove-icon="icon = null"
       @update:all-day="(v) => (allDay = v)"
       @update:date="(v) => (date = v)"
+      @update:end-date="(v: string) => (endDate = v)"
       @update:start="(v) => (start = v)"
       @update:end="(v) => (end = v)"
       @update:reminder="(v) => (reminder = v)"
@@ -61,6 +63,7 @@
         :icon="icon"
         :all-day="allDay"
         :date="date"
+        v-bind="variant === 'v2' ? { endDate } : {}"
         :start="start"
         :end="end"
         alert-label="No reminder"
@@ -83,6 +86,7 @@
         @remove-icon="icon = null"
         @update:all-day="(v) => (allDay = v)"
         @update:date="(v) => (date = v)"
+        @update:end-date="(v: string) => (endDate = v)"
         @update:start="(v) => (start = v)"
         @update:end="(v) => (end = v)"
         @update:reminder="(v) => (reminder = v)"
@@ -107,6 +111,7 @@ import { useTasksStore, mkTask } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
+import { quickAddSeed } from '@/utils/quick-add-seed'
 import type { TitleSuggestion } from '@/utils/title-suggestions'
 import type { IconName } from '@/components/ui/icons'
 import type { ReminderPreset, RepeatMode } from '@/types/task'
@@ -135,6 +140,7 @@ const color = ref('#E3A75C')
 const icon = ref<IconName | null>(null)
 const allDay = ref(false)
 const date = ref('')
+const endDate = ref('')
 const start = ref('09:00')
 const end = ref('09:30')
 const repeat = ref<RepeatMode>('none')
@@ -169,24 +175,33 @@ const sheetTransitionAttrs = computed(() =>
   props.variant === 'v2' ? { name: 'cd-sheet', duration: 300 } : {}
 )
 
+// `immediate: true` is load-bearing, not defensive: every host mounts this component behind
+// `v-if="ui.qaPop"` (DayPageV2.vue, WeekPageV2.vue, MonthPageV2.vue, IndexPage.vue), so setup
+// runs *after* the click handler has already written ui.qaPop. Without it the watcher's getter
+// merely records that object and the callback never fires — the card then rendered the raw ref
+// defaults (no date, 09:00-09:30) and the tapped slot was lost. Closing nulls qaPop and
+// unmounts the component, so this seeds exactly once per open.
 watch(
   () => ui.qaPop,
   (pop) => {
     if (!pop) return
+    const seed = quickAddSeed(pop)
     title.value = ''
     type.value = 'event'
     quad.value = 'do'
     color.value = '#E3A75C'
     icon.value = null
-    allDay.value = pop.time === null
-    date.value = pop.date
-    start.value = pop.time ?? '09:00'
-    end.value = pop.endTime ?? '10:00'
+    allDay.value = seed.allDay
+    date.value = seed.date
+    endDate.value = seed.endDate
+    start.value = seed.start
+    end.value = seed.end
     repeat.value = 'none'
     reminder.value = '15-min'
     calendarId.value = calendarsStore.defaultCalendarId ?? ''
     location.value = ''
-  }
+  },
+  { immediate: true }
 )
 
 // Overwrites every carried field, including the tapped time slot: showing "12:00 - 13:00" on the
@@ -232,15 +247,19 @@ function onAdd(): void {
   // isLoading gate, but a save button race (e.g. isLoading flips true again mid-edit) is cheap
   // to guard here too.
   if (!ui.qaPop || !title.value.trim() || tasksStore.isLoading) return
-  const { time, endTime } = ui.qaPop
   const task = mkTask({
     date: date.value,
+    // Absence is how a single-day entry is stored, so the field is only written when the user
+    // actually pulled ENDS onto a later day — the same rule EventPreviewPopoverV2 applies. The
+    // flat refs make this a one-shot decision at save time, which is why this host cannot hit
+    // the emit-order trap commit-date-order.test.ts pins for the draft-object hosts.
+    ...(endDate.value > date.value ? { endDate: endDate.value } : {}),
     calendarId: calendarId.value || calendarsStore.defaultCalendarId!,
     title: title.value.trim(),
     type: type.value === 'event' ? 'event' : 'quadrant',
     allDay: type.value === 'event' ? allDay.value : false,
-    start: type.value === 'event' && allDay.value ? '' : start.value || time || '09:00',
-    end: type.value === 'event' && allDay.value ? '' : end.value || endTime || '10:00',
+    start: type.value === 'event' && allDay.value ? '' : start.value,
+    end: type.value === 'event' && allDay.value ? '' : end.value,
     important: type.value === 'task' ? quad.value === 'do' || quad.value === 'plan' : false,
     urgent: type.value === 'task' ? quad.value === 'do' || quad.value === 'quick' : false,
     backgroundColor: type.value === 'event' ? color.value : null,
