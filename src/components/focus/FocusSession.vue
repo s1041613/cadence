@@ -15,9 +15,14 @@
     </div>
 
     <template v-if="phase === 'breathing'">
-      <div class="fx-hud">Breathe in on the rise · out on the fall</div>
-      <div class="fx-dots">
-        <span v-for="i in BREATHS" :key="i" :class="{ done: i <= breathsDone, active: i === breathsDone + 1 }" />
+      <!-- Caption and dots share one flow container below the button row: the caption is long
+           enough to run under Skip and ✕ when it spans the full width, and long enough to wrap
+           on a narrow screen, which would put it on top of absolutely positioned dots. -->
+      <div class="fx-breathe-head">
+        <div class="fx-hud">Breathe in on the rise · out on the fall</div>
+        <div class="fx-dots">
+          <span v-for="i in BREATHS" :key="i" :class="{ done: i <= breathsDone, active: i === breathsDone + 1 }" />
+        </div>
       </div>
       <svg class="fx-scene" viewBox="0 0 100 190" preserveAspectRatio="xMidYMid slice">
         <defs>
@@ -34,7 +39,7 @@
     </template>
 
     <template v-else>
-      <div class="fx-hud">{{ mode === 'focus' ? 'Focus · Pomodoro' : `Short break · ${restMinutes} min` }}</div>
+      <div class="fx-hud fx-hud--timer">{{ mode === 'focus' ? 'Focus · Pomodoro' : `Short break · ${restMinutes} min` }}</div>
 
       <!-- The ring counts down this pomodoro; how much of the timebox is left is a different
            and more important clock that the screen never showed. Independent of subtasks:
@@ -404,24 +409,43 @@ onUnmounted(() => {
   font-weight: 700
 
 .fx .fx-hud
-  position: absolute
-  top: 26px
-  left: 0
-  right: 0
   text-align: center
   z-index: 7
   font-size: 12px
+  line-height: 1.5
   letter-spacing: .2em
   color: rgba(255, 255, 255, .7)
   text-transform: uppercase
   font-weight: 700
+
+// The timer label is short, so it keeps the top row and reads beside the ✕. The insets mirror
+// the button's footprint (22px inset + 36px wide) on both sides, so the label stays optically
+// centred and cannot slide under the button however wide it gets.
+.fx .fx-hud--timer
+  position: absolute
+  top: 26px
+  left: 66px
+  right: 66px
+
+// Clears the 36px button row, which occupies 20px–56px.
+.fx .fx-breathe-head
+  position: absolute
+  top: 68px
+  left: 0
+  right: 0
+  z-index: 7
+  display: flex
+  flex-direction: column
+  align-items: center
+  gap: 10px
+  padding: 0 20px
 
 // Three pieces of information separated by weight and brightness rather than by line, so the
 // bar stays one object: the name says what, the slot says when, the remaining figure is the
 // only number that moves on its own and is therefore the brightest.
 .fx .fx-ctx
   position: absolute
-  top: 56px
+  top: 72px
   left: 26px
   right: 26px
   z-index: 7
@@ -540,14 +564,9 @@ onUnmounted(() => {
       text-decoration: line-through
 
 .fx .fx-dots
-  position: absolute
-  top: 52px
-  left: 0
-  right: 0
   display: flex
   gap: 9px
   justify-content: center
-  z-index: 7
 
   span
     width: 8px
