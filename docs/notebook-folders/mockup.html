@@ -186,10 +186,14 @@
     font: 600 9px/1 var(--font-mono); letter-spacing: 0.06em;
   }
   .note__folder::before { content: '#'; opacity: 0.55; margin-right: 2px; }
-  .note__title { margin: 0 0 5px; font: 600 15px/1.35 var(--font-mono); color: #1b1b1b; }
+  /* 日期用描邊、資料夾用填色：兩顆 chip 並排時不會看成同一種東西 */
+  .note__date {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 999px;
+    border: 1px solid #d5d4cd; color: #6e6e6e;
+    font: 600 9px/1 var(--font-mono); letter-spacing: 0.06em;
+  }
   .note__body { margin: 0; font: 400 15px/1.42 var(--font-mono); color: #1b1b1b; white-space: pre-wrap; }
-  /* 有標題時，內文退成第二層，卡片才有主從 */
-  .note__title + .note__body { font-size: 13.5px; line-height: 1.5; color: #6e6e6e; }
 
   .empty { padding: 44px 8px 0; text-align: center; }
   .empty__glyph {
@@ -232,10 +236,9 @@
   .sheet__close { font: 500 12px var(--font-mono); color: #9c9c9c; }
   .sheet__foot { margin: 14px 0 0; font: 500 10px/1.6 var(--font-mono); color: #9c9c9c; }
 
-  /* --- 新增便條：標題行 + 說明行 + 工具列（結構照參考畫面） --- */
-  .compose { padding: 16px 2px 4px; }
-  .compose__title { font: 600 17px/1.4 var(--font-mono); color: #1b1b1b; }
-  .compose__desc { margin-top: 12px; font: 400 14px/1.45 var(--font-mono); color: #b2b2b2; }
+  /* --- 新增便條：一欄內文 + 工具列（工具列與送出鍵的排法照參考畫面） --- */
+  .compose { padding: 16px 2px 4px; min-height: 100px; }
+  .compose__body { font: 400 16px/1.5 var(--font-mono); color: #1b1b1b; }
   .caret { display: inline-block; width: 1.5px; height: 18px; margin-left: 1px; background: #1b1b1b; vertical-align: -3px; }
   .tok { color: #6e6a52; }
 
@@ -250,6 +253,9 @@
   .tool--muted { color: #9c9c9c; border-style: dashed; }
   .tool::before { content: '#'; color: #9c9c9c; }
   .tool--plain::before { content: none; }
+  .tool--date { padding: 0 10px; }
+  .tool--date::before { content: none; }
+  .tool--set { border-color: #1b1b1b; }
   .send { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: #1b1b1b; }
 
   /* # 觸發的資料夾候選：貼著輸入行浮出來，不蓋住正在打的字 */
@@ -263,6 +269,24 @@
   .sug__row--new { color: #6e6a52; }
   .sug__count { margin-left: auto; font: 500 10px var(--font-mono); color: #b2b2b2; }
   .sug__hash { color: #9c9c9c; }
+
+  /* --- 選日期（迷你月曆） --- */
+  .quick { display: flex; gap: 8px; padding: 2px 0 16px; }
+  .quick span {
+    flex: 1; display: grid; place-items: center; height: 40px;
+    border: 1px solid #d5d4cd; border-radius: 12px; background: #fff;
+    font: 600 11px var(--font-mono); color: #1b1b1b;
+  }
+  .quick span.on { background: #1b1b1b; border-color: #1b1b1b; color: #fafaf9; }
+  .cal { border-top: 1px solid #e9e8e2; padding-top: 14px; }
+  .cal__head { display: flex; align-items: center; justify-content: space-between; padding: 0 4px 10px; font: 600 12px var(--font-mono); }
+  .cal__nav { color: #b2b2b2; }
+  .cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal__dow { display: grid; place-items: center; height: 24px; font: 600 9px var(--font-mono); color: #b2b2b2; }
+  .cal__day { display: grid; place-items: center; height: 36px; border-radius: 10px; font: 500 12px var(--font-mono); color: #1b1b1b; }
+  .cal__day--mute { color: #d2d1c9; }
+  .cal__day--today { box-shadow: inset 0 0 0 1px #d5d4cd; }
+  .cal__day--on { background: #1b1b1b; color: #fafaf9; }
 
   /* --- 資料夾清單（移動 / 管理共用） --- */
   .rows { display: grid; }
@@ -357,8 +381,10 @@
     右下角的 <strong>＋</strong> 長出新增面板，在送出前就決定這則便條落在哪一格。
   </p>
   <p class="lede">
-    新增流程照著參考 app 的做法走：<strong>標題行 ＋ 說明行 ＋ 一列工具 ＋ 右下圓形送出鍵</strong>，
-    而且在標題行打 <code>#</code> 就會即時跳出資料夾候選，不必先去點選單。
+    新增流程照著參考 app 的做法走：<strong>底部面板 ＋ 一列工具 ＋ 右下圓形送出鍵</strong>，
+    而且在內文裡打 <code>#</code> 就會即時跳出資料夾候選，不必先去點選單。
+    便條本身維持現在的樣子——<strong>一段純文字，沒有標題</strong>，所以面板只有一欄。
+    工具列上另一顆是日曆：<strong>便條可以放到某一天</strong>，寫的時候順手指定，事後也能長按選「移到某一天…」。
     新增資料夾則刻意退回到最小的形式——<strong>一個置中跳窗、一格輸入框、取消 / 建立</strong>，
     跟參考畫面的 Add Section 一樣，不做選色、選 emoji 那些會拖慢一次性動作的東西。
   </p>
@@ -381,6 +407,10 @@
     <div class="decision">
       <h3>新增資料夾＝跳窗</h3>
       <p>建資料夾是一次性的雜務，不值得一整張面板。置中跳窗、一格輸入框、取消 / 建立，名稱空白或重複時「建立」保持停用。</p>
+    </div>
+    <div class="decision">
+      <h3>日期不搬走便條</h3>
+      <p>放到某一天只是替便條加一個日期欄位：它仍舊留在 Notebook 的原資料夾，卡片多一顆日期 chip。分類回答「這是什麼」，日期回答「什麼時候要用」，兩件事互不取代。</p>
     </div>
     <div class="decision">
       <h3>查詢不看分頁</h3>
@@ -431,9 +461,8 @@
 
         <div class="feed">
           <article class="note">
-            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__date">8/20</span><span class="note__folder">工作</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
 
           <article class="note">
@@ -443,8 +472,7 @@
 
           <article class="note">
             <div class="note__head"><span class="note__when">Yesterday</span><span class="note__spacer"></span><span class="note__folder">讀書</span></div>
-            <p class="note__title">注意力殘留</p>
-            <p class="note__body">《深度工作力》p.87 — 切換任務後，前一件事會在腦裡續住二十分鐘</p>
+            <p class="note__body">《深度工作力》p.87 — 注意力殘留：切換任務後，前一件事會在腦裡續住二十分鐘</p>
           </article>
 
           <article class="note">
@@ -471,7 +499,6 @@
         <ul class="board__notes">
           <li>分頁列夾在頁首與 feed 之間，橫向捲動；右緣的漸層是「還有更多」的訊號，＋ 固定不捲走。</li>
           <li>在「全部」時每張卡右上角標出所屬資料夾；進到單一資料夾後這個標籤會收起來（見畫面 02）。</li>
-          <li>有標題的卡片標題在上、內文退成第二層；沒下標題的便條維持今天的樣子，一行就是一行。</li>
           <li>沒有資料夾時整條分頁列不出現——分類是選配，不是必修。</li>
         </ul>
       </figcaption>
@@ -513,8 +540,7 @@
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
           <article class="note">
             <div class="note__head"><span class="note__when">Yesterday</span></div>
@@ -528,6 +554,7 @@
 
         <div class="menu">
           <div class="menu__item menu__item--on">⇄&nbsp; 移動到…</div>
+          <div class="menu__item">▦&nbsp; 移到某一天…</div>
           <div class="menu__item menu__item--danger">⌫&nbsp; 刪除</div>
         </div>
 
@@ -550,7 +577,7 @@
           <li>選了資料夾後，副標題換成「資料夾 · N 則」，標題列也回答「我現在在哪」。</li>
           <li>點內文就地編輯，維持現在的做法——沒有「編輯」按鈕，也不另開頁面。長按才出選單，裡面只有移動與刪除。</li>
           <li>刪除鍵從卡片右上角收進長按選單，誤觸就少了。</li>
-          <li>「移動到…」開的是畫面 07 的資料夾清單。</li>
+          <li>「移動到…」開的是畫面 09 的資料夾清單。</li>
         </ul>
       </figcaption>
     </figure>
@@ -594,8 +621,7 @@
 
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
-            <p class="note__title">下週跟 B 討論 <span class="hl">onboarding</span></p>
-            <p class="note__body">先看留存數字再談文案</p>
+            <p class="note__body">下週跟 B 討論 <span class="hl">onboarding</span>：先看留存數字再談文案</p>
           </article>
 
           <article class="note">
@@ -623,7 +649,7 @@
         <ul class="board__notes">
           <li>搜尋列常駐在分頁列下方（照參考畫面）。一開始打字，分頁列就淡下去：會來搜尋，通常正是因為不知道東西被放在哪一格。</li>
           <li>每張結果卡都標出所屬資料夾，找到之後也就知道下次該去哪裡翻。命中的字以淡色底標出。</li>
-          <li>比對標題與內文，不分大小寫；沒有結果時顯示「找不到含有『onboarding』的便條」，並保留清除鍵讓人改字。</li>
+          <li>比對內文，不分大小寫；沒有結果時顯示「找不到含有『onboarding』的便條」，並保留清除鍵讓人改字。</li>
           <li>FAB 在搜尋時收起來——這個狀態是在找東西，不是在寫東西。</li>
         </ul>
       </figcaption>
@@ -665,8 +691,7 @@
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
         </div>
 
@@ -675,11 +700,14 @@
         <div class="sheet" style="bottom: 232px; border-radius: 24px 24px 0 0;">
           <div class="sheet__handle"></div>
           <div class="compose">
-            <div class="compose__title">下週跟 B 討論 onboarding<span class="caret"></span></div>
-            <div class="compose__desc">補充說明</div>
+            <div class="compose__body">下週跟 B 討論 onboarding：先看留存數字再談文案<span class="caret"></span></div>
           </div>
           <div class="tools">
             <span class="tool">工作</span>
+            <span class="tool tool--date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10 H20.5 M8 3.5 V6.5 M16 3.5 V6.5"/></svg>
+              日期
+            </span>
             <span class="tools__spacer"></span>
             <span class="send">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19 V5 M6 11 L12 5 L18 11"/></svg>
@@ -692,8 +720,9 @@
         <span class="board__step">畫面 04</span>
         <span class="board__title">新增便條 — 照參考畫面的結構</span>
         <ul class="board__notes">
-          <li>上面一行是便條本身（送出後成為卡片標題），下面一行是選填的補充說明；只寫一行就存，卡片跟今天一模一樣。</li>
-          <li>工具列只有一顆資料夾藥丸：預設等於目前分頁，在「全部」按 ＋ 則預設「未分類」。參考畫面的日期、旗標、清單等 icon 對純文字便條沒有對應功能，寧可留白也不擺死的按鈕。</li>
+          <li>只有一欄內文，跟便條的資料形狀一致：寫多少存多少，送出後的卡片跟今天長得一模一樣。</li>
+          <li>工具列兩顆：資料夾藥丸預設等於目前分頁（在「全部」按 ＋ 則預設「未分類」），日曆藥丸把便條放到某一天、設好後直接顯示日期。</li>
+          <li>參考畫面另外還有旗標與清單 icon，純文字便條沒有對應的東西，寧可留白也不擺死的按鈕。</li>
           <li>右下圓形箭頭送出，Enter 也送出；面板一開就聚焦、鍵盤直接升起。</li>
         </ul>
       </figcaption>
@@ -735,8 +764,7 @@
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
         </div>
 
@@ -753,11 +781,14 @@
         <div class="sheet" style="bottom: 232px;">
           <div class="sheet__handle"></div>
           <div class="compose">
-            <div class="compose__title">週日想去看那間展 <span class="tok">#</span><span class="caret"></span></div>
-            <div class="compose__desc">補充說明</div>
+            <div class="compose__body">週日想去看那間展 <span class="tok">#</span><span class="caret"></span></div>
           </div>
           <div class="tools">
             <span class="tool tool--muted">工作</span>
+            <span class="tool tool--date">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10 H20.5 M8 3.5 V6.5 M16 3.5 V6.5"/></svg>
+              日期
+            </span>
             <span class="tools__spacer"></span>
             <span class="send">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19 V5 M6 11 L12 5 L18 11"/></svg>
@@ -771,13 +802,99 @@
         <span class="board__title">打 # 直接選資料夾</span>
         <ul class="board__notes">
           <li>打出 <code>#</code> 就跳出候選，繼續打字即篩選；選中後 <code>#</code> 連同輸入的字從內文消失，改成工具列上的藥丸——便條內容不會被指令弄髒。</li>
-          <li>最後一列的「新增資料夾…」開畫面 06 的跳窗，建完直接套用到這則便條。</li>
+          <li>最後一列的「新增資料夾…」開畫面 07 的跳窗，建完直接套用到這則便條。</li>
           <li>候選浮在輸入行上方而不是蓋住它，打到一半仍看得見自己寫了什麼。</li>
         </ul>
       </figcaption>
     </figure>
 
     <!-- 06 ─────────────────────────────────────────────── -->
+    <figure class="board">
+      <div class="dev">
+        <div class="status"><span>11:48</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
+
+        <div class="hd">
+          <div>
+            <h2 class="hd__title">Notebook</h2>
+            <p class="hd__eyebrow">工作 · 4 則</p>
+          </div>
+          <div class="hd__more">···</div>
+        </div>
+
+        <div class="tabs">
+          <div class="tabs__scroll">
+            <span class="tab">全部<span class="tab__count">12</span></span>
+            <span class="tab">想法<span class="tab__count">5</span></span>
+            <span class="tab tab--on">工作<span class="tab__count">4</span></span>
+            <span class="tab">讀書<span class="tab__count">2</span></span>
+          </div>
+          <div class="tabs__fade"></div>
+          <div class="tabs__add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6e6e6e" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5 V19 M5 12 H19"/></svg>
+          </div>
+        </div>
+
+        <div class="search">
+          <div class="search__box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b2b2b2" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16 L20.5 20.5"/></svg>
+            <span class="search__ph">搜尋便條</span>
+          </div>
+        </div>
+
+        <div class="feed">
+          <article class="note">
+            <div class="note__head"><span class="note__when">Today</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
+          </article>
+        </div>
+
+        <div class="scrim"></div>
+        <div class="sheet">
+          <div class="sheet__handle"></div>
+          <div class="sheet__head">
+            <span class="sheet__title">放到哪一天</span>
+            <span class="sheet__close">取消</span>
+          </div>
+
+          <div class="quick">
+            <span>今天 8/18</span>
+            <span>明天 8/19</span>
+            <span class="on">8/20</span>
+          </div>
+
+          <div class="cal">
+            <div class="cal__head">
+              <span class="cal__nav">‹</span>
+              <span>2026 年 8 月</span>
+              <span class="cal__nav">›</span>
+            </div>
+            <div class="cal__grid">
+              <span class="cal__dow">一</span><span class="cal__dow">二</span><span class="cal__dow">三</span><span class="cal__dow">四</span><span class="cal__dow">五</span><span class="cal__dow">六</span><span class="cal__dow">日</span>
+              <span class="cal__day cal__day--mute">27</span><span class="cal__day cal__day--mute">28</span><span class="cal__day cal__day--mute">29</span><span class="cal__day cal__day--mute">30</span><span class="cal__day cal__day--mute">31</span><span class="cal__day">1</span><span class="cal__day">2</span>
+              <span class="cal__day">3</span><span class="cal__day">4</span><span class="cal__day">5</span><span class="cal__day">6</span><span class="cal__day">7</span><span class="cal__day">8</span><span class="cal__day">9</span>
+              <span class="cal__day">10</span><span class="cal__day">11</span><span class="cal__day">12</span><span class="cal__day">13</span><span class="cal__day">14</span><span class="cal__day">15</span><span class="cal__day">16</span>
+              <span class="cal__day">17</span><span class="cal__day cal__day--today">18</span><span class="cal__day">19</span><span class="cal__day cal__day--on">20</span><span class="cal__day">21</span><span class="cal__day">22</span><span class="cal__day">23</span>
+              <span class="cal__day">24</span><span class="cal__day">25</span><span class="cal__day">26</span><span class="cal__day">27</span><span class="cal__day">28</span><span class="cal__day">29</span><span class="cal__day">30</span>
+            </div>
+          </div>
+
+          <p class="sheet__foot">已有日期的便條，這裡會多一顆「清除日期」。</p>
+        </div>
+      </div>
+
+      <figcaption class="board__caption">
+        <span class="board__step">畫面 06</span>
+        <span class="board__title">把便條放到某一天</span>
+        <ul class="board__notes">
+          <li>兩個入口共用這張面板：新增時工具列的日曆藥丸，以及既有便條長按選單的「移到某一天…」。</li>
+          <li>今天 / 明天兩顆快捷擋掉最常見的情況，其餘才需要真的看月曆；選完就關，不必再按確認。</li>
+          <li>日期只是便條的一個欄位，<strong>便條不會離開 Notebook</strong>：它照樣留在原資料夾，只是卡片上多一顆日期 chip。</li>
+          <li>日曆沿用 v2 既有的月格語彙（<code>Pv2MonthSheet</code>）：今天描邊、選中黑底，非本月淡出。</li>
+        </ul>
+      </figcaption>
+    </figure>
+
+    <!-- 07 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>12:06</span><span class="status__right">▮▮▯ ⌁ 27</span></div>
@@ -812,9 +929,8 @@
 
         <div class="feed">
           <article class="note">
-            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">工作</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__date">8/20</span><span class="note__folder">工作</span></div>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span><span class="note__spacer"></span><span class="note__folder">想法</span></div>
@@ -836,7 +952,7 @@
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 06</span>
+        <span class="board__step">畫面 07</span>
         <span class="board__title">新增資料夾 — 一個跳窗就夠</span>
         <ul class="board__notes">
           <li>只問名稱。沒有顏色、沒有 emoji、沒有預覽——建資料夾是一次性的雜務，愈快結束愈好。</li>
@@ -846,7 +962,7 @@
       </figcaption>
     </figure>
 
-    <!-- 07 ─────────────────────────────────────────────── -->
+    <!-- 08 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:49</span><span class="status__right">▮▮▯ ⌁ 30</span></div>
@@ -882,8 +998,7 @@
         <div class="feed">
           <article class="note">
             <div class="note__head"><span class="note__when">Today</span></div>
-            <p class="note__title">週會前先寫一頁</p>
-            <p class="note__body">Q3 的三個指標寫成一頁就好，別再開投影片</p>
+            <p class="note__body">週會前把 Q3 的三個指標寫成一頁，別再開投影片</p>
           </article>
         </div>
 
@@ -906,7 +1021,7 @@
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 07</span>
+        <span class="board__step">畫面 08</span>
         <span class="board__title">移動便條到別的資料夾</span>
         <ul class="board__notes">
           <li>從卡片長按選單的「移動到…」進來。右側打勾標出目前所在，點任一列即移動並關閉，不必再按確認。</li>
@@ -916,7 +1031,7 @@
       </figcaption>
     </figure>
 
-    <!-- 08 ─────────────────────────────────────────────── -->
+    <!-- 09 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:50</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
@@ -970,17 +1085,17 @@
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 08</span>
+        <span class="board__step">畫面 09</span>
         <span class="board__title">管理資料夾 — 頁首「···」</span>
         <ul class="board__notes">
           <li>拖曳把手決定分頁列的順序，也就是使用者自己的優先順序。</li>
-          <li>「改名」開的是畫面 06 那個跳窗，只是標題換成「重新命名」、輸入框帶入原名。</li>
+          <li>「改名」開的是畫面 07 那個跳窗，只是標題換成「重新命名」、輸入框帶入原名。</li>
           <li>刪除是唯一的破壞性操作，二次確認寫明「N 則便條會移到未分類」。長按分頁藥丸也能直接開到這裡。</li>
         </ul>
       </figcaption>
     </figure>
 
-    <!-- 09 ─────────────────────────────────────────────── -->
+    <!-- 10 ─────────────────────────────────────────────── -->
     <figure class="board">
       <div class="dev">
         <div class="status"><span>11:52</span><span class="status__right">▮▮▯ ⌁ 29</span></div>
@@ -1034,7 +1149,7 @@
       </div>
 
       <figcaption class="board__caption">
-        <span class="board__step">畫面 09</span>
+        <span class="board__step">畫面 10</span>
         <span class="board__title">空資料夾 — 剛建好的樣子</span>
         <ul class="board__notes">
           <li>建立完直接切到新資料夾，接著就是畫面 04 的新增流程。</li>
@@ -1058,7 +1173,7 @@
       <tbody>
         <tr>
           <td>src/types/note.ts</td>
-          <td>多一個 <code>folderId: string | null</code>，<code>null</code> 就是「未分類」——既有便條零遷移，也不必先建一個實體資料夾。<strong>另外多一個選填 <code>title</code></strong>：這是採用參考畫面「標題行 ＋ 說明行」的代價，該檔目前明寫「no title」，要一起更新那段註解。不想動模型的話，面板留一欄就好，其餘設計不受影響。</td>
+          <td>多兩個欄位：<code>folderId: string | null</code>（<code>null</code>＝未分類）與 <code>day: string | null</code>（YYYY-MM-DD，<code>null</code>＝沒放到任何一天；存日不存時刻，便條沒有「幾點」這回事）。既有便條零遷移，也不必先建一個實體資料夾。「no title、no tags」那段刻意極簡的宣告維持不變，這份設計沒有動它。</td>
         </tr>
         <tr>
           <td>新增 note_folders</td>
@@ -1074,15 +1189,19 @@
         </tr>
         <tr>
           <td>Pv2NoteComposer.vue</td>
-          <td>速記藥丸退場，改為 <code>Pv2Fab</code> ＋ 底部面板：標題行、說明行、資料夾藥丸、圓形送出鍵，外加 <code>#</code> 的即時候選。</td>
+          <td>速記藥丸退場，改為 <code>Pv2Fab</code> ＋ 底部面板：一欄內文、資料夾藥丸、日期藥丸、圓形送出鍵，外加 <code>#</code> 的即時候選。</td>
         </tr>
         <tr>
           <td>搜尋（新元件）</td>
-          <td>常駐搜尋列 ＋ 前端純本機比對：便條全數已在 store 裡，<code>title</code> 與 <code>body</code> 做不分大小寫的子字串比對即可，不必打 API。有查詢字串時忽略選中的分頁、收起 FAB。</td>
+          <td>常駐搜尋列 ＋ 前端純本機比對：便條全數已在 store 裡，<code>body</code> 做不分大小寫的子字串比對即可，不必打 API。有查詢字串時忽略選中的分頁、收起 FAB。</td>
         </tr>
         <tr>
           <td>Pv2NoteCard.vue</td>
-          <td>就地編輯的行為原封不動（點內文＝進入編輯、失焦或 Esc 送出）。右上角的垃圾桶收進長按選單；有標題時分兩層排版；在「全部」與搜尋結果裡多顯示一顆資料夾標籤。</td>
+          <td>就地編輯的行為原封不動（點內文＝進入編輯、失焦或 Esc 送出）。右上角的垃圾桶收進長按選單，選單多出「移動到…」與「移到某一天…」；有日期時多顯示一顆日期 chip；在「全部」與搜尋結果裡多顯示一顆資料夾標籤。</td>
+        </tr>
+        <tr>
+          <td>選日期面板</td>
+          <td>沿用 <code>Pv2MonthSheet</code> 的月格與底部面板外殼，加上今天 / 明天快捷與「清除日期」。<code>setNoteDay</code> 與其他寫入共用同一套樂觀更新。</td>
         </tr>
         <tr>
           <td>缺一個跳窗元件</td>
@@ -1094,7 +1213,8 @@
 
   <h2 style="margin-top:36px">還沒決定的</h2>
   <ul class="open-qs">
-    <li>要不要真的加標題欄？加了新增體驗跟參考畫面一致、卡片也更好掃；不加則 Note 維持「一段純文字」的極簡設定，改動小很多。</li>
+    <li>放到某一天的便條，要不要在 Day 視圖（MY DAY）也看得到？看得到才算真的「移過去」，但那等於把 Notebook 的內容帶進日曆，得先想清楚它跟 task 的差別。</li>
+    <li>Notebook 要不要能只看「有日期的便條」？例如分頁列最前面多一顆「排程」，或搜尋列旁一顆篩選。</li>
     <li>搜尋要不要記住最近查過的字？空查詢時列出最近幾筆很方便，但也等於把使用者找過什麼留在畫面上。</li>
     <li>資料夾要不要有數量上限？分頁列一屏約放得下四到五個，十個以上就只能靠橫捲找。</li>
     <li>「全部」要不要記住上次選的分頁？記住對長期待在單一資料夾的人比較順，但每次回來看到的畫面就不一定相同。</li>
