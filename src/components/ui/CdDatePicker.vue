@@ -1,4 +1,7 @@
 <template>
+  <!-- The variant class goes on the popover, not here: the trigger sits inside the host card
+       and is re-skinned by it from the outside, so only the teleported panel needs to be told
+       which palette it is in. -->
   <div ref="rootEl" class="cd-date-picker">
     <button
       type="button"
@@ -13,7 +16,13 @@
     </button>
 
     <Teleport to="body">
-      <div v-if="open" ref="popoverEl" class="cd-date-picker__popover" :style="popoverStyle">
+      <div
+        v-if="open"
+        ref="popoverEl"
+        class="cd-date-picker__popover"
+        :class="{ 'cd-date-picker__popover--v2': variant === 'v2' }"
+        :style="popoverStyle"
+      >
         <div class="cd-date-picker__header">
           <button type="button" class="cd-date-picker__nav" aria-label="Previous month" @click="prevMonth">‹</button>
           <span class="cd-date-picker__month-label">{{ monthLabel }} {{ viewYear }}</span>
@@ -61,6 +70,12 @@ import { monthGridCells, stepMonth, type MonthGridCellDate } from '@/utils/month
 // CdMonthSheet's bottom-sheet/wheel-mode contract offers cheaply.
 const props = defineProps<{
   modelValue: string // 'YYYY-MM-DD'
+  // Which palette the popover paints in. The trigger is re-skinned from the outside by
+  // whichever card hosts it, but the popover is teleported to <body>, so no host's scoped
+  // :deep rule and no inherited custom property can reach it — the calling generation has
+  // to name itself here. 'legacy' keeps the warm cd-* palette CdEventEditCard is built on;
+  // 'v2' switches to the neutral ink-on-paper family the v2 surfaces use.
+  variant?: 'legacy' | 'v2'
 }>()
 
 const emit = defineEmits<{
@@ -343,5 +358,78 @@ onBeforeUnmount(() => {
   background: var(--cd-accent-mid);
   color: #fff;
   font-weight: 700;
+}
+
+/* ==========================================================================
+ * v2 variant — the neutral ink-on-paper palette the v2 surfaces are built on
+ * (Pv2EventEditCard, Pv2CopyToDaysCard, Pv2TitleSuggestions all declare this
+ * same family locally). Only colour and the surface's corner/shadow change;
+ * the grid geometry is shared, so the two variants stay the same calendar.
+ *
+ * These rules live here rather than in the host card because the popover is
+ * teleported to <body>: a scoped :deep selector on the card compiles to a
+ * descendant selector, and the popover is no longer a descendant of anything
+ * the card renders. That is why the warm accent survived the card's re-skin of
+ * the trigger — the selected day kept painting in --cd-accent-mid.
+ * ========================================================================== */
+.cd-date-picker__popover--v2 {
+  --dp-ink: #1b1b1b;
+  --dp-ink-2: #6e6e6e;
+  --dp-ink-3: #cdcdcd;
+  --dp-line: #e2e2e2;
+  --dp-fill-hover: #ececea;
+  --dp-paper: #fafaf9;
+
+  /* Matches Pv2TitleSuggestions, the other teleported panel this card opens, so the
+     two floating surfaces read as one generation. */
+  background: var(--dp-paper);
+  border-color: var(--dp-line);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__nav {
+  color: var(--dp-ink-2);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__nav:hover {
+  background: var(--dp-fill-hover);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__month-label {
+  color: var(--dp-ink);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__dow {
+  color: var(--dp-ink-2);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__cell {
+  color: var(--dp-ink);
+}
+
+.cd-date-picker__popover--v2 .cd-date-picker__cell:hover {
+  background: var(--dp-fill-hover);
+}
+
+/* Full-strength muted ink rather than ink + opacity: the legacy pair renders the
+   outside days at 55% of a warm grey, which on this paper turns beige. */
+.cd-date-picker__popover--v2 .cd-date-picker__cell--outside {
+  color: var(--dp-ink-3);
+  opacity: 1;
+}
+
+/* Today is a ring, not a fill, so the filled disc stays unambiguously "selected" —
+   the same inset ring Pv2TimeChip draws when it is open. */
+.cd-date-picker__popover--v2 .cd-date-picker__cell--today {
+  color: var(--dp-ink);
+  box-shadow: inset 0 0 0 1.5px var(--dp-ink);
+}
+
+/* Dark disc, paper type — the v2 selection mark, identical to Pv2CopyToDaysCard's
+   selected day and Pv2Cell's today pill. */
+.cd-date-picker__popover--v2 .cd-date-picker__cell--selected {
+  background: var(--dp-ink);
+  color: var(--dp-paper);
 }
 </style>
