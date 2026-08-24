@@ -32,14 +32,14 @@
         />
       </form>
       <button v-else class="nbv__tag-add" type="button" aria-label="New tag" @click="startTag">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <path d="M12 5 V19 M5 12 H19" />
         </svg>
       </button>
     </div>
 
     <label class="nbv__search">
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5" />
         <path d="M16 16 L21 21" />
       </svg>
@@ -157,9 +157,9 @@ function onSwipe(details: SwipeDetails): void {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
-  padding: 14px 22px 8px;
+  padding: 10px 22px 6px;
   scrollbar-width: none;
 }
 
@@ -171,16 +171,16 @@ function onSwipe(details: SwipeDetails): void {
 .nbv__tag-add,
 .nbv__tag-form {
   flex: none;
-  height: 34px;
+  height: 27px;
   border: 1px solid #e2e2e2;
-  border-radius: 9px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.74);
 }
 
 .nbv__tag {
-  min-width: 64px;
-  padding: 0 14px;
-  font: 600 12px var(--cd-font-mono);
+  min-width: 52px;
+  padding: 0 11px;
+  font: 600 11px var(--cd-font-mono);
   color: #4f4f4f;
   cursor: pointer;
 }
@@ -192,7 +192,7 @@ function onSwipe(details: SwipeDetails): void {
 }
 
 .nbv__tag-add {
-  width: 34px;
+  width: 27px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -201,10 +201,10 @@ function onSwipe(details: SwipeDetails): void {
 }
 
 .nbv__tag-form {
-  width: 118px;
+  width: 100px;
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 8px;
 }
 
 .nbv__tag-input {
@@ -213,7 +213,7 @@ function onSwipe(details: SwipeDetails): void {
   border: none;
   outline: none;
   background: transparent;
-  font: 600 12px var(--cd-font-mono);
+  font: 600 11px var(--cd-font-mono);
   color: #1b1b1b;
 }
 
@@ -221,12 +221,12 @@ function onSwipe(details: SwipeDetails): void {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 11px;
-  height: 60px;
-  margin: 12px 22px 14px;
-  padding: 0 18px;
+  gap: 9px;
+  height: 44px;
+  margin: 8px 22px 10px;
+  padding: 0 14px;
   border: 1px solid #e2e2e2;
-  border-radius: 17px;
+  border-radius: 13px;
   background: rgba(255, 255, 255, 0.86);
 }
 
@@ -236,7 +236,7 @@ function onSwipe(details: SwipeDetails): void {
   border: none;
   outline: none;
   background: transparent;
-  font: 400 17px var(--cd-font-mono);
+  font: 400 14px var(--cd-font-mono);
   color: #1b1b1b;
 }
 
