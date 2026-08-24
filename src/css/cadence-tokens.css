@@ -133,33 +133,26 @@
    */
 
   /* ---------- Typography: families ----------
-   * The product ships exactly two faces. Fonts are a fixed passthrough: they are
-   * NOT part of the theme, so no palette may override them.
+   * The product ships one Latin face, Inter. Fonts are a fixed passthrough: they
+   * are NOT part of the theme, so no palette may override them.
    *
-   *   --cd-font-display : Instrument Serif, reserved for the bottom nav — its letter
-   *                       glyphs and their labels, and nothing else. The month poster
-   *                       is not nav, and the week/day TODAY pill belongs to headers
-   *                       that are set in the UI face; both use --cd-font-ui.
-   *                       Deliberately narrow usage: it ships a single weight (400),
-   *                       so never ask it for 500+ or the browser fakes the bold.
-   *                       It has no CJK coverage, but every string set in it is
-   *                       Latin chrome the app itself owns, never user text.
-   *   --cd-font-ui      : JetBrains Mono, everything else.
+   *   --cd-font-display : Inter, used for the bottom nav — its letter glyphs and
+   *                       their labels, and nothing else.
+   *   --cd-font-ui      : Inter, everything else.
    *
-   * JetBrains Mono ships 100–800. 600 is a real weight here (it was not under the
-   * previous UI face), but there is no 900 — the one call site asking for it gets
-   * a synthesised weight.
+   * Both tokens point at the same face and are kept separate (rather than
+   * merged into one) so nav and UI chrome can diverge again later without
+   * touching every call site. Inter ships 100–900; call sites use 400–800.
    */
-  --cd-font-display: 'Instrument Serif', 'Noto Sans TC', serif;
-  --cd-font-ui: 'JetBrains Mono', 'Noto Sans TC', monospace;
+  --cd-font-display: 'Inter', 'Noto Sans TC', sans-serif;
+  --cd-font-ui: 'Inter', 'Noto Sans TC', sans-serif;
 
   /* Deprecated aliases — resolve onto the two faces above so existing consumers
    * keep rendering while they are migrated. Delete each once its usage hits zero.
    *
    * --cd-font-title maps to the UI face, not the display face, despite its name:
    * its 60 call sites are body-level chrome (buttons, field labels, settings
-   * rows), not poster titles. Pointing it at Instrument Serif would set the whole
-   * settings drawer in a single-weight serif with no CJK coverage.
+   * rows), not poster titles.
    *
    * --cd-font-serif maps to the UI face too, and likewise despite its name. Only
    * navigation is set in the display face now; its other call sites — the large
@@ -174,9 +167,10 @@
   --cd-font-caveat: var(--cd-font-ui);
 
   /* Tabular figures for the clock gutter and day-number grids that rely on even
-   * digit widths for vertical alignment. Redundant while the UI face is itself
-   * monospaced, but kept: the .cd-tnum utility states the requirement, so it
-   * survives a future change of face rather than silently depending on this one. */
+   * digit widths for vertical alignment. Load-bearing now that the UI face
+   * (Inter) is proportional — every call site that needs digit alignment sets
+   * font-variant-numeric to this token explicitly rather than depending on the
+   * face being monospaced. */
   --cd-numeric-aligned: tabular-nums;
 
   /* ---------- Typography: sizes (px scale used across the design) ---------- */
