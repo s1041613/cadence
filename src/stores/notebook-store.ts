@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { Note } from '@/types/note'
+import { computed, ref } from 'vue'
+import type { Note, NoteTag } from '@/types/note'
 import { fetchNotes, insertNote, updateNote, deleteNote } from '@/services/notes-service'
+import { fetchNoteTags, insertNoteTag } from '@/services/note-tags-service'
 import { notifySyncError } from '@/lib/notify'
 import { useAuthStore } from './auth-store'
 
@@ -10,6 +11,9 @@ import { useAuthStore } from './auth-store'
 export const useNotebookStore = defineStore('notebook', () => {
   // Newest-first: the feed renders in array order, and addNote prepends.
   const notes = ref<Note[]>([])
+  const tags = ref<NoteTag[]>([])
+  const activeTagId = ref<string | null>(null)
+  const query = ref('')
   // Quick-capture text. Deliberately not persisted — an unsent draft is not a note.
   const draft = ref('')
   // Gates writes and first paint. Only ever set true by a successful load, so a failed load
@@ -28,6 +32,7 @@ export const useNotebookStore = defineStore('notebook', () => {
   // strictly in order. Mirrors inbox-store — it also stops a double-tapped trash glyph from
   // racing two deletes for the same row.
   const writeChains = new Map<string, Promise<void>>()
+  const tagWriteChains = new Map<string, Promise<void>>()
 
   function enqueueWrite(id: string, op: () => Promise<void>): Promise<void> {
     const version = generation
@@ -51,6 +56,17 @@ export const useNotebookStore = defineStore('notebook', () => {
     notifySyncError('尚未完成同步，請稍後再試', retry)
   }
 
+  const tagTabs = computed<(string | null)[]>(() => [null, ...tags.value.map((tag) => tag.id)])
+
+  const visibleNotes = computed(() => {
+    const needle = query.value.trim().toLocaleLowerCase()
+    return notes.value.filter((note) => {
+      if (activeTagId.value !== null && note.tagId !== activeTagId.value) return false
+      if (needle !== '' && !note.body.toLocaleLowerCase().includes(needle)) return false
+      return true
+    })
+  })
+
   // --- lifecycle ------------------------------------------------------------
 
   /**
@@ -70,9 +86,13 @@ export const useNotebookStore = defineStore('notebook', () => {
     syncUserId = ownerId
 
     try {
-      const remote = await fetchNotes(ownerId)
+      const [remoteNotes, remoteTags] = await Promise.all([fetchNotes(ownerId), fetchNoteTags(ownerId)])
       if (version !== generation) return
-      notes.value = remote
+      notes.value = remoteNotes
+      tags.value = remoteTags
+      if (activeTagId.value !== null && !remoteTags.some((tag) => tag.id === activeTagId.value)) {
+        activeTagId.value = null
+      }
       isLoaded.value = true
     } catch {
       if (version !== generation) return
@@ -87,12 +107,16 @@ export const useNotebookStore = defineStore('notebook', () => {
   function resetLocal(): void {
     generation += 1
     notes.value = []
+    tags.value = []
+    activeTagId.value = null
+    query.value = ''
     draft.value = ''
     isLoaded.value = false
     syncUserId = null
     // Drop every pending chain so queued same-id writes don't fire against the new session;
     // the bumped generation also gates anything already in flight.
     writeChains.clear()
+    tagWriteChains.clear()
   }
 
   // --- actions (optimistic; remote persistence runs in the background) -------
@@ -135,7 +159,77 @@ export const useNotebookStore = defineStore('notebook', () => {
       })
   }
 
-  function addNote(body: string): void {
+  function selectTag(id: string | null): void {
+    if (id !== null && !tags.value.some((tag) => tag.id === id)) return
+    activeTagId.value = id
+  }
+
+  function stepTag(delta: number): void {
+    if (delta === 0) return
+    const tabs = tagTabs.value
+    const current = tabs.indexOf(activeTagId.value)
+    const from = current === -1 ? 0 : current
+    const to = Math.min(Math.max(from + delta, 0), tabs.length - 1)
+    activeTagId.value = tabs[to] ?? null
+  }
+
+  function restoreTag(snapshot: NoteTag): void {
+    if (tags.value.some((tag) => tag.id === snapshot.id)) return
+    tags.value = [...tags.value, snapshot].sort((a, b) => a.position - b.position || a.createdAt.localeCompare(b.createdAt))
+  }
+
+  function persistInsertTag(snapshot: NoteTag): void {
+    const ownerId = syncUserId
+    if (ownerId === null) {
+      rejectUnsyncedWrite(() => persistInsertTag(snapshot))
+      return
+    }
+    const version = generation
+    const prev = tagWriteChains.get(snapshot.id) ?? Promise.resolve()
+    const next = prev.catch(() => {}).then(() => {
+      if (version !== generation) return
+      return insertNoteTag(snapshot, ownerId)
+    })
+    tagWriteChains.set(snapshot.id, next)
+    void next
+      .then(() => {
+        if (version !== generation) return
+        restoreTag(snapshot)
+      })
+      .catch(() => {
+        if (version !== generation) return
+        tags.value = tags.value.filter((tag) => tag.id !== snapshot.id)
+        if (activeTagId.value === snapshot.id) activeTagId.value = null
+        notifySyncError('儲存分類失敗', () => persistInsertTag(snapshot))
+      })
+      .finally(() => {
+        if (tagWriteChains.get(snapshot.id) === next) tagWriteChains.delete(snapshot.id)
+      })
+  }
+
+  function addTag(name: string): string | null {
+    const text = name.trim()
+    if (text === '') return null
+
+    if (!isLoaded.value || syncUserId === null) {
+      rejectUnsyncedWrite(() => addTag(name))
+      return null
+    }
+
+    const now = new Date().toISOString()
+    const snapshot: NoteTag = {
+      id: crypto.randomUUID(),
+      name: text,
+      position: tags.value.length,
+      createdAt: now,
+      updatedAt: null
+    }
+    tags.value = [...tags.value, snapshot]
+    persistInsertTag(snapshot)
+    return snapshot.id
+  }
+
+  function addNote(body: string, tagId = activeTagId.value): void {
     const text = body.trim()
     // An empty draft is not an error, it is a no-op: pressing + on an empty pill should do
     // nothing at all, toast included.
@@ -153,7 +247,8 @@ export const useNotebookStore = defineStore('notebook', () => {
       body: text,
       createdAt: new Date().toISOString(),
       // Never edited yet; the column is nullable for exactly this case.
-      updatedAt: null
+      updatedAt: null,
+      tagId
     }
     notes.value.unshift(snapshot)
     persistInsert(snapshot)
@@ -219,10 +314,17 @@ export const useNotebookStore = defineStore('notebook', () => {
 
   return {
     notes,
+    tags,
+    activeTagId,
+    query,
+    visibleNotes,
     draft,
     isLoaded,
     loadFromRemote,
     resetLocal,
+    selectTag,
+    stepTag,
+    addTag,
     addNote,
     editNote,
     removeNote

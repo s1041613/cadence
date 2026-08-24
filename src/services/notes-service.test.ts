@@ -55,7 +55,8 @@ const NOTE: Note = {
   id: 'note-1',
   body: 'Kyoto — book the ryokan',
   createdAt: '2026-03-04T09:00:00.000Z',
-  updatedAt: null
+  updatedAt: null,
+  tagId: 'tag-1'
 }
 
 describe('notes-service', () => {
@@ -67,13 +68,21 @@ describe('notes-service', () => {
     it('reads this user rows newest-first and maps them to the domain shape', async () => {
       const { builder, calls } = makeBuilder({
         data: [
-          { id: 'note-1', user_id: 'user-1', body: 'first', created_at: '2026-03-04T09:00:00.000Z', updated_at: null },
+          {
+            id: 'note-1',
+            user_id: 'user-1',
+            body: 'first',
+            created_at: '2026-03-04T09:00:00.000Z',
+            updated_at: null,
+            tag_id: 'tag-1'
+          },
           {
             id: 'note-2',
             user_id: 'user-1',
             body: 'second',
             created_at: '2026-03-03T09:00:00.000Z',
-            updated_at: '2026-03-05T09:00:00.000Z'
+            updated_at: '2026-03-05T09:00:00.000Z',
+            tag_id: null
           }
         ],
         error: null
@@ -82,12 +91,13 @@ describe('notes-service', () => {
       requireSupabaseMock.mockReturnValue(supabase)
 
       await expect(fetchNotes('user-1')).resolves.toEqual([
-        { id: 'note-1', body: 'first', createdAt: '2026-03-04T09:00:00.000Z', updatedAt: null },
+        { id: 'note-1', body: 'first', createdAt: '2026-03-04T09:00:00.000Z', updatedAt: null, tagId: 'tag-1' },
         {
           id: 'note-2',
           body: 'second',
           createdAt: '2026-03-03T09:00:00.000Z',
-          updatedAt: '2026-03-05T09:00:00.000Z'
+          updatedAt: '2026-03-05T09:00:00.000Z',
+          tagId: null
         }
       ])
 
@@ -139,7 +149,8 @@ describe('notes-service', () => {
             user_id: 'user-1',
             body: 'Kyoto — book the ryokan',
             created_at: '2026-03-04T09:00:00.000Z',
-            updated_at: null
+            updated_at: null,
+            tag_id: 'tag-1'
           },
           { ignoreDuplicates: true }
         ]
