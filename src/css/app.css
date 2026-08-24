@@ -4,24 +4,21 @@
 
 /* 自架字體（取代 demo 版本的 Google Fonts CDN，符合 CSP self-only 限制）
  *
- * The product ships two faces only (see cadence-tokens.css --cd-font-display /
- * --cd-font-ui). JetBrains Mono is the UI face and carries every weight in use
- * (400–800; the lone 900 in CdDraftDrawer is synthesised). The italic is
- * imported at 400 only, which is every weight the display titles ask for: the
- * month poster, the week title and the day numeral are one shared spec.
- * Instrument Serif is the nav face and ships a single weight (400).
+ * The product ships one Latin face only (see cadence-tokens.css --cd-font-display /
+ * --cd-font-ui, both Inter). It carries every weight in use (400–800; the lone
+ * 900 in CdDraftDrawer is synthesised). The italic is imported at 400 only,
+ * which is every weight the display titles ask for: the month poster, the
+ * week title and the day numeral are one shared spec.
  *
- * Noto Sans TC is no longer a mere fallback: neither Latin face covers CJK, so
+ * Noto Sans TC is no longer a mere fallback: Inter doesn't cover CJK, so
  * every Chinese glyph in the app — event titles above all — renders in it. Its
  * weight coverage therefore has to track what the UI actually asks for. */
-@import "@fontsource/jetbrains-mono/400.css";
-@import "@fontsource/jetbrains-mono/400-italic.css";
-@import "@fontsource/jetbrains-mono/500.css";
-@import "@fontsource/jetbrains-mono/600.css";
-@import "@fontsource/jetbrains-mono/700.css";
-@import "@fontsource/jetbrains-mono/800.css";
-@import "@fontsource/instrument-serif/400.css";
-@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/400-italic.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
 @import "@fontsource/noto-sans-tc/400.css";
 @import "@fontsource/noto-sans-tc/500.css";
 @import "@fontsource/noto-sans-tc/600.css";
@@ -45,7 +42,7 @@ body {
   overflow: hidden;
   overscroll-behavior: none;
   color: var(--cd-ink);
-  font-family: 'JetBrains Mono', 'Noto Sans TC', monospace;
+  font-family: 'Inter', 'Noto Sans TC', sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }

@@ -27,7 +27,7 @@
     <link rel="icon" type="image/ico" href="favicon.ico">
 
     <link rel="preload" as="font" type="font/woff2" crossorigin
-          href="<%= publicPath %>fonts/instrument-serif-italic.woff2">
+          href="<%= publicPath %>fonts/inter-400.woff2">
 
     <!-- ---------- Launch animation (pure CSS) ----------
          The CSP above is script-src 'self', so no inline <script> may run here;
@@ -36,13 +36,13 @@
          cold start is no longer a blank page. Teardown lives in the bundle, in
          src/composables/use-app-splash.ts. -->
     <style>
-      /* app.css imports Instrument Serif via @fontsource, but that only lands once
+      /* app.css imports Inter via @fontsource, but that only lands once
          the bundle does. This copy in public/fonts/ is what makes the mark render
          with the right face on the very first paint. */
       @font-face {
-        font-family: 'Instrument Serif Splash';
-        src: url('<%= publicPath %>fonts/instrument-serif-italic.woff2') format('woff2');
-        font-style: italic;
+        font-family: 'Inter Splash';
+        src: url('<%= publicPath %>fonts/inter-400.woff2') format('woff2');
+        font-style: normal;
         font-weight: 400;
         font-display: block;
       }
@@ -94,7 +94,7 @@
 
       .cd-splash__mark {
         position: relative;
-        font: italic 400 150px/1 'Instrument Serif Splash', 'Instrument Serif', Georgia, serif;
+        font: 400 150px/1 'Inter Splash', 'Inter', system-ui, sans-serif;
         color: #1b1b1b;
         opacity: 0;
         animation: cd-splash-mark .66s cubic-bezier(.22, 1, .36, 1) .26s forwards;
@@ -138,7 +138,7 @@
         position: absolute;
         top: 50%;
         margin-top: 128px;
-        font: 500 13px/1 'Zen Kaku Gothic New', system-ui, sans-serif;
+        font: 500 13px/1 'Inter', system-ui, sans-serif;
         color: var(--cd-ink, #56585e);
         letter-spacing: .66em;
         padding-left: .66em;
