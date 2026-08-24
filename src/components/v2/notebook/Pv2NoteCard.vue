@@ -7,6 +7,42 @@
   <article class="nbk">
     <div class="nbk__head">
       <span class="nbk__when">{{ label }}</span>
+      <button
+        class="nbk__copy"
+        type="button"
+        :aria-label="justCopied ? 'Copied!' : 'Copy note'"
+        @click="copyBody"
+      >
+        <svg
+          v-if="!justCopied"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#c4c4c4"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="8" y="8" width="12" height="13" rx="2" />
+          <path d="M16 8 V5.5 A1.5 1.5 0 0 0 14.5 4 H5.5 A1.5 1.5 0 0 0 4 5.5 V16.5 A1.5 1.5 0 0 0 5.5 18 H8" />
+        </svg>
+        <svg
+          v-else
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#c4c4c4"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M4 12.5 L9.5 18 L20 6" />
+        </svg>
+      </button>
       <button class="nbk__delete" type="button" aria-label="Delete note" @click="emit('delete')">
         <svg
           width="15"
@@ -65,6 +101,18 @@ const emit = defineEmits<{
 const isEditing = ref(false)
 const buffer = ref('')
 const field = useTemplateRef<HTMLTextAreaElement>('field')
+
+const justCopied = ref(false)
+let copiedTimeout: ReturnType<typeof setTimeout> | undefined
+
+async function copyBody(): Promise<void> {
+  await navigator.clipboard.writeText(props.note.body)
+  justCopied.value = true
+  clearTimeout(copiedTimeout)
+  copiedTimeout = setTimeout(() => {
+    justCopied.value = false
+  }, 1200)
+}
 
 async function startEditing(): Promise<void> {
   buffer.value = props.note.body
@@ -129,6 +177,7 @@ function commit(): void {
   color: #b2b2b2;
 }
 
+.nbk__copy,
 .nbk__delete {
   flex: none;
   display: inline-flex;
