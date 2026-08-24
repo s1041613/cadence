@@ -2,14 +2,19 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useNotebookStore } from './notebook-store'
 import * as notesService from '@/services/notes-service'
+import * as noteTagsService from '@/services/note-tags-service'
 import { notifySyncError } from '@/lib/notify'
-import type { Note } from '@/types/note'
+import type { Note, NoteTag } from '@/types/note'
 
 vi.mock('@/services/notes-service', () => ({
   fetchNotes: vi.fn(),
   insertNote: vi.fn(),
   updateNote: vi.fn(),
   deleteNote: vi.fn()
+}))
+vi.mock('@/services/note-tags-service', () => ({
+  fetchNoteTags: vi.fn(),
+  insertNoteTag: vi.fn()
 }))
 vi.mock('@/lib/notify', () => ({
   notifySyncError: vi.fn()
@@ -22,6 +27,8 @@ const fetchNotesMock = vi.mocked(notesService.fetchNotes)
 const insertNoteMock = vi.mocked(notesService.insertNote)
 const updateNoteMock = vi.mocked(notesService.updateNote)
 const deleteNoteMock = vi.mocked(notesService.deleteNote)
+const fetchNoteTagsMock = vi.mocked(noteTagsService.fetchNoteTags)
+const insertNoteTagMock = vi.mocked(noteTagsService.insertNoteTag)
 const notifySyncErrorMock = vi.mocked(notifySyncError)
 
 interface Deferred<T> {
@@ -49,6 +56,20 @@ const note = (id: string, body = `body ${id}`): Note => ({
   id,
   body,
   createdAt: '2026-03-04T09:00:00.000Z',
+  updatedAt: null,
+  tagId: null
+})
+
+const taggedNote = (id: string, tagId: string, body = `body ${id}`): Note => ({
+  ...note(id, body),
+  tagId
+})
+
+const tag = (id: string, name = `Tag ${id}`, position = 0): NoteTag => ({
+  id,
+  name,
+  position,
+  createdAt: '2026-08-24T10:00:00.000Z',
   updatedAt: null
 })
 
@@ -57,8 +78,20 @@ const note = (id: string, body = `body ${id}`): Note => ({
 async function loadedStore(seed: Note[] = []) {
   const store = useNotebookStore()
   fetchNotesMock.mockResolvedValueOnce(seed)
+  fetchNoteTagsMock.mockResolvedValueOnce([])
   await store.loadFromRemote()
   fetchNotesMock.mockClear()
+  fetchNoteTagsMock.mockClear()
+  return store
+}
+
+async function loadedStoreWith(seed: Note[], tags: NoteTag[]) {
+  const store = useNotebookStore()
+  fetchNotesMock.mockResolvedValueOnce(seed)
+  fetchNoteTagsMock.mockResolvedValueOnce(tags)
+  await store.loadFromRemote()
+  fetchNotesMock.mockClear()
+  fetchNoteTagsMock.mockClear()
   return store
 }
 
@@ -67,7 +100,9 @@ describe('notebook-store', () => {
     setActivePinia(createPinia())
     vi.resetAllMocks()
     fetchNotesMock.mockResolvedValue([])
+    fetchNoteTagsMock.mockResolvedValue([])
     insertNoteMock.mockResolvedValue(undefined)
+    insertNoteTagMock.mockResolvedValue(undefined)
     updateNoteMock.mockResolvedValue(undefined)
     deleteNoteMock.mockResolvedValue(undefined)
   })
@@ -93,6 +128,58 @@ describe('notebook-store', () => {
     })
   })
 
+  describe('tag navigation and filtering', () => {
+    it('starts on the virtual All tab with no default tags', async () => {
+      const store = await loadedStore([taggedNote('a', 'tag-1'), note('b')])
+
+      expect(store.activeTagId).toBeNull()
+      expect(store.tags).toEqual([])
+      expect(store.visibleNotes.map((n) => n.id)).toEqual(['a', 'b'])
+    })
+
+    it('filters notes by the active tag while All still shows every note', async () => {
+      const store = await loadedStoreWith(
+        [taggedNote('a', 'tag-1'), taggedNote('b', 'tag-2'), note('c')],
+        [tag('tag-1', 'Rituals'), tag('tag-2', 'Trips', 1)]
+      )
+
+      store.selectTag('tag-1')
+      expect(store.visibleNotes.map((n) => n.id)).toEqual(['a'])
+
+      store.selectTag(null)
+      expect(store.visibleNotes.map((n) => n.id)).toEqual(['a', 'b', 'c'])
+    })
+
+    it('applies search inside the current tag filter', async () => {
+      const store = await loadedStoreWith(
+        [taggedNote('a', 'tag-1', 'Morning pages'), taggedNote('b', 'tag-1', 'Evening walk'), note('c', 'Morning call')],
+        [tag('tag-1', 'Rituals')]
+      )
+
+      store.selectTag('tag-1')
+      store.query = 'morning'
+
+      expect(store.visibleNotes.map((n) => n.id)).toEqual(['a'])
+    })
+
+    it('steps between All and tags without wrapping at the edges', async () => {
+      const store = await loadedStoreWith([], [tag('tag-1', 'Rituals'), tag('tag-2', 'Trips', 1)])
+
+      store.stepTag(1)
+      expect(store.activeTagId).toBe('tag-1')
+      store.stepTag(1)
+      expect(store.activeTagId).toBe('tag-2')
+      store.stepTag(1)
+      expect(store.activeTagId).toBe('tag-2')
+      store.stepTag(-1)
+      expect(store.activeTagId).toBe('tag-1')
+      store.stepTag(-1)
+      expect(store.activeTagId).toBeNull()
+      store.stepTag(-1)
+      expect(store.activeTagId).toBeNull()
+    })
+  })
+
   describe('addNote', () => {
     it('trims the body and prepends the note so the newest is first', async () => {
       const store = await loadedStore([note('old')])
@@ -103,6 +190,26 @@ describe('notebook-store', () => {
       expect(store.notes.map((n) => n.body)).toEqual(['fresh thought', 'body old'])
       expect(insertNoteMock).toHaveBeenCalledTimes(1)
       expect(insertNoteMock.mock.calls[0]?.[0]?.body).toBe('fresh thought')
+    })
+
+    it('uses null tagId when adding from All', async () => {
+      const store = await loadedStore()
+
+      store.addNote('untagged')
+      await flush()
+
+      expect(insertNoteMock.mock.calls[0]?.[0]?.tagId).toBeNull()
+    })
+
+    it('uses the active tag when adding from a tag page', async () => {
+      const store = await loadedStoreWith([], [tag('tag-1', 'Rituals')])
+      store.selectTag('tag-1')
+
+      store.addNote('tagged')
+      await flush()
+
+      expect(store.notes[0]?.tagId).toBe('tag-1')
+      expect(insertNoteMock.mock.calls[0]?.[0]?.tagId).toBe('tag-1')
     })
 
     // Pressing + on an empty pill is not an error — it should do nothing at all,
@@ -189,6 +296,30 @@ describe('notebook-store', () => {
       await flush()
 
       expect(store.notes.map((n) => n.body)).toEqual(['twice failed'])
+    })
+  })
+
+  describe('addTag', () => {
+    it('trims the name and appends a tag optimistically', async () => {
+      const store = await loadedStore()
+
+      store.addTag('  Rituals  ')
+      await flush()
+
+      expect(store.tags.map((t) => t.name)).toEqual(['Rituals'])
+      expect(insertNoteTagMock).toHaveBeenCalledTimes(1)
+      expect(insertNoteTagMock.mock.calls[0]?.[0]?.name).toBe('Rituals')
+      expect(insertNoteTagMock.mock.calls[0]?.[0]?.position).toBe(0)
+    })
+
+    it('silently ignores an empty tag name', async () => {
+      const store = await loadedStore()
+
+      store.addTag('   ')
+      await flush()
+
+      expect(store.tags).toEqual([])
+      expect(insertNoteTagMock).not.toHaveBeenCalled()
     })
   })
 
@@ -311,10 +442,12 @@ describe('notebook-store', () => {
     it('populates the feed and marks the store loaded', async () => {
       const store = useNotebookStore()
       fetchNotesMock.mockResolvedValueOnce([note('a'), note('b')])
+      fetchNoteTagsMock.mockResolvedValueOnce([tag('tag-1', 'Rituals')])
 
       await store.loadFromRemote()
 
       expect(store.notes.map((n) => n.id)).toEqual(['a', 'b'])
+      expect(store.tags.map((t) => t.id)).toEqual(['tag-1'])
       expect(store.isLoaded).toBe(true)
     })
 
@@ -391,6 +524,7 @@ describe('notebook-store', () => {
       store.resetLocal()
 
       expect(store.notes).toEqual([])
+      expect(store.tags).toEqual([])
       expect(store.draft).toBe('')
       expect(store.isLoaded).toBe(false)
     })

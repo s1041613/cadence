@@ -22,6 +22,7 @@ export interface NoteRow {
   body: string
   created_at: string
   updated_at: string | null
+  tag_id: string | null
 }
 
 export function rowToNote(row: NoteRow): Note {
@@ -30,7 +31,8 @@ export function rowToNote(row: NoteRow): Note {
     body: row.body,
     createdAt: row.created_at,
     // Rows written before notes became editable have no column value at all.
-    updatedAt: row.updated_at ?? null
+    updatedAt: row.updated_at ?? null,
+    tagId: row.tag_id ?? null
   }
 }
 
@@ -40,7 +42,8 @@ export function noteToRow(note: Note, ownerId: string): NoteRow {
     user_id: ownerId,
     body: note.body,
     created_at: note.createdAt,
-    updated_at: note.updatedAt
+    updated_at: note.updatedAt,
+    tag_id: note.tagId
   }
 }
 
