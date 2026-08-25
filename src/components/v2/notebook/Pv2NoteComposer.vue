@@ -1,5 +1,5 @@
 <template>
-  <CdSheet class="nbc-sheet" scrim-color="var(--cd-scrim-heavy)" @scrim-click="emit('close')" @dismiss="emit('close')">
+  <CdSheet scrim-color="var(--cd-scrim-heavy)" @scrim-click="emit('close')" @dismiss="emit('close')">
     <form class="nbc" @submit.prevent="emit('submit')">
       <textarea
         ref="field"
@@ -123,10 +123,6 @@ function commitTag(): void {
   flex-direction: column;
   padding: 20px 26px 0;
   background: #fff;
-}
-
-.nbc-sheet {
-  bottom: calc(-1 * var(--pv2-nav-h));
 }
 
 .nbc__input {

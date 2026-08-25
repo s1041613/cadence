@@ -16,6 +16,21 @@
       </div>
       <Pv2BottomNav active="notes" />
     </div>
+
+    <!-- Mounted as a sibling of .nb2__frame, not inside it, so the sheet's absolute
+         positioning isn't confined to .nb2__content and can cover Pv2BottomNav — same
+         placement DayPageV2.vue uses for EventComposerOverlay relative to .dp2__frame. -->
+    <Transition name="cd-sheet">
+      <Pv2NoteComposer
+        v-if="store.isComposerOpen"
+        v-model="store.draft"
+        v-model:selected-tag-id="store.composerTagId"
+        :tags="store.tags"
+        @submit="store.submitComposer"
+        @close="store.closeComposer"
+        @add-tag="store.addComposerTag"
+      />
+    </Transition>
   </div>
 </template>
 
@@ -23,6 +38,7 @@
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { useNotebookStore } from '@/stores/notebook-store'
 import NotebookViewV2 from '@/components/v2/notebook/NotebookViewV2.vue'
+import Pv2NoteComposer from '@/components/v2/notebook/Pv2NoteComposer.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 

@@ -16,6 +16,12 @@ export const useNotebookStore = defineStore('notebook', () => {
   const query = ref('')
   // Quick-capture text. Deliberately not persisted — an unsent draft is not a note.
   const draft = ref('')
+  // Composer sheet open/tag state. Lives here (not as page/view-local state) so the sheet can
+  // be mounted at the page-shell level, outside the content area that gates it — see
+  // NotebookPageV2.vue for why that placement matters (it's what lets the sheet cover the
+  // bottom nav, the same way the Day/Week/Month create flow does with ui.createOpen).
+  const isComposerOpen = ref(false)
+  const composerTagId = ref<string | null>(null)
   // Gates writes and first paint. Only ever set true by a successful load, so a failed load
   // keeps writes rejected rather than letting them build local-only state that the retry
   // would then replace.
@@ -111,6 +117,8 @@ export const useNotebookStore = defineStore('notebook', () => {
     activeTagId.value = null
     query.value = ''
     draft.value = ''
+    isComposerOpen.value = false
+    composerTagId.value = null
     isLoaded.value = false
     syncUserId = null
     // Drop every pending chain so queued same-id writes don't fire against the new session;
@@ -162,6 +170,32 @@ export const useNotebookStore = defineStore('notebook', () => {
   function selectTag(id: string | null): void {
     if (id !== null && !tags.value.some((tag) => tag.id === id)) return
     activeTagId.value = id
+  }
+
+  function openComposer(): void {
+    composerTagId.value = activeTagId.value
+    isComposerOpen.value = true
+  }
+
+  function closeComposer(): void {
+    isComposerOpen.value = false
+  }
+
+  /** Submits the composer's current draft as a note tagged with composerTagId, then closes it.
+   *  Mirrors the empty-draft no-op in addNote — pressing send on an empty draft does nothing. */
+  function submitComposer(): void {
+    const text = draft.value
+    if (text.trim() === '') return
+    addNote(text, composerTagId.value)
+    draft.value = ''
+    closeComposer()
+  }
+
+  /** Adds a tag from within the composer and selects it there, same as addComposerTag did
+   *  locally in NotebookViewV2 before the composer moved to the page shell. */
+  function addComposerTag(name: string): void {
+    const id = addTag(name)
+    if (id !== null) composerTagId.value = id
   }
 
   function stepTag(delta: number): void {
@@ -319,6 +353,8 @@ export const useNotebookStore = defineStore('notebook', () => {
     query,
     visibleNotes,
     draft,
+    isComposerOpen,
+    composerTagId,
     isLoaded,
     loadFromRemote,
     resetLocal,
@@ -327,6 +363,10 @@ export const useNotebookStore = defineStore('notebook', () => {
     addTag,
     addNote,
     editNote,
-    removeNote
+    removeNote,
+    openComposer,
+    closeComposer,
+    submitComposer,
+    addComposerTag
   }
 })
