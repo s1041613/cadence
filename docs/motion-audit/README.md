@@ -77,7 +77,7 @@
 
 | # | 位置 | 現況 |
 |---|---|---|
-| **#6** | `Pv2BottomNav.vue` | 整個檔案 **0 個動畫宣告**。每天點幾十次，無按壓回饋；切頁籤時 `.pv2-nav__glyph--on` 的黑底白字瞬間跳換 |
+| ~~**#6**~~ | `Pv2BottomNav.vue` | **已解決 2026-08-25**：floating glass pill 改版 —— 共用 pill 元素依實測位置 `translateX`/`width` 液態變形（`--cd-ease-glass`/`--cd-duration-glass`），`.pv2-nav__item:active` 補上非對稱按壓回饋（60ms 按下／160ms 放開），兩者皆已接 `prefers-reduced-motion` |
 | **#7a** | `Pv2WeekDayRow.vue:22-37` | 可點列，無回饋 |
 | **#7b** | `Pv2EventBlock.vue:98` | `cursor:pointer` 但無回饋 |
 
@@ -100,7 +100,7 @@
 |---|---|
 | **FocusSession 全部** | Zoe 明確指定不處理（長期有效）。原稽核的 #5 reduced-motion、#9 未具名 transition、#10 800ms 時長、#12 hover gating 皆屬此列 |
 | **view 切換轉場** | **已完成**，非待辦 —— `2f41ea3` 已加 swipe 導航，`app.css` 有完整 `.pv2-slide-next/prev` 含 `prefers-reduced-motion` |
-| `apple-design` skill 的 materials/translucency | 與 Zoe 的 neutral ink/paper 極簡方向不合 |
+| ~~`apple-design` skill 的 materials/translucency~~ | **REVERSED 2026-08-25**：使用者明確要求 Pv2BottomNav 改成 iOS 26 Liquid Glass 風格（floating pill + backdrop-filter + 主動 pill 液態變形動畫），知情且刻意推翻本行原本的排除決定。同時解決下方 #6 —— 見 `Pv2BottomNav.vue` |
 
 ---
 

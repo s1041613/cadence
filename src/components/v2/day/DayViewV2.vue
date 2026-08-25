@@ -107,6 +107,12 @@ function onCreate(): void {
   display: flex;
   flex-direction: column;
   padding: 6px 22px 12px;
+  /* Pv2BottomNav floats over the frame now instead of taking its own flex row, so
+     this body has to give up the clearance itself or the time grid scrolls under the
+     pill. .dv2__viewport (.pv2-slide-viewport, app.css) is flex:1 inside this column,
+     so padding here — not on .dv2__panel, which is only inset:0 inside that viewport
+     — is what actually shrinks the viewport's height. */
+  padding-bottom: var(--pv2-nav-h);
   overflow: hidden;
   /* The horizontal day-swipe lives here; pan-y leaves the time grid's vertical scroll alone. */
   touch-action: pan-y;
