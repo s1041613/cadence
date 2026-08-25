@@ -249,7 +249,10 @@ function onSwipe(details: SwipeDetails): void {
   /* Load-bearing: without it the flex child refuses to shrink and the whole frame scrolls. */
   min-height: 0;
   overflow-y: auto;
-  padding: 10px 22px 96px;
+  /* Bottom padding clears the floating Pv2BottomNav pill (var(--pv2-nav-h)), not a
+     fixed guess — the feed is itself the scrolling element, so padding goes directly
+     here rather than on a flex ancestor. */
+  padding: 10px 22px var(--pv2-nav-h);
   touch-action: pan-y;
   /* Repo idiom (see DayViewV2): hide the scrollbar while keeping the scroll. */
   scrollbar-width: none;
@@ -268,7 +271,8 @@ function onSwipe(details: SwipeDetails): void {
   text-align: center;
 }
 
+/* FAB 浮在底部 nav 之上：離 nav 頂緣 16px，隨 nav 高度自動跟著走（同 Week/Day） */
 .nbv__fab {
-  bottom: 16px;
+  bottom: calc(var(--pv2-nav-h) + 16px);
 }
 </style>

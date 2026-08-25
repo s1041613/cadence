@@ -202,13 +202,19 @@
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
   /* ---------- v2 layout ---------- */
-  /* Pv2BottomNav's real height: 12 top + 30 glyph + 6 gap + 11 label + 30 bottom + 1
-     border. Each view's FAB uses it to clear the nav; changing Pv2BottomNav's padding
-     means changing this too, or the FAB overlaps the nav (with no error on that side).
-     This height is independent of the configurable tab count: the count only affects
-     the column count (horizontal), and each cell is a fixed-height column — so adding
-     or removing tabs in the Tab bar settings never requires touching this value. */
-  --pv2-nav-h: 90px;
+  /* Pv2BottomNav is a floating overlay (position: absolute), not an in-flow row, so this
+     is clearance from the frame's true bottom edge to the top of the floating pill, not
+     the nav's own rendered height:
+       76 = 14 (pill's floating margin off the frame's bottom edge)
+          + 62 (pill's own height: 10 padding-top + 24 icon + 4 gap + ~12 label line
+                + 10 padding-bottom + 2 border)
+     env(...) adds the iOS home-indicator inset on top, since the pill floats above it
+     now instead of an in-flow bottom padding absorbing it directly.
+     Each view's FAB and every scrolling pane's bottom padding read this token; changing
+     Pv2BottomNav.vue's own floating-margin/height math means changing this too, or those
+     consumers clear the wrong amount with no error on that side. Independent of the
+     configurable tab count: the count only affects column count (horizontal). */
+  --pv2-nav-h: calc(76px + env(safe-area-inset-bottom, 0px));
 
   /* ---------- Radius ---------- */
   --cd-radius-pill: 999px;
@@ -267,6 +273,11 @@
   --cd-duration-micro-5: .2s;
   --cd-duration-micro-6: .22s;
   --cd-duration-spin: .8s;
+
+  /* Pv2BottomNav's active-pill morph only. A deliberate overshoot curve (>1) for the
+     "liquid glass" settle — distinct from --cd-ease-standard, which never overshoots. */
+  --cd-ease-glass: cubic-bezier(.34, 1.56, .64, 1);
+  --cd-duration-glass: .42s;
 }
 
 /* ---------- Keyframes ---------- */

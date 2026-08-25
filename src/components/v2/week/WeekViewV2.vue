@@ -167,6 +167,11 @@ function onCreate(): void {
   display: flex;
   flex-direction: column;
   padding: 6px 22px 12px;
+  /* Pv2BottomNav floats over the frame now instead of taking its own flex row, so
+     this body has to give up the clearance itself or the 7th day row sits under the
+     pill. .pv2-slide-viewport (app.css) is flex:1 inside this column, so padding here
+     — not on its absolutely-positioned child — is what actually shrinks its height. */
+  padding-bottom: var(--pv2-nav-h);
   overflow: hidden;
   /* The horizontal week-swipe lives here; pan-y leaves each row's own vertical scroll alone. */
   touch-action: pan-y;

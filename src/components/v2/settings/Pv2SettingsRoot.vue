@@ -133,7 +133,8 @@ const prefRows: PrefRow[] = [
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 20px 22px 24px;
+  /* Bottom clears the floating Pv2BottomNav pill. */
+  padding: 20px 22px var(--pv2-nav-h);
 }
 
 /* Account 卡 */
