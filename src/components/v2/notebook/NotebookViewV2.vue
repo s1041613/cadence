@@ -58,18 +58,7 @@
       />
     </div>
 
-    <Pv2Fab class="nbv__fab" @click="openComposer" />
-    <Transition name="cd-sheet">
-      <Pv2NoteComposer
-        v-if="isComposerOpen"
-        v-model="store.draft"
-        v-model:selected-tag-id="composerTagId"
-        :tags="store.tags"
-        @submit="onSubmit"
-        @close="closeComposer"
-        @add-tag="addComposerTag"
-      />
-    </Transition>
+    <Pv2Fab class="nbv__fab" @click="store.openComposer" />
   </div>
 </template>
 
@@ -79,7 +68,6 @@ import { useNotebookStore } from '@/stores/notebook-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import type { SwipeDetails } from '@/composables/use-date-swipe'
 import Pv2NotebookHeader from './Pv2NotebookHeader.vue'
-import Pv2NoteComposer from './Pv2NoteComposer.vue'
 import Pv2NoteCard from './Pv2NoteCard.vue'
 import Pv2Fab from '@/components/v2/ui/Pv2Fab.vue'
 
@@ -88,30 +76,9 @@ const store = useNotebookStore()
 // Shared module-level ticking singleton, so Today/Yesterday roll over at midnight on their
 // own. A local ref(new Date()) would be static and freeze every label at first render.
 const now = useCurrentTime()
-const isComposerOpen = ref(false)
-const composerTagId = ref<string | null>(null)
 const isAddingTag = ref(false)
 const tagDraft = ref('')
 const tagField = useTemplateRef<HTMLInputElement>('tagField')
-
-function openComposer(): void {
-  composerTagId.value = store.activeTagId
-  isComposerOpen.value = true
-}
-
-function closeComposer(): void {
-  isComposerOpen.value = false
-}
-
-function onSubmit(): void {
-  // The store silently refuses an empty draft (pressing + on an empty pill is not an error);
-  // this guard exists only so the input isn't cleared on a no-op submit.
-  const text = store.draft
-  if (text.trim() === '') return
-  store.addNote(text, composerTagId.value)
-  store.draft = ''
-  closeComposer()
-}
 
 async function startTag(): Promise<void> {
   tagDraft.value = ''
@@ -131,13 +98,8 @@ function commitTag(): void {
   cancelTag()
 }
 
-function addComposerTag(name: string): void {
-  const id = store.addTag(name)
-  if (id !== null) composerTagId.value = id
-}
-
 function onSwipe(details: SwipeDetails): void {
-  if (isComposerOpen.value) return
+  if (store.isComposerOpen) return
   if (details.direction === 'left') store.stepTag(1)
   if (details.direction === 'right') store.stepTag(-1)
 }
