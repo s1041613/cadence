@@ -20,9 +20,15 @@
     <!-- Mounted as a sibling of .nb2__frame, not inside it, so the sheet's absolute
          positioning isn't confined to .nb2__content and can cover Pv2BottomNav — same
          placement DayPageV2.vue uses for EventComposerOverlay relative to .dp2__frame. -->
-    <Transition name="cd-sheet">
+    <!-- @after-enter, not the composer's own onMounted: the enter transition starts the panel at
+         translateY(100%), so a focus taken at mount points iOS's scroll-into-view at a rect a full
+         sheet-height below the viewport, and it never recomputes. Vue resolves after-enter
+         immediately when there is no transition to run (prefers-reduced-motion), which a timer
+         keyed to --cd-duration-sheet would not. -->
+    <Transition name="cd-sheet" @after-enter="composer?.focusField()">
       <Pv2NoteComposer
         v-if="store.isComposerOpen"
+        ref="composer"
         v-model="store.draft"
         v-model:selected-tag-id="store.composerTagId"
         :tags="store.tags"
@@ -35,6 +41,7 @@
 </template>
 
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { useNotebookStore } from '@/stores/notebook-store'
 import NotebookViewV2 from '@/components/v2/notebook/NotebookViewV2.vue'
@@ -44,6 +51,7 @@ import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 
 const { isDesktop } = useBreakpoint()
 const store = useNotebookStore()
+const composer = useTemplateRef<InstanceType<typeof Pv2NoteComposer>>('composer')
 </script>
 
 <style scoped>
