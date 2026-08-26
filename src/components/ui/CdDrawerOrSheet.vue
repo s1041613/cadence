@@ -55,7 +55,8 @@ const props = withDefaults(
     sheetDuration?: string
     sheetFullscreen?: boolean
     raised?: boolean
-    /** CdSheet-only: overrides the sheet's default white surface (e.g. Draft's paper token). */
+    /** CdSheet-only: overrides the sheet's default #fafaf9 paper (e.g. Draft's paper token). Set
+     *  it here rather than on the slot content — see the note on CdSheet's own `surface` prop. */
     sheetSurface?: string
   }>(),
   {

@@ -152,7 +152,12 @@ function commitTag(): void {
      one block hanging 4px off Notebook's own edge (68640cb aligned the page titles for the same
      reason and missed this one). Kept in sync with .nbc__tags' bleed below. */
   padding: 18px 22px 0;
-  background: #fff;
+  /* Deliberately no background: the panel's paper belongs to .cd-sheet, and the handle zone above
+     this form plus the sheet's home-indicator padding below it are OUTSIDE the slot. A background
+     here that differs from the sheet's paints those two strips a different colour — which is
+     exactly what #fff did, and it showed as bands top and bottom over a dark wallpaper. Every
+     other sheet body (Pv2EventEditCard, Pv2MonthSheet, Pv2DaySheet) sits on the same paper.
+     Inheriting rather than restating #fafaf9 so this cannot drift from the sheet's default. */
 }
 
 .nbc__input {

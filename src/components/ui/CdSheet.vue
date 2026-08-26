@@ -34,8 +34,11 @@ const props = withDefaults(
     showHandle?: boolean
     fullscreen?: boolean
     raised?: boolean
-    // Overrides the sheet's default #fff surface (e.g. Draft passes its paper token so the
-    // fullscreen sheet's edge-to-edge background matches the drawer content, not white).
+    // Overrides the sheet's default #fafaf9 paper (e.g. Draft passes its own paper token so the
+    // fullscreen sheet's edge-to-edge background matches the drawer content).
+    // NOT #fff — the handle zone and the panel's bottom padding sit outside the slot and are
+    // painted by this surface, so slot content that sets a different background of its own shows
+    // it as a band above and below itself. Match the paper or override it here, not in the slot.
     surface?: string
   }>(),
   { scrimColor: 'var(--cd-scrim)', duration: '.3s', showHandle: true, fullscreen: false, raised: false }
