@@ -153,10 +153,16 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 .pv2-nav__pill {
   position: absolute;
+  /* top/bottom mirror .pv2-nav's own 10px padding, so the pill spans exactly the grid
+     content box — which is exactly the tab button's box, since the buttons are the only
+     items in the single implicit row. That's the same relationship measurePill() already
+     maintains horizontally, and it derives the height from the button instead of
+     restating its math: the previous hardcoded 46px had drifted 9px short of the 55px
+     button, leaving 8px of clearance above the icon and clipping the label at the bottom. */
   top: 10px;
+  bottom: 10px;
   left: 0;
-  height: 46px;
-  border-radius: 18px;
+  border-radius: 20px;
   opacity: 0;
   /* Only the animating element gets a promoted layer — the static bar shell doesn't
      need one held permanently. */
