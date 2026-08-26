@@ -152,7 +152,10 @@ function commitTag(): void {
      one block hanging 4px off Notebook's own edge (68640cb aligned the page titles for the same
      reason and missed this one). Kept in sync with .nbc__tags' bleed below. */
   padding: 18px 22px 0;
-  background: #fff;
+  /* No background of its own: CdSheet already paints the v2 paper surface. A colour here would
+     only cover the slot, leaving the sheet's handle zone above and its 30px home-indicator
+     padding below in paper — the two-tone panel Notebook had (Day's card avoids it by using
+     --pv2-paper, the same #fafaf9 CdSheet defaults to). */
 }
 
 .nbc__input {
