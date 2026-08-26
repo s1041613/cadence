@@ -27,23 +27,27 @@
     <link rel="icon" type="image/ico" href="favicon.ico">
 
     <link rel="preload" as="font" type="font/woff2" crossorigin
-          href="<%= publicPath %>fonts/inter-400.woff2">
+          href="<%= publicPath %>fonts/inter-500.woff2">
 
     <!-- ---------- Launch animation (pure CSS) ----------
+         Notes surfacing one by one, then linking into a graph that collapses into
+         the CADENCE mark. The dark ground is the splash only; the app underneath
+         keeps its paper colour, so dismissing it returns to #fafaf9.
+
          The CSP above is script-src 'self', so no inline <script> may run here;
          style-src allows 'unsafe-inline', so the animation is written as CSS
-         keyframes. It starts painting before the JS bundle has downloaded, so a
-         cold start is no longer a blank page. Teardown lives in the bundle, in
-         src/composables/use-app-splash.ts. -->
+         keyframes over static SVG markup. It starts painting before the JS bundle
+         has downloaded, so a cold start is no longer a blank page. Teardown lives
+         in the bundle, in src/composables/use-app-splash.ts. -->
     <style>
       /* app.css imports Inter via @fontsource, but that only lands once
          the bundle does. This copy in public/fonts/ is what makes the mark render
          with the right face on the very first paint. */
       @font-face {
         font-family: 'Inter Splash';
-        src: url('<%= publicPath %>fonts/inter-400.woff2') format('woff2');
+        src: url('<%= publicPath %>fonts/inter-500.woff2') format('woff2');
         font-style: normal;
-        font-weight: 400;
+        font-weight: 500;
         font-display: block;
       }
 
@@ -53,10 +57,8 @@
         z-index: 9999;
         display: grid;
         place-items: center;
-        background: #fafaf9;
-        transition:
-          opacity .42s cubic-bezier(.22, 1, .36, 1),
-          transform .42s cubic-bezier(.22, 1, .36, 1);
+        background: #0b0b0b;
+        transition: opacity .4s cubic-bezier(.22, 1, .36, 1);
         /* Fail-open. use-app-splash.ts only runs once App.vue mounts, and the auth
            boot file awaits getSession() before that — so a hung or very slow auth
            call means the JS fuse is never even armed, and this overlay would trap
@@ -78,132 +80,137 @@
       /* Added by use-app-splash.ts; the element is removed once the fade ends */
       #cd-splash.is-out {
         opacity: 0;
-        transform: scale(1.03);
         pointer-events: none;
       }
 
-      .cd-splash__grid {
+      /* The graph scales with the viewport (default xMidYMid meet), so it stays
+         centred on the mark it collapses into, on a phone or a desktop window. */
+      .cd-splash__net {
         position: absolute;
         inset: 0;
-        background-image: radial-gradient(#d8d8d2 1.6px, transparent 1.6px);
-        background-size: 28px 28px;
-        background-position: 14px 14px;
+        width: 100%;
+        height: 100%;
+        transform-origin: 50% 50%;
+        animation: cd-splash-collapse .5s cubic-bezier(.22, 1, .36, 1) 1.55s forwards;
+      }
+
+      .cd-splash__edges {
+        fill: none;
+        stroke: #3a3a3a;
+        stroke-width: 1.1;
+      }
+
+      /* pathLength="1" on each line makes the dash length line-independent, so a
+         single keyframe draws every edge over its own full length. */
+      .cd-splash__edges line {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: cd-splash-line .5s cubic-bezier(.22, 1, .36, 1) var(--d) forwards;
+      }
+
+      .cd-splash__nodes {
+        fill: #d8d8d8;
+      }
+
+      .cd-splash__nodes circle {
         opacity: 0;
-        animation: cd-splash-grid .9s cubic-bezier(.22, 1, .36, 1) forwards;
+        /* Scale each dot about its own centre rather than the viewBox origin */
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: cd-splash-dot .4s cubic-bezier(.34, 1.5, .6, 1) var(--d) forwards;
       }
 
       .cd-splash__mark {
         position: relative;
-        font: 400 150px/1 'Inter Splash', 'Inter', system-ui, sans-serif;
-        color: #1b1b1b;
         opacity: 0;
-        animation: cd-splash-mark .66s cubic-bezier(.22, 1, .36, 1) .26s forwards;
-      }
-
-      .cd-splash__rhythm {
-        position: absolute;
-        top: 50%;
-        margin-top: 86px;
-        width: 260px;
-        height: 12px;
-      }
-
-      .cd-splash__line {
-        position: absolute;
-        left: 50%;
-        top: 5px;
-        width: 0;
-        height: 1.5px;
-        background: var(--cd-line, #e5e3db);
-        transform: translateX(-50%);
-        animation: cd-splash-line .62s cubic-bezier(.22, 1, .36, 1) 1.12s forwards;
-      }
-
-      .cd-splash__dot {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 11px;
-        height: 11px;
-        margin-left: -5.5px;
-        border-radius: 50%;
-        opacity: 0;
-        transform: translateX(var(--x0)) scale(.4);
-        animation:
-          cd-splash-dot .5s cubic-bezier(.34, 1.56, .64, 1) var(--d) forwards,
-          cd-splash-spread .62s cubic-bezier(.22, 1, .36, 1) 1.12s forwards;
+        animation: cd-splash-mark .5s cubic-bezier(.22, 1, .36, 1) 1.62s forwards;
       }
 
       .cd-splash__word {
-        position: absolute;
-        top: 50%;
-        margin-top: 128px;
-        font: 500 13px/1 'Inter', system-ui, sans-serif;
-        color: var(--cd-ink, #56585e);
-        letter-spacing: .66em;
-        padding-left: .66em;
+        font: 500 17px/1 'Inter Splash', 'Inter', system-ui, sans-serif;
+        color: #8a8a88;
+        letter-spacing: .5em;
+        /* Letter-spacing adds a trailing gap after the last glyph; the matching
+           left padding keeps the word optically centred as the tracking closes. */
+        padding-left: .5em;
         opacity: 0;
-        animation: cd-splash-word .72s cubic-bezier(.22, 1, .36, 1) 1.24s forwards;
+        animation: cd-splash-word .5s cubic-bezier(.22, 1, .36, 1) 1.78s forwards;
       }
 
-      @keyframes cd-splash-grid {
-        from { opacity: 0; transform: scale(1.12); }
+      @keyframes cd-splash-dot {
+        from { opacity: 0; transform: scale(.3); }
         to   { opacity: 1; transform: scale(1); }
       }
+      @keyframes cd-splash-line {
+        to { stroke-dashoffset: 0; }
+      }
+      @keyframes cd-splash-collapse {
+        from { opacity: 1; transform: scale(1); }
+        to   { opacity: 0; transform: scale(.4); }
+      }
       @keyframes cd-splash-mark {
-        from { opacity: 0; transform: translateY(14px) scale(.86); }
+        from { opacity: 0; transform: translateY(8px) scale(.94); }
         to   { opacity: 1; transform: translateY(0) scale(1); }
       }
-      @keyframes cd-splash-dot {
-        from { opacity: 0; transform: translateX(var(--x0)) scale(.4); }
-        to   { opacity: 1; transform: translateX(var(--x0)) scale(1); }
-      }
-      @keyframes cd-splash-spread {
-        from { transform: translateX(var(--x0)) scale(1); }
-        to   { transform: translateX(var(--x1)) scale(1); }
-      }
-      @keyframes cd-splash-line {
-        from { width: 0; }
-        to   { width: 250px; }
-      }
       @keyframes cd-splash-word {
-        from { opacity: 0; letter-spacing: .66em; padding-left: .66em; transform: translateY(10px); }
-        to   { opacity: 1; letter-spacing: .3em;  padding-left: .3em;  transform: translateY(0); }
+        from { opacity: 0; letter-spacing: .5em;  padding-left: .5em; }
+        to   { opacity: 1; letter-spacing: .28em; padding-left: .28em; }
       }
 
-      /* Reduced-motion: jump straight to the finished state, play nothing.
-         Note this selects children only — the container keeps its fail-open
-         animation, which is a safety timer rather than a motion effect. */
+      /* Reduced-motion: jump straight to the finished state, play nothing. The
+         graph is mid-animation scaffolding that ends up hidden, so it is simply
+         never shown. Note this selects children only — the container keeps its
+         fail-open animation, which is a safety timer rather than a motion effect. */
       @media (prefers-reduced-motion: reduce) {
         #cd-splash * { animation: none !important; }
 
-        /* Dismiss by fading alone: the 3% scale-up is motion these users opted out of */
-        #cd-splash {
-          transition: opacity .42s cubic-bezier(.22, 1, .36, 1);
+        .cd-splash__net { display: none; }
+        .cd-splash__mark { opacity: 1; }
+        .cd-splash__word {
+          opacity: 1;
+          letter-spacing: .28em;
+          padding-left: .28em;
         }
-        #cd-splash.is-out {
-          transform: none;
-        }
-        .cd-splash__grid,
-        .cd-splash__mark,
-        .cd-splash__word { opacity: 1; }
-        .cd-splash__line { width: 250px; }
-        .cd-splash__dot  { opacity: 1; transform: translateX(var(--x1)); }
       }
     </style>
   </head>
   <body>
     <!-- Launch animation: sits outside the quasar mount point so mounting cannot replace it -->
     <div id="cd-splash" aria-hidden="true">
-      <div class="cd-splash__grid"></div>
-      <div class="cd-splash__mark">C</div>
-      <div class="cd-splash__rhythm">
-        <span class="cd-splash__line"></span>
-        <span class="cd-splash__dot" style="--x0:-26px; --x1:-108px; --d:.74s; background:#c0564b"></span>
-        <span class="cd-splash__dot" style="--x0:0px;    --x1:0px;    --d:.82s; background:#b3ac91"></span>
-        <span class="cd-splash__dot" style="--x0:26px;   --x1:108px;  --d:.90s; background:#3a6ea5"></span>
-      </div>
-      <div class="cd-splash__word">CADENCE</div>
+      <svg class="cd-splash__net" viewBox="0 0 340 420" width="100%" height="100%" aria-hidden="true" focusable="false">
+        <g class="cd-splash__edges">
+          <line x1="80" y1="120" x2="110" y2="200" pathLength="1" style="--d:1.15s"/>
+          <line x1="110" y1="200" x2="170" y2="90" pathLength="1" style="--d:1.185s"/>
+          <line x1="170" y1="90" x2="250" y2="80" pathLength="1" style="--d:1.22s"/>
+          <line x1="170" y1="90" x2="260" y2="140" pathLength="1" style="--d:1.255s"/>
+          <line x1="260" y1="140" x2="290" y2="160" pathLength="1" style="--d:1.29s"/>
+          <line x1="260" y1="140" x2="300" y2="230" pathLength="1" style="--d:1.325s"/>
+          <line x1="300" y1="230" x2="230" y2="300" pathLength="1" style="--d:1.36s"/>
+          <line x1="230" y1="300" x2="130" y2="330" pathLength="1" style="--d:1.395s"/>
+          <line x1="130" y1="330" x2="60" y2="260" pathLength="1" style="--d:1.43s"/>
+          <line x1="60" y1="260" x2="40" y2="180" pathLength="1" style="--d:1.465s"/>
+          <line x1="60" y1="260" x2="110" y2="200" pathLength="1" style="--d:1.5s"/>
+          <line x1="200" y1="210" x2="110" y2="200" pathLength="1" style="--d:1.535s"/>
+          <line x1="200" y1="210" x2="300" y2="230" pathLength="1" style="--d:1.57s"/>
+          <line x1="200" y1="210" x2="230" y2="300" pathLength="1" style="--d:1.605s"/>
+          <line x1="80" y1="120" x2="40" y2="180" pathLength="1" style="--d:1.64s"/>
+        </g>
+        <g class="cd-splash__nodes">
+          <circle cx="80" cy="120" r="4.5" style="--d:0.55s"/>
+          <circle cx="170" cy="90" r="3" style="--d:0.595s"/>
+          <circle cx="260" cy="140" r="3" style="--d:0.64s"/>
+          <circle cx="300" cy="230" r="3" style="--d:0.685s"/>
+          <circle cx="230" cy="300" r="4.5" style="--d:0.73s"/>
+          <circle cx="130" cy="330" r="3" style="--d:0.775s"/>
+          <circle cx="60" cy="260" r="3" style="--d:0.82s"/>
+          <circle cx="110" cy="200" r="3" style="--d:0.865s"/>
+          <circle cx="200" cy="210" r="4.5" style="--d:0.91s"/>
+          <circle cx="250" cy="80" r="3" style="--d:0.955s"/>
+          <circle cx="40" cy="180" r="3" style="--d:1s"/>
+          <circle cx="290" cy="160" r="3" style="--d:1.045s"/>
+        </g>
+      </svg>
+      <div class="cd-splash__mark"><span class="cd-splash__word">CADENCE</span></div>
     </div>
 
     <!-- quasar:entry-point -->

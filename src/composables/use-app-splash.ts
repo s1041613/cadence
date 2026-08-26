@@ -17,9 +17,11 @@ import { useTasksStore } from '@/stores/tasks-store'
  * path: the data is already there.
  */
 
-const MIN_MS = 1_900
+// MIN_MS matches the end of the animation's last beat (CADENCE settles at 2.28s),
+// so the brand moment is never cut off mid-play.
+const MIN_MS = 2_300
 const MAX_MS = 6_000
-const FADE_MS = 420
+const FADE_MS = 400
 
 let scheduled = false
 

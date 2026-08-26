@@ -2,6 +2,11 @@
 
 分支 `feat/splash-animation`，來源設計 [Web Splash.dc.html](https://claude.ai/design/p/6b2e6720-08d2-442d-9737-1147150093ff?file=Web+Splash.dc.html)。
 
+> **2026-08 改版：** 動畫內容已換成新的「思考的網絡」稿
+> （[CADENCE Mobile 畫面設計](https://claude.ai/code/artifact/c7896a64-815c-434d-bcba-bfed5888f6ef)）。
+> 下面的**做法、兩層保險絲、收尾條件**都沒變，只有畫面與時間軸換了 ——
+> 見文末〈改版：思考的網絡〉。
+
 ## 問題
 
 冷啟動時 `index.html` 的 body 是空的：使用者先看到一片空白，等 JS bundle 下載、
@@ -118,3 +123,60 @@ cd /Users/zoe/Documents/cadence/.worktrees/splash-animation && npm run dev
 - `auth.init()` 的 `getSession()` 沒有 timeout。splash 這邊已用 CSS fail-open 兜住，
   但 auth boot 本身卡住仍會讓 app 停在空畫面（動畫讓開之後）。那是既有問題、不在
   這個 PR 範圍，但值得另開一張處理
+
+---
+
+# 改版：思考的網絡（2026-08）
+
+來源設計：[CADENCE Mobile 畫面設計](https://claude.ai/code/artifact/c7896a64-815c-434d-bcba-bfed5888f6ef)。
+
+對應 reflect.app 的核心意象：把零散的筆記結成一張網（backlink graph）。
+節點逐一亮起、連線成網，再收攏成 CADENCE 標記。開場短暫轉成深色只為了那三秒的
+「意義感」，收掉之後立刻回到 app 原本的紙色 `#fafaf9`。
+
+## 新時間軸
+
+| 時間 | 畫面 |
+| --- | --- |
+| 0.00s | 畫面即為深底 `#0b0b0b` |
+| 0.55s | 12 個節點依序亮起（每顆間隔 0.045s），像陸續想起的筆記 |
+| 1.15s | 15 條連線一條條畫出（每條間隔 0.035s），連成一張網 |
+| 1.55s | 整張網收攏縮小（scale .4）並淡出 |
+| 1.62s | 標記浮起 |
+| 1.78s | CADENCE 字距由 .5em 收攏到 .28em |
+| ≥2.30s | 資料到齊即淡出（opacity 0，400ms） |
+| 6.00s / 8.00s | 兩層保險絲，與改版前相同 |
+
+## 實作差異
+
+| 項目 | 改版前 | 改版後 |
+| --- | --- | --- |
+| 底色 | 紙面 `#fafaf9` | 深底 `#0b0b0b`（僅 splash，app 本身不變） |
+| 主體 | 點陣格線 + 斜體 C + 三顆分類圓點 | 內嵌 SVG：12 節點 + 15 連線 |
+| 字 | Inter 400（大寫 C 150px） | Inter 500（只剩 CADENCE 17px） |
+| 字檔 | `public/fonts/inter-400.woff2` | `public/fonts/inter-500.woff2`（400 那份已無人使用，移除） |
+| 收尾 | opacity + scale 1.03 | 只用 opacity（設計稿的收法） |
+| `MIN_MS` | 1900 | 2300（新動畫最後一拍 2.28s 收完） |
+
+連線用 `pathLength="1"` 搭配 `stroke-dasharray: 1`，讓「畫線」的 keyframe 與線段
+實際長度無關，一組 keyframe 就能畫完 15 條各自不同長度的線。節點的縮放用
+`transform-box: fill-box` 以自己的圓心為原點，而不是 viewBox 原點。
+
+SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置中 —— 手機與桌機
+都對得上它最後收攏成的標記位置。
+
+`prefers-reduced-motion: reduce` 時網絡直接 `display: none`（它本來就是過場的鷹架、
+最後會消失），只留深底與收攏後的 CADENCE。
+
+## 驗證（改版）
+
+| 項目 | 結果 |
+| --- | --- |
+| `npm run typecheck` | 通過 |
+| `npm test` | 52 檔 797 測試全過 |
+| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/fonts/inter-500.woff2` 已出貨 |
+| Playwright 逐拍截圖 | 393×852 與 1280×800 兩種視窗、含 reduced-motion，各拍點畫面與設計稿一致 |
+
+**仍未做真機驗收**：截圖是把動畫暫停在指定時間點拍的，實際的節奏感（節點亮起的
+密度、收攏的快慢、與登入頁的銜接）還是要跑起來看。冷啟動路徑建議用 hard reload
+或無痕視窗。
