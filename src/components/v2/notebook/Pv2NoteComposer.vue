@@ -55,12 +55,12 @@
           :aria-expanded="isListRowOpen"
           @click="toggleListRow"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M4 7 H20 M4 12 H14 M4 17 H17" />
           </svg>
         </button>
         <button class="nbc__send" type="submit" aria-label="Add note">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#cfcfcf" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8f8f8f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 19 V5" />
             <path d="M5.5 11.5 L12 5 L18.5 11.5" />
           </svg>
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, ref, useTemplateRef } from 'vue'
+import { nextTick, ref, useTemplateRef } from 'vue'
 import type { NoteTag } from '@/types/note'
 import CdSheet from '@/components/ui/CdSheet.vue'
 
@@ -95,10 +95,18 @@ const isListRowOpen = ref(false)
 const isAddingTag = ref(false)
 const tagDraft = ref('')
 
-onMounted(async () => {
-  await nextTick()
+// Focus is NOT taken on mount. The page wraps this sheet in <Transition name="cd-sheet">, whose
+// enter starts the panel at translateY(100%) (CdSheet.vue), so at mount the textarea still sits a
+// full sheet-height below the viewport. iOS runs its scroll-into-view against the rect it has at
+// focus time and never recomputes it, which threw the whole page upward — the notes list ended up
+// under the status bar and the composer's footer under the keyboard.
+//
+// NotebookPageV2 calls this from the Transition's @after-enter instead, once the panel has landed.
+function focusField(): void {
   field.value?.focus()
-})
+}
+
+defineExpose({ focusField })
 
 function onInput(event: Event): void {
   emit('update:modelValue', (event.target as HTMLTextAreaElement).value)
@@ -140,18 +148,21 @@ function commitTag(): void {
 .nbc {
   display: flex;
   flex-direction: column;
-  padding: 20px 26px 0;
+  /* 22px, not 26: .nbh, .nbv__tags and .nbv__feed are all on a 22px column, so the composer was the
+     one block hanging 4px off Notebook's own edge (68640cb aligned the page titles for the same
+     reason and missed this one). Kept in sync with .nbc__tags' bleed below. */
+  padding: 18px 22px 0;
   background: #fff;
 }
 
 .nbc__input {
   width: 100%;
-  min-height: 76px;
+  min-height: 60px;
   border: none;
   outline: none;
   resize: none;
   background: transparent;
-  font: 400 22px var(--cd-font-mono);
+  font: 400 19px var(--cd-font-mono);
   line-height: 1.32;
   color: #1b1b1b;
 }
@@ -165,8 +176,10 @@ function commitTag(): void {
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  margin: 14px -26px 0;
-  padding: 0 26px 12px;
+  /* Full-bleed scroller: the negative margin and the padding must equal .nbc's horizontal padding,
+     or the row's first chip stops sitting on the column. */
+  margin: 14px -22px 0;
+  padding: 0 22px 12px;
   scrollbar-width: none;
 }
 
@@ -233,15 +246,15 @@ function commitTag(): void {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  padding-top: 14px;
+  padding-top: 10px;
 }
 
 .nbc__lists {
   flex: none;
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 14px;
@@ -259,8 +272,11 @@ function commitTag(): void {
   flex: none;
   display: grid;
   place-items: center;
-  width: 62px;
-  height: 62px;
+  /* 50, not 62: at 62 the ring rivalled Pv2Fab's 64px black circle — the one primary action on the
+     screen — while carrying a far quieter treatment. The glyph goes 26 -> 19 with it, holding the
+     icon at ~38% of the circle instead of 42%. */
+  width: 50px;
+  height: 50px;
   padding: 0;
   border: 1.5px solid #e0e0dd;
   border-radius: 50%;
