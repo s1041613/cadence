@@ -8,6 +8,7 @@ import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
 import { useNotebookStore } from '@/stores/notebook-store'
 import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
 import { useV2TabsStore } from '@/stores/v2-tabs-store'
+import { useNotificationPrefsStore } from '@/stores/notification-prefs-store'
 import { ensureDefaultCalendar } from '@/services/calendars-service'
 import { onAuthUserChange } from './auth-data-sync-core'
 
@@ -26,6 +27,10 @@ export default defineBoot(({ store }) => {
   const notebookStore = useNotebookStore(store)
   const v2AppearanceStore = useV2AppearanceStore(store)
   const v2TabsStore = useV2TabsStore(store)
+  // Constructed here for every session, not lazily from the Notifications pane:
+  // registering its user_settings slice is what keeps persistSettings() from
+  // refusing to write a partial row.
+  const notificationPrefsStore = useNotificationPrefsStore(store)
 
   watch(
     () => auth.user?.id ?? null,
@@ -39,6 +44,7 @@ export default defineBoot(({ store }) => {
         notebookStore,
         v2AppearanceStore,
         v2TabsStore,
+        notificationPrefsStore,
         getCurrentUserId: () => auth.user?.id ?? null,
         getMemberCalendarIds: () => calendarsStore.calendars.map((c) => c.id)
       })

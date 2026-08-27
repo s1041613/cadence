@@ -19,13 +19,14 @@ beforeEach(() => {
   saveMock.mockResolvedValue(undefined)
 })
 
-/** Registers both real contributors, as the boot file does. */
-function registerBothStores(): void {
+/** Registers every real contributor, as the boot file does. */
+function registerAllStores(): void {
   registerSettingsSlice('v2-appearance', () => ({
     backgroundPath: 'u/1.jpg',
     scrimOpacity: 0.5
   }))
   registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: ['month', 'setting'] }))
+  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
 }
 
 describe('currentSettings', () => {
@@ -59,7 +60,7 @@ describe('currentSettings', () => {
   })
 
   it('does not invent values for a column no store has registered', () => {
-    // The write path sends all three columns, so a fabricated default here would
+    // The write path sends every column, so a fabricated default here would
     // be written over whatever the remote row holds. A column nobody owns must be
     // reported as absent, not as a guess.
     registerSettingsSlice('a', () => ({ scrimOpacity: 0.3 }))
@@ -72,13 +73,18 @@ describe('currentSettings', () => {
 })
 
 describe('persistSettings', () => {
-  it('writes all three columns when both stores have registered', async () => {
-    registerBothStores()
+  it('writes every column when all stores have registered', async () => {
+    registerAllStores()
 
     await persistSettings('user-1')
 
     expect(saveMock).toHaveBeenCalledWith(
-      { backgroundPath: 'u/1.jpg', scrimOpacity: 0.5, shownTabKeys: ['month', 'setting'] },
+      {
+        backgroundPath: 'u/1.jpg',
+        scrimOpacity: 0.5,
+        shownTabKeys: ['month', 'setting'],
+        notifyOnMemberEvents: true
+      },
       'user-1'
     )
   })
@@ -90,6 +96,7 @@ describe('persistSettings', () => {
       backgroundPath: 'u/1.jpg',
       scrimOpacity: 0.5
     }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
 
     await expect(persistSettings('user-1')).rejects.toThrow(/shownTabKeys/)
     expect(saveMock).not.toHaveBeenCalled()
@@ -103,11 +110,12 @@ describe('persistSettings', () => {
       scrimOpacity: 0.8
     }))
     registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: null }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
 
     await persistSettings('user-1')
 
     expect(saveMock).toHaveBeenCalledWith(
-      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null },
+      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null, notifyOnMemberEvents: true },
       'user-1'
     )
   })

@@ -228,10 +228,11 @@ describe('v2-tabs-store persistence', () => {
     saveMock.mockResolvedValue(undefined)
 
     // Mirror of the appearance suite: persistSettings refuses a partial row, and
-    // this suite instantiates only the tabs store. In the app both register at boot.
+    // this suite instantiates only the tabs store. In the app they all register at boot.
     const { clearSettingsSlices, registerSettingsSlice } = await import('./user-settings-sync')
     clearSettingsSlices()
     registerSettingsSlice('v2-appearance', () => ({ backgroundPath: null, scrimOpacity: 0.8 }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
   })
 
   it('does not call the service when nobody is signed in', async () => {
@@ -255,7 +256,12 @@ describe('v2-tabs-store persistence', () => {
   it('keeps the defaults when the row has no tab preference', async () => {
     // A user who set a wallpaper but never touched the tab bar has a row whose
     // shown_tab_keys is null — that is "no preference", not "no tabs".
-    fetchMock.mockResolvedValue({ backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null })
+    fetchMock.mockResolvedValue({
+      backgroundPath: null,
+      scrimOpacity: 0.8,
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
+    })
     const store = useV2TabsStore()
 
     await store.loadFromRemote()
@@ -267,7 +273,8 @@ describe('v2-tabs-store persistence', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: null,
       scrimOpacity: 0.8,
-      shownTabKeys: ['week', 'month', 'setting']
+      shownTabKeys: ['week', 'month', 'setting'],
+      notifyOnMemberEvents: true
     })
     const store = useV2TabsStore()
 
@@ -284,7 +291,8 @@ describe('v2-tabs-store persistence', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       // duplicate, unknown key, over the cap, and missing the mandatory tab
-      shownTabKeys: ['month', 'month', 'bogus', 'week', 'draft', 'notes']
+      shownTabKeys: ['month', 'month', 'bogus', 'week', 'draft', 'notes'],
+      notifyOnMemberEvents: true
     })
     const store = useV2TabsStore()
 
@@ -299,7 +307,12 @@ describe('v2-tabs-store persistence', () => {
   })
 
   it('repairs an empty stored array rather than rendering an empty nav', async () => {
-    fetchMock.mockResolvedValue({ backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: [] })
+    fetchMock.mockResolvedValue({
+      backgroundPath: null,
+      scrimOpacity: 0.8,
+      shownTabKeys: [],
+      notifyOnMemberEvents: true
+    })
     const store = useV2TabsStore()
 
     await store.loadFromRemote()
@@ -391,7 +404,8 @@ describe('v2-tabs-store persistence', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: null,
       scrimOpacity: 0.8,
-      shownTabKeys: ['week', 'setting']
+      shownTabKeys: ['week', 'setting'],
+      notifyOnMemberEvents: true
     })
     const store = useV2TabsStore()
     await store.loadFromRemote()

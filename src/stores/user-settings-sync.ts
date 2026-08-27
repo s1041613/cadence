@@ -2,16 +2,17 @@ import { saveUserSettings, type UserSettings } from '@/services/user-settings-se
 
 // Shared write path for the single `user_settings` row.
 //
-// Two stores own different columns of the same row: v2-appearance-store owns
-// background_path and scrim_opacity, v2-tabs-store owns shown_tab_keys. The
-// service deliberately writes all three columns on every save (a partial upsert
-// would let one store clobber the other's column with a stale value), which
-// means whoever saves must know the current value of columns it does not own.
+// Several stores own different columns of the same row: v2-appearance-store owns
+// background_path and scrim_opacity, v2-tabs-store owns shown_tab_keys, and
+// notification-prefs-store owns notify_on_member_events. The service deliberately
+// writes every column on every save (a partial upsert would let one store clobber
+// another's column with a stale value), which means whoever saves must know the
+// current value of columns it does not own.
 //
-// Having each store import the other to ask would make them mutually dependent
-// and would instantiate one from inside the other's action. Instead each store
+// Having each store import the others to ask would make them mutually dependent
+// and would instantiate one from inside another's action. Instead each store
 // registers a getter for the slice it owns, and this module assembles the full
-// row at write time. Neither store knows the other exists.
+// row at write time. No store knows the others exist.
 
 type Slice = Partial<UserSettings>
 
@@ -48,15 +49,22 @@ export function currentSettings(): Slice {
   return assembled
 }
 
-const OWNED_COLUMNS = ['backgroundPath', 'scrimOpacity', 'shownTabKeys'] as const
+const OWNED_COLUMNS = [
+  'backgroundPath',
+  'scrimOpacity',
+  'shownTabKeys',
+  'notifyOnMemberEvents'
+] as const
 
 /**
  * Writes the assembled row. Throws on failure; callers own rollback.
  *
- * Refuses to write a partial row. Both stores register at boot, so in the running
- * app this never triggers — but the guard is what makes that a structural
+ * Refuses to write a partial row. Every owning store registers at boot, so in the
+ * running app this never triggers — but the guard is what makes that a structural
  * guarantee rather than a timing coincidence, and a partial write here would
- * silently blank a column the user never touched.
+ * silently blank a column the user never touched. Adding a column to
+ * OWNED_COLUMNS therefore has to land in the same change as the store that
+ * registers it, or every save starts throwing.
  */
 export async function persistSettings(ownerId: string): Promise<void> {
   const settings = currentSettings()
