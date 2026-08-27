@@ -42,6 +42,11 @@ export interface OnAuthUserChangeDeps {
   // and every tab stays reachable through Settings regardless.
   v2AppearanceStore: TitleDismissalsStoreLike
   v2TabsStore: TitleDismissalsStoreLike
+  // Account-level notification preferences — a third owner of that same user_settings row. It must
+  // be constructed here even for a user who never opens Settings: persistSettings() refuses to write
+  // a partial row, so if this store never registered its slice, saving the wallpaper or the tab bar
+  // would start throwing.
+  notificationPrefsStore: TitleDismissalsStoreLike
   // Reads the *current* signed-in user id at the moment it's called (not the userId this change
   // event started with) — used only for the stale-session check below.
   getCurrentUserId: () => string | null
@@ -67,6 +72,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     notebookStore,
     v2AppearanceStore,
     v2TabsStore,
+    notificationPrefsStore,
     getCurrentUserId,
     getMemberCalendarIds
   } = deps
@@ -81,6 +87,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     // just before sign-out cannot stamp this user's opacity onto the next session.
     v2AppearanceStore.resetLocal()
     v2TabsStore.resetLocal()
+    notificationPrefsStore.resetLocal()
     return
   }
 
@@ -107,10 +114,11 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore.loadFromRemote(userId, defaultId),
     titleDismissalsStore.loadFromRemote(),
     notebookStore.loadFromRemote(),
-    // Both read the same user_settings row, so this is two round trips for one row.
-    // Left as-is rather than merged: sharing a fetch would couple two stores that
-    // otherwise know nothing about each other, to save one request on sign-in only.
+    // All three read the same user_settings row, so this is three round trips for one
+    // row. Left as-is rather than merged: sharing a fetch would couple stores that
+    // otherwise know nothing about each other, to save two requests on sign-in only.
     v2AppearanceStore.loadFromRemote(),
-    v2TabsStore.loadFromRemote()
+    v2TabsStore.loadFromRemote(),
+    notificationPrefsStore.loadFromRemote()
   ])
 }

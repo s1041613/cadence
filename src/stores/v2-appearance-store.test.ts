@@ -47,11 +47,12 @@ beforeEach(async () => {
 
   // The shared row is assembled from every registered store, and persistSettings
   // refuses to write a partial row (blanking a column its owner never touched).
-  // This suite instantiates only the appearance store, so stand in for the tabs
-  // store's column — in the app both register at boot.
+  // This suite instantiates only the appearance store, so stand in for the columns
+  // the other stores own — in the app all of them register at boot.
   const { clearSettingsSlices, registerSettingsSlice } = await import('./user-settings-sync')
   clearSettingsSlices()
   registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: null }))
+  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
 })
 
 afterEach(() => {
@@ -95,7 +96,8 @@ describe('loadFromRemote', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/abc.jpg',
       scrimOpacity: 0.4,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
@@ -169,7 +171,12 @@ describe('setScrimOpacity', () => {
     vi.useFakeTimers()
     const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
-    fetchMock.mockResolvedValue({ backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null })
+    fetchMock.mockResolvedValue({
+      backgroundPath: null,
+      scrimOpacity: 0.8,
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
+    })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
 
@@ -187,7 +194,12 @@ describe('setScrimOpacity', () => {
     vi.useFakeTimers()
     const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
-    fetchMock.mockResolvedValue({ backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null })
+    fetchMock.mockResolvedValue({
+      backgroundPath: null,
+      scrimOpacity: 0.8,
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
+    })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
 
@@ -259,7 +271,8 @@ describe('resetLocal', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/abc.jpg',
       scrimOpacity: 0.1,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
 
@@ -295,7 +308,8 @@ describe('uploadBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
     uploadMock.mockResolvedValue('user-1/new.jpg')
@@ -323,7 +337,8 @@ describe('uploadBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
     uploadMock.mockRejectedValue(new Error('boom'))
@@ -342,7 +357,8 @@ describe('uploadBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
     uploadMock.mockResolvedValue('user-1/new.jpg')
@@ -360,7 +376,8 @@ describe('uploadBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
 
@@ -431,7 +448,8 @@ describe('clearBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
 
@@ -448,7 +466,8 @@ describe('clearBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
 
@@ -463,7 +482,8 @@ describe('clearBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
@@ -481,7 +501,8 @@ describe('clearBackground', () => {
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
-      shownTabKeys: null
+      shownTabKeys: null,
+      notifyOnMemberEvents: true
     })
     await store.loadFromRemote()
     expect(store.hasCustomBackground).toBe(true)

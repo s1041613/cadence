@@ -71,7 +71,8 @@ function makeStorageBucket(overrides: Record<string, unknown> = {}) {
 const SETTINGS: UserSettings = {
   backgroundPath: 'user-1/abc.jpg',
   scrimOpacity: 0.6,
-  shownTabKeys: ['month', 'notes', 'setting']
+  shownTabKeys: ['month', 'notes', 'setting'],
+  notifyOnMemberEvents: true
 }
 
 beforeEach(() => {
@@ -84,13 +85,53 @@ describe('fetchUserSettings', () => {
       data: {
         background_path: 'user-1/abc.jpg',
         scrim_opacity: 0.6,
-        shown_tab_keys: ['month', 'notes', 'setting']
+        shown_tab_keys: ['month', 'notes', 'setting'],
+        notify_on_member_events: true
       },
       error: null
     })
     requireSupabaseMock.mockReturnValue({ from: () => builder })
 
     await expect(fetchUserSettings('user-1')).resolves.toEqual(SETTINGS)
+  })
+
+  it('reads every column the client shape needs', async () => {
+    // A column missing from the select comes back undefined, which the mapper
+    // would then write back as the user's preference on the next save.
+    const { builder, calls } = makeBuilder({ data: null, error: null })
+    requireSupabaseMock.mockReturnValue({ from: () => builder })
+
+    await fetchUserSettings('user-1')
+
+    const columns = calls.find((c) => c[0] === 'select')?.[1] as string
+    for (const column of [
+      'background_path',
+      'scrim_opacity',
+      'shown_tab_keys',
+      'notify_on_member_events'
+    ]) {
+      expect(columns).toContain(column)
+    }
+  })
+
+  it('treats a null notify_on_member_events as the column default', async () => {
+    // A row written before the column existed can read back as null through a
+    // stale PostgREST schema cache. Turning notifications off would be the wrong
+    // way to fail.
+    const { builder } = makeBuilder({
+      data: {
+        background_path: null,
+        scrim_opacity: 0.8,
+        shown_tab_keys: null,
+        notify_on_member_events: null
+      },
+      error: null
+    })
+    requireSupabaseMock.mockReturnValue({ from: () => builder })
+
+    await expect(fetchUserSettings('user-1')).resolves.toMatchObject({
+      notifyOnMemberEvents: true
+    })
   })
 
   it('returns null when the user has no row yet', async () => {
@@ -120,10 +161,11 @@ describe('fetchUserSettings', () => {
 })
 
 describe('saveUserSettings', () => {
-  it('always writes all three preference columns, never a partial row', async () => {
-    // The slider debounce, a photo upload and a tab-bar save all target the same
-    // row. A partial upsert would let one clobber another's column with a stale
-    // value, so every write carries the full current state.
+  it('always writes every preference column, never a partial row', async () => {
+    // The slider debounce, a photo upload, a tab-bar save and the notification
+    // switch all target the same row. A partial upsert would let one clobber
+    // another's column with a stale value, so every write carries the full
+    // current state.
     const { builder, calls } = makeBuilder({ data: null, error: null })
     requireSupabaseMock.mockReturnValue({ from: () => builder })
 
@@ -136,7 +178,8 @@ describe('saveUserSettings', () => {
       user_id: 'user-1',
       background_path: 'user-1/abc.jpg',
       scrim_opacity: 0.6,
-      shown_tab_keys: ['month', 'notes', 'setting']
+      shown_tab_keys: ['month', 'notes', 'setting'],
+      notify_on_member_events: true
     })
   })
 
@@ -158,13 +201,15 @@ describe('saveUserSettings', () => {
     requireSupabaseMock.mockReturnValue({ from: () => builder })
 
     await saveUserSettings(
-      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null },
+      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null, notifyOnMemberEvents: false },
       'user-1'
     )
 
     const row = calls.find((c) => c[0] === 'upsert')?.[1] as Record<string, unknown>
     expect(row).toHaveProperty('background_path', null)
     expect(row).toHaveProperty('shown_tab_keys', null)
+    // false is a real preference, not an absent one — it must survive the write.
+    expect(row).toHaveProperty('notify_on_member_events', false)
   })
 
   it('throws when the write errors', async () => {

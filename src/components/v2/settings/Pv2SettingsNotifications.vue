@@ -1,9 +1,11 @@
 <template>
   <!--
     v2 設定 · Notifications 子頁。骨架照 Customization：header(back)+scroll+card。
-    MVP 只接「Event reminders」開關到 Web Push 訂閱（push-service）；
+    「Event reminders」接到 Web Push 訂閱（push-service）：真相來源是瀏覽器本機訂閱
+    （hasActiveSubscription），per-device，不進 store，避免雙狀態不同步。
+    「Shared calendar activity」則相反——它決定伺服器要不要為這位使用者入列通知，
+    是 per-account 偏好，住在共用的 user_settings 列（notification-prefs-store）。
     Daily agenda / Assistant nudges 先顯示但停用（尚無後端排程，見 web-push plan MVP 排除項）。
-    開關真相來源是瀏覽器本機訂閱（hasActiveSubscription），不進 store，避免雙狀態不同步。
   -->
   <div class="pv2-notif">
     <header class="pv2-notif__head">
@@ -24,6 +26,18 @@
             <div class="pv2-notif__row-sub">Notify before scheduled events</div>
           </div>
           <CdSwitch size="46x28" :model-value="eventReminders" @update:model-value="onToggleEventReminders" />
+        </div>
+
+        <div class="pv2-notif__row pv2-notif__row--divided">
+          <div class="pv2-notif__row-text">
+            <div class="pv2-notif__row-label">Shared calendar activity</div>
+            <div class="pv2-notif__row-sub">{{ sharedActivitySub }}</div>
+          </div>
+          <CdSwitch
+            size="46x28"
+            :model-value="notificationPrefs.notifyOnMemberEvents"
+            @update:model-value="notificationPrefs.setNotifyOnMemberEvents"
+          />
         </div>
 
         <div class="pv2-notif__row pv2-notif__row--divided pv2-notif__row--muted">
@@ -54,9 +68,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import CdSwitch from '@/components/ui/CdSwitch.vue'
 import { useAuthStore } from '@/stores/auth-store'
+import { useNotificationPrefsStore } from '@/stores/notification-prefs-store'
 import { notifySyncError } from '@/lib/notify'
 import {
   isPushSupported,
@@ -71,12 +86,27 @@ const emit = defineEmits<{
 
 const auth = useAuthStore()
 
+// Shared calendar activity is deliberately NOT modelled like Event reminders
+// below. That switch is per-device (its truth is this browser's subscription);
+// this one is per-account — the server decides whether to enqueue anything for
+// this user at all — so it lives in the shared user_settings row instead.
+const notificationPrefs = useNotificationPrefsStore()
+
 // Local UI state; the source of truth is the browser's own push subscription
 // (per-device), reconciled on mount. No pinia store — nothing else reads this.
 const eventReminders = ref(false)
 const unsupported = ref(false)
 // Guards against re-entrant toggles while an async subscribe/unsubscribe runs.
 const busy = ref(false)
+
+// Both switches feed the same transport, so the account-level preference has no
+// visible effect until this device is actually subscribed. Say so rather than
+// letting the toggle look broken.
+const sharedActivitySub = computed(() =>
+  eventReminders.value
+    ? 'When someone adds an event to a shared calendar'
+    : 'Turn on Event reminders to receive these'
+)
 
 onMounted(async () => {
   if (!isPushSupported()) {

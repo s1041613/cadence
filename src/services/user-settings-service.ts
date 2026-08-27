@@ -23,6 +23,7 @@ interface UserSettingsRow {
   background_path: string | null
   scrim_opacity: number
   shown_tab_keys: string[] | null
+  notify_on_member_events: boolean
 }
 
 /** Client-side shape. `null` on a field means "no preference" and the caller
@@ -32,6 +33,10 @@ export interface UserSettings {
   backgroundPath: string | null
   scrimOpacity: number
   shownTabKeys: string[] | null
+  // NOT NULL in the database, so unlike the three above there is no "no
+  // preference" value inside the row — an absent row is the only way to say
+  // that, and the caller falls back to its own default.
+  notifyOnMemberEvents: boolean
 }
 
 /**
@@ -41,7 +46,7 @@ export interface UserSettings {
 export async function fetchUserSettings(ownerId: string): Promise<UserSettings | null> {
   const { data, error } = await requireSupabase()
     .from('user_settings')
-    .select('background_path, scrim_opacity, shown_tab_keys')
+    .select('background_path, scrim_opacity, shown_tab_keys, notify_on_member_events')
     .eq('user_id', ownerId)
     .abortSignal(timeoutSignal())
     // maybeSingle, not single: zero rows is the expected first-run state, and
@@ -54,25 +59,31 @@ export async function fetchUserSettings(ownerId: string): Promise<UserSettings |
   return {
     backgroundPath: row.background_path,
     scrimOpacity: row.scrim_opacity,
-    shownTabKeys: row.shown_tab_keys
+    shownTabKeys: row.shown_tab_keys,
+    // A row written before this column existed reads back as null through an
+    // older PostgREST cache; treat that like the column default rather than
+    // silently turning notifications off.
+    notifyOnMemberEvents: row.notify_on_member_events ?? true
   }
 }
 
 /**
  * Writes the whole preference set.
  *
- * Always all three columns, never a partial row. The slider's debounced write,
- * a photo upload and a tab-bar save all target this one row, so a partial
- * upsert would let whichever landed last clobber the others' columns with a
- * stale value. The store holds the current value of all three, so sending them
- * together is both correct and cheap.
+ * Always every column, never a partial row. The slider's debounced write, a
+ * photo upload, a tab-bar save and the notification switch all target this one
+ * row, so a partial upsert would let whichever landed last clobber the others'
+ * columns with a stale value. The stores between them hold the current value of
+ * all of them (assembled by user-settings-sync), so sending them together is
+ * both correct and cheap.
  */
 export async function saveUserSettings(settings: UserSettings, ownerId: string): Promise<void> {
   const row: UserSettingsRow = {
     user_id: ownerId,
     background_path: settings.backgroundPath,
     scrim_opacity: settings.scrimOpacity,
-    shown_tab_keys: settings.shownTabKeys
+    shown_tab_keys: settings.shownTabKeys,
+    notify_on_member_events: settings.notifyOnMemberEvents
   }
 
   // No ignoreDuplicates here, unlike notes-service: this table has a real UPDATE

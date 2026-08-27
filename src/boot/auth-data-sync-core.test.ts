@@ -34,6 +34,7 @@ describe('onAuthUserChange', () => {
   let notebookStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
   let v2AppearanceStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
   let v2TabsStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
+  let notificationPrefsStore: { loadFromRemote: Mock<() => Promise<void>>; resetLocal: Mock<() => void> }
   let getCurrentUserId: Mock<() => string | null>
   let getMemberCalendarIds: Mock<() => string[]>
 
@@ -46,6 +47,7 @@ describe('onAuthUserChange', () => {
     notebookStore,
     v2AppearanceStore,
     v2TabsStore,
+    notificationPrefsStore,
     getCurrentUserId,
     getMemberCalendarIds
   })
@@ -59,6 +61,7 @@ describe('onAuthUserChange', () => {
     notebookStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     v2AppearanceStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     v2TabsStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
+    notificationPrefsStore = { loadFromRemote: vi.fn().mockResolvedValue(undefined), resetLocal: vi.fn() }
     getCurrentUserId = vi.fn()
     getMemberCalendarIds = vi.fn().mockReturnValue(['cal-uuid-1'])
   })
@@ -78,6 +81,7 @@ describe('onAuthUserChange', () => {
     expect(notebookStore.loadFromRemote).toHaveBeenCalledTimes(1)
     expect(v2AppearanceStore.loadFromRemote).toHaveBeenCalledTimes(1)
     expect(v2TabsStore.loadFromRemote).toHaveBeenCalledTimes(1)
+    expect(notificationPrefsStore.loadFromRemote).toHaveBeenCalledTimes(1)
   })
 
   it('loads calendars to completion before starting the events load', async () => {
@@ -105,6 +109,7 @@ describe('onAuthUserChange', () => {
     expect(notebookStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(v2AppearanceStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(v2TabsStore.resetLocal).toHaveBeenCalledTimes(1)
+    expect(notificationPrefsStore.resetLocal).toHaveBeenCalledTimes(1)
     expect(ensureDefaultCalendar).not.toHaveBeenCalled()
   })
 
@@ -125,6 +130,7 @@ describe('onAuthUserChange', () => {
     expect(notebookStore.loadFromRemote).not.toHaveBeenCalled()
     expect(v2AppearanceStore.loadFromRemote).not.toHaveBeenCalled()
     expect(v2TabsStore.loadFromRemote).not.toHaveBeenCalled()
+    expect(notificationPrefsStore.loadFromRemote).not.toHaveBeenCalled()
   })
 
   it('does not load any store when the session goes stale (signed out) while ensureDefaultCalendar is pending', async () => {
@@ -159,5 +165,6 @@ describe('onAuthUserChange', () => {
     expect(notebookStore.resetLocal).not.toHaveBeenCalled()
     expect(v2AppearanceStore.resetLocal).not.toHaveBeenCalled()
     expect(v2TabsStore.resetLocal).not.toHaveBeenCalled()
+    expect(notificationPrefsStore.resetLocal).not.toHaveBeenCalled()
   })
 })
