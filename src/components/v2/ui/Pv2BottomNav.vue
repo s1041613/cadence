@@ -129,7 +129,9 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  /* Same token --pv2-nav-h is built from, so the pill and everything clearing it
+     can never disagree about where its top edge is. */
+  bottom: calc(var(--pv2-nav-inset) + env(safe-area-inset-bottom, 0px));
   z-index: 20;
   display: grid;
   /* Column count is bound in the template (it follows v2-tabs-store), not fixed here */

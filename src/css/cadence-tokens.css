@@ -202,19 +202,42 @@
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
   /* ---------- v2 layout ---------- */
-  /* Pv2BottomNav is a floating overlay (position: absolute), not an in-flow row, so this
-     is clearance from the frame's true bottom edge to the top of the floating pill, not
-     the nav's own rendered height:
-       76 = 14 (pill's floating margin off the frame's bottom edge)
-          + 62 (pill's own height: 10 padding-top + 24 icon + 4 gap + ~12 label line
-                + 10 padding-bottom + 2 border)
+  /* Pv2BottomNav is a floating overlay (position: absolute), not an in-flow row, so the
+     clearance below is measured from the frame's true bottom edge to the TOP of the
+     floating pill — not the pill's own rendered height.
+
+     Split into its two parts so the nav and everything that has to clear it read the
+     same numbers instead of restating them:
+
+       --pv2-nav-inset  : the pill's floating margin off the frame's bottom edge.
+                          Pv2BottomNav's own `bottom` is built from this.
+       --pv2-nav-pill-h : the pill's rendered height, measured in Chromium at the
+                          shipped Inter metrics —
+                            10 padding-top
+                          + 55 button (8 padding-top + 24 icon + 4 gap + 11 label line
+                                       + 8 padding-bottom)
+                          + 10 padding-bottom
+                          +  2 border
+                          The button's own 8px/8px padding is the part this used to
+                          miss, which left the token 15px short: the FAB's nominal
+                          16px gap resolved to 1px so it sat flush on the pill, and
+                          every scrolling pane ran 15px under it.
+
      env(...) adds the iOS home-indicator inset on top, since the pill floats above it
      now instead of an in-flow bottom padding absorbing it directly.
-     Each view's FAB and every scrolling pane's bottom padding read this token; changing
-     Pv2BottomNav.vue's own floating-margin/height math means changing this too, or those
-     consumers clear the wrong amount with no error on that side. Independent of the
-     configurable tab count: the count only affects column count (horizontal). */
-  --pv2-nav-h: calc(76px + env(safe-area-inset-bottom, 0px));
+
+     Every view's FAB and every scrolling pane's bottom padding read --pv2-nav-h;
+     changing Pv2BottomNav.vue's box means changing these, or those consumers clear the
+     wrong amount with no error on that side. Pv2BottomNav.clearance.test.ts recomputes
+     the sum from the component's own declarations and fails when the two drift.
+     Independent of the configurable tab count: the count only affects columns
+     (horizontal). */
+  --pv2-nav-inset: 14px;
+  --pv2-nav-pill-h: 77px;
+  --pv2-nav-h: calc(var(--pv2-nav-inset) + var(--pv2-nav-pill-h) + env(safe-area-inset-bottom, 0px));
+
+  /* Breathing room between the FAB's bottom edge and the nav pill's top edge (Pv2Fab). */
+  --pv2-fab-gap: 16px;
 
   /* ---------- Radius ---------- */
   --cd-radius-pill: 999px;

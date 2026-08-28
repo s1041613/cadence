@@ -58,7 +58,7 @@
       />
     </div>
 
-    <Pv2Fab class="nbv__fab" @click="store.openComposer" />
+    <Pv2Fab @click="store.openComposer" />
   </div>
 </template>
 
@@ -231,10 +231,5 @@ function onSwipe(details: SwipeDetails): void {
   font: 500 12px var(--cd-font-mono);
   color: #b2b2b2;
   text-align: center;
-}
-
-/* FAB 浮在底部 nav 之上：離 nav 頂緣 16px，隨 nav 高度自動跟著走（同 Week/Day） */
-.nbv__fab {
-  bottom: calc(var(--pv2-nav-h) + 16px);
 }
 </style>
