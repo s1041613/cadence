@@ -27,7 +27,7 @@
       </div>
     </div>
 
-    <Pv2Fab class="dv2__fab" @click="onCreate" />
+    <Pv2Fab @click="onCreate" />
     <Pv2BottomNav active="draft" />
   </div>
 </template>
@@ -156,10 +156,5 @@ function onCreate(): void {
 
 .dv2__panel::-webkit-scrollbar {
   display: none;
-}
-
-/* FAB 浮在底部 nav 之上：離 nav 頂緣 16px，隨 nav 高度自動跟著走 */
-.dv2__fab {
-  bottom: calc(var(--pv2-nav-h) + 16px);
 }
 </style>

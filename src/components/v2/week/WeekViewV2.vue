@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <Pv2Fab class="wv2__fab" @click="onCreate" />
+    <Pv2Fab @click="onCreate" />
     <Pv2BottomNav active="week" />
   </div>
 </template>
@@ -200,10 +200,5 @@ function onCreate(): void {
 .wv2__days :deep(.pv2-wdr) {
   flex: 1;
   min-height: 0;
-}
-
-/* FAB 浮在底部 nav 之上：離 nav 頂緣 16px，隨 nav 高度自動跟著走 */
-.wv2__fab {
-  bottom: calc(var(--pv2-nav-h) + 16px);
 }
 </style>

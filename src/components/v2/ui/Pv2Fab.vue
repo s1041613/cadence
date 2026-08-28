@@ -17,7 +17,11 @@ const emit = defineEmits<{
 .pv2-fab {
   position: absolute;
   right: 22px;
-  bottom: 22px;
+  /* Floats --pv2-fab-gap above the bottom nav's top edge, and follows it: --pv2-nav-h
+     already carries the pill's height, its floating inset and the home-indicator inset.
+     Lives here rather than in each view — Day, Week and Notebook all carried the same
+     override, so all three had to be found and edited whenever the nav's box moved. */
+  bottom: calc(var(--pv2-nav-h) + var(--pv2-fab-gap));
   z-index: 10;
   width: 64px;
   height: 64px;
