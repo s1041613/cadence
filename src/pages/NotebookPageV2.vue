@@ -2,11 +2,12 @@
   <!--
     v2 notebook page shell. A content page, so it carries the shared wallpaper
     (Pv2PageBackdrop) exactly as Month/Day/Week do — only Settings, the tool page, stays
-    on the bare canvas. No overlays. Desktop centres the 393px phone frame.
+    on the bare canvas. No overlays. Desktop centres the 393px phone frame; phone and
+    tablet run full-bleed.
     The bottom nav sits outside the v-if/v-else so it is present while loading too —
     otherwise the loading state strands the user on a screen with no way out.
   -->
-  <div class="nb2" :class="{ 'nb2--desktop': isDesktop }">
+  <div class="nb2" :class="{ 'nb2--desktop': layout === 'desktop' }">
     <div class="nb2__frame">
       <Pv2PageBackdrop />
 
@@ -49,7 +50,7 @@ import Pv2NoteComposer from '@/components/v2/notebook/Pv2NoteComposer.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 
-const { isDesktop } = useBreakpoint()
+const { layout } = useBreakpoint()
 const store = useNotebookStore()
 const composer = useTemplateRef<InstanceType<typeof Pv2NoteComposer>>('composer')
 </script>
@@ -105,7 +106,10 @@ const composer = useTemplateRef<InstanceType<typeof Pv2NoteComposer>>('composer'
 
 .nb2--desktop .nb2__frame {
   width: 393px;
-  height: 852px;
+  /* min(), not a flat 852px: the page clips its overflow, so on any viewport shorter
+     than 852 + the shell's 52px of padding — a laptop window, a browser with devtools
+     docked — the frame's bottom (and with it the nav pill) was simply cut off. */
+  height: min(852px, 100%);
   flex: none;
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);

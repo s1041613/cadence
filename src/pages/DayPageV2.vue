@@ -1,9 +1,9 @@
 <template>
   <!--
     v2 日檢視頁殼。結構同 WeekPageV2：共用桌布層（Pv2PageBackdrop）、
-    data-poster-root（overlay 定位）、桌面手機 frame 置中。
+    data-poster-root（overlay 定位）、桌面手機 frame 置中；手機與平板滿版。
   -->
-  <div class="dp2" :class="{ 'dp2--desktop': isDesktop }">
+  <div class="dp2" :class="{ 'dp2--desktop': layout === 'desktop' }">
     <div class="dp2__frame" data-poster-root>
       <Pv2PageBackdrop />
 
@@ -31,7 +31,7 @@ import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
-const { isDesktop } = useBreakpoint()
+const { layout } = useBreakpoint()
 
 onBeforeUnmount(() => {
   ui.qaPop = null
@@ -76,7 +76,10 @@ onBeforeUnmount(() => {
 
 .dp2--desktop .dp2__frame {
   width: 393px;
-  height: 852px;
+  /* min(), not a flat 852px: the page clips its overflow, so on any viewport shorter
+     than 852 + the shell's 52px of padding — a laptop window, a browser with devtools
+     docked — the frame's bottom (and with it the nav pill) was simply cut off. */
+  height: min(852px, 100%);
   flex: none;
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
