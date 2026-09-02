@@ -1,5 +1,5 @@
 <template>
-  <CdPopover v-if="ui.qaPop && isDesktop" :anchor="ui.qaPop.anchor" :width="388" :approx-height="520" caret @scrim-click="close">
+  <CdPopover v-if="ui.qaPop && usesPopover" :anchor="ui.qaPop.anchor" :width="388" :approx-height="520" caret @scrim-click="close">
     <component
       :is="editCardComponent"
       is-new
@@ -124,7 +124,7 @@ const ui = useUiStore()
 const tasksStore = useTasksStore()
 const calendarsStore = useCalendarsStore()
 const settings = useSettingsStore()
-const { isDesktop } = useBreakpoint()
+const { isDesktop, layout } = useBreakpoint()
 
 const props = withDefaults(
   defineProps<{
@@ -159,6 +159,15 @@ const REPEAT_CYCLE: RepeatMode[] = ['none', 'daily', 'weekly', 'monthly']
 const calendarOptions = computed(() =>
   [...calendarsStore.calendars].sort((a, b) => a.order - b.order).map((c) => ({ id: c.id, name: c.name }))
 )
+
+// Which of the two branches below renders. v2's tablet band sits inside the desktop media
+// query but draws the phone's full-bleed shell, so on a tablet this stays a sheet — otherwise
+// rotating an iPad from portrait to landscape would swap the card between a sheet and an
+// anchored popover. Legacy has no tablet band and keeps the plain desktop split.
+const usesPopover = computed(() =>
+  props.variant === 'v2' ? layout.value === 'desktop' : isDesktop.value
+)
+
 // One template drives both cards, so the icon prop/handlers stay even though the v2 card no
 // longer declares them (its STYLE field picks a colour only): v1 still has a full icon
 // picker, and on v2 they simply fall through as unused attrs. The `v: IconName` annotation

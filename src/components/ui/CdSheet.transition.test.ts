@@ -149,18 +149,27 @@ describe('CdSheet · the legacy/v2 gate on shared files', () => {
     expect(gate, 'omit the keys instead of passing undefined').not.toMatch(/undefined/)
   })
 
-  it('withholds the attrs on desktop too, where the child is a drawer', () => {
-    // EventComposerOverlay's CdDrawerOrSheet renders a CdDrawer above the
-    // breakpoint, and .cd-sheet-* never matches a drawer root — so the CSS half
-    // is inert there either way. The JS half is not: Vue's whenTransitionEnds
-    // takes `if (explicitTimeout != null) return setTimeout(...)` before it ever
+  it('withholds the attrs on the drawer branch too', () => {
+    // EventComposerOverlay's CdDrawerOrSheet renders a CdDrawer on the desktop
+    // branch, and .cd-sheet-* never matches a drawer root — so the CSS half is
+    // inert there either way. The JS half is not: Vue's whenTransitionEnds takes
+    // `if (explicitTimeout != null) return setTimeout(...)` before it ever
     // inspects computed styles, so a duration passed on the drawer branch would
     // hold the drawer mounted for 300ms with nothing animating. With no attrs
     // at all it reaches `if (!type) return resolve()` and unmounts in the same
     // tick, exactly as before this change.
+    //
+    // The gate reads `usesDrawer`, the same computed the template's `v-if` and
+    // `:presentation` branch on, rather than restating the breakpoint: v2 renders
+    // a sheet on a tablet even though the tablet band sits above --cd-bp-desktop,
+    // so a second copy of that condition here could disagree with the child that
+    // actually mounted.
     const src = consumers.get('EventComposerOverlay') as string
     const gate = src.match(/const sheetTransitionAttrs = computed\([\s\S]*?\n\)/)?.[0] ?? ''
-    expect(gate, 'the composer must also gate on !isDesktop').toMatch(/!isDesktop\.value/)
+    expect(gate, 'the composer must also gate on !usesDrawer').toMatch(/!usesDrawer\.value/)
+    expect(src, 'usesDrawer is what the template branches on').toMatch(
+      /:presentation="usesDrawer \? 'drawer' : 'sheet'"/
+    )
   })
 
   it('leaves the legacy mounts on the default variant', () => {

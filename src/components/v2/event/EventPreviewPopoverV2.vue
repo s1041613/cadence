@@ -1,5 +1,5 @@
 <template>
-  <CdPopover v-if="ui.eventPreview && task && isDesktop" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="previewApproxHeight" caret @scrim-click="close">
+  <CdPopover v-if="ui.eventPreview && task && layout === 'desktop'" :anchor="ui.eventPreview.anchor" :width="popWidth" :approx-height="previewApproxHeight" caret @scrim-click="close">
     <Pv2CopyToDaysCard
       v-if="copyMode"
       :month-label="copyMonthLabel"
@@ -191,7 +191,10 @@ const tasksStore = useTasksStore()
 const auth = useAuthStore()
 const settings = useSettingsStore()
 const calendarsStore = useCalendarsStore()
-const { isDesktop } = useBreakpoint()
+// 'desktop', not !isDesktop: the tablet band sits inside the desktop query but renders the
+// phone's full-bleed shell, so its overlays stay sheets — otherwise rotating an iPad from
+// portrait to landscape would swap this card between a sheet and an anchored popover.
+const { layout } = useBreakpoint()
 
 const task = computed<Task | null>(() => {
   const id = ui.eventPreview?.taskId

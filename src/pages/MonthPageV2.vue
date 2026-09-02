@@ -3,9 +3,11 @@
     v2 月曆頁殼。重用既有 store 驅動的 overlay（quick-add / event-preview / focus），
     外觀之後再換皮；月曆主畫面 MonthViewV2 照設計稿。
     - data-poster-root：anchorFromEvent / CdPopover 的 clamp 根，overlay 定位需要它。
-    - 桌面寬度把 393px 手機 frame 置中（像設計稿的 device frame）；手機寬度滿版。
+    - 桌面寬度把 393px 手機 frame 置中（像設計稿的 device frame）；手機與平板滿版。
+      平板要滿版而不是拿那個 frame：那是給桌面瀏覽器看設計稿用的，橫式 iPad 套上去只會
+      拿到一張比玻璃還高、底部連 nav 一起被切掉的手機卡（見 use-breakpoint.ts）。
   -->
-  <div class="mp2" :class="{ 'mp2--desktop': isDesktop }">
+  <div class="mp2" :class="{ 'mp2--desktop': layout === 'desktop' }">
     <div id="mp2-root" class="mp2__frame" data-poster-root>
       <!-- 共用桌布層：內容頁一律掛這個，Settings 不掛。設定在 Customization。 -->
       <Pv2PageBackdrop />
@@ -37,7 +39,7 @@ import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
-const { isDesktop } = useBreakpoint()
+const { layout } = useBreakpoint()
 
 // 離開 v2 頁時清掉這頁開過的 global overlay state，避免殘留污染舊版 `/`（反之亦然）。
 onBeforeUnmount(() => {
@@ -90,7 +92,10 @@ onBeforeUnmount(() => {
 
 .mp2--desktop .mp2__frame {
   width: 393px;
-  height: 852px;
+  /* min(), not a flat 852px: the page clips its overflow, so on any viewport shorter
+     than 852 + the shell's 52px of padding — a laptop window, a browser with devtools
+     docked — the frame's bottom (and with it the nav pill) was simply cut off. */
+  height: min(852px, 100%);
   flex: none;
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);

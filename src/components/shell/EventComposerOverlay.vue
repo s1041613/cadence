@@ -1,5 +1,5 @@
 <template>
-  <div v-if="draft && fromCreate && isDesktop" class="task-editor-dock-root">
+  <div v-if="draft && fromCreate && usesDrawer" class="task-editor-dock-root">
     <div class="task-editor-dock-root__panel">
       <component
         :is="editCardComponent"
@@ -49,14 +49,14 @@
   </div>
   <!-- This file renders for BOTH routes — legacy mounts it bare, v2 passes variant="v2" — so
        the sheet transition is gated on `variant` and legacy keeps CdSheet's original keyframe.
-       It is additionally gated on !isDesktop: the desktop branch renders a CdDrawer, whose root
+       It is additionally gated on !usesDrawer: the drawer branch renders a CdDrawer, whose root
        the cd-sheet classes don't match, but :duration is a JS timer that would still hold a
        leaving drawer mounted for 300ms. Both bindings must be gated for the same reason.
        The condition sits on <Transition> because CdDrawerOrSheet is the v-else-if half of a
        pair whose v-if is the desktop dock above; a wrapper between them severs that chain. -->
   <Transition v-else-if="draft" v-bind="sheetTransitionAttrs">
     <CdDrawerOrSheet
-      :presentation="isDesktop ? 'drawer' : 'sheet'"
+      :presentation="usesDrawer ? 'drawer' : 'sheet'"
       :width="editorWidth"
       scrim-color="var(--cd-scrim)"
       :raised="!!ui.draftConv"
@@ -137,7 +137,7 @@ const tasksStore = useTasksStore()
 const calendarsStore = useCalendarsStore()
 const inboxStore = useInboxStore()
 const settings = useSettingsStore()
-const { isDesktop } = useBreakpoint()
+const { isDesktop, layout } = useBreakpoint()
 
 const props = withDefaults(
   defineProps<{
@@ -173,17 +173,26 @@ const editQuad = computed(() => (draft.value ? quadrantOf(draft.value).key : 'la
 // icon picker, and on v2 they simply fall through as unused attrs. The `v: IconName`
 // annotation is needed because the union of the two cards no longer types the payload.
 const isV2 = computed(() => props.variant === 'v2')
+
+// Which of the two branches below mounts: the desktop dock / drawer, or the sheet. v2's tablet
+// band sits inside the desktop media query but draws the phone's full-bleed shell, so on a
+// tablet the composer stays a sheet — otherwise rotating an iPad from portrait to landscape
+// would swap it between a sheet and a side drawer. Legacy has no tablet band and keeps the
+// plain desktop split.
+const usesDrawer = computed(() => (isV2.value ? layout.value === 'desktop' : isDesktop.value))
 const editCardComponent = computed(() => (isV2.value ? Pv2EventEditCard : CdEventEditCard))
 
-// Sheet open/close transition, v2 phone only — legacy keeps CdSheet's original enter-only
-// keyframe, and the desktop branch renders a CdDrawer whose root the cd-sheet classes don't
-// match. Both attributes have to be withheld together: an empty `name` matches no CSS, but
-// `duration` is a JS timer independent of it, so passing one alone would hold a leaving drawer
-// or legacy sheet mounted for 300ms. `exactOptionalPropertyTypes` rejects passing
-// `duration: undefined`, so this omits the keys entirely — same workaround as CdDrawerOrSheet's
-// scrimColorAttr. 300 tracks --cd-duration-sheet (.3s); the transition classes live in CdSheet.
+// Sheet open/close transition, v2 sheet branches only — legacy keeps CdSheet's original
+// enter-only keyframe, and the drawer branch renders a CdDrawer whose root the cd-sheet
+// classes don't match. Both attributes have to be withheld together: an empty `name` matches
+// no CSS, but `duration` is a JS timer independent of it, so passing one alone would hold a
+// leaving drawer or legacy sheet mounted for 300ms. `exactOptionalPropertyTypes` rejects
+// passing `duration: undefined`, so this omits the keys entirely — same workaround as
+// CdDrawerOrSheet's scrimColorAttr. 300 tracks --cd-duration-sheet (.3s); the transition
+// classes live in CdSheet. It reads the same `usesDrawer` the template branches on, so the
+// two cannot disagree about which child is mounted.
 const sheetTransitionAttrs = computed(() =>
-  props.variant === 'v2' && !isDesktop.value ? { name: 'cd-sheet', duration: 300 } : {}
+  props.variant === 'v2' && !usesDrawer.value ? { name: 'cd-sheet', duration: 300 } : {}
 )
 
 // All member calendars (own and shared) as picker options, in display order. The picker only

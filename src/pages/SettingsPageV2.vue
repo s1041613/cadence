@@ -1,10 +1,11 @@
 <template>
   <!--
-    v2 settings shell. On desktop the 393px phone frame is centred (as in MonthPageV2).
+    v2 settings shell. On desktop the 393px phone frame is centred (as in MonthPageV2);
+    phone and tablet run full-bleed.
     Panes: root menu + Customization / Notifications, with Tab bar nested under
     Customization. Switching is local state; the bottom nav is the shared component.
   -->
-  <div class="sp2" :class="{ 'sp2--desktop': isDesktop }">
+  <div class="sp2" :class="{ 'sp2--desktop': layout === 'desktop' }">
     <div class="sp2__frame">
       <div class="sp2__content">
         <Pv2SettingsRoot v-if="pane === 'root'" @open="pane = $event" />
@@ -31,7 +32,7 @@ import Pv2SettingsCustomization from '@/components/v2/settings/Pv2SettingsCustom
 import Pv2SettingsTabBar from '@/components/v2/settings/Pv2SettingsTabBar.vue'
 import Pv2SettingsNotifications from '@/components/v2/settings/Pv2SettingsNotifications.vue'
 
-const { isDesktop } = useBreakpoint()
+const { layout } = useBreakpoint()
 
 // root, customization, tabs, notifications; the remaining sub-pages are unimplemented
 const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
@@ -77,7 +78,10 @@ const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
 
 .sp2--desktop .sp2__frame {
   width: 393px;
-  height: 852px;
+  /* min(), not a flat 852px: the page clips its overflow, so on any viewport shorter
+     than 852 + the shell's 52px of padding — a laptop window, a browser with devtools
+     docked — the frame's bottom (and with it the nav pill) was simply cut off. */
+  height: min(852px, 100%);
   flex: none;
   border-radius: 44px;
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
