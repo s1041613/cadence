@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    // 腳本是用 node --experimental-strip-types 直接跑的，
+    // 所以只准寫「拿掉型別就等於合法 JS」的語法（不能用 enum / namespace / 參數屬性）
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src/**/*.ts"]
+}

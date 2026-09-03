@@ -1,0 +1,17 @@
+{
+  "name": "notion-discord-notifier",
+  "version": "1.0.0",
+  "private": true,
+  "description": "把「雷包糾察隊」Notion 資料庫的新增紀錄推到 Discord 頻道",
+  "type": "module",
+  "scripts": {
+    "notify": "node --experimental-strip-types src/notify.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
