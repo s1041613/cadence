@@ -1,0 +1,60 @@
+name: Notion → Discord 通知
+
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: '從這個時間之後重查（ISO 8601，例如 2026-09-01T00:00:00Z）。留空就沿用 state 檔。'
+        required: false
+        type: string
+      dry_run:
+        description: '只印出會通知什麼，不真的送 Discord、不寫 state'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # 每 10 分鐘。GitHub 的排程本來就會延遲，腳本用 state 檔比對時間，延遲不會漏資料。
+    - cron: '*/10 * * * *'
+
+permissions:
+  contents: write
+
+# state 檔是共用狀態，同時間只准跑一個
+concurrency:
+  group: notion-discord-notifier
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 查 Notion 並通知 Discord
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATA_SOURCE_ID: ${{ secrets.NOTION_DATA_SOURCE_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          SINCE: ${{ inputs.since }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: node --experimental-strip-types src/notify.ts
+
+      # always()：就算上一步中途失敗，已經成功送出的部分也寫進 state 了，一定要存回去，
+      # 否則下次執行會把那幾筆重複通知一次。
+      - name: 把 state 存回 repo
+        if: always()
+        run: |
+          if [ -z "$(git status --porcelain -- state/)" ]; then
+            echo "state 沒有變動，不用 commit"
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add state/
+          git commit -m 'chore: 更新通知 state'
+          git pull --rebase --autostash origin "${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"
