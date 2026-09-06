@@ -2,7 +2,7 @@
 // Every metric below is lifted from the app's own source, not from the screenshot:
 //   CELL (src/utils/month-lanes.ts), Pv2Cell/Pv2EventChip/Pv2Grid/Pv2WeekRow,
 //   Pv2Poster/Pv2CalStrip/Pv2Chip/Pv2WeekdayHeader/Pv2BottomNav, cadence-tokens.css.
-import { writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 
 const CELL = { padTop: 4, padBottom: 5, headGap: 3, headH: 20, chipH: 15, chipGap: 2 }
 
@@ -240,3 +240,63 @@ out('Step2.dc.html', artboard({ lanes: FIX_LANES, rowHeight: FIX_ROW, filled: fa
 out('Main.dc.html', artboard({ lanes: FIX_LANES, rowHeight: FIX_ROW, filled: true, chrome: 'white-slots' }))
 
 console.log(JSON.stringify({ GRID_H, NOW_ROW, NOW_LANES, FIX_ROW, FIX_LANES, gridNow: NOW_ROW * 5, gridFix: FIX_ROW * 5, saved: (NOW_ROW - FIX_ROW) * 5 }, null, 1))
+
+// ── 標題字體對照 ────────────────────────────────────────────────────────────
+// Header-only specimens so the月份標題 can be judged against the current Inter italic
+// without four full months competing for attention.
+const SPEC_H = 330
+
+const FONTS = JSON.parse(readFileSync(new URL('fonts.json', import.meta.url), 'utf8'))
+
+function specimen({ family, weight, style, face, note }) {
+  // The candidate face is inlined (fonts.json), not linked: a linked Google Font falls back
+  // to Inter in a PNG/PDF export, which would make every specimen look identical.
+  const link = `  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;1,400&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+  <style>${face ? FONTS[face] : ''}</style>`
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"><\/script>
+</head>
+<body>
+<x-dc>
+<helmet>
+${link}
+  <style>
+    body { margin: 0; }
+    a { color: #56585E; } a:hover { color: #1b1b1b; }
+  </style>
+</helmet>
+<div style="position:relative;width:${FRAME_W}px;height:${SPEC_H}px;overflow:hidden;background:#fafaf9;font-family:'Inter','Noto Sans TC',sans-serif">
+  <div style="display:flex;flex-direction:column;height:100%;box-sizing:border-box;padding:20px ${BODY_PAD_X}px 0">
+    <div style="font:600 9px 'Inter',sans-serif;letter-spacing:0.16em;color:#a5a49f">${note}</div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:14px 0 0">
+      <span style="font:${style} ${weight} 48px/0.9 ${family};color:#1b1b1b">September</span>
+      <span style="margin-top:8px;font:600 12px 'Inter',sans-serif;letter-spacing:0.16em;color:#1b1b1b">2026</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:18px;padding-bottom:6px;overflow:hidden">
+      <span style="flex:none;display:inline-flex;align-items:center;padding:6px 11px;border-radius:999px;border:1px solid #1b1b1b;background:#1b1b1b;font:600 10px/1 'Inter','Noto Sans TC',sans-serif;letter-spacing:0.03em;color:#fafaf9">#河賴瑞斯 Mo</span>
+      <span style="flex:none;display:inline-flex;align-items:center;padding:6px 11px;border-radius:999px;border:1px solid #1b1b1b;background:#1b1b1b;font:600 10px/1 'Inter','Noto Sans TC',sans-serif;letter-spacing:0.03em;color:#fafaf9">#Bu</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));margin-top:10px;padding-bottom:6px">
+${['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].map((w) => `      <span style="text-align:center;font:600 9px 'Inter',sans-serif;letter-spacing:0.03em;color:#6e6e6e">${w}</span>`).join('\n')}
+    </div>
+    <div style="border-top:1px solid #e2e2e2;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));height:${FIX_ROW}px">
+${WEEKS[0].map((c) => dayCell(c, FIX_LANES, true, true)).join('\n')}
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":${FRAME_W},"height":${SPEC_H}}}'>
+class Component extends DCLogic {}
+<\/script>
+</body>
+</html>
+`
+}
+
+out('TypeInter.dc.html', specimen({ family: "'Inter',sans-serif", weight: 400, style: 'italic', face: null, note: '現況 — INTER ITALIC 400' }))
+out('TypeFredoka.dc.html', specimen({ family: "'Fredoka','Inter',sans-serif", weight: 600, style: 'normal', face: 'Fredoka', note: 'A — FREDOKA 600' }))
+out('TypeBaloo.dc.html', specimen({ family: "'Baloo 2','Inter',sans-serif", weight: 800, style: 'normal', face: 'Baloo 2', note: 'B — BALOO 2 800' }))
+out('TypeNunito.dc.html', specimen({ family: "'Nunito','Inter',sans-serif", weight: 900, style: 'normal', face: 'Nunito', note: 'C — NUNITO 900' }))
