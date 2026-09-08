@@ -361,10 +361,14 @@ onBeforeUnmount(() => {
 }
 
 /* ==========================================================================
- * v2 variant — the neutral ink-on-paper palette the v2 surfaces are built on
- * (Pv2EventEditCard, Pv2CopyToDaysCard, Pv2TitleSuggestions all declare this
- * same family locally). Only colour and the surface's corner/shadow change;
- * the grid geometry is shared, so the two variants stay the same calendar.
+ * v2 variant — the rose ink-on-paper ramp the v2 surfaces are built on
+ * (--pv2-*, declared on :root in cadence-tokens.css). Only colour and the
+ * surface's corner/shadow change; the grid geometry is shared, so the two
+ * variants stay the same calendar.
+ *
+ * The --dp-* names are kept as the seam: this picker also has a legacy variant
+ * on the cd-* palette, and mapping the ramp onto them once here is what lets
+ * every rule below serve both.
  *
  * These rules live here rather than in the host card because the popover is
  * teleported to <body>: a scoped :deep selector on the card compiles to a
@@ -373,12 +377,12 @@ onBeforeUnmount(() => {
  * the trigger — the selected day kept painting in --cd-accent-mid.
  * ========================================================================== */
 .cd-date-picker__popover--v2 {
-  --dp-ink: #1b1b1b;
-  --dp-ink-2: #6e6e6e;
-  --dp-ink-3: #cdcdcd;
-  --dp-line: #e2e2e2;
-  --dp-fill-hover: #ececea;
-  --dp-paper: #fafaf9;
+  --dp-ink: var(--pv2-ink);
+  --dp-ink-2: var(--pv2-ink-2);
+  --dp-ink-3: var(--pv2-line);
+  --dp-line: var(--pv2-line-soft);
+  --dp-fill-hover: var(--pv2-fill-hover);
+  --dp-paper: var(--pv2-canvas);
 
   /* Matches Pv2TitleSuggestions, the other teleported panel this card opens, so the
      two floating surfaces read as one generation. */
@@ -426,10 +430,9 @@ onBeforeUnmount(() => {
   box-shadow: inset 0 0 0 1.5px var(--dp-ink);
 }
 
-/* Dark disc, paper type — the v2 selection mark, identical to Pv2CopyToDaysCard's
-   selected day and Pv2Cell's today pill. */
+/* Accent disc, white type — the v2 selection mark, the same pill Pv2Cell gives today. */
 .cd-date-picker__popover--v2 .cd-date-picker__cell--selected {
-  background: var(--dp-ink);
-  color: var(--dp-paper);
+  background: var(--pv2-accent);
+  color: var(--pv2-on-accent);
 }
 </style>

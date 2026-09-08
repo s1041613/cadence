@@ -52,7 +52,7 @@ describe('Pv2MonthSheet · backdrop carried by the pseudo-element', () => {
 
   it('paints the backdrop on ::before at the day sheet value', () => {
     // Same value as Pv2DaySheet so the two sheets read as one system.
-    expect(decl(sheet, '.pv2-sheet-scrim::before', 'background')).toBe('rgba(27, 27, 27, 0.32)')
+    expect(decl(sheet, '.pv2-sheet-scrim::before', 'background')).toBe('rgba(var(--pv2-ink-rgb), 0.32)')
   })
 })
 

@@ -217,7 +217,7 @@ function hourLabel(h: number): string {
 // --cd-surface-raised the legacy grid uses.
 function tint(hex: string): string {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
-  if (!m) return 'rgba(27, 27, 27, 0.08)'
+  if (!m) return 'rgba(var(--pv2-ink-rgb), 0.08)'
   const n = parseInt(m[1]!, 16)
   const r = (n >> 16) & 255
   const g = (n >> 8) & 255
@@ -248,7 +248,7 @@ function tint(hex: string): string {
   width: 58px;
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.12em;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-grid__allday-items {
@@ -267,7 +267,7 @@ function tint(hex: string): string {
   border-left: 3px solid;
   border-radius: 10px;
   font: 600 14px var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   cursor: pointer;
 }
 
@@ -276,7 +276,7 @@ function tint(hex: string): string {
 .pv2-grid__rule {
   flex: none;
   height: 1px;
-  background: rgba(27, 27, 27, 0.16);
+  background: rgba(var(--pv2-ink-rgb), 0.16);
   margin: 12px 0 0;
 }
 
@@ -311,7 +311,7 @@ function tint(hex: string): string {
   font: 500 12px/14px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.02em;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-grid__hour-label--now {
@@ -326,7 +326,7 @@ function tint(hex: string): string {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 1px solid rgba(27, 27, 27, 0.07);
+  border-top: 1px solid rgba(var(--pv2-ink-rgb), 0.07);
 }
 
 .pv2-grid__now-line {

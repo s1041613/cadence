@@ -50,7 +50,7 @@ const emit = defineEmits<{
 .pv2-hn__seg--today {
   gap: 5px;
   padding: 0 11px;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   /* UI face, not the display face the bottom nav uses: this pill belongs to the week
      and day headers, which are set in the UI face throughout. Weight goes back to 500
      — the display face only ships 400, this one has a real 500. */
@@ -68,6 +68,6 @@ const emit = defineEmits<{
 }
 
 .pv2-hn__seg:active {
-  background: #f0efec;
+  background: var(--pv2-fill);
 }
 </style>

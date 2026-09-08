@@ -91,13 +91,15 @@ function onKeydown(e: KeyboardEvent): void {
 
 <style scoped>
 .pv2-color-list {
-  /* Falls back to the v2 card palette when this list is used outside a host that defines
-     the locals, so it never renders unstyled on a bare surface. */
-  --pv2-cl-ink: var(--pv2-ink, #1b1b1b);
-  --pv2-cl-ink-3: var(--pv2-ink-3, #b2b2b2);
-  --pv2-cl-line: var(--pv2-line, #e2e2e2);
-  --pv2-cl-fill: var(--pv2-fill, #f3f3f1);
-  --pv2-cl-fill-hover: var(--pv2-fill-hover, #ececea);
+  /* Aliases of the v2 ramp. The fallbacks these carried are gone: the ramp is defined on
+     :root now (cadence-tokens.css), so every one of them is always resolvable, and a host
+     that wants this list softer — Pv2EventEditCard does — still gets its way by overriding
+     the ramp name on itself. */
+  --pv2-cl-ink: var(--pv2-ink);
+  --pv2-cl-ink-3: var(--pv2-ink-3);
+  --pv2-cl-line: var(--pv2-line);
+  --pv2-cl-fill: var(--pv2-fill);
+  --pv2-cl-fill-hover: var(--pv2-fill-hover);
 
   display: flex;
   flex-direction: column;

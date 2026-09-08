@@ -19,7 +19,7 @@
           height="15"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#c4c4c4"
+          stroke="var(--pv2-line-strong)"
           stroke-width="1.8"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -34,7 +34,7 @@
           height="15"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#c4c4c4"
+          stroke="var(--pv2-line-strong)"
           stroke-width="1.8"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -49,7 +49,7 @@
           height="15"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#c4c4c4"
+          stroke="var(--pv2-line-strong)"
           stroke-width="1.8"
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -146,7 +146,7 @@ function commit(): void {
 .nbk {
   padding: 16px 18px;
   margin-bottom: 14px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   /*
     Dotted paper. This used to be the notebook PAGE's background; it now belongs to the
@@ -154,11 +154,11 @@ function commit(): void {
     the whole tab being made of a different material than every other tab.
     The dots ride on background-image above the white background-color, so they clip to
     the card's radius for free. Lighter than the old page-level #c7c7c2: that value was
-    tuned against the #fafaf9 canvas, and the same ink on white reads much heavier.
+    tuned against the var(--pv2-canvas) canvas, and the same ink on white reads much heavier.
     Grid geometry (20px pitch, 14px offset) is carried over unchanged.
   */
   background-color: #fff;
-  background-image: radial-gradient(#e6e6e3 1.1px, transparent 1.1px);
+  background-image: radial-gradient(var(--pv2-fill-hover) 1.1px, transparent 1.1px);
   background-size: 20px 20px;
   background-position: 14px 14px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -174,7 +174,7 @@ function commit(): void {
 .nbk__when {
   flex: 1;
   font: 500 10px var(--cd-font-mono);
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
 }
 
 .nbk__copy,
@@ -193,7 +193,7 @@ function commit(): void {
   margin: 0;
   font: 400 15px var(--cd-font-mono);
   line-height: 1.4;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   /* Not in the mock, but real data hits both: without pre-wrap multi-line text collapses to
      one line, and without overflow-wrap a long URL bursts the card's bounds. */
   white-space: pre-wrap;

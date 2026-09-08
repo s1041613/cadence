@@ -7,10 +7,10 @@
       </div>
       <div v-if="mine" class="pv2-preview-card__actions">
         <CdIconButton :size="30" ariaLabel="Copy" @click="emit('copy')">
-          <CdIcon name="copy" :size="15" color="#1b1b1b" />
+          <CdIcon name="copy" :size="15" color="var(--pv2-ink)" />
         </CdIconButton>
         <CdIconButton :size="30" ariaLabel="Edit" @click="emit('edit')">
-          <CdIcon name="pencil" :size="15" color="#1b1b1b" />
+          <CdIcon name="pencil" :size="15" color="var(--pv2-ink)" />
         </CdIconButton>
         <CdIconButton :size="30" danger ariaLabel="Delete" @click="emit('delete')">
           <CdIcon name="trash" :size="15" color="#9f3e36" />
@@ -102,7 +102,7 @@
               :aria-label="`Delete ${subtask.title}`"
               @click="emit('deleteSubtask', subtask.id)"
             >
-              <CdIcon name="close" :size="12" color="#b2b2b2" />
+              <CdIcon name="close" :size="12" color="var(--pv2-ink-4)" />
             </button>
           </li>
         </ul>
@@ -241,11 +241,11 @@ function cancelEdit(): void {
 <style scoped>
 .pv2-preview-card {
   width: 370px;
-  background: #fafaf9;
-  border: 1px solid #e2e2e2;
+  background: var(--pv2-canvas);
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 8px;
   padding: 18px;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 @media (max-width: 899px) {
@@ -292,20 +292,20 @@ function cancelEdit(): void {
 
 .pv2-preview-card__title-block {
   padding: 19px 0 17px;
-  border-bottom: 1.5px solid #1b1b1b;
+  border-bottom: 1.5px solid var(--pv2-ink);
 }
 
 .pv2-preview-card__title {
   margin: 0;
   overflow-wrap: anywhere;
   font: 500 30px/1.04 var(--cd-font-serif);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-preview-card__when {
   margin: 8px 0 0;
   font: 700 12px var(--cd-font-mono);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 .pv2-preview-card__rows {
@@ -319,7 +319,7 @@ function cancelEdit(): void {
   align-items: center;
   gap: 10px;
   min-height: 48px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-preview-card__row--notes {
@@ -329,18 +329,18 @@ function cancelEdit(): void {
 
 .pv2-preview-card__row-label {
   font: 800 10px var(--cd-font-mono);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 .pv2-preview-card__row-value {
   min-width: 0;
   overflow-wrap: anywhere;
   font: 600 14px/1.35 var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-preview-card__row-value--placeholder {
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   font-style: italic;
   font-weight: 500;
 }
@@ -348,7 +348,7 @@ function cancelEdit(): void {
 .pv2-preview-card__chevron,
 .pv2-preview-card__meta {
   font: 800 13px var(--cd-font-mono);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 /* The subtask block sits inside the same rows stack, so it inherits the 1px rules and the
@@ -362,7 +362,7 @@ function cancelEdit(): void {
   min-height: 48px;
   padding: 0;
   border: 0;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -376,12 +376,12 @@ function cancelEdit(): void {
   align-items: center;
   gap: 6px;
   font: 800 10px var(--cd-font-mono);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   transition: color 0.12s;
 }
 
 .pv2-subtasks__head:hover .pv2-subtasks__label {
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 /* Rotates rather than swapping glyphs, so the control reads as one object in two states. */
@@ -389,7 +389,7 @@ function cancelEdit(): void {
   display: inline-block;
   font-size: 9px;
   line-height: 1;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   transform: rotate(90deg);
   transition: transform 0.18s ease;
 }
@@ -401,7 +401,7 @@ function cancelEdit(): void {
 .pv2-subtasks__count {
   grid-column: 3;
   font: 800 13px var(--cd-font-mono);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 /* Caps the card's height so the popover's positioning stays predictable and the focus
@@ -422,14 +422,14 @@ function cancelEdit(): void {
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-subtasks__check {
   width: 20px;
   height: 20px;
   flex: none;
-  border: 1.5px solid #b2b2b2;
+  border: 1.5px solid var(--pv2-ink-4);
   border-radius: 5px;
   background: transparent;
   cursor: pointer;
@@ -439,12 +439,12 @@ function cancelEdit(): void {
 }
 
 .pv2-subtasks__check:hover {
-  border-color: #1b1b1b;
+  border-color: var(--pv2-ink);
 }
 
 .pv2-subtasks__check[data-on='true'] {
-  background: #1b1b1b;
-  border-color: #1b1b1b;
+  background: var(--pv2-ink);
+  border-color: var(--pv2-ink);
 }
 
 .pv2-subtasks__check:disabled {
@@ -459,13 +459,13 @@ function cancelEdit(): void {
   padding: 0;
   text-align: left;
   font: 600 14px/1.35 var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   cursor: text;
 }
 
 /* Struck text is not editable text: checked greys the title and stops it responding. */
 .pv2-subtasks__row[data-done='true'] .pv2-subtasks__name {
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   text-decoration: line-through;
   font-weight: 500;
   cursor: default;
@@ -475,11 +475,11 @@ function cancelEdit(): void {
 .pv2-subtasks__edit {
   min-width: 0;
   border: 0;
-  border-bottom: 1.5px solid #1b1b1b;
+  border-bottom: 1.5px solid var(--pv2-ink);
   background: transparent;
   padding: 0;
   font: 600 14px/1.35 var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   outline: none;
 }
 
@@ -504,7 +504,7 @@ function cancelEdit(): void {
 }
 
 .pv2-subtasks__del:hover {
-  background: #f0e7e6;
+  background: var(--pv2-fill-hover);
 }
 
 .pv2-subtasks__add {
@@ -513,16 +513,16 @@ function cancelEdit(): void {
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 /* Dashed until there is something to submit, so it reads as "not yet a row". */
 .pv2-subtasks__plus {
   width: 20px;
   height: 20px;
-  border: 1.5px dashed #b2b2b2;
+  border: 1.5px dashed var(--pv2-ink-4);
   border-radius: 5px;
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   display: grid;
   place-items: center;
   font: 700 13px/1 var(--cd-font-ui);
@@ -530,8 +530,8 @@ function cancelEdit(): void {
 
 .pv2-subtasks__plus[data-armed='true'] {
   border-style: solid;
-  border-color: #1b1b1b;
-  color: #1b1b1b;
+  border-color: var(--pv2-ink);
+  color: var(--pv2-ink);
 }
 
 .pv2-subtasks__add-input {
@@ -541,19 +541,19 @@ function cancelEdit(): void {
   padding: 0;
   outline: none;
   font: 600 14px var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-subtasks__add-input::placeholder {
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   font-weight: 500;
   font-style: italic;
 }
 
 .pv2-subtasks__ent {
   font: 800 10px var(--cd-font-mono);
-  color: #6e6e6e;
-  border: 1px solid #e2e2e2;
+  color: var(--pv2-ink-2);
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 4px;
   padding: 3px 6px;
   opacity: 0;
@@ -572,7 +572,7 @@ function cancelEdit(): void {
   margin-top: 18px;
   border: none;
   border-radius: 6px;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   color: #fff;
   cursor: pointer;
   font: 800 13px var(--cd-font-ui);

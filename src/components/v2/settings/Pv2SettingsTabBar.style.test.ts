@@ -30,7 +30,7 @@ describe('Pv2SettingsTabBar · spec values', () => {
   })
 
   it('sets the hint line in the mono face the spec calls for', () => {
-    // Spec: hint is `400 11px mono #9c9c9c` — the settings pages use mono for this
+    // Spec: hint is `400 11px mono` in the hint ink (--pv2-ink-3) — the settings pages use mono for this
     // register, so --cd-font-ui here would read as a different typographic voice.
     expect(decl('.pv2-tabs__hint', 'font')).toContain('--cd-font-mono')
   })

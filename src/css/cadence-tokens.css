@@ -40,7 +40,7 @@
    * They will reconcile when one generation retires; until then, replacing either
    * with the other moves measured contrast, so pick by which shell you are in.
    * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
-  --cd-surface-canvas: #fafaf9;
+  --cd-surface-canvas: #FFF7FA;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
@@ -91,6 +91,54 @@
    * "disabled". Pairs with --cd-accent as the on-state.
    */
   --cd-control-off: #D7D4CB;
+
+  /* ==========================================================================
+   * v2 NEUTRAL RAMP — rose-tinted
+   *
+   * The v2 screens were handed off with a literal greyscale ladder (#1b1b1b …
+   * #fafaf9) restated in each component's <style>. It is a ramp with real roles —
+   * body ink, secondary ink, hint, grid rule — so it lives here as tokens now, and
+   * the components reference the role instead of a hex nobody could re-tint.
+   *
+   * The values carry a rose hue rather than being neutral grey: this generation's
+   * palette is pink (see the event palette in
+   * src/components/v2/ui/event-colors.ts), and a pure-grey chrome around pink
+   * content reads as two unrelated designs rather than one.
+   *
+   * Contrast against --pv2-canvas, measured:
+   *   --pv2-ink        13.0:1  body text, day numbers, the on-state pill
+   *   --pv2-ink-2       5.1:1  secondary text, labels        (AA)
+   *   --pv2-ink-3       2.8:1  hints and placeholders — non-essential only
+   *   --pv2-ink-4       2.3:1  the "+N" overflow count and other faint marks
+   * The three below the bar hold the same ratios their greys did; they are for
+   * information that is available elsewhere, never for meaning of their own.
+   * ========================================================================== */
+  --pv2-canvas: #FFF7FA;        /* page base; matches --cd-surface-canvas */
+  --pv2-canvas-rgb: 255, 247, 250;
+  --pv2-ink: #3E1F2D;           /* was #1b1b1b */
+  --pv2-ink-rgb: 62, 31, 45;    /* both roles are used translucently — see rule 1 above */
+  --pv2-ink-2: #8A5F70;         /* was #6e6e6e / #4f4f4f / #777 */
+  --pv2-ink-3: #B58EA0;         /* was #9c9c9c */
+  --pv2-ink-4: #C9A3B3;         /* was #b2b2b2 */
+  --pv2-line-strong: #DCB8C6;   /* was #c4c4c4 */
+  --pv2-line: #E6C9D4;          /* was #cdcdcd — cell rules, chip outlines */
+  --pv2-line-soft: #F2DEE6;     /* was #e2e2e2 — hairlines, inactive tracks */
+
+  /* Filled rows and control tracks inside a card — the segmented track, a select's resting
+   * state, a settings row's press feedback. One pair, not the eleven near-identical greys
+   * (#f3f3f1, #f0f0ed, #efefef, #f0efec … #e0e0dd) these replace: no two of those differed by
+   * more than a channel step or two, and nothing distinguished them but who wrote the file. */
+  --pv2-fill: #FBF1F5;
+  --pv2-fill-hover: #F4E5EC;
+
+  /* The signature pink, for the marks that say "here" and "act": today's date pill and the FAB.
+   * Distinct from --pv2-ink, which is chrome: everything ink-coloured is structure, and anything
+   * wearing the accent is either the current day or the primary action. White on it measures
+   * 4.6:1, so the accent cannot be lightened without re-checking --pv2-on-accent.
+   * NOT an event colour — those are user data and live in event-colors.ts. */
+  --pv2-accent: #D82E77;
+  --pv2-accent-rgb: 216, 46, 119;
+  --pv2-on-accent: #ffffff;
 
   /* ---------- Weekday accents ---------- */
   --cd-weekday-saturday: #3A6EA5;

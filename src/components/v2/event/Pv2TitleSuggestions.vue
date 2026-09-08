@@ -181,12 +181,12 @@ onBeforeUnmount(teardown)
 <style scoped>
 .pv2-title-suggestions {
   /* v2 neutral palette, matching Pv2EventEditCard — not the app-wide warm cd-* tokens. */
-  --pv2s-ink: #1b1b1b;
-  --pv2s-ink-2: #6e6e6e;
-  --pv2s-ink-3: #b2b2b2;
-  --pv2s-line: #e2e2e2;
-  --pv2s-fill-hover: #ececea;
-  --pv2s-paper: #fafaf9;
+  --pv2s-ink: var(--pv2-ink);
+  --pv2s-ink-2: var(--pv2-ink-2);
+  --pv2s-ink-3: var(--pv2-ink-4);
+  --pv2s-line: var(--pv2-line-soft);
+  --pv2s-fill-hover: var(--pv2-fill-hover);
+  --pv2s-paper: var(--pv2-canvas);
 
   margin: 0;
   padding: 4px;
