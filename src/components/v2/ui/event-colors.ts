@@ -107,7 +107,7 @@ export function readableInkOn(hex: string): string {
  * The washed-out fill a chip uses when it wants the colour present but not shouting.
  *
  * How far towards white depends on the colour's own lightness, and that is the whole point: a
- * fixed 86% mix turned Blossom pink into #FEF5F8, which against the #FFF7FA page is a 1.02:1
+ * fixed 86% mix turned Blossom pink into #FEF5F8, which against the #fafaf9 page is a 1.03:1
  * difference — a chip with no visible fill at all, exactly the half of the palette this
  * rendering exists to serve. Scaling the mix by luminance keeps every tint at least 1.13:1
  * against the page while leaving the deep end as washed as before.

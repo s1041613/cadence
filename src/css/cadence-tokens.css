@@ -40,7 +40,7 @@
    * They will reconcile when one generation retires; until then, replacing either
    * with the other moves measured contrast, so pick by which shell you are in.
    * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
-  --cd-surface-canvas: #FFF7FA;
+  --cd-surface-canvas: #fafaf9;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
@@ -103,18 +103,22 @@
    * The values carry a rose hue rather than being neutral grey: this generation's
    * palette is pink (see the event palette in
    * src/components/v2/ui/event-colors.ts), and a pure-grey chrome around pink
-   * content reads as two unrelated designs rather than one.
+   * content reads as two unrelated designs rather than one. The page base is the
+   * exception — see --pv2-canvas below.
    *
    * Contrast against --pv2-canvas, measured:
-   *   --pv2-ink        13.0:1  body text, day numbers, the on-state pill
+   *   --pv2-ink        14.0:1  body text, day numbers, the on-state pill
    *   --pv2-ink-2       5.1:1  secondary text, labels        (AA)
-   *   --pv2-ink-3       2.8:1  hints and placeholders — non-essential only
-   *   --pv2-ink-4       2.3:1  the "+N" overflow count and other faint marks
+   *   --pv2-ink-3       2.7:1  hints and placeholders — non-essential only
+   *   --pv2-ink-4       2.2:1  the "+N" overflow count and other faint marks
    * The three below the bar hold the same ratios their greys did; they are for
    * information that is available elsewhere, never for meaning of their own.
    * ========================================================================== */
-  --pv2-canvas: #FFF7FA;        /* page base; matches --cd-surface-canvas */
-  --pv2-canvas-rgb: 255, 247, 250;
+  /* The page base stays neutral: the v2 shells paint a photographic backdrop over it
+   * (Pv2PageBackdrop), and tinting the colour underneath it fights the artwork instead of
+   * letting it read. Only the ink and the lines carry the rose hue. */
+  --pv2-canvas: #fafaf9;        /* page base; matches --cd-surface-canvas */
+  --pv2-canvas-rgb: 250, 250, 249;
   --pv2-ink: #3E1F2D;           /* was #1b1b1b */
   --pv2-ink-rgb: 62, 31, 45;    /* both roles are used translucently — see rule 1 above */
   --pv2-ink-2: #8A5F70;         /* was #6e6e6e / #4f4f4f / #777 */

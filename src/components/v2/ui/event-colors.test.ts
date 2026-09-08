@@ -22,7 +22,7 @@ import type { Task } from '@/types/task'
  * assert is that the palette suits the surface it was measured against, so a change to that
  * surface SHOULD fail this file and force a re-measure.
  */
-const CANVAS = '#FFF7FA'
+const CANVAS = '#fafaf9'
 
 function channels(hex: string): [number, number, number] {
   const h = hex.replace('#', '')
