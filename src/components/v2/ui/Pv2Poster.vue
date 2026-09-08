@@ -1,5 +1,5 @@
 <template>
-  <!-- 月曆海報標題：居中直排，italic 大字 + 年份，皆為 UI face。點擊開月/年輪盤。 -->
+  <!-- 月曆海報標題：居中直排，圓體粗大字 + 年份小標。點擊開月/年輪盤。 -->
   <button type="button" class="pv2-poster" @click="emit('openSheet')">
     <span class="pv2-poster__month">{{ monthName }}</span>
     <span class="pv2-poster__year">{{ year }}</span>
@@ -31,14 +31,15 @@ const emit = defineEmits<{
   cursor: pointer;
 }
 
-/* 與日檢視的大日期數字同規格（Pv2DayHeader 的 italic 400 48px）。
-   月份不明顯的原因不在字重——三個檢視的主標題本來就都是 400——而在字級：
-   同一個字重下 36px 的筆畫就是比 48px 細，疊在照片底上更被背景紋理吃掉。
-   所以份量加回在字級，字重維持 400，月/週/日三個主標題的筆畫粗細因此一致。 */
+/* 月份名稱是這個檢視的封面，不是它的標題列：--cd-font-poster（M PLUS Rounded 1c 900）
+   是全 app 唯一穿這個字體的地方，圓體 900 的筆畫在照片底上也不會被背景紋理吃掉——
+   之前靠 48px 補回來的份量，現在由字重本身撐住。
+   刻意不是 italic：這個字體的重心在圓，斜體會把圓角拉成橢圓，反而糊掉。
+   字級維持 48px，與日檢視的大日期數字同一階。 */
 .pv2-poster__month {
   text-align: center;
-  font: italic 400 48px var(--cd-font-ui);
-  letter-spacing: 0;
+  font: 900 48px var(--cd-font-poster);
+  letter-spacing: -0.01em;
   line-height: 0.9;
   color: var(--pv2-ink);
 }

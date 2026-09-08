@@ -2,27 +2,13 @@
 @import "tailwindcss";
 @import "./cadence-tokens.css";
 
-/* 自架字體（取代 demo 版本的 Google Fonts CDN，符合 CSP self-only 限制）
- *
- * The product ships one Latin face only (see cadence-tokens.css --cd-font-display /
- * --cd-font-ui, both Inter). It carries every weight in use (400–800; the lone
- * 900 in CdDraftDrawer is synthesised). The italic is imported at 400 only,
- * which is every weight the display titles ask for: the month poster, the
- * week title and the day numeral are one shared spec.
- *
- * Noto Sans TC is no longer a mere fallback: Inter doesn't cover CJK, so
- * every Chinese glyph in the app — event titles above all — renders in it. Its
- * weight coverage therefore has to track what the UI actually asks for. */
-@import "@fontsource/inter/400.css";
-@import "@fontsource/inter/400-italic.css";
-@import "@fontsource/inter/500.css";
-@import "@fontsource/inter/600.css";
-@import "@fontsource/inter/700.css";
-@import "@fontsource/inter/800.css";
-@import "@fontsource/noto-sans-tc/400.css";
-@import "@fontsource/noto-sans-tc/500.css";
-@import "@fontsource/noto-sans-tc/600.css";
-@import "@fontsource/noto-sans-tc/700.css";
+/* Web fonts are NOT imported here — they live in fonts.css, which quasar.config.ts
+ * loads alongside this file. They have to: this file starts with @import "tailwindcss",
+ * so @tailwindcss/postcss inlines every @import in it, and the font packages' relative
+ * url(./files/...) then resolve against src/css/ instead of the package. Vite cannot find
+ * them, leaves the URLs verbatim, and the built app requests /assets/files/*.woff2 —
+ * which is nothing, so every face 404s and the whole app renders in system fallbacks.
+ * A plain CSS file outside the Tailwind pipeline rebases and emits them correctly. */
 
 /* 100%（錨定 ICB）而非 100dvh：iOS standalone 冷啟動的 viewport 單位會照整個
  * 螢幕高解析（含 status bar），shell 因此比 webview 可視區高、整頁變得可捲。

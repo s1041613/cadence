@@ -52,7 +52,7 @@ const props = withDefaults(
     ariaLabel: string
     itemHeight?: number
     visibleCount?: number
-    variant?: 'serif' | 'ui' | 'mono'
+    variant?: 'poster' | 'ui' | 'mono'
     /** Font size per distance from centre: [0, 1, 2, 3+]. */
     sizes?: [string, string, string, string]
   }>(),
@@ -222,11 +222,13 @@ function itemStyle(dist: number): Record<string, string> {
   scroll-snap-align: center;
 }
 
-/* Font size comes from the inline itemStyle; only family/style/weight live here. */
-.pv2-wheel-col__item--serif {
-  font-family: var(--cd-font-serif);
-  font-style: italic;
-  font-weight: 400;
+/* Font size comes from the inline itemStyle; only family and weight live here.
+   Named for the face it wears, not 'serif' as it was: the month column is the only
+   consumer, and it now carries --cd-font-poster so the month name looks the same in the
+   picker as on the poster the picker edits. */
+.pv2-wheel-col__item--poster {
+  font-family: var(--cd-font-poster);
+  font-weight: 900;
 }
 
 .pv2-wheel-col__item--mono {

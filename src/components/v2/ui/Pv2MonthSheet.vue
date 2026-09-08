@@ -1,6 +1,6 @@
 <template>
   <!--
-    月/年輪盤選擇器（照設計稿）：兩欄 scroll-snap，月欄 Instrument Serif italic、年欄 mono。
+    月/年輪盤選擇器（照設計稿）：兩欄 scroll-snap，月欄 poster 圓體、年欄 mono。
     中央高亮列有上下細線；上下漸層淡出。捲動 snap 到某列即選定該月/年。
     兩欄都是 Pv2WheelColumn，與時間滾輪共用同一份 scroll-snap 實作。
   -->
@@ -17,7 +17,7 @@
         <Pv2WheelColumn
           :items="monthItems"
           :model-value="monthIdx"
-          variant="serif"
+          variant="poster"
           :sizes="['25px', '21px', '19px', '18px']"
           ariaLabel="Month"
           @update:model-value="(v) => onSelect(Number(v), yearIdx)"

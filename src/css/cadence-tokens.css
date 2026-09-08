@@ -186,19 +186,28 @@
    */
 
   /* ---------- Typography: families ----------
-   * The product ships one Latin face, Inter. Fonts are a fixed passthrough: they
-   * are NOT part of the theme, so no palette may override them.
+   * Two Latin faces: Inter for everything the user reads, and M PLUS Rounded 1c
+   * for the one thing they look at rather than read. Fonts are a fixed
+   * passthrough: they are NOT part of the theme, so no palette may override them.
    *
    *   --cd-font-display : Inter, used for the bottom nav — its letter glyphs and
    *                       their labels, and nothing else.
    *   --cd-font-ui      : Inter, everything else.
+   *   --cd-font-poster  : M PLUS Rounded 1c at 900, the month name — the month
+   *                       poster's title and the month wheel that edits it. ONLY
+   *                       the month name: it is the calendar's cover, and a face
+   *                       this loud stops being a cover once a second thing wears it.
    *
-   * Both tokens point at the same face and are kept separate (rather than
+   * Display and UI point at the same face and are kept separate (rather than
    * merged into one) so nav and UI chrome can diverge again later without
    * touching every call site. Inter ships 100–900; call sites use 400–800.
+   *
+   * Only the poster face's latin-900 subset is loaded (src/css/app.css), so a call
+   * site asking for any other weight silently renders at 900 — declare 900.
    */
   --cd-font-display: 'Inter', 'Noto Sans TC', sans-serif;
   --cd-font-ui: 'Inter', 'Noto Sans TC', sans-serif;
+  --cd-font-poster: 'M PLUS Rounded 1c', 'Noto Sans TC', sans-serif;
 
   /* Deprecated aliases — resolve onto the two faces above so existing consumers
    * keep rendering while they are migrated. Delete each once its usage hits zero.
@@ -252,7 +261,7 @@
   --cd-fs-30: 30px;
   --cd-fs-44: 44px;
   --cd-fs-46: 46px;
-  --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
+  --cd-fs-52: 52px; /* v2 月曆標題 */
 
   /* ---------- v2 layout ---------- */
   /* Pv2BottomNav is a floating overlay (position: absolute), not an in-flow row, so the
