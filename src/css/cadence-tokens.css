@@ -131,10 +131,11 @@
   --pv2-fill: #FBF1F5;
   --pv2-fill-hover: #F4E5EC;
 
-  /* The signature pink, for the marks that say "here" and "act": today's date pill and the FAB.
-   * Distinct from --pv2-ink, which is chrome: everything ink-coloured is structure, and anything
-   * wearing the accent is either the current day or the primary action. White on it measures
-   * 4.6:1, so the accent cannot be lightened without re-checking --pv2-on-accent.
+  /* The signature pink, for the mark that says "here": today's date pill in the month grid and
+   * the week rows, and the selected day in the v2 date picker. Distinct from --pv2-ink, which is
+   * chrome — the FAB and the shell's filled buttons are ink, so the accent stays rare enough to
+   * mean something. White on it measures 4.6:1, so the accent cannot be lightened without
+   * re-checking --pv2-on-accent.
    * NOT an event colour — those are user data and live in event-colors.ts. */
   --pv2-accent: #D82E77;
   --pv2-accent-rgb: 216, 46, 119;
