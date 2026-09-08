@@ -60,7 +60,7 @@
           v-for="fmt in (['name', 'icon', 'dot'] as const)"
           :key="fmt"
           title="Deep work"
-          color="#6E839B"
+          color="#B96DB0"
           quad="plan"
           time="14:00"
           end-time="15:30"
@@ -68,8 +68,8 @@
           :done="false"
           :fmt="fmt"
         />
-        <CdEventChip title="All-day trip" color="#C56A5E" quad="do" :time="null" :end-time="null" all-day :done="false" fmt="name" />
-        <CdEventChip title="Done task" color="#BFA86A" quad="quick" time="09:00" end-time="09:30" :all-day="false" done fmt="name" />
+        <CdEventChip title="All-day trip" color="#F7C8D9" quad="do" :time="null" :end-time="null" all-day :done="false" fmt="name" />
+        <CdEventChip title="Done task" color="#EC5093" quad="quick" time="09:00" end-time="09:30" :all-day="false" done fmt="name" />
       </div>
     </section>
 
@@ -171,10 +171,10 @@ const timeGridColumns = computed<TimeGridColumn[]>(() => [
     dowLabel: 'TODAY',
     dayNum: now.value.getDate(),
     today: true,
-    allDayEvents: [{ id: 'gallery-conference', title: 'Conference', color: '#6863B0' }],
+    allDayEvents: [{ id: 'gallery-conference', title: 'Conference', color: '#D82E77' }],
     events: [
-      { id: 'deep-work', title: 'Deep work', color: '#6E839B', start: 14 * 60, end: 16 * 60, allDay: false },
-      { id: 'dentist', title: 'Dentist', color: '#C56A5E', start: 14 * 60 + 30, end: 15 * 60, allDay: false }
+      { id: 'deep-work', title: 'Deep work', color: '#F7A8C4', start: 14 * 60, end: 16 * 60, allDay: false },
+      { id: 'dentist', title: 'Dentist', color: '#8E5A8A', start: 14 * 60 + 30, end: 15 * 60, allDay: false }
     ]
   }
 ])

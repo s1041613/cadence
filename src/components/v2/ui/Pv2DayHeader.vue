@@ -58,7 +58,7 @@ const emit = defineEmits<{
 .pv2-dh__num {
   font: italic 400 48px var(--cd-font-serif);
   line-height: 0.8;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-dh__meta {
@@ -70,16 +70,16 @@ const emit = defineEmits<{
 
 /* Weekday and month-year read as one metadata cluster beside the serif day number, so they
    share a colour rather than splitting into a dark/light pair. Both sit at the day number's
-   ink: #9c9c9c was ~2.6:1 over the photo background and read as washed out. */
+   ink: var(--pv2-ink-3) was ~2.6:1 over the photo background and read as washed out. */
 .pv2-dh__dow {
   font: 700 14px var(--cd-font-ui);
   letter-spacing: 0.12em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-dh__my {
   font: 500 11px var(--cd-font-ui);
   letter-spacing: 0.12em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 </style>

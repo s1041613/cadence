@@ -1,9 +1,9 @@
 <template>
   <!--
-    週檢視單日列（照設計稿）：左側日期欄＝大日期數字（Instrument Serif，今天較黑）＋其下 DOW 標籤；
+    週檢視單日列（照設計稿）：左側日期欄＝大日期數字（Instrument Serif，今天較深）＋其下 DOW 標籤；
     其餘小字一律 Zen Kaku；
     右側事件列（色點 + 標題 + 右側時間 / all-day / —），空日留白不顯示佔位文字。
-    今天：DOW 標籤轉為黑底反白藥丸。
+    今天：DOW 標籤轉為粉紅底反白藥丸。
   -->
   <div class="pv2-wdr">
     <!-- 日期欄：數字與 DOW 同屬一個識別單位，垂直堆疊後兩者共用同一條左邊界。 -->
@@ -100,21 +100,21 @@ const emit = defineEmits<{
 
 /* 日期數字＝浮水印感：斜體、灰階墨色，像蓋在背景上的水印。
    背景是照片＋可調白紗（scrim 0/0.5/0.8），底色亮度不固定，
-   所以非今天的數字必須夠深才讀得到；今天維持全黑，兩者落差仍然明顯。
+   所以非今天的數字必須夠深才讀得到；今天維持全墨色，兩者落差仍然明顯。
    35px 略大於表頭 "Week N" 的 28px，維持原本 50/40 的比例（全站大標題同乘 0.7，見 Pv2DayHeader）。 */
 .pv2-wdr__num {
   font: italic 400 35px var(--cd-font-serif);
   line-height: 1;
-  color: rgba(27, 27, 27, 0.62); /* 非今天：約 4.5:1，仍明顯淡於今天 */
+  color: rgba(var(--pv2-ink-rgb), 0.62); /* 非今天：約 4.5:1，仍明顯淡於今天 */
 }
 
 /* 今天：同樣斜體 serif，但更深、明顯浮出 */
 .pv2-wdr__num--today {
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-wdr__num--outside {
-  color: rgba(27, 27, 27, 0.42);
+  color: rgba(var(--pv2-ink-rgb), 0.42);
 }
 
 .pv2-wdr__body {
@@ -147,16 +147,16 @@ const emit = defineEmits<{
   display: none;
 }
 
-/* 10px 全大寫 Zen Kaku，字級小又有字距，原 #9c9c9c 在照片背景上只有約 2.2:1，改用 #6e6e6e。
+/* 10px 全大寫 Zen Kaku，字級小又有字距，原 var(--pv2-ink-3) 在照片背景上只有約 2.2:1，改用 var(--pv2-ink-2)。
    字距從 0.16em 收到 0.12em：0.16em 是為等寬臉調的，比例字身在小字級下會鬆散。 */
 .pv2-wdr__dow {
   font: 500 10px var(--cd-font-ui);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
-/* 今天：黑底反白藥丸，沿用底部 nav 選中態的語彙（#1b1b1b 底 / #fafaf9 字）。
+/* 今天：粉紅底反白藥丸（--pv2-accent / --pv2-on-accent），與月曆今日格同一個語彙。
    標記做在 DOW 而非數字上，是因為週列等高：35px 的數字包圓圈需要約 50px 會超出列高，
    10px 的標籤加藥丸則完全在餘裕內。
 
@@ -167,8 +167,8 @@ const emit = defineEmits<{
 .pv2-wdr__dow--today {
   padding: 3px 6px 3px 7px;
   border-radius: 999px;
-  background: #1b1b1b;
-  color: #fafaf9;
+  background: var(--pv2-accent);
+  color: var(--pv2-on-accent);
 }
 
 /* Two rows: dot / title / count / time on the first, subtask names on the second. A grid
@@ -190,7 +190,7 @@ const emit = defineEmits<{
   flex: none;
   font: 700 11px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 /* Spans to the end, starting at the title column rather than the dot's. */
@@ -198,7 +198,7 @@ const emit = defineEmits<{
   grid-column: 2 / -1;
   margin-top: 2px;
   font: 500 11.5px/1.4 var(--cd-font-ui);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -215,19 +215,19 @@ const emit = defineEmits<{
   flex: 1;
   min-width: 0;
   font: 500 13px/1.25 var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* 事件時間：維持次於標題的層級，但從 #9c9c9c 加深到 #6e6e6e 才讀得到。
+/* 事件時間：維持次於標題的層級，但從 var(--pv2-ink-3) 加深到 var(--pv2-ink-2) 才讀得到。
    Zen Kaku 是比例字身，數字寬度不一致會讓右側時間欄參差，補 tabular-nums 對齊。 */
 .pv2-wdr__time {
   flex: none;
   font: 500 11px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.04em;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 </style>

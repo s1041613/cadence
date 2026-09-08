@@ -40,10 +40,10 @@ const emit = defineEmits<{
   font: italic 400 48px var(--cd-font-ui);
   letter-spacing: 0;
   line-height: 0.9;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
-/* 年份同樣吃虧在照片底：#6e6e6e 對背景亮處只有 ~3:1，看起來是褪色而不是次級。
+/* 年份同樣吃虧在照片底：var(--pv2-ink-2) 對背景亮處只有 ~3:1，看起來是褪色而不是次級。
    改用與月份同一個墨色，層級交給字級與字距撐（同 Pv2DayHeader 的 meta 處理）。 */
 .pv2-poster__year {
   display: flex;
@@ -51,6 +51,6 @@ const emit = defineEmits<{
   margin-top: 8px;
   font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.16em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 </style>

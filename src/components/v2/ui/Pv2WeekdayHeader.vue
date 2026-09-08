@@ -1,5 +1,5 @@
 <template>
-  <!-- 星期表頭：小寫 3 字母、mono 9px，依 firstDay 重排，底部黑線。 -->
+  <!-- 星期表頭：小寫 3 字母、mono 9px，依 firstDay 重排，底部墨線。 -->
   <div class="pv2-wd">
     <span v-for="w in labels" :key="w" class="pv2-wd__cell">{{ w }}</span>
   </div>
@@ -45,6 +45,6 @@ const labels = computed(() =>
   text-align: center;
   font: 600 9px var(--cd-font-mono);
   letter-spacing: 0.03em;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 </style>

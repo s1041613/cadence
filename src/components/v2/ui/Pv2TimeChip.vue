@@ -95,8 +95,8 @@ function onEscape(): void {
      that wants the outline back without shifting every control by 1px. */
   border: 1px solid transparent;
   border-radius: var(--pv2-control-r, 9px);
-  background: var(--pv2-control-bg, #f0f0ed);
-  color: var(--pv2-ink, #1b1b1b);
+  background: var(--pv2-control-bg, var(--pv2-fill));
+  color: var(--pv2-ink);
   font: var(--pv2-control-fw, 500) var(--pv2-control-fs, 14px) var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   text-align: center;
@@ -106,14 +106,14 @@ function onEscape(): void {
 }
 
 .pv2-time-chip:hover {
-  background: var(--pv2-control-bg-hover, #e8e8e4);
+  background: var(--pv2-control-bg-hover, var(--pv2-fill-hover));
 }
 
 /* Focusing the chip is what opens the wheel, so --open doubles as the focus
    indicator for pointer users. Keyboard users additionally get the standard ring,
    matching every other control on the card. */
 .pv2-time-chip:focus-visible {
-  outline: 2px solid var(--pv2-ink, #1b1b1b);
+  outline: 2px solid var(--pv2-ink);
   outline-offset: 2px;
 }
 
@@ -121,8 +121,8 @@ function onEscape(): void {
    border to darken, and inset shadow paints inside the box so nothing reflows when
    the wheel opens. */
 .pv2-time-chip--open {
-  background: var(--pv2-control-bg-open, #e2e2de);
-  box-shadow: inset 0 0 0 1.5px var(--pv2-ink, #1b1b1b);
+  background: var(--pv2-control-bg-open, var(--pv2-fill-hover));
+  box-shadow: inset 0 0 0 1.5px var(--pv2-ink);
 }
 
 @media (prefers-reduced-motion: reduce) {

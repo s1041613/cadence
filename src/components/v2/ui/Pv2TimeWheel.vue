@@ -80,11 +80,11 @@ function commit(h: number, m: number): void {
   /* Falloff colours for the shared columns, and the surface colour the edge fades dissolve
      into — taken from the host card rather than hard-coded, so the wheel never shows a seam
      against a container with a different background. */
-  --pv2-wheel-ink: var(--pv2-ink, #1b1b1b);
-  --pv2-wheel-ink-2: var(--pv2-ink-2, #6e6e6e);
-  --pv2-wheel-ink-3: var(--pv2-ink-3, #b2b2b2);
-  --pv2-wheel-ink-4: #c4c4c4;
-  --pv2-wheel-surface: var(--pv2-paper, #fafaf9);
+  --pv2-wheel-ink: var(--pv2-ink);
+  --pv2-wheel-ink-2: var(--pv2-ink-2);
+  --pv2-wheel-ink-3: var(--pv2-ink-3);
+  --pv2-wheel-ink-4: var(--pv2-line-strong);
+  --pv2-wheel-surface: var(--pv2-paper, var(--pv2-canvas));
 
   position: relative;
   height: var(--pv2-tw-frame);
@@ -100,7 +100,7 @@ function commit(h: number, m: number): void {
   width: 168px;
   height: var(--pv2-tw-row);
   border-radius: var(--cd-radius-sm);
-  background: var(--pv2-fill, #f3f3f1);
+  background: var(--pv2-fill);
   pointer-events: none;
 }
 

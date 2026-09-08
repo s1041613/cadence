@@ -43,7 +43,7 @@ const options: Array<{ value: DayTab; label: string }> = [
   padding: 5px;
   border-radius: 14px;
   /* 極淡半透明底：讓背景圖隱約透出、與海報融合，不搶白 goal 卡（方案 A） */
-  background: rgba(27, 27, 27, 0.06);
+  background: rgba(var(--pv2-ink-rgb), 0.06);
 }
 
 .pv2-dt__seg {
@@ -53,14 +53,14 @@ const options: Array<{ value: DayTab; label: string }> = [
   background: transparent;
   font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.1em;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .pv2-dt__seg--on {
   background: #fff;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 

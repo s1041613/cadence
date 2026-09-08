@@ -43,9 +43,9 @@ export const DAYS_PER_WEEK = 7
  * Cell geometry, in px. Shared so the grid's "how many lanes fit" arithmetic and the week row's
  * "where does lane N sit" arithmetic cannot drift apart.
  *
- * chipH tracks Pv2EventChip's type size (9px text x 1.2 line-height, plus 1+1 padding and 1+1
- * border). Change the chip's font size without changing this and every cell silently fits one
- * chip too many or too few.
+ * chipH tracks Pv2EventChip's type size (9px text x 1.2 line-height, plus 2+2 padding; the chip
+ * is filled now and carries no border). Change the chip's font size or padding without changing
+ * this and every cell silently fits one chip too many or too few.
  */
 export const CELL = { padTop: 4, padBottom: 5, headGap: 3, headH: 20, chipH: 15, chipGap: 2 } as const
 

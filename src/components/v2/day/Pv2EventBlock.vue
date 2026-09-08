@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { readableInkOn } from '@/components/v2/ui/event-colors'
 import type { Subtask } from '@/types/subtask'
 
 // Pv2EventBlock — v2 copy of CdEventBlock. The geometry and the three height clamps are
@@ -58,7 +59,7 @@ const MIN_CONTENT_HEIGHT = 31
 
 // v2 paper. Kept as a literal rather than a --cd-* token: the whole v2 tree hardcodes its
 // neutral palette so the app-wide warm tokens cannot leak in.
-const V2_PAPER = '#fafaf9'
+const V2_PAPER = 'var(--pv2-canvas)'
 
 // One subtask line at 12px/1.35 plus its 2px row gap. Blocks are sized by the clock, not by
 // their contents, so the list takes only the room the slot already affords rather than growing
@@ -87,7 +88,9 @@ const blockStyle = computed(() => ({
   zIndex: 3 + props.lane,
   borderLeft: `3px solid ${props.color}`,
   background: props.active ? props.color : `color-mix(in srgb, ${props.color} 22%, ${V2_PAPER})`,
-  color: props.active ? '#fff' : '#1b1b1b'
+  // Measured against the fill rather than fixed to white — an active block filled with Blossom
+  // pink and titled in white is a blank card.
+  color: props.active ? readableInkOn(props.color) : 'var(--pv2-ink)'
 }))
 </script>
 
@@ -125,7 +128,7 @@ const blockStyle = computed(() => ({
   flex: none;
   font: 500 13px var(--cd-font-mono);
   font-variant-numeric: var(--cd-numeric-aligned);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   white-space: nowrap;
 }
 
@@ -145,7 +148,7 @@ const blockStyle = computed(() => ({
 
 .pv2-event-block__subs li {
   font: 500 12px/1.35 var(--cd-font-ui);
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -153,12 +156,12 @@ const blockStyle = computed(() => ({
 
 .pv2-event-block__subs li[data-done='true'] {
   text-decoration: line-through;
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
 }
 
 .pv2-event-block__more {
   font-weight: 700;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-event-block--active .pv2-event-block__subs li {

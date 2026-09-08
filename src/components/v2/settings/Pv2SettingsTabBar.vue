@@ -7,7 +7,7 @@
   <div class="pv2-tabs">
     <header class="pv2-tabs__head">
       <button type="button" class="pv2-tabs__back" aria-label="返回" @click="emit('back')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 5 L8 12 L15 19" />
         </svg>
       </button>
@@ -71,7 +71,7 @@
             @pointerup="onHandleUp"
             @pointercancel="onHandleUp"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c4c4c4" stroke-width="1.8" stroke-linecap="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-line-strong)" stroke-width="1.8" stroke-linecap="round">
               <path d="M4 9 H20 M4 15 H20" />
             </svg>
           </span>
@@ -248,7 +248,7 @@ function rowStyle(i: number): Record<string, string> {
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-tabs__back {
@@ -258,7 +258,7 @@ function rowStyle(i: number): Record<string, string> {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #d6d6d0;
+  border: 1px solid var(--pv2-line);
   background: #fff;
   cursor: pointer;
 }
@@ -269,7 +269,7 @@ function rowStyle(i: number): Record<string, string> {
   margin: 0;
   font: 400 30px var(--cd-font-serif);
   line-height: 1;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-tabs__save {
@@ -280,14 +280,14 @@ function rowStyle(i: number): Record<string, string> {
   height: 32px;
   border: none;
   border-radius: 50%;
-  background: #efefef;
-  color: #9c9c9c;
+  background: var(--pv2-fill);
+  color: var(--pv2-ink-3);
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
 }
 
 .pv2-tabs__save--dirty {
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   color: #fff;
 }
 
@@ -310,7 +310,7 @@ function rowStyle(i: number): Record<string, string> {
   font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-tabs__scroll > .pv2-tabs__group-label {
@@ -321,18 +321,18 @@ function rowStyle(i: number): Record<string, string> {
   margin-right: 4px;
   font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.1em;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   /* Tabular figures so the count doesn't shift the layout as it changes */
   font-variant-numeric: tabular-nums;
 }
 
 .pv2-tabs__counter--full {
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 /* Bordered, no shadow; rows run edge to edge so the dividers read correctly */
 .pv2-tabs__card {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   background: #fff;
   overflow: hidden;
@@ -353,7 +353,7 @@ function rowStyle(i: number): Record<string, string> {
 }
 
 .pv2-tabs__row--divided {
-  border-top: 1px solid #e2e2e2;
+  border-top: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-tabs__circle {
@@ -377,7 +377,7 @@ function rowStyle(i: number): Record<string, string> {
 }
 
 .pv2-tabs__circle--off {
-  background: #e2e2e2;
+  background: var(--pv2-line-soft);
   cursor: not-allowed;
 }
 
@@ -388,15 +388,15 @@ function rowStyle(i: number): Record<string, string> {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   font: 400 17px var(--cd-font-display);
   line-height: 1;
   color: #fff;
 }
 
 .pv2-tabs__disc--off {
-  background: #efefef;
-  color: #9c9c9c;
+  background: var(--pv2-fill);
+  color: var(--pv2-ink-3);
 }
 
 .pv2-tabs__text {
@@ -407,11 +407,11 @@ function rowStyle(i: number): Record<string, string> {
 .pv2-tabs__name {
   font: 600 13px var(--cd-font-mono);
   letter-spacing: 0.06em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-tabs__name--off {
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 /* nowrap + ellipsis is insurance: a long description truncates instead of growing
@@ -419,14 +419,14 @@ function rowStyle(i: number): Record<string, string> {
 .pv2-tabs__desc {
   margin-top: 2px;
   font: 400 11px var(--cd-font-mono);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pv2-tabs__desc--off {
-  color: #c4c4c4;
+  color: var(--pv2-line-strong);
 }
 
 /* touch-action only on the handle — putting it on the row or the scroll container
@@ -444,7 +444,7 @@ function rowStyle(i: number): Record<string, string> {
 .pv2-tabs__hint {
   margin: 10px 4px 0;
   font: 400 11px var(--cd-font-mono);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   line-height: 1.5;
 }
 
@@ -452,6 +452,6 @@ function rowStyle(i: number): Record<string, string> {
   padding: 18px 16px;
   text-align: center;
   font: 400 12px var(--cd-font-ui);
-  color: #c4c4c4;
+  color: var(--pv2-line-strong);
 }
 </style>

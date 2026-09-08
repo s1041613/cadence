@@ -1,7 +1,7 @@
 <template>
-  <!-- 新增按鈕（FAB）：黑圓 + 白色加號，浮在格線上、底部 nav 之上（照設計稿）。 -->
+  <!-- 新增按鈕（FAB）：粉紅圓 + 白色加號，浮在格線上、底部 nav 之上。 -->
   <button type="button" class="pv2-fab" aria-label="新增" @click="emit('click')">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.4" stroke-linecap="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-on-accent)" stroke-width="2.4" stroke-linecap="round">
       <path d="M12 5 V19 M5 12 H19" />
     </svg>
   </button>
@@ -29,8 +29,12 @@ const emit = defineEmits<{
   place-items: center;
   border: none;
   border-radius: 50%;
-  background: #1b1b1b;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  /* The primary action wears the accent, same as today's date pill — the two are the only
+     accent-coloured things in the shell, so the colour reads as "act here". */
+  background: var(--pv2-accent);
+  /* Cast in the accent rather than in black: a neutral shadow under a saturated pink disc
+     greys the pixels around its edge and the disc looks dirty against the pink page. */
+  box-shadow: 0 8px 22px rgba(var(--pv2-accent-rgb), 0.32);
   cursor: pointer;
   transition: transform 0.12s ease;
 }

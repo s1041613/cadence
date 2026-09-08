@@ -11,6 +11,7 @@ let card = ''
 let selectField = ''
 let timeChip = ''
 let datePicker = ''
+let tokens = ''
 
 beforeAll(async () => {
   card = await readFile(new URL('./Pv2EventEditCard.vue', import.meta.url), 'utf8')
@@ -21,6 +22,10 @@ beforeAll(async () => {
   timeChip = await readFile(new URL('../ui/Pv2TimeChip.vue', import.meta.url), 'utf8')
   datePicker = await readFile(
     new URL('../../ui/CdDatePicker.vue', import.meta.url),
+    'utf8'
+  )
+  tokens = await readFile(
+    new URL('../../../css/cadence-tokens.css', import.meta.url),
     'utf8'
   )
 })
@@ -93,7 +98,9 @@ describe('Pv2SelectField · overlay technique', () => {
 
   it('consumes the control contract with fallbacks so it renders standalone', () => {
     expect(decl(selectField, '.pv2-select-field', 'height')).toBe('var(--pv2-control-h, 40px)')
-    expect(decl(selectField, '.pv2-select-field', 'background')).toBe('var(--pv2-control-bg, #f0f0ed)')
+    expect(decl(selectField, '.pv2-select-field', 'background')).toBe(
+      'var(--pv2-control-bg, var(--pv2-fill))'
+    )
   })
 
   it('asks for touch-action itself, since app.css only grants it to buttons', () => {
@@ -108,14 +115,26 @@ describe('Pv2TimeChip · joins the same contract', () => {
     expect(decl(timeChip, '.pv2-time-chip', 'height')).toBe('var(--pv2-control-h, 40px)')
   })
 
-  it('guards every host variable with a fallback', () => {
+  it('guards every HOST variable with a fallback', () => {
     // It previously read --pv2-line-strong and --pv2-fill with no defaults, so
     // outside the edit card its border and hover resolved to nothing at all.
+    //
+    // "Host variable" now means one the edit card invents — the --pv2-control-* contract and
+    // its geometry. The ramp names (--pv2-ink, --pv2-fill, --pv2-line …) are declared on :root
+    // in cadence-tokens.css, so they always resolve and a fallback for one is dead text that
+    // freezes a copy of the palette in this file. The token file is read here rather than
+    // listed, so a name added to the ramp needs no edit on this side.
+    const ramp = new Set(
+      [...tokens.matchAll(/^\s*(--pv2-[a-z0-9-]+):/gm)].map((m) => m[1]!)
+    )
+    expect(ramp.size, 'no --pv2-* ramp found in cadence-tokens.css').toBeGreaterThan(0)
+
     const block = timeChip.slice(
       timeChip.indexOf('.pv2-time-chip {'),
       timeChip.indexOf('}', timeChip.indexOf('.pv2-time-chip {'))
     )
-    for (const match of block.matchAll(/var\((--pv2-[a-z-]+)([^)]*)\)/g)) {
+    for (const match of block.matchAll(/var\((--pv2-[a-z0-9-]+)([^)]*)\)/g)) {
+      if (ramp.has(match[1]!)) continue
       expect(match[2], `${match[1]} has no fallback`).toMatch(/^,\s*\S/)
     }
   })
@@ -129,13 +148,14 @@ describe('CdDatePicker · the popover follows the host generation', () => {
     expect(card.match(/<CdDatePicker variant="v2"/g)).toHaveLength(2)
   })
 
-  it('paints the v2 popover in ink-on-paper, not the warm accent', () => {
+  it('paints the v2 popover in the v2 palette, not the warm accent', () => {
     const start = datePicker.indexOf('.cd-date-picker__popover--v2 {')
     expect(start).toBeGreaterThan(-1)
     const v2Block = datePicker.slice(start)
     // The exact symptom this fixes: the selected day was a --cd-accent-mid olive disc
-    // inside an otherwise neutral card.
+    // inside a card built on the other generation's palette. It is the v2 accent now, which
+    // is the same mark Pv2Cell gives today — what must never come back is the cd-* one.
     expect(v2Block).not.toMatch(/--cd-accent/)
-    expect(v2Block).toMatch(/\.cd-date-picker__popover--v2 \.cd-date-picker__cell--selected \{[^}]*background: var\(--dp-ink\)/)
+    expect(v2Block).toMatch(/\.cd-date-picker__popover--v2 \.cd-date-picker__cell--selected \{[^}]*background: var\(--pv2-accent\)/)
   })
 })

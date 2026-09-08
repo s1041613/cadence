@@ -1,6 +1,6 @@
 <template>
   <!--
-    月曆單日格。日期數字 Caveat 藥丸：today 黑底白字、非 today 深色 + 可讀陰影、外月淡色。
+    月曆單日格。日期數字 Caveat 藥丸：today 粉紅底白字、非 today 深色 + 可讀陰影、外月淡色。
     cell 點擊 → 開當日事件面板。
 
     Events are NOT rendered here: a multi-day event has to be one element crossing several
@@ -42,7 +42,7 @@ const emit = defineEmits<{
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-bottom: 1px solid #cdcdcd;
+  border-bottom: 1px solid var(--pv2-line);
   padding: 4px 2px 5px;
   box-sizing: border-box;
   cursor: pointer;
@@ -65,18 +65,21 @@ const emit = defineEmits<{
   border-radius: 999px;
   font: 700 13px var(--cd-font-caveat);
   line-height: 1;
-  color: #1b1b1b;
-  text-shadow: 0 1px 3px rgba(250, 250, 249, 0.9), 0 0 2px rgba(250, 250, 249, 0.9);
+  color: var(--pv2-ink);
+  text-shadow: 0 1px 3px rgba(var(--pv2-canvas-rgb), 0.9), 0 0 2px rgba(var(--pv2-canvas-rgb), 0.9);
 }
 
+/* Today wears the accent, not the ink: in a month of pink chips an ink pill reads as just
+   another dark mark, and the one cell a user looks for first should be the loudest thing
+   on the grid. */
 .pv2-cell__num--today {
-  background: #1b1b1b;
-  color: #fafaf9;
+  background: var(--pv2-accent);
+  color: var(--pv2-on-accent);
   text-shadow: none;
 }
 
 .pv2-cell__num--outside {
-  color: #cdcdcd;
+  color: var(--pv2-line);
   text-shadow: none;
 }
 
@@ -87,6 +90,6 @@ const emit = defineEmits<{
   right: 3px;
   bottom: 3px;
   font: 400 8px var(--cd-font-mono);
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
 }
 </style>

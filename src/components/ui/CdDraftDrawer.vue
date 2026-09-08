@@ -118,6 +118,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { QUADRANTS } from '@/composables/use-theme'
 import CdCheckCircle from './CdCheckCircle.vue'
 import CdIcon from './CdIcon.vue'
 
@@ -219,11 +220,18 @@ function onSwipeEnd(id: string): void {
   swipeOffsets.value = { ...swipeOffsets.value, [id]: current < -SWIPE_SNAP_THRESHOLD ? -SWIPE_OPEN : 0 }
 }
 
+// Labels and order are this drawer's own; the colours are QUADRANTS' (use-theme.ts), looked up by
+// key so the drawer cannot drift onto a retired palette the way its hardcoded copy did.
+const QUAD_COLOR = Object.fromEntries(QUADRANTS.map((q) => [q.key, q.backgroundColor])) as Record<
+  'do' | 'plan' | 'quick' | 'later',
+  string
+>
+
 const quadOptions = [
-  { key: 'plan' as const, label: 'Plan', color: '#6E839B' },
-  { key: 'do' as const, label: 'Do Now', color: '#C56A5E' },
-  { key: 'quick' as const, label: 'Quick', color: '#BFA86A' },
-  { key: 'later' as const, label: 'Later', color: '#9A988F' }
+  { key: 'plan' as const, label: 'Plan', color: QUAD_COLOR.plan },
+  { key: 'do' as const, label: 'Do Now', color: QUAD_COLOR.do },
+  { key: 'quick' as const, label: 'Quick', color: QUAD_COLOR.quick },
+  { key: 'later' as const, label: 'Later', color: QUAD_COLOR.later }
 ]
 
 const filteredGroups = computed(() => {

@@ -1,6 +1,6 @@
 <template>
   <!--
-    SCHEDULE 分頁：ALL-DAY 列（恆顯示）+ 底部黑線，其下為 06:00–23:00 的像素時間軸。
+    SCHEDULE 分頁：ALL-DAY 列（恆顯示）+ 底部墨線，其下為 06:00–23:00 的像素時間軸。
     時間軸沿用 legacy CdTimeGrid 的幾何（絕對定位、高度正比於時長、重疊分欄、now 線），
     見 Pv2TimeGrid；此檔只負責把 tasksStore 的資料映射成格線要的形狀。
   -->

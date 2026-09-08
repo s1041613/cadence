@@ -29,7 +29,7 @@
           />
         </form>
         <button v-else class="nbc__tag-add" type="button" aria-label="New list" @click="startTag">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M12 5 V19 M5 12 H19" />
           </svg>
         </button>
@@ -155,7 +155,7 @@ function commitTag(): void {
   /* No background of its own: CdSheet already paints the v2 paper surface. A colour here would
      only cover the slot, leaving the sheet's handle zone above and its 30px home-indicator
      padding below in paper — the two-tone panel Notebook had (Day's card avoids it by using
-     --pv2-paper, the same #fafaf9 CdSheet defaults to). */
+     --pv2-paper, the same var(--pv2-canvas) CdSheet defaults to). */
 }
 
 .nbc__input {
@@ -167,11 +167,11 @@ function commitTag(): void {
   background: transparent;
   font: 400 19px var(--cd-font-mono);
   line-height: 1.32;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .nbc__input::placeholder {
-  color: #777;
+  color: var(--pv2-ink-2);
 }
 
 .nbc__tags {
@@ -195,7 +195,7 @@ function commitTag(): void {
 .nbc__tag-form {
   flex: none;
   height: 34px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 999px;
   background: #fff;
 }
@@ -204,14 +204,14 @@ function commitTag(): void {
   min-width: 64px;
   padding: 0 15px;
   font: 600 12px var(--cd-font-mono);
-  color: #4f4f4f;
+  color: var(--pv2-ink-2);
   cursor: pointer;
 }
 
 .nbc__tag--active {
-  border-color: #1b1b1b;
-  background: #1b1b1b;
-  color: #fafaf9;
+  border-color: var(--pv2-ink);
+  background: var(--pv2-ink);
+  color: var(--pv2-canvas);
 }
 
 .nbc__tag-add {
@@ -237,11 +237,11 @@ function commitTag(): void {
   outline: none;
   background: transparent;
   font: 600 12px var(--cd-font-mono);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .nbc__tag-input::placeholder {
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .nbc__footer {
@@ -262,7 +262,7 @@ function commitTag(): void {
   border: none;
   border-radius: 14px;
   background: transparent;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   cursor: pointer;
 }
 
@@ -281,7 +281,7 @@ function commitTag(): void {
   width: 50px;
   height: 50px;
   padding: 0;
-  border: 1.5px solid #e0e0dd;
+  border: 1.5px solid var(--pv2-fill-hover);
   border-radius: 50%;
   background: #fff;
   cursor: pointer;

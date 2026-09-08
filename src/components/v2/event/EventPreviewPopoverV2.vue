@@ -162,6 +162,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { DEFAULT_EVENT_COLOR } from '../ui/event-colors'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdPopover from '@/components/ui/CdPopover.vue'
 import Pv2CopyToDaysCard from './Pv2CopyToDaysCard.vue'
@@ -249,7 +250,7 @@ const previewApproxHeight = computed(() => {
 const editTitle = ref('')
 const editType = ref<'event' | 'task'>('task')
 const editQuad = ref<'do' | 'plan' | 'quick' | 'later'>('later')
-const editColor = ref<string>('#4A8B85')
+const editColor = ref<string>(DEFAULT_EVENT_COLOR)
 // No UI writes this any more — v2's STYLE field picks a colour only. It is kept because
 // seedEditState/saveEdit round-trip it: dropping the ref would null out the stored icon of
 // any event edited in v2, which v1's picker can still set.
@@ -278,7 +279,7 @@ function seedEditState(t: Task): void {
   editTitle.value = t.title
   editType.value = t.type === 'event' ? 'event' : 'task'
   editQuad.value = quadrantOf(t).key
-  editColor.value = t.backgroundColor ?? '#4A8B85'
+  editColor.value = t.backgroundColor ?? DEFAULT_EVENT_COLOR
   editIcon.value = t.icon
   editAllDay.value = t.allDay
   editDate.value = t.date

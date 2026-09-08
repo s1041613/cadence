@@ -28,7 +28,7 @@
             aria-label="Toggle reminder"
             @click="r.done = !r.done"
           >
-            <svg v-if="r.done" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg v-if="r.done" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-canvas)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12 L10 17 L19 7" />
             </svg>
           </button>
@@ -78,7 +78,7 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   margin: 0 0 12px;
   font: 600 12px var(--cd-font-mono);
   letter-spacing: 0.14em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 /* MEAL PLAN 卡：四列，左 slot 標右內容 */
@@ -94,7 +94,7 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   align-items: center;
   gap: 18px;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(27, 27, 27, 0.06);
+  border-bottom: 1px solid rgba(var(--pv2-ink-rgb), 0.06);
 }
 
 .dmd__meal-row:last-child {
@@ -106,14 +106,14 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   width: 84px;
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.1em;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .dmd__meal-text {
   flex: 1;
   min-width: 0;
   font: 500 16px var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 /* REMINDER 清單 */
@@ -128,7 +128,7 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   align-items: center;
   gap: 14px;
   padding: 14px 2px;
-  border-bottom: 1px solid rgba(27, 27, 27, 0.08);
+  border-bottom: 1px solid rgba(var(--pv2-ink-rgb), 0.08);
 }
 
 /* 深色圓角方框 checkbox（照設計稿，非 olive 圓） */
@@ -139,24 +139,24 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   width: 24px;
   height: 24px;
   border-radius: 7px;
-  border: 1.8px solid #cdcdcd;
+  border: 1.8px solid var(--pv2-line);
   background: transparent;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .dmd__check--on {
-  background: #1b1b1b;
-  border-color: #1b1b1b;
+  background: var(--pv2-ink);
+  border-color: var(--pv2-ink);
 }
 
 .dmd__reminder-text {
   font: 500 16px var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .dmd__reminder-text--done {
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   text-decoration: line-through;
 }
 
@@ -169,6 +169,6 @@ const notes = 'Remember to book the Kyoto ryokan before Friday.'
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   font: italic 400 16px var(--cd-font-serif);
   line-height: 1.5;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 </style>

@@ -113,7 +113,7 @@ function onToday(): void {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(27, 27, 27, 0.32);
+  background: rgba(var(--pv2-ink-rgb), 0.32);
   /* A positioned generated box paints above non-positioned siblings and would
      otherwise cover the panel and swallow its clicks; the panel is given its own
      positioned context below, and this stays transparent to hit-testing so the
@@ -124,7 +124,7 @@ function onToday(): void {
 .pv2-sheet {
   position: relative; /* paint above ::before, which is positioned and would otherwise cover it */
   width: 100%;
-  background: #fafaf9;
+  background: var(--pv2-canvas);
   border-radius: 24px 24px 0 0;
   padding: 14px 24px 30px;
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
@@ -142,7 +142,7 @@ function onToday(): void {
   width: 40px;
   height: 5px;
   border-radius: 3px;
-  background: #dadad4;
+  background: var(--pv2-line);
   margin: 0 auto;
 }
 
@@ -160,7 +160,7 @@ function onToday(): void {
   gap: 12px;
   margin-top: 18px;
   padding-top: 16px;
-  border-top: 1px solid #e4e4e1;
+  border-top: 1px solid var(--pv2-fill-hover);
 }
 
 /* 兩顆按鈕共用：藥丸、鎖死 line-height（button 預設 normal 會撐高），字距同 chip */
@@ -179,9 +179,9 @@ function onToday(): void {
 .pv2-sheet__today {
   gap: 6px;
   padding: 11px 18px;
-  border: 1px solid #cdcdcd;
+  border: 1px solid var(--pv2-line);
   background: transparent;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 .pv2-sheet__today-icon {
@@ -192,13 +192,13 @@ function onToday(): void {
 
 .pv2-sheet__done {
   padding: 11px 26px;
-  border: 1px solid #1b1b1b;
-  background: #1b1b1b;
-  color: #fafaf9;
+  border: 1px solid var(--pv2-ink);
+  background: var(--pv2-ink);
+  color: var(--pv2-canvas);
 }
 
 .pv2-sheet__today:active {
-  background: #f0efec;
+  background: var(--pv2-fill);
 }
 
 .pv2-sheet__done:active {
@@ -215,11 +215,11 @@ function onToday(): void {
 
 .pv2-sheet__fade--top {
   top: 0;
-  background: linear-gradient(#fafaf9, rgba(250, 250, 249, 0));
+  background: linear-gradient(var(--pv2-canvas), rgba(var(--pv2-canvas-rgb), 0));
 }
 
 .pv2-sheet__fade--bottom {
   bottom: 0;
-  background: linear-gradient(rgba(250, 250, 249, 0), #fafaf9);
+  background: linear-gradient(rgba(var(--pv2-canvas-rgb), 0), var(--pv2-canvas));
 }
 </style>

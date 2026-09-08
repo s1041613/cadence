@@ -32,14 +32,14 @@
         />
       </form>
       <button v-else class="nbv__tag-add" type="button" aria-label="New tag" @click="startTag">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <path d="M12 5 V19 M5 12 H19" />
         </svg>
       </button>
     </div>
 
     <label class="nbv__search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c9c9c" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5" />
         <path d="M16 16 L21 21" />
       </svg>
@@ -134,7 +134,7 @@ function onSwipe(details: SwipeDetails): void {
 .nbv__tag-form {
   flex: none;
   height: 27px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.74);
 }
@@ -143,14 +143,14 @@ function onSwipe(details: SwipeDetails): void {
   min-width: 52px;
   padding: 0 11px;
   font: 600 11px var(--cd-font-mono);
-  color: #4f4f4f;
+  color: var(--pv2-ink-2);
   cursor: pointer;
 }
 
 .nbv__tag--active {
-  border-color: #1b1b1b;
-  background: #1b1b1b;
-  color: #fafaf9;
+  border-color: var(--pv2-ink);
+  background: var(--pv2-ink);
+  color: var(--pv2-canvas);
 }
 
 .nbv__tag-add {
@@ -176,7 +176,7 @@ function onSwipe(details: SwipeDetails): void {
   outline: none;
   background: transparent;
   font: 600 11px var(--cd-font-mono);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .nbv__search {
@@ -187,7 +187,7 @@ function onSwipe(details: SwipeDetails): void {
   height: 44px;
   margin: 8px 22px 10px;
   padding: 0 14px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 13px;
   background: rgba(255, 255, 255, 0.86);
 }
@@ -199,11 +199,11 @@ function onSwipe(details: SwipeDetails): void {
   outline: none;
   background: transparent;
   font: 400 14px var(--cd-font-mono);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .nbv__search-input::placeholder {
-  color: #777;
+  color: var(--pv2-ink-2);
 }
 
 .nbv__feed {
@@ -229,7 +229,7 @@ function onSwipe(details: SwipeDetails): void {
 .nbv__empty {
   margin: 24px 0 0;
   font: 500 12px var(--cd-font-mono);
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
   text-align: center;
 }
 </style>

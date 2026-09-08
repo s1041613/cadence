@@ -58,10 +58,10 @@ const emit = defineEmits<{
   font: italic 400 40px var(--cd-font-serif);
   letter-spacing: 0;
   line-height: 1;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
-/* 日期區間副標：照片背景上 #9c9c9c 只有約 2.2:1，加深到 #6e6e6e，
+/* 日期區間副標：照片背景上 var(--pv2-ink-3) 只有約 2.2:1，加深到 var(--pv2-ink-2)，
    仍明顯次於上方 Week N 主標。
    Zen Kaku 比例字身，字距從 0.16em 收到 0.12em 才不鬆散；數字補 tabular-nums，
    換週時 "AUG 2 — 8" 的寬度才不會跳動。 */
@@ -70,6 +70,6 @@ const emit = defineEmits<{
   font-variant-numeric: var(--cd-numeric-aligned);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 </style>

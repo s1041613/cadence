@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { DEFAULT_EVENT_COLOR } from '@/components/v2/ui/event-colors'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdEventEditCard from '@/components/ui/CdEventEditCard.vue'
 import Pv2EventEditCard from '@/components/v2/event/Pv2EventEditCard.vue'
@@ -148,7 +149,7 @@ const props = withDefaults(
 
 const fromCreate = ref(false)
 
-const FALLBACK_EVENT_COLOR = '#6E839B'
+const FALLBACK_EVENT_COLOR = DEFAULT_EVENT_COLOR
 const DEFAULT_START = '09:00'
 const DEFAULT_END = '09:30'
 

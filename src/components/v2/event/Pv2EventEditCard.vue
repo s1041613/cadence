@@ -604,18 +604,19 @@ const matrixOptions = [
 
 <style scoped>
 .pv2-edit-card {
-  /* v2 palette — neutral ink-on-paper, not the app-wide warm-beige cd-* tokens.
-     Mirrors the v2 month surface (Pv2Cell / Pv2Chip): near-black ink #1b1b1b,
-     paper #fafaf9, cool neutral greys for lines and fills. Everything below is
-     expressed through these locals so the whole card reads as one v2 surface. */
-  --pv2-ink: #1b1b1b;
-  --pv2-ink-2: #6e6e6e;
-  --pv2-ink-3: #b2b2b2;
-  --pv2-line: #e2e2e2;
-  --pv2-line-strong: #cdcdcd;
-  --pv2-fill: #f3f3f1;
-  --pv2-fill-hover: #ececea;
-  --pv2-paper: #fafaf9;
+  /* v2 palette — the rose ramp from cadence-tokens.css, not the app-wide warm-beige cd-*
+     tokens. --pv2-ink, --pv2-ink-2, --pv2-fill and --pv2-fill-hover are inherited from :root
+     untouched and are NOT restated here: a custom property that references itself
+     (--pv2-ink: var(--pv2-ink)) is a cycle, which resolves to nothing and takes the whole
+     card's ink with it.
+
+     The three below are real overrides, and they say the same thing each did as a hardcoded
+     grey: this card runs one step softer than the month grid, because its lines sit on a
+     white panel rather than on the canvas and the same value reads heavier there. */
+  --pv2-ink-3: var(--pv2-ink-4);
+  --pv2-line: var(--pv2-line-soft);
+  --pv2-line-strong: var(--pv2-line);
+  --pv2-paper: var(--pv2-canvas);
 
   --pv2-label-col: 92px;
   --pv2-gap: 12px;
@@ -644,9 +645,9 @@ const matrixOptions = [
   --pv2-control-fs: 14px;
   --pv2-control-fw: 500;
   --pv2-control-px: 12px;
-  --pv2-control-bg: #f0f0ed;
-  --pv2-control-bg-hover: #e8e8e4;
-  --pv2-control-bg-open: #e2e2de;
+  --pv2-control-bg: var(--pv2-fill);
+  --pv2-control-bg-hover: var(--pv2-fill-hover);
+  --pv2-control-bg-open: var(--pv2-fill-hover);
 
   /* Derived, not measured. This was pinned at 62.67px — the height the tallest
      control happened to render at — so every other row's rhythm depended on a
@@ -742,7 +743,7 @@ const matrixOptions = [
 .pv2-edit-card__type:deep(.cd-segmented__btn--active) {
   background: #fff;
   border: 1px solid var(--pv2-line);
-  box-shadow: 0 1px 2px rgba(27, 27, 27, 0.08);
+  box-shadow: 0 1px 2px rgba(var(--pv2-ink-rgb), 0.08);
   color: var(--pv2-ink);
 }
 

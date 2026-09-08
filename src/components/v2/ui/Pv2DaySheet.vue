@@ -19,7 +19,7 @@
           <span class="pv2-ds__date">{{ dateLabel }}</span>
         </div>
         <button type="button" class="pv2-ds__add" aria-label="新增事件" @click="emit('create')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2.2" stroke-linecap="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-canvas)" stroke-width="2.2" stroke-linecap="round">
             <path d="M12 5 V19 M5 12 H19" />
           </svg>
         </button>
@@ -120,7 +120,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(27, 27, 27, 0.32);
+  background: rgba(var(--pv2-ink-rgb), 0.32);
   /* A positioned generated box paints above non-positioned siblings and would
      otherwise cover the panel and swallow its clicks; the panel is given its own
      positioned context below, and this stays transparent to hit-testing so the
@@ -134,7 +134,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   height: 50%; /* 固定高度：不論事件多少都一樣高，超過的事件在列表區捲動 */
   display: flex;
   flex-direction: column;
-  background: #fafaf9;
+  background: var(--pv2-canvas);
   border-radius: 24px 24px 0 0;
   padding: 14px 24px 30px;
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.22);
@@ -156,7 +156,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   width: 40px;
   height: 5px;
   border-radius: 3px;
-  background: #dadad4;
+  background: var(--pv2-line);
   margin: 0 auto;
 }
 
@@ -167,7 +167,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 14px;
-  border-bottom: 1.5px solid #1b1b1b;
+  border-bottom: 1.5px solid var(--pv2-ink);
 }
 
 .pv2-ds__head-text {
@@ -181,14 +181,14 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 /* 同 poster 的斜體，字級跟著全站大標題乘 0.7（見 Pv2DayHeader） */
 .pv2-ds__date {
   font: italic 400 24px var(--cd-font-serif);
   line-height: 1;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-ds__add {
@@ -199,7 +199,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   height: 52px;
   border-radius: 50%;
   border: none;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   cursor: pointer;
 }
 
@@ -222,7 +222,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   width: 100%;
   padding: 14px 2px;
   border: none;
-  border-bottom: 1px solid rgba(27, 27, 27, 0.08);
+  border-bottom: 1px solid rgba(var(--pv2-ink-rgb), 0.08);
   background: none;
   cursor: pointer;
   text-align: left;
@@ -237,7 +237,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   font: 500 14px var(--cd-font-mono);
   letter-spacing: 0.02em;
   white-space: nowrap;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
 }
 
 /* 象限色點：小圓點（非直條），列高由 align-items:center 垂直置中 */
@@ -258,7 +258,7 @@ function onSwipeHorizontal(details: SwipeDetails): void {
 
 .pv2-ds__title {
   font: 600 16px var(--cd-font-ui);
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -268,6 +268,6 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   display: block;
   padding: 24px 2px;
   font: italic 400 15px var(--cd-font-serif);
-  color: #b0b0aa;
+  color: var(--pv2-ink-3);
 }
 </style>

@@ -193,28 +193,28 @@ import CdIcon from './CdIcon.vue'
 import { estPomsOf, minutes, type TimeFormatName } from '@/utils/convert-date-time'
 import type { IconName } from './icons'
 import type { ReminderPreset } from '@/types/task'
+import { QUADRANTS } from '@/composables/use-theme'
 
 // CdEventEditCard — Event/Task edit popover (same popover swaps between preview/edit, no slide
 // transition). design-research-report.md §3.9. desk width 388px.
 //
 // Event rows use the handoff's Style push subview for color/icon. Tasks show the quadrant matrix.
 //
-// CADENCE Handoff: event swatches use the handoff's cool event palette (#4A8B85 #63996B #6863B0
-// #8E6FB0 #A56D91 #4C4E57) — deliberately distinct from the warm/slate quadrant palette so the two
-// classification systems stay visually distinguishable. 38px circles; selected state ring changed
-// to `box-shadow: 0 0 0 3px #F1EFE8, 0 0 0 5px {c}` (was `0 0 0 2px #fff, 0 0 0 4px {c}`).
+// Event swatches come from EVENT_COLORS (event-colors.ts) via CdAppearancePicker; quadrant chips
+// come from QUADRANTS below. Both are pink now, and the two systems are told apart by SHAPE — a
+// swatch circle against a quadrant chip — rather than by hue, which is what the earlier cool/warm
+// split relied on. 38px circles; selected state ring `box-shadow: 0 0 0 3px #F1EFE8, 0 0 0 5px {c}`.
 //
 // CADENCE Handoff: time validation — when not all-day and end <= start, show a warning below the
 // time rows and disable Save (no save emit) until the range is valid again.
-const QUAD_COLORS: Record<string, string> = {
-  do: '#C56A5E',
-  plan: '#6E839B',
-  quick: '#BFA86A',
-  later: '#9A988F'
-}
+// Derived, not restated: QUADRANTS is the authority (use-theme.ts), and a second copy of the four
+// hexes here is how this card kept rendering the old palette after that one changed.
+const QUAD_COLORS: Record<string, string> = Object.fromEntries(
+  QUADRANTS.map((q) => [q.key, q.backgroundColor])
+)
 
 function quadColor(k: string): string {
-  return QUAD_COLORS[k] ?? '#9A988F'
+  return QUAD_COLORS[k] ?? QUAD_COLORS.later!
 }
 
 const props = withDefaults(

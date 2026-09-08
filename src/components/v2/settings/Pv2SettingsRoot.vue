@@ -75,15 +75,15 @@ async function onLogout(): Promise<void> {
 
 // 線條 icon（照設計稿風格，stroke 1.7，深色）
 const ICON_CAL =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2.5"/><path d="M4 9.5 H20 M8 3 V6 M16 3 V6"/></svg>'
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2.5"/><path d="M4 9.5 H20 M8 3 V6 M16 3 V6"/></svg>'
 const ICON_TIME =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7 V12 L15.5 14"/></svg>'
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7 V12 L15.5 14"/></svg>'
 const ICON_CUSTOM =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="8.5" cy="9" r="1.6"/><path d="M20 15 L15 10 L5 20"/></svg>'
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="8.5" cy="9" r="1.6"/><path d="M20 15 L15 10 L5 20"/></svg>'
 const ICON_NOTIF =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 a6 6 0 0 1 12 0 c0 5 2 6 2 6 H4 s2-1 2-6"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>'
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 a6 6 0 0 1 12 0 c0 5 2 6 2 6 H4 s2-1 2-6"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>'
 const ICON_PRIVACY =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 c0 5-3 8-7 10 c-4-2-7-5-7-10 V6 Z"/></svg>'
+  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 c0 5-3 8-7 10 c-4-2-7-5-7-10 V6 Z"/></svg>'
 const ICON_LOGOUT =
   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c56a5e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 H5 a2 2 0 0 0-2 2 v10 a2 2 0 0 0 2 2 h4 M15 8 l4 4-4 4 M19 12 H9"/></svg>'
 
@@ -111,8 +111,8 @@ const prefRows: PrefRow[] = [
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  /* Inherit the frame's paper (#fafaf9) rather than painting a slightly greyer
-     #efefef here — the old mismatch left a lighter band above the title where the
+  /* Inherit the frame's paper (var(--pv2-canvas)) rather than painting a slightly greyer
+     var(--pv2-fill) here — the old mismatch left a lighter band above the title where the
      safe-area padding showed the frame colour through. One surface, top to bottom. */
   background: transparent;
 }
@@ -125,8 +125,8 @@ const prefRows: PrefRow[] = [
   padding: 16px 22px 16px;
   font: 400 30px var(--cd-font-serif);
   line-height: 1;
-  color: #1b1b1b;
-  border-bottom: 1px solid #e2e2e2;
+  color: var(--pv2-ink);
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-set__scroll {
@@ -144,7 +144,7 @@ const prefRows: PrefRow[] = [
   gap: 16px;
   width: 100%;
   padding: 16px 18px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   background: #fff;
   cursor: default;
@@ -174,7 +174,7 @@ const prefRows: PrefRow[] = [
 .pv2-set__name {
   font: 600 16px var(--cd-font-mono);
   letter-spacing: 0.04em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
   line-height: 1;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -184,7 +184,7 @@ const prefRows: PrefRow[] = [
 .pv2-set__email {
   margin-top: 2px;
   font: 400 13px var(--cd-font-ui);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -196,12 +196,12 @@ const prefRows: PrefRow[] = [
   font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 /* 卡片群組：邊框無陰影，照設計稿 */
 .pv2-set__card {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   background: #fff;
   overflow: hidden;
@@ -233,7 +233,7 @@ const prefRows: PrefRow[] = [
   left: 54px;
   right: 0;
   height: 1px;
-  background: #e2e2e2;
+  background: var(--pv2-line-soft);
 }
 
 .pv2-set__row-icon {
@@ -249,7 +249,7 @@ const prefRows: PrefRow[] = [
   font: 600 13px var(--cd-font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-set__row--enabled {
@@ -268,7 +268,7 @@ const prefRows: PrefRow[] = [
   flex: none;
   font-size: 18px;
   line-height: 1;
-  color: #c4c4c4;
+  color: var(--pv2-line-strong);
 }
 
 .pv2-set__footer {
@@ -277,7 +277,7 @@ const prefRows: PrefRow[] = [
   font: 500 11px var(--cd-font-mono);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #b2b2b2;
+  color: var(--pv2-ink-4);
 }
 
 .pv2-set__footer-ver {

@@ -41,14 +41,14 @@ defineProps<{
 .pv2-gc__label {
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.18em;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-gc__body {
   margin: 0;
   font: 500 17px var(--cd-font-ui);
   line-height: 1.35;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-gc__img {

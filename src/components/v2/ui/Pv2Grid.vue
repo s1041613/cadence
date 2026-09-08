@@ -76,7 +76,7 @@ const hiddenPerDayFor = (week: Pv2GridWeek) => overflowFor(week).hiddenPerDay
   display: grid;
   grid-template-columns: 1fr;
   grid-auto-rows: 1fr;
-  border-top: 1px solid #e2e2e2;
+  border-top: 1px solid var(--pv2-line-soft);
 }
 
 /* 最後一列不收底線，月曆下緣開放。Cells are now nested inside week rows rather than being
