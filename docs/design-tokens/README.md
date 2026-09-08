@@ -18,7 +18,7 @@ The tokens themselves live in `src/css/cadence-tokens.css`, with each role's con
 ## The v2 ramp (`--pv2-*`)
 
 The v2 screens run on their own, rose-tinted ramp — `--pv2-ink` through `--pv2-line-soft`, plus
-`--pv2-accent` for today's date and the FAB — declared in the same file, below the `--cd-*` roles.
+`--pv2-accent` for today's date — declared in the same file, below the `--cd-*` roles.
 It is a second generation's palette, not a second palette in the sense below: the two coexist
 until one generation retires, and a screen belongs to exactly one of them.
 
