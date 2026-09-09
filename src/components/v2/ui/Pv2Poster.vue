@@ -25,22 +25,38 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 25px 0;
+  /* Tighter than the 25px it carried at 48px type: the title itself is the breathing room now,
+     and the grid below is flex:1 — every px spent here is a px the month's rows do not get. */
+  padding: 22px 0 14px;
   border: none;
   background: none;
   cursor: pointer;
+  /* The month name is sized off THIS box, not the viewport: on desktop the page centres a 393px
+     phone frame inside a window that may be three times wider, so a vw-based title would be
+     sized by a width the title never gets to use. Safe as a container because the parent sets
+     this element's width (.mv2__poster-title is width:100%). */
+  container-type: inline-size;
 }
 
 /* 月份名稱是這個檢視的封面，不是它的標題列：--cd-font-poster（M PLUS Rounded 1c 900）
    是全 app 唯一穿這個字體的地方，圓體 900 的筆畫在照片底上也不會被背景紋理吃掉——
    之前靠 48px 補回來的份量，現在由字重本身撐住。
    刻意不是 italic：這個字體的重心在圓，斜體會把圓角拉成橢圓，反而糊掉。
-   字級維持 48px，與日檢視的大日期數字同一階。
+   字級照參考圖放大成海報級（見下方 clamp 的計算）。
    顏色是 --pv2-poster-ink（比 accent 淡的粉紅，只夠 display 級字用）——月份名是封面，
    不是要讀的資訊，年份那行留在墨色才不會整塊糊成一片粉。 */
 .pv2-poster__month {
   text-align: center;
-  font: 900 48px var(--cd-font-poster);
+  /* Poster scale, sized so the LONGEST month name fits — one size for all twelve, not a size
+     per month: at a constant size the months are comparable, and only September ever comes
+     close to the edge. Measured in the running app at the shipped face, 'September' renders
+     5.494x its font-size wide, so 94% of the container divided by that is 17.1cqw. The 79px
+     ceiling only engages on a container wider than 462px, i.e. never on a phone frame.
+     The plain px declaration above it is the fallback for a browser without container units. */
+  font-family: var(--cd-font-poster);
+  font-weight: 900;
+  font-size: 64px;
+  font-size: min(79px, 17.1cqw);
   letter-spacing: -0.01em;
   line-height: 0.9;
   color: var(--pv2-poster-ink);
@@ -51,7 +67,7 @@ const emit = defineEmits<{
 .pv2-poster__year {
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
   font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.16em;
   color: var(--pv2-ink);

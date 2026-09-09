@@ -12,6 +12,24 @@
         <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
       </div>
 
+      <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。 -->
+      <div class="mv2__todos">
+        <Pv2TodoCard
+          label="今日待辦"
+          :total="todayTodos.length"
+          :item="todayTodos[0] ?? null"
+          empty-text="今天沒有待辦"
+          @item-click="onTodoClick"
+        />
+        <Pv2TodoCard
+          label="接下來七天"
+          :total="weekTodos.length"
+          :item="weekTodos[0] ?? null"
+          empty-text="七天內沒有待辦"
+          @item-click="onTodoClick"
+        />
+      </div>
+
       <!-- The strip scrolls horizontally itself, so it stops touchstart before the swipe
            directive on .mv2__body can claim a gesture that started inside the chip row. -->
       <Pv2CalStrip
@@ -82,14 +100,15 @@ import Pv2Grid, { type Pv2GridWeek } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2DaySheet, { type Pv2DayEvent } from '@/components/v2/ui/Pv2DaySheet.vue'
+import Pv2TodoCard, { type Pv2TodoItem } from '@/components/v2/ui/Pv2TodoCard.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
-import { themeOf } from '@/composables/use-theme'
+import { QUADRANTS, quadrantOf, themeOf } from '@/composables/use-theme'
 import { festivalOf } from '@/utils/festivals'
 import { anchorFromEvent } from '@/utils/popover-anchor'
-import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
+import { parseISO, iso, addDays, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { spansDate } from '@/utils/event-span'
 import { compareForLane, layoutWeek, weekRows } from '@/utils/month-lanes'
 import type { Task } from '@/types/task'
@@ -128,6 +147,44 @@ function visibleTasksForDate(date: string): Task[] {
 // Lanes are assigned once per week rather than per day, which is what keeps a span on the same
 // row in every cell it covers — assigning per cell let the same event sit on different rows on
 // consecutive days, so it never read as one bar.
+// 待辦＝象限任務（type 'quadrant'），不是事件：事件是「幾點要在哪」，象限任務才是「要做完的事」。
+// 已完成的不進來——卡片只有一行，被打勾的那筆佔掉它就等於沒有卡片。
+//
+// Order is urgency first, not insertion: the one line a card shows has to be the one worth
+// showing, and QUADRANTS is already ordered 馬上做 → 之後再說. Date leads for the seven-day card
+// so tomorrow's 之後再說 cannot outrank next Friday's 馬上做 by urgency alone.
+const QUAD_RANK: Record<string, number> = Object.fromEntries(QUADRANTS.map((q, i) => [q.key, i]))
+
+function todosBetween(from: string, to: string): Pv2TodoItem[] {
+  return tasksStore.tasks
+    .filter(
+      (t) =>
+        t.type === 'quadrant' &&
+        !t.done &&
+        calendarsStore.isVisible(t.calendarId) &&
+        t.date >= from &&
+        t.date <= to
+    )
+    .sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) ||
+        (QUAD_RANK[quadrantOf(a).key] ?? 0) - (QUAD_RANK[quadrantOf(b).key] ?? 0) ||
+        a.title.localeCompare(b.title)
+    )
+    .map((t) => ({ id: t.id, title: t.title, color: themeOf(t).backgroundColor }))
+}
+
+// Today, and then the six days after it — never overlapping, so a task is counted by exactly one
+// card and the two badges add up to the work ahead.
+const todayTodos = computed(() => todosBetween(iso(new Date()), iso(new Date())))
+const weekTodos = computed(() =>
+  todosBetween(iso(addDays(new Date(), 1)), iso(addDays(new Date(), 6)))
+)
+
+function onTodoClick(id: string, e: MouseEvent): void {
+  ui.eventPreview = { taskId: id, anchor: anchorFromEvent(e), mode: 'preview' }
+}
+
 const gridWeeks = computed<Pv2GridWeek[]>(() => {
   const today = iso(new Date())
   const visible = tasksStore.tasks.filter((t) => calendarsStore.isVisible(t.calendarId))
@@ -292,9 +349,18 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   touch-action: pan-x;
 }
 
+/* 待辦雙卡：與 chip 列、月曆共用同一組左右邊界。 */
+.mv2__todos {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 0 16px;
+}
+
 /* 標題與 chip 列之間留白（headline 在上，chip 列不與標題相黏） */
 .mv2__strip {
-  margin-top: 18px;
+  margin-top: 14px;
 }
 
 .mv2__weekdays {
