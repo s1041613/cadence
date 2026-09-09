@@ -64,6 +64,35 @@ export const CELL = {
 /** Vertical offset of the bar overlay from the top of a week row. */
 export const BARS_TOP = CELL.padTop + CELL.headH + CELL.festivalH + CELL.headGap
 
+/**
+ * The height a week row needs to show `lanes` chips, and nothing more.
+ *
+ * The grid's rows are 1fr, so without a ceiling they split whatever height the page has left —
+ * on a tall phone that is a 6-row month of nearly empty 110px rows, which reads as a table that
+ * could not fill itself rather than as a calendar. Capping the GRID at rows x this keeps 1fr's
+ * one virtue (rows shrink to fit a short screen) while stopping the stretch on a tall one.
+ */
+export const rowHeightForLanes = (lanes: number): number =>
+  CELL.padTop +
+  CELL.headH +
+  CELL.festivalH +
+  CELL.headGap +
+  lanes * CELL.chipH +
+  Math.max(0, lanes - 1) * CELL.chipGap +
+  CELL.padBottom
+
+/**
+ * What a row is allowed to grow to: three lanes.
+ *
+ * It is a ceiling, not a density target — the rows are still 1fr, so a short screen shrinks
+ * them below this; what it stops is six near-empty rows splitting a tall phone between them.
+ *
+ * Three lanes, not two, because an overflowing day spends one of them on its "+N" (see
+ * computeHidden): at two the grid shows a single chip and a "+N" under it, which is a list of
+ * one. Three lands on the reference's density — two titles and a count of what is left.
+ */
+export const ROW_MAX_H = rowHeightForLanes(3)
+
 /** Top offset of a lane within the overlay. */
 export const laneTop = (lane: number): number => lane * (CELL.chipH + CELL.chipGap)
 

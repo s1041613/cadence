@@ -48,15 +48,15 @@ const emit = defineEmits<{
 .pv2-poster__month {
   text-align: center;
   /* Poster scale, sized so the LONGEST month name fits — one size for all twelve, not a size
-     per month: at a constant size the months are comparable, and only September ever comes
-     close to the edge. Measured in the running app at the shipped face, 'September' renders
-     5.494x its font-size wide, so 94% of the container divided by that is 17.1cqw. The 79px
-     ceiling only engages on a container wider than 462px, i.e. never on a phone frame.
-     The plain px declaration above it is the fallback for a browser without container units. */
+     per month: at a constant size the months are comparable. Measured in the running app at the
+     shipped face, 'September' renders 5.494x its font-size wide, so 13.5cqw puts the longest
+     month at about three quarters of the container and leaves the title reading as a cover
+     rather than as a wall. The 62px ceiling only engages above a 459px container, i.e. never on
+     a phone frame. The plain px declaration is the fallback without container units. */
   font-family: var(--cd-font-poster);
   font-weight: 900;
-  font-size: 64px;
-  font-size: min(79px, 17.1cqw);
+  font-size: 52px;
+  font-size: min(62px, 13.5cqw);
   letter-spacing: -0.01em;
   line-height: 0.9;
   color: var(--pv2-poster-ink);
