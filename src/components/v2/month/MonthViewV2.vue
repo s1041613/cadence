@@ -87,6 +87,7 @@ import { useTasksStore } from '@/stores/tasks-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { themeOf } from '@/composables/use-theme'
+import { festivalOf } from '@/utils/festivals'
 import { anchorFromEvent } from '@/utils/popover-anchor'
 import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
 import { spansDate } from '@/utils/event-span'
@@ -139,7 +140,8 @@ const gridWeeks = computed<Pv2GridWeek[]>(() => {
         date: c.date,
         dayNum: c.dayNum,
         today: c.date === today,
-        outsideMonth: c.outsideMonth
+        outsideMonth: c.outsideMonth,
+        festival: festivalOf(c.date)
       })),
       bars: layoutWeek(visible, dates).bars.map((bar) => ({
         id: bar.task.id,
