@@ -8,7 +8,7 @@
     Rows are weeks, not days: a multi-day event is drawn as one bar spanning several columns, so
     the element that owns it has to be the week (see Pv2WeekRow).
   -->
-  <div ref="gridEl" class="pv2-grid">
+  <div ref="gridEl" class="pv2-grid" :style="{ maxHeight: `${weeks.length * ROW_MAX_H}px` }">
     <Pv2WeekRow
       v-for="week in weeks"
       :key="week.key"
@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Pv2WeekRow, { type Pv2WeekBar, type Pv2WeekCell } from './Pv2WeekRow.vue'
-import { CELL, computeHidden } from '@/utils/month-lanes'
+import { CELL, ROW_MAX_H, computeHidden } from '@/utils/month-lanes'
 
 export interface Pv2GridWeek {
   /** Stable across renders; the week's first date. */
@@ -78,6 +78,10 @@ const hiddenPerDayFor = (week: Pv2GridWeek) => overflowFor(week).hiddenPerDay
   grid-auto-rows: 1fr;
   border-top: 1px solid var(--pv2-line-soft);
 }
+
+/* Height is capped inline at weeks x ROW_MAX_H (month-lanes.ts): the rows stay 1fr so they can
+   still shrink onto a short screen, but on a tall one the month ends where its content ends
+   instead of stretching every week to 110px of mostly blank cell. */
 
 /* 最後一列不收底線，月曆下緣開放。Cells are now nested inside week rows rather than being
    siblings across the whole grid, so this targets the last WEEK — the old
