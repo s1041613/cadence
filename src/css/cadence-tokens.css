@@ -145,6 +145,16 @@
   --pv2-accent-rgb: 216, 46, 119;
   --pv2-on-accent: #ffffff;
 
+  /* The month poster's ink. A lighter pink than the accent and NOT interchangeable with it:
+   * it measures 3.1:1 on the page, which clears the bar for 48px/900 display type and nothing
+   * else. Never set anything smaller in it. */
+  --pv2-poster-ink: #E56090;
+
+  /* Public-holiday text in the month grid (utils/festivals.ts). Red is the calendar convention
+   * for a day off and survives the pink surroundings; 4.8:1 on the page, which the 8px label
+   * needs. Distinct from --pv2-accent on purpose — one says "today", this one says "no work". */
+  --pv2-holiday: #C43D5B;
+
   /* ---------- Weekday accents ---------- */
   --cd-weekday-saturday: #3A6EA5;
   --cd-weekday-sunday: #C0564B;

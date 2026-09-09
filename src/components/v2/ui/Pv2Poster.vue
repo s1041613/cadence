@@ -35,13 +35,15 @@ const emit = defineEmits<{
    是全 app 唯一穿這個字體的地方，圓體 900 的筆畫在照片底上也不會被背景紋理吃掉——
    之前靠 48px 補回來的份量，現在由字重本身撐住。
    刻意不是 italic：這個字體的重心在圓，斜體會把圓角拉成橢圓，反而糊掉。
-   字級維持 48px，與日檢視的大日期數字同一階。 */
+   字級維持 48px，與日檢視的大日期數字同一階。
+   顏色是 --pv2-poster-ink（比 accent 淡的粉紅，只夠 display 級字用）——月份名是封面，
+   不是要讀的資訊，年份那行留在墨色才不會整塊糊成一片粉。 */
 .pv2-poster__month {
   text-align: center;
   font: 900 48px var(--cd-font-poster);
   letter-spacing: -0.01em;
   line-height: 0.9;
-  color: var(--pv2-ink);
+  color: var(--pv2-poster-ink);
 }
 
 /* 年份同樣吃虧在照片底：var(--pv2-ink-2) 對背景亮處只有 ~3:1，看起來是褪色而不是次級。

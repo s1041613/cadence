@@ -16,6 +16,7 @@
       :day-num="c.dayNum"
       :today="c.today"
       :outside-month="c.outsideMonth"
+      :festival="c.festival"
       :hidden-count="hiddenPerDay[i] ?? 0"
       @cell-click="emit('cellClick', c.date)"
     />
@@ -43,12 +44,14 @@ import { computed } from 'vue'
 import Pv2Cell from './Pv2Cell.vue'
 import Pv2EventChip from './Pv2EventChip.vue'
 import { BARS_TOP, DAYS_PER_WEEK, laneTop } from '@/utils/month-lanes'
+import type { Festival } from '@/utils/festivals'
 
 export interface Pv2WeekCell {
   date: string
   dayNum: number
   today: boolean
   outsideMonth: boolean
+  festival: Festival | null
 }
 
 /** A laid-out bar, ready to position: view concerns only, no Task and no date arithmetic. */

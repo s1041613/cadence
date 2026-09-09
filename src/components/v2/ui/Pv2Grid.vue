@@ -59,7 +59,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 const maxLanes = computed(() => {
   if (gridHeight.value <= 0) return 3 // pre-measure fallback
   const rowH = gridHeight.value / Math.max(1, props.weeks.length)
-  const availH = rowH - CELL.padTop - CELL.padBottom - CELL.headGap - CELL.headH
+  const availH = rowH - CELL.padTop - CELL.padBottom - CELL.headGap - CELL.headH - CELL.festivalH
   return Math.max(1, Math.floor((availH + CELL.chipGap) / (CELL.chipH + CELL.chipGap)))
 })
 

@@ -47,10 +47,22 @@ export const DAYS_PER_WEEK = 7
  * is filled now and carries no border). Change the chip's font size or padding without changing
  * this and every cell silently fits one chip too many or too few.
  */
-export const CELL = { padTop: 4, padBottom: 5, headGap: 3, headH: 20, chipH: 15, chipGap: 2 } as const
+export const CELL = {
+  padTop: 4,
+  padBottom: 5,
+  headGap: 3,
+  headH: 20,
+  /* The festival line under the day number (Pv2Cell), at 8px/1.3 rounded up. Reserved on every
+     cell, not only the ones with a festival: the bar overlay sits at one offset for the whole
+     week, so a per-cell height would put a chip through the label on exactly the days that have
+     one. A blank line on an ordinary day costs the row 11px; a collision costs it the label. */
+  festivalH: 11,
+  chipH: 15,
+  chipGap: 2
+} as const
 
 /** Vertical offset of the bar overlay from the top of a week row. */
-export const BARS_TOP = CELL.padTop + CELL.headH + CELL.headGap
+export const BARS_TOP = CELL.padTop + CELL.headH + CELL.festivalH + CELL.headGap
 
 /** Top offset of a lane within the overlay. */
 export const laneTop = (lane: number): number => lane * (CELL.chipH + CELL.chipGap)
