@@ -1,5 +1,5 @@
 <template>
-  <!-- 月曆海報標題：居中直排，圓體粗大字 + 年份小標。點擊開月/年輪盤。 -->
+  <!-- 月曆海報標題：居中直排，粗體大字 + 年份小標。點擊開月/年輪盤。 -->
   <button type="button" class="pv2-poster" @click="emit('openSheet')">
     <span class="pv2-poster__month">{{ monthName }}</span>
     <span class="pv2-poster__year">{{ year }}</span>
@@ -38,23 +38,22 @@ const emit = defineEmits<{
   container-type: inline-size;
 }
 
-/* 月份名稱是這個檢視的封面，不是它的標題列：--cd-font-poster（M PLUS Rounded 1c 900）
-   是全 app 唯一穿這個字體的地方，圓體 900 的筆畫在照片底上也不會被背景紋理吃掉——
-   之前靠 48px 補回來的份量，現在由字重本身撐住。
-   刻意不是 italic：這個字體的重心在圓，斜體會把圓角拉成橢圓，反而糊掉。
-   字級照參考圖放大成海報級（見下方 clamp 的計算）。
-   顏色是 --pv2-poster-ink（比 accent 淡的粉紅，只夠 display 級字用）——月份名是封面，
-   不是要讀的資訊，年份那行留在墨色才不會整塊糊成一片粉。 */
+/* 月份名稱是這個檢視的封面，不是它的標題列：字級與字重扛住份量，顏色就交給墨色。
+   曾經是粉紅的（--pv2-poster-ink 現在指回 --pv2-ink）——標題一粉，底下整排粉紅 chip
+   就沒有東西可以對比，兩邊一起變糊。
+   刻意不是 italic，也刻意不是第二套字體：設計稿的月份是一個平的粗體 grotesque。 */
 .pv2-poster__month {
   text-align: center;
   /* Poster scale, sized so the LONGEST month name fits — one size for all twelve, not a size
-     per month: at a constant size the months are comparable. Measured in the running app at the
-     shipped face, 'September' renders 5.494x its font-size wide, so 13.5cqw puts the longest
-     month at about three quarters of the container and leaves the title reading as a cover
-     rather than as a wall. The 62px ceiling only engages above a 459px container, i.e. never on
-     a phone frame. The plain px declaration is the fallback without container units. */
+     per month: at a constant size the months are comparable. 'September' is the widest of the
+     twelve, and 13.5cqw puts it at roughly three quarters of the container — a cover rather
+     than a wall. The 62px ceiling only engages above a 459px container, i.e. never on a phone
+     frame. The plain px declaration is the fallback without container units.
+     800, not 900: the UI face is loaded at 400–800 (fonts.css), and a call site asking for 900
+     renders at 800 anyway — with the weight written down, that is a decision instead of a
+     silent fallback. */
   font-family: var(--cd-font-poster);
-  font-weight: 900;
+  font-weight: 800;
   font-size: 52px;
   font-size: min(62px, 13.5cqw);
   letter-spacing: -0.01em;

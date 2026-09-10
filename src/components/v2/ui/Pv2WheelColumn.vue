@@ -228,7 +228,7 @@ function itemStyle(dist: number): Record<string, string> {
    picker as on the poster the picker edits. */
 .pv2-wheel-col__item--poster {
   font-family: var(--cd-font-poster);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .pv2-wheel-col__item--mono {

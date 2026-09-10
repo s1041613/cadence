@@ -30,9 +30,3 @@
 @import "@fontsource/noto-sans-tc/500.css";
 @import "@fontsource/noto-sans-tc/600.css";
 @import "@fontsource/noto-sans-tc/700.css";
-
-/* The month poster's face (--cd-font-poster). latin-900 alone, not the family's
- * own 900.css: this package carries a full CJK range, and the unsubsetted import
- * emits every Japanese slice into the build for a word that is always a Latin
- * month name. One weight, because one call site. */
-@import "@fontsource/m-plus-rounded-1c/latin-900.css";
