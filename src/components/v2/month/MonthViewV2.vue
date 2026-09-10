@@ -12,6 +12,25 @@
         <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
       </div>
 
+      <!-- 摘要卡列：今天 / 未來七天。放在標題與過濾條之間，因為它回答的是
+           「先看哪裡」——那個問題比「要看哪個日曆」更早發生。 -->
+      <div class="mv2__summary">
+        <Pv2SummaryCard
+          label="Today's tasks"
+          :lead="todaySummary.lead"
+          :more="todaySummary.more"
+          empty-text="今天沒有安排"
+          @select="onSummarySelect"
+        />
+        <Pv2SummaryCard
+          label="Up next 7 days"
+          :lead="upNextSummary.lead"
+          :more="upNextSummary.more"
+          empty-text="這七天沒有安排"
+          @select="onSummarySelect"
+        />
+      </div>
+
       <!-- The strip scrolls horizontally itself, so it stops touchstart before the swipe
            directive on .mv2__body can claim a gesture that started inside the chip row. -->
       <Pv2CalStrip
@@ -77,6 +96,7 @@
 import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
 import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
+import Pv2SummaryCard, { type Pv2SummaryItem } from '@/components/v2/ui/Pv2SummaryCard.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridWeek } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -88,12 +108,13 @@ import { useSettingsStore } from '@/stores/settings-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
-import { parseISO, iso, WD_CAP, formatTime } from '@/utils/convert-date-time'
-import { spansDate } from '@/utils/event-span'
+import { addDays, parseISO, iso, formatTime } from '@/utils/convert-date-time'
+import { endDateOf, spansDate } from '@/utils/event-span'
 import { compareForLane, layoutWeek, weekRows } from '@/utils/month-lanes'
 import type { Task } from '@/types/task'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
 import { resolveDaySheetStep, useDateSwipe } from '@/composables/use-date-swipe'
+import { useCurrentTime } from '@/composables/use-current-time'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
@@ -155,6 +176,52 @@ const gridWeeks = computed<Pv2GridWeek[]>(() => {
     }
   })
 })
+
+// ── 上方摘要卡（今天 / 未來七天）────────────────────────────
+// 兩張卡都只吐「最前面一筆 + 還剩幾筆」，清單本身在日檢視與當日面板裡，這裡不重畫。
+// done 的事項不算：卡片問的是「還有什麼要做」，已完成的留在格子裡就好。
+type Summary = { lead: Pv2SummaryItem | null; more: number }
+
+function summarize(tasks: Task[]): Summary {
+  const [first, ...rest] = tasks
+  if (!first) return { lead: null, more: 0 }
+  return {
+    lead: { id: first.id, title: first.title || '(無標題)', color: themeOf(first).backgroundColor },
+    more: rest.length
+  }
+}
+
+// 今天用實際日期，不是 ui.selectedDate：卡片講的是「今天」，翻到十二月時它不該跟著翻。
+// 走共用時鐘而不是在 setup 取一次 new Date()：這張卡可能開著過午夜，那時它得換成新的一天。
+// iso() 每秒重算一次（很便宜），但字串沒變就不會往下推——下面兩張卡因此還是一天只算一次。
+const clock = useCurrentTime()
+const today = computed(() => iso(clock.value))
+
+const todaySummary = computed<Summary>(() =>
+  summarize(visibleTasksForDate(today.value).filter((t) => !t.done).sort(compareForLane))
+)
+
+// 明天起算的七天（含第七天）。用區間相交而不是 spansDate 逐日比對，跨月的長事件才只算一次。
+const upNextSummary = computed<Summary>(() => {
+  const from = iso(addDays(parseISO(today.value), 1))
+  const to = iso(addDays(parseISO(today.value), 7))
+  return summarize(
+    tasksStore.tasks
+      .filter(
+        (t) =>
+          !t.done &&
+          calendarsStore.isVisible(t.calendarId) &&
+          t.date <= to &&
+          endDateOf(t) >= from
+      )
+      .sort(compareForLane)
+  )
+})
+
+// 點卡片＝開那一筆的 preview，跟點當日面板裡的一列同一個行為。
+function onSummarySelect(id: string, e: MouseEvent): void {
+  ui.eventPreview = { taskId: id, anchor: anchorFromEvent(e), mode: 'preview' }
+}
 
 // ── 當日事件面板（cell 點擊）──────────────────────────────
 const daySheetDate = ref<string | null>(null)
@@ -290,13 +357,24 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   touch-action: pan-x;
 }
 
-/* 標題與 chip 列之間留白（headline 在上，chip 列不與標題相黏） */
+/* 摘要卡列：兩張等寬。1fr 1fr 而不是 auto——長標題不該把另一張卡擠窄，
+   兩張卡的寬度是固定的視覺節奏。 */
+.mv2__summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 0 4px;
+}
+
+/* 摘要卡與 chip 列之間留白 */
 .mv2__strip {
-  margin-top: 18px;
+  margin-top: 16px;
+  padding: 0 4px;
 }
 
 .mv2__weekdays {
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 /* 星期表頭與格線之間，grid 撐滿剩餘高度 */

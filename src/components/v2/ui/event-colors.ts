@@ -49,3 +49,33 @@ export function eventColorNameOf(hex: string | undefined): string | null {
   const match = EVENT_COLORS.find((c) => c.hex.toLowerCase() === hex.toLowerCase())
   return match?.name ?? null
 }
+
+/**
+ * Mixes a colour towards white and returns an opaque hex.
+ *
+ * The month grid's timed chips are filled with a pale wash of the event's own colour
+ * (see Pv2EventChip). That wash has to be OPAQUE, not the colour at low alpha: the v2
+ * pages can carry a user background photo, and a translucent chip would let the photo
+ * through and stop reading as one flat swatch. Mixing here rather than with CSS
+ * color-mix() also keeps the result identical everywhere — the value is data-derived,
+ * so it must not depend on how new the browser is.
+ *
+ * `weight` is how much of the ORIGINAL colour survives: 0.16 means 16% colour, 84% white.
+ * Returns null for anything that isn't #rgb / #rrggbb — stored colours come from the
+ * database and need not be either, so callers fall back rather than render garbage.
+ */
+export function tintOf(hex: string, weight: number): string | null {
+  const m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m) return null
+
+  const body = m[1]!
+  const full = body.length === 3 ? body.replace(/./g, (c) => c + c) : body
+  const w = Math.min(1, Math.max(0, weight))
+
+  const mixed = [0, 2, 4].map((i) => {
+    const channel = parseInt(full.slice(i, i + 2), 16)
+    return Math.round(channel * w + 255 * (1 - w))
+  })
+
+  return `#${mixed.map((c) => c.toString(16).padStart(2, '0')).join('')}`
+}

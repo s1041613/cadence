@@ -201,6 +201,51 @@
   --cd-fs-46: 46px;
   --cd-fs-52: 52px; /* v2 月曆標題 Instrument Serif */
 
+  /* ==========================================================================
+   * v2 月曆頁配色（rose / navy）
+   *
+   * 這組 token 是月曆頁的視覺主題，不是全站調色盤：Day / Week / Notes / Settings
+   * 仍走上面的 --cd-* 角色色。定義在 :root 只是為了「值只寫一次」，套用範圍由
+   * MonthPageV2 的 frame 決定（它在自己身上覆寫 --cd-surface-canvas 與 nav 的
+   * accent，custom property 往下繼承，所以只有月曆頁改色）。
+   *
+   * 命名照角色而非材質：--pv2-rose 是「當前 / 強調」，--pv2-rose-soft 是它的底色，
+   * --pv2-ink 是主要文字，--pv2-ink-2 是次級（星期表頭、卡片標籤），
+   * --pv2-ink-3 是外月日期這種「在場但不讀」的層級。
+   * ========================================================================== */
+
+  /* 頁面底：偏冷的近白，與 --cd-surface-canvas 的暖白刻意不同 */
+  --pv2-canvas: #f5f7fa;
+  --pv2-canvas-top: #f8f9fc;
+
+  /* 文字三階 */
+  --pv2-ink: #3a4060;      /* 標題、日期數字 */
+  --pv2-ink-2: #8f95a6;    /* 星期表頭、卡片標籤、+N */
+  --pv2-ink-3: #c2c7d4;    /* 外月日期 */
+  --pv2-ink-body: #43485c; /* 事件 chip 上的內文（比 --pv2-ink 中性一點） */
+
+  /* 強調色 */
+  --pv2-rose: #dd6183;
+  --pv2-rose-rgb: 221, 97, 131;
+  --pv2-rose-ink: #b8446a;   /* rose 底上的深字 */
+  --pv2-rose-soft: #fbe3ea;  /* chip / active 狀態的底 */
+
+  /* 線與面 */
+  --pv2-line: #e4e7ee;
+  --pv2-card: rgba(255, 255, 255, .82);
+  --pv2-card-line: rgba(255, 255, 255, .9);
+  --pv2-chip-off-line: #d9dde6;
+  --pv2-chip-on: #e4e8f0;
+  --pv2-chip-on-ink: #545b72;
+
+  /* 卡片陰影：月曆頁的卡片是「浮在紙上」的層級，與 --cd-shadow-overlay
+     （蓋住整頁的 sheet / drawer）不同級，所以獨立一個值。 */
+  --pv2-shadow-card: 0 2px 10px rgba(58, 64, 96, .06);
+
+  /* 月曆頁的圓角 */
+  --pv2-radius-card: 16px;
+  --pv2-radius-chip: 5px;
+
   /* ---------- v2 layout ---------- */
   /* Pv2BottomNav is a floating overlay (position: absolute), not an in-flow row, so the
      clearance below is measured from the frame's true bottom edge to the TOP of the

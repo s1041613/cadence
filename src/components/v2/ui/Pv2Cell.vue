@@ -1,6 +1,6 @@
 <template>
   <!--
-    月曆單日格。日期數字 Caveat 藥丸：today 黑底白字、非 today 深色 + 可讀陰影、外月淡色。
+    月曆單日格。日期數字置中，today 是實心 rose 圓、非 today 深藍墨、外月淡灰。
     cell 點擊 → 開當日事件面板。
 
     Events are NOT rendered here: a multi-day event has to be one element crossing several
@@ -38,55 +38,55 @@ const emit = defineEmits<{
 </script>
 
 <style scoped>
+/* padding / head 尺寸與 month-lanes 的 CELL 常數是同一組數字：那邊算「一列塞得下幾條」，
+   這邊畫格子本身，對不上就會多畫或少畫一條 chip。改這裡要一起改 CELL。 */
 .pv2-cell {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  border-bottom: 1px solid #cdcdcd;
-  padding: 4px 2px 5px;
+  border-bottom: 1px solid var(--pv2-line);
+  padding: 3px 1px 4px;
   box-sizing: border-box;
   cursor: pointer;
 }
 
-/* center，不是 space-between：head 目前只有日期藥丸一個子元素，space-between 等同 flex-start，
-   藥丸貼欄左緣、每欄右側空一截，整個月曆讀起來偏左。日後若補右側元素再回頭調整。 */
 .pv2-cell__head {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 24px; /* = CELL.headH */
 }
 
+/* 圓形而非藥丸：today 是實心圓，一位數與兩位數要同樣大小，所以寬高都鎖 24。 */
 .pv2-cell__num {
   display: inline-grid;
   place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 3px;
+  width: 24px;
+  height: 24px;
   border-radius: 999px;
-  font: 700 13px var(--cd-font-caveat);
+  font: 500 15px var(--cd-font-ui);
+  font-variant-numeric: var(--cd-numeric-aligned);
   line-height: 1;
-  color: #1b1b1b;
-  text-shadow: 0 1px 3px rgba(250, 250, 249, 0.9), 0 0 2px rgba(250, 250, 249, 0.9);
+  color: var(--pv2-ink);
 }
 
 .pv2-cell__num--today {
-  background: #1b1b1b;
-  color: #fafaf9;
-  text-shadow: none;
+  background: var(--pv2-rose);
+  color: #fff;
+  font-weight: 600;
 }
 
 .pv2-cell__num--outside {
-  color: #cdcdcd;
-  text-shadow: none;
+  color: var(--pv2-ink-3);
 }
 
 /* Pinned to the bottom of the cell rather than following a chip list — the chips live in the
    week's overlay now, so there is nothing here for it to sit after. */
 .pv2-cell__more {
   position: absolute;
-  right: 3px;
-  bottom: 3px;
-  font: 400 8px var(--cd-font-mono);
-  color: #b2b2b2;
+  right: 4px;
+  bottom: 2px;
+  font: 500 8px var(--cd-font-ui);
+  color: var(--pv2-ink-2);
 }
 </style>

@@ -121,6 +121,16 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 </script>
 
 <style scoped>
+/*
+ * Two theming hooks, read through var() FALLBACKS rather than declared with defaults here:
+ * a `--pv2-nav-on: …` on .pv2-nav itself would sit closer to the element than a page's
+ * override on its frame and silently win, so the nav would never take a page's tint.
+ * The fallback form keeps the shared-palette default while still letting an ancestor
+ * (MonthPageV2's frame, which puts the active tab on rose) set the value by inheritance.
+ *
+ *   --pv2-nav-on   : the active tab's icon + label
+ *   --pv2-nav-pill : the tint under the sliding active pill
+ */
 .pv2-nav {
   /* Floating overlay, not an in-flow row: absolute (not fixed) so it stays inside
      each page's own position:relative frame — NotebookPageV2/SettingsPageV2 render a
@@ -171,7 +181,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   will-change: transform, width;
   background:
     linear-gradient(160deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .18)),
-    var(--cd-ink-wash-line);
+    var(--pv2-nav-pill, var(--cd-ink-wash-line));
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, .5);
@@ -188,9 +198,12 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   opacity: 1;
 }
 
+/* No blur to sit under, so the pill drops the white gradient and paints the tint flat.
+   It shares --pv2-nav-pill with the blurred rule above rather than keeping its own,
+   heavier wash: one hook is what lets a page tint the pill in both branches at once. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .pv2-nav__pill {
-    background: var(--cd-ink-wash-strong);
+    background: var(--pv2-nav-pill, var(--cd-ink-wash-strong));
   }
 }
 
@@ -223,7 +236,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 .pv2-nav__icon--on {
-  color: var(--cd-ink);
+  color: var(--pv2-nav-on, var(--cd-ink));
 }
 
 .pv2-nav__label {
@@ -237,7 +250,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 }
 
 .pv2-nav__label--on {
-  color: var(--cd-ink);
+  color: var(--pv2-nav-on, var(--cd-ink));
 }
 
 @media (prefers-reduced-motion: reduce) {

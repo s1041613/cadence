@@ -43,11 +43,13 @@ export const DAYS_PER_WEEK = 7
  * Cell geometry, in px. Shared so the grid's "how many lanes fit" arithmetic and the week row's
  * "where does lane N sit" arithmetic cannot drift apart.
  *
- * chipH tracks Pv2EventChip's type size (9px text x 1.2 line-height, plus 1+1 padding and 1+1
- * border). Change the chip's font size without changing this and every cell silently fits one
- * chip too many or too few.
+ * Three of these are mirrors of CSS and have to be changed in pairs, or every cell silently
+ * fits one chip too many or too few:
+ *   padTop / padBottom → Pv2Cell's .pv2-cell padding
+ *   headH              → Pv2Cell's .pv2-cell__head height (the day-number circle)
+ *   chipH              → Pv2EventChip's box: 10px text x 1.3 line-height + 1+1 padding
  */
-export const CELL = { padTop: 4, padBottom: 5, headGap: 3, headH: 20, chipH: 15, chipGap: 2 } as const
+export const CELL = { padTop: 3, padBottom: 4, headGap: 4, headH: 24, chipH: 15, chipGap: 3 } as const
 
 /** Vertical offset of the bar overlay from the top of a week row. */
 export const BARS_TOP = CELL.padTop + CELL.headH + CELL.headGap

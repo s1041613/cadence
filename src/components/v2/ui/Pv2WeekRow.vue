@@ -106,8 +106,10 @@ const barStyle = (bar: Pv2WeekBar) => ({
 
 .pv2-week__bar {
   position: absolute;
-  /* The inset the cell applies to its day number, so bar and number share a left edge. */
-  padding-inline: 2px;
+  /* Matches .pv2-cell's own inline padding, so a bar sits inside the same column gutter the
+     day number does. Kept tight (1px) on purpose: at 10px type every pixel here is roughly a
+     tenth of a CJK glyph off the end of a chip's title. */
+  padding-inline: 1px;
   box-sizing: border-box;
 }
 </style>
