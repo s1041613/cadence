@@ -57,14 +57,16 @@ const remaining = computed(() => Math.max(0, props.total - (props.item ? 1 : 0))
   flex: 1;
   min-width: 0;
   box-sizing: border-box;
-  padding: 10px 12px 11px;
-  border-radius: var(--cd-radius-picker);
-  /* The tinted fill, not a white card: these sit on the page rather than floating over it, and
-     the backdrop shows through a white box as a bright rectangle. */
-  background: var(--pv2-fill);
+  padding: 12px 14px 13px;
+  border-radius: 18px;
+  /* A white card with a soft lift, not a tinted panel: everything else on this page is drawn
+     flat onto the paper, so the two cards are the one thing that sits ON it — that is what
+     makes them read as a summary of somewhere else rather than as part of the grid. */
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(var(--pv2-ink-rgb), 0.06);
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
 }
 
 .pv2-todo__head {
@@ -74,15 +76,17 @@ const remaining = computed(() => Math.max(0, props.total - (props.item ? 1 : 0))
   gap: 8px;
 }
 
+/* Uppercase and wide-tracked: it is a section marker, not a sentence, and at this size the
+   tracking is what stops it reading as a shrunken heading. */
 .pv2-todo__label {
-  font: 700 10px var(--cd-font-ui);
-  letter-spacing: 0.06em;
-  color: var(--pv2-ink-2);
+  font: 600 11px var(--cd-font-ui);
+  letter-spacing: 0.04em;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-todo__more {
   flex: none;
-  font: 500 10px var(--cd-font-ui);
+  font: 500 11px var(--cd-font-ui);
   font-variant-numeric: var(--cd-numeric-aligned);
   color: var(--pv2-ink-3);
 }
@@ -104,13 +108,13 @@ const remaining = computed(() => Math.max(0, props.total - (props.item ? 1 : 0))
 .pv2-todo__dot {
   flex: none;
   width: 5px;
-  height: 12px;
+  height: 14px;
   border-radius: 3px;
 }
 
 .pv2-todo__title {
   min-width: 0;
-  font: 700 13px var(--cd-font-ui);
+  font: 700 15px var(--cd-font-ui);
   color: var(--pv2-ink);
   white-space: nowrap;
   overflow: hidden;
@@ -119,7 +123,7 @@ const remaining = computed(() => Math.max(0, props.total - (props.item ? 1 : 0))
 
 /* Same height as an item row so an empty card does not shrink and leave the pair uneven. */
 .pv2-todo__none {
-  font: 500 13px/12px var(--cd-font-ui);
+  font: 500 15px/14px var(--cd-font-ui);
   color: var(--pv2-ink-3);
 }
 </style>

@@ -15,14 +15,14 @@
       <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。 -->
       <div class="mv2__todos">
         <Pv2TodoCard
-          label="今日待辦"
+          label="TODAY'S TASKS"
           :total="todayTodos.length"
           :item="todayTodos[0] ?? null"
           empty-text="今天沒有待辦"
           @item-click="onTodoClick"
         />
         <Pv2TodoCard
-          label="接下來七天"
+          label="UP NEXT 7 DAYS"
           :total="weekTodos.length"
           :item="weekTodos[0] ?? null"
           empty-text="七天內沒有待辦"

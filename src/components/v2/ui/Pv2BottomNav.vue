@@ -140,7 +140,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   border: 1px solid rgba(255, 255, 255, .55);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .46)),
-    var(--cd-surface-raised);
+    var(--pv2-canvas);
   backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
   box-shadow: var(--cd-shadow-overlay);
@@ -149,7 +149,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 /* Opaque, still-legible fallback where backdrop-filter isn't supported. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .pv2-nav {
-    background: var(--cd-surface-raised);
+    background: var(--pv2-canvas);
   }
 }
 
@@ -169,15 +169,17 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   /* Only the animating element gets a promoted layer — the static bar shell doesn't
      need one held permanently. */
   will-change: transform, width;
+  /* A wash of the accent, not of the ink: the tab you are on and the day you are on are
+     the same statement, so they wear the same colour. */
   background:
     linear-gradient(160deg, rgba(255, 255, 255, .55), rgba(255, 255, 255, .18)),
-    var(--cd-ink-wash-line);
+    rgba(var(--pv2-accent-rgb), .12);
   backdrop-filter: blur(14px) saturate(160%);
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, .5);
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, .6),
-    0 2px 8px rgba(var(--cd-ink-rgb), .18);
+    0 2px 8px rgba(var(--pv2-ink-rgb), .12);
   transition:
     transform var(--cd-duration-glass) var(--cd-ease-glass),
     width var(--cd-duration-glass) var(--cd-ease-glass),
@@ -190,7 +192,7 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .pv2-nav__pill {
-    background: var(--cd-ink-wash-strong);
+    background: rgba(var(--pv2-accent-rgb), .16);
   }
 }
 
@@ -218,12 +220,12 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   place-items: center;
   width: 24px;
   height: 24px;
-  color: var(--cd-ink-muted);
+  color: var(--pv2-ink-3);
   transition: color var(--cd-duration-micro-4) var(--cd-ease-standard);
 }
 
 .pv2-nav__icon--on {
-  color: var(--cd-ink);
+  color: var(--pv2-accent);
 }
 
 .pv2-nav__label {
@@ -232,12 +234,12 @@ onBeforeUnmount(() => resizeObserver?.disconnect())
   font: 400 9px var(--cd-font-display);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--cd-ink-muted);
+  color: var(--pv2-ink-3);
   transition: color var(--cd-duration-micro-4) var(--cd-ease-standard);
 }
 
 .pv2-nav__label--on {
-  color: var(--cd-ink);
+  color: var(--pv2-accent);
 }
 
 @media (prefers-reduced-motion: reduce) {

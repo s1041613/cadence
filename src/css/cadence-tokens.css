@@ -40,7 +40,7 @@
    * They will reconcile when one generation retires; until then, replacing either
    * with the other moves measured contrast, so pick by which shell you are in.
    * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
-  --cd-surface-canvas: #fafaf9;
+  --cd-surface-canvas: #F7FBFE;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
@@ -100,60 +100,59 @@
    * body ink, secondary ink, hint, grid rule — so it lives here as tokens now, and
    * the components reference the role instead of a hex nobody could re-tint.
    *
-   * The values carry a rose hue rather than being neutral grey: this generation's
-   * palette is pink (see the event palette in
-   * src/components/v2/ui/event-colors.ts), and a pure-grey chrome around pink
-   * content reads as two unrelated designs rather than one. The page base is the
-   * exception — see --pv2-canvas below.
+   * The chrome is COOL — a violet-leaning slate on a near-white page — and the pink
+   * belongs to the content: event chips, today's pill, the active tab. Rose-tinted
+   * chrome put pink around pink, which left the data nothing to stand out against;
+   * a colour that is everywhere marks nothing.
    *
    * Contrast against --pv2-canvas, measured:
-   *   --pv2-ink        14.0:1  body text, day numbers, the on-state pill
-   *   --pv2-ink-2       5.1:1  secondary text, labels        (AA)
-   *   --pv2-ink-3       2.7:1  hints and placeholders — non-essential only
-   *   --pv2-ink-4       2.2:1  the "+N" overflow count and other faint marks
+   *   --pv2-ink        10.4:1  body text, day numbers, the on-state pill
+   *   --pv2-ink-2       5.2:1  secondary text, labels        (AA)
+   *   --pv2-ink-3       3.0:1  hints and placeholders — non-essential only
+   *   --pv2-ink-4       1.9:1  the "+N" overflow count and other faint marks
    * The three below the bar hold the same ratios their greys did; they are for
    * information that is available elsewhere, never for meaning of their own.
    * ========================================================================== */
-  /* The page base stays neutral: the v2 shells paint a photographic backdrop over it
-   * (Pv2PageBackdrop), and tinting the colour underneath it fights the artwork instead of
-   * letting it read. Only the ink and the lines carry the rose hue. */
-  --pv2-canvas: #fafaf9;        /* page base; matches --cd-surface-canvas */
-  --pv2-canvas-rgb: 250, 250, 249;
-  --pv2-ink: #3E1F2D;           /* was #1b1b1b */
-  --pv2-ink-rgb: 62, 31, 45;    /* both roles are used translucently — see rule 1 above */
-  --pv2-ink-2: #8A5F70;         /* was #6e6e6e / #4f4f4f / #777 */
-  --pv2-ink-3: #B58EA0;         /* was #9c9c9c */
-  --pv2-ink-4: #C9A3B3;         /* was #b2b2b2 */
-  --pv2-line-strong: #DCB8C6;   /* was #c4c4c4 */
-  --pv2-line: #E6C9D4;          /* was #cdcdcd — cell rules, chip outlines */
-  --pv2-line-soft: #F2DEE6;     /* was #e2e2e2 — hairlines, inactive tracks */
+  /* A near-white with a breath of blue in it, not a flat #fff: the cards and chips that
+   * sit on it are white, and against pure white they would have no edge at all. The v2
+   * shells also paint a photographic backdrop over this, so the base shows only where
+   * the artwork does not. */
+  --pv2-canvas: #F7FBFE;        /* page base; matches --cd-surface-canvas */
+  --pv2-canvas-rgb: 247, 251, 254;
+  --pv2-ink: #393B58;           /* slate with a violet cast — never a neutral grey */
+  --pv2-ink-rgb: 57, 59, 88;    /* both roles are used translucently — see rule 1 above */
+  --pv2-ink-2: #6B6976;         /* secondary text, labels */
+  --pv2-ink-3: #92909E;         /* hints, the weekday header, the festival line */
+  --pv2-ink-4: #B7B5C2;         /* the faintest marks: "+N", outside-month days */
+  --pv2-line-strong: #D6D8E2;
+  --pv2-line: #E4E7EF;          /* cell rules */
+  --pv2-line-soft: #EDF0F6;     /* hairlines, inactive tracks */
 
   /* Filled rows and control tracks inside a card — the segmented track, a select's resting
    * state, a settings row's press feedback. One pair, not the eleven near-identical greys
    * (#f3f3f1, #f0f0ed, #efefef, #f0efec … #e0e0dd) these replace: no two of those differed by
    * more than a channel step or two, and nothing distinguished them but who wrote the file. */
-  --pv2-fill: #FBF1F5;
-  --pv2-fill-hover: #F4E5EC;
+  --pv2-fill: #F2F4F9;
+  --pv2-fill-hover: #E8EBF2;
 
-  /* The signature pink, for the mark that says "here": today's date pill in the month grid and
-   * the week rows, and the selected day in the v2 date picker. Distinct from --pv2-ink, which is
-   * chrome — the FAB and the shell's filled buttons are ink, so the accent stays rare enough to
-   * mean something. White on it measures 4.6:1, so the accent cannot be lightened without
-   * re-checking --pv2-on-accent.
+  /* The signature rose, for the marks that say "here" and "you are on this one": today's date
+   * pill, the selected day in the v2 date picker, and the active tab in the bottom nav.
+   * Deeper than the soft rose the design draws (#DE6E8C): white on that measures 3.1:1 and the
+   * day number it carries is 13px, under the size where 3:1 is allowed. This is the closest
+   * tone to it that keeps --pv2-on-accent legible, at 4.5:1.
    * NOT an event colour — those are user data and live in event-colors.ts. */
-  --pv2-accent: #D82E77;
-  --pv2-accent-rgb: 216, 46, 119;
+  --pv2-accent: #CB466D;
+  --pv2-accent-rgb: 203, 70, 109;
   --pv2-on-accent: #ffffff;
 
-  /* The month poster's ink. A lighter pink than the accent and NOT interchangeable with it:
-   * it measures 3.1:1 on the page, which clears the bar for 48px/900 display type and nothing
-   * else. Never set anything smaller in it. */
-  --pv2-poster-ink: #E56090;
+  /* The month poster's ink. The same slate as the body ink: the title carries the page on
+   * size and weight, and the pink it used to wear competed with the chips under it. */
+  --pv2-poster-ink: var(--pv2-ink);
 
-  /* Public-holiday text in the month grid (utils/festivals.ts). Red is the calendar convention
-   * for a day off and survives the pink surroundings; 4.8:1 on the page, which the 8px label
-   * needs. Distinct from --pv2-accent on purpose — one says "today", this one says "no work". */
-  --pv2-holiday: #C43D5B;
+  /* Public-holiday text in the month grid (utils/festivals.ts), and the Sunday column header.
+   * The two share a colour on purpose — both mean "not a working day", which is the whole of
+   * what a calendar's red print has ever said. 4.7:1 on the page, which the 8px label needs. */
+  --pv2-holiday: #AE5570;
 
   /* ---------- Weekday accents ---------- */
   --cd-weekday-saturday: #3A6EA5;
@@ -196,28 +195,26 @@
    */
 
   /* ---------- Typography: families ----------
-   * Two Latin faces: Inter for everything the user reads, and M PLUS Rounded 1c
-   * for the one thing they look at rather than read. Fonts are a fixed
-   * passthrough: they are NOT part of the theme, so no palette may override them.
+   * One Latin face, Inter. Fonts are a fixed passthrough: they are NOT part of
+   * the theme, so no palette may override them.
    *
    *   --cd-font-display : Inter, used for the bottom nav — its letter glyphs and
    *                       their labels, and nothing else.
    *   --cd-font-ui      : Inter, everything else.
-   *   --cd-font-poster  : M PLUS Rounded 1c at 900, the month name — the month
-   *                       poster's title and the month wheel that edits it. ONLY
-   *                       the month name: it is the calendar's cover, and a face
-   *                       this loud stops being a cover once a second thing wears it.
+   *   --cd-font-poster  : the month name — the poster's title and the month wheel
+   *                       that edits it. Points at the UI face: the design sets the
+   *                       month in a plain bold grotesque, and the title carries the
+   *                       page on size and weight rather than on a second typeface.
+   *                       Kept as its own role so that putting a display face back is
+   *                       one line here instead of an edit at every call site.
    *
    * Display and UI point at the same face and are kept separate (rather than
    * merged into one) so nav and UI chrome can diverge again later without
    * touching every call site. Inter ships 100–900; call sites use 400–800.
-   *
-   * Only the poster face's latin-900 subset is loaded (src/css/app.css), so a call
-   * site asking for any other weight silently renders at 900 — declare 900.
    */
   --cd-font-display: 'Inter', 'Noto Sans TC', sans-serif;
   --cd-font-ui: 'Inter', 'Noto Sans TC', sans-serif;
-  --cd-font-poster: 'M PLUS Rounded 1c', 'Noto Sans TC', sans-serif;
+  --cd-font-poster: var(--cd-font-ui);
 
   /* Deprecated aliases — resolve onto the two faces above so existing consumers
    * keep rendering while they are migrated. Delete each once its usage hits zero.
