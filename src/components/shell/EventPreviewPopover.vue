@@ -143,6 +143,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { DEFAULT_EVENT_COLOR } from '@/components/v2/ui/event-colors'
 import CdPopover from '@/components/ui/CdPopover.vue'
 import CdDrawerOrSheet from '@/components/ui/CdDrawerOrSheet.vue'
 import CdEventPreviewCard from '@/components/ui/CdEventPreviewCard.vue'
@@ -218,7 +219,7 @@ const popWidth = computed(() => (copyMode.value ? 320 : ui.eventPreview?.mode ==
 const editTitle = ref('')
 const editType = ref<'event' | 'task'>('task')
 const editQuad = ref<'do' | 'plan' | 'quick' | 'later'>('later')
-const editColor = ref<string>('#4A8B85')
+const editColor = ref<string>(DEFAULT_EVENT_COLOR)
 const editIcon = ref<string | null>(null)
 const editAllDay = ref(false)
 const editDate = ref('')
@@ -246,7 +247,7 @@ function seedEditState(t: Task): void {
   editTitle.value = t.title
   editType.value = t.type === 'event' ? 'event' : 'task'
   editQuad.value = quadrantOf(t).key
-  editColor.value = t.backgroundColor ?? '#4A8B85'
+  editColor.value = t.backgroundColor ?? DEFAULT_EVENT_COLOR
   editIcon.value = t.icon
   editAllDay.value = t.allDay
   editDate.value = t.date

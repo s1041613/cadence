@@ -52,7 +52,7 @@ const props = withDefaults(
     ariaLabel: string
     itemHeight?: number
     visibleCount?: number
-    variant?: 'serif' | 'ui' | 'mono'
+    variant?: 'poster' | 'ui' | 'mono'
     /** Font size per distance from centre: [0, 1, 2, 3+]. */
     sizes?: [string, string, string, string]
   }>(),
@@ -178,10 +178,10 @@ function onKeydown(e: KeyboardEvent): void {
 function itemStyle(dist: number): Record<string, string> {
   const d = Math.abs(dist)
   const fontSize = props.sizes[Math.min(d, 3) as 0 | 1 | 2 | 3]
-  if (d === 0) return { fontSize, color: 'var(--pv2-wheel-ink, #1b1b1b)', opacity: '1' }
-  if (d === 1) return { fontSize, color: 'var(--pv2-wheel-ink-2, #6e6e6e)', opacity: '0.6' }
-  if (d === 2) return { fontSize, color: 'var(--pv2-wheel-ink-3, #b2b2b2)', opacity: '0.4' }
-  return { fontSize, color: 'var(--pv2-wheel-ink-4, #c4c4c4)', opacity: '0.22' }
+  if (d === 0) return { fontSize, color: 'var(--pv2-wheel-ink, var(--pv2-ink))', opacity: '1' }
+  if (d === 1) return { fontSize, color: 'var(--pv2-wheel-ink-2, var(--pv2-ink-2))', opacity: '0.6' }
+  if (d === 2) return { fontSize, color: 'var(--pv2-wheel-ink-3, var(--pv2-ink-4))', opacity: '0.4' }
+  return { fontSize, color: 'var(--pv2-wheel-ink-4, var(--pv2-line-strong))', opacity: '0.22' }
 }
 </script>
 
@@ -202,7 +202,7 @@ function itemStyle(dist: number): Record<string, string> {
 
 .pv2-wheel-col:focus-visible {
   border-radius: 8px;
-  box-shadow: 0 0 0 2px var(--pv2-wheel-ink, #1b1b1b);
+  box-shadow: 0 0 0 2px var(--pv2-wheel-ink, var(--pv2-ink));
 }
 
 .pv2-wheel-col::-webkit-scrollbar {
@@ -222,11 +222,13 @@ function itemStyle(dist: number): Record<string, string> {
   scroll-snap-align: center;
 }
 
-/* Font size comes from the inline itemStyle; only family/style/weight live here. */
-.pv2-wheel-col__item--serif {
-  font-family: var(--cd-font-serif);
-  font-style: italic;
-  font-weight: 400;
+/* Font size comes from the inline itemStyle; only family and weight live here.
+   Named for the face it wears, not 'serif' as it was: the month column is the only
+   consumer, and it now carries --cd-font-poster so the month name looks the same in the
+   picker as on the poster the picker edits. */
+.pv2-wheel-col__item--poster {
+  font-family: var(--cd-font-poster);
+  font-weight: 800;
 }
 
 .pv2-wheel-col__item--mono {

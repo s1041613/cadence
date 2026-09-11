@@ -25,7 +25,7 @@
   margin: 0;
   font: 400 34px var(--cd-font-mono);
   line-height: 0.92;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 /* text-transform rather than literal capitals: presentation stays in CSS, and the DOM and
@@ -35,6 +35,6 @@
   font: 500 10px var(--cd-font-mono);
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 </style>

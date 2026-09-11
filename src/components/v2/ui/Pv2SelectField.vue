@@ -76,8 +76,8 @@ const selectedLabel = computed(
      1px. */
   border: 1px solid transparent;
   border-radius: var(--pv2-control-r, 9px);
-  background: var(--pv2-control-bg, #f0f0ed);
-  color: var(--pv2-ink, #1b1b1b);
+  background: var(--pv2-control-bg, var(--pv2-fill));
+  color: var(--pv2-ink);
   cursor: pointer;
   /* The global rule in app.css grants these to button/a/[role=button] only, and
      this control's root is a <label> — so it has to ask for them itself. */
@@ -88,11 +88,11 @@ const selectedLabel = computed(
 }
 
 .pv2-select-field:hover {
-  background: var(--pv2-control-bg-hover, #e8e8e4);
+  background: var(--pv2-control-bg-hover, var(--pv2-fill-hover));
 }
 
 .pv2-select-field:active {
-  background: var(--pv2-control-bg-open, #e2e2de);
+  background: var(--pv2-control-bg-open, var(--pv2-fill-hover));
 }
 
 /* The native <select> is the focusable node, so the ring has to be drawn by the
@@ -100,7 +100,7 @@ const selectedLabel = computed(
    never focused; the `:has()` guard keeps the ring off pointer interactions, so a
    click doesn't leave a keyboard-looking outline behind. */
 .pv2-select-field:has(.pv2-select-field__native:focus-visible) {
-  outline: 2px solid var(--pv2-ink, #1b1b1b);
+  outline: 2px solid var(--pv2-ink);
   outline-offset: 2px;
 }
 
@@ -115,7 +115,7 @@ const selectedLabel = computed(
 }
 
 .pv2-select-field__chevron {
-  color: var(--pv2-ink-3, #b2b2b2);
+  color: var(--pv2-ink-3, var(--pv2-ink-4));
 }
 
 /* Invisible, but a real control: it keeps the native picker (the wheel on iOS, the

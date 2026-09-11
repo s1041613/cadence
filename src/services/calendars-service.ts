@@ -1,12 +1,13 @@
 import { requireSupabase } from '@/lib/supabase'
 import type { Calendar, CalendarMember } from '@/types/calendar'
+import { DEFAULT_EVENT_COLOR } from '@/components/v2/ui/event-colors'
 
 const REQUEST_TIMEOUT_MS = 10_000
 
 // First-sign-in default calendar name/color. Only used by create_calendar's fallback path in
 // ensureDefaultCalendar below — every other Calendar field comes from the DB via fetchCalendars.
 const DEFAULT_CALENDAR_NAME = 'My Calendar'
-const DEFAULT_CALENDAR_COLOR = '#6E839B'
+const DEFAULT_CALENDAR_COLOR = DEFAULT_EVENT_COLOR
 
 // fetchCalendars result: Calendar plus the per-user visibility columns (calendar_members.enabled/
 // selected) the store needs to derive hiddenCalendarIds. Kept off the core Calendar type since

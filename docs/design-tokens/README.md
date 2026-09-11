@@ -15,13 +15,27 @@ The tokens themselves live in `src/css/cadence-tokens.css`, with each role's con
 
 **2. Names describe the role, never the material or the call site.** Test: *if the palette or the layout changed, would this name still be true?* `--cd-olive` starts lying the moment the accent changes. `--cd-topbar` had 17 consumers and only one was a topbar.
 
+## The v2 ramp (`--pv2-*`)
+
+The v2 screens run on their own, rose-tinted ramp — `--pv2-ink` through `--pv2-line-soft`, plus
+`--pv2-accent` for today's date — declared in the same file, below the `--cd-*` roles.
+It is a second generation's palette, not a second palette in the sense below: the two coexist
+until one generation retires, and a screen belongs to exactly one of them.
+
+Everything in this document applies to it. In particular the `-rgb` rule: `--pv2-ink` and
+`--pv2-canvas` are used translucently and expose triples, so washes compose as
+`rgba(var(--pv2-ink-rgb), α)`.
+
+Note that `npm run check:tokens` does **not** scan the v2 directories, so nothing mechanical
+stops a hex from reappearing there.
+
 ## Authoring a second palette
 
 Supply a value for every role. There is no fallback — a palette that omits one is broken, because silently inheriting the previous palette's colour is worse than an obviously missing value.
 
 Satisfy the **contract**, not the v1 value. Two roles currently fail WCAG AA and a new palette should fix them rather than copy them; see `deferred-decisions.md` §6.
 
-Fonts, quadrant colours and event colours are not part of the palette. See `deferred-decisions.md` §9 for why the last two must stay literal.
+Fonts, quadrant colours and event colours are not part of the palette. See `deferred-decisions.md` §9 for why the last two must stay literal. Both now sit in one pink family — quadrants in `src/composables/use-theme.ts`, events in `src/components/v2/ui/event-colors.ts` — and both are guarded by `src/components/v2/ui/event-colors.test.ts`, which measures every fill against the ink it is rendered with.
 
 ## Checking
 

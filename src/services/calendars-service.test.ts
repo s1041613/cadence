@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { DEFAULT_EVENT_COLOR } from '@/components/v2/ui/event-colors'
 import {
   ensureDefaultCalendar,
   fetchCalendars,
@@ -61,7 +62,7 @@ describe('calendars-service', () => {
     ])
   })
 
-  it('creates the first calendar via RPC with the literal default name/color when none exists', async () => {
+  it('creates the first calendar via RPC with the default name/color when none exists', async () => {
     const selectBuilder = {
       select: vi.fn(() => selectBuilder),
       eq: vi.fn(() => selectBuilder),
@@ -78,7 +79,13 @@ describe('calendars-service', () => {
 
     await expect(ensureDefaultCalendar('user-1')).resolves.toBe('new-calendar')
 
-    expect(supabase.rpc).toHaveBeenCalledWith('create_calendar', { calendar_name: 'My Calendar', calendar_color: '#6E839B' })
+    // The colour is asserted through DEFAULT_EVENT_COLOR rather than a copied hex: the default
+    // calendar takes the palette's default (event-colors.ts), so a hex here would just be a second
+    // place to update whenever the palette moves — and a failure that says nothing about behaviour.
+    expect(supabase.rpc).toHaveBeenCalledWith('create_calendar', {
+      calendar_name: 'My Calendar',
+      calendar_color: DEFAULT_EVENT_COLOR
+    })
   })
 
   describe('fetchCalendars', () => {

@@ -5,7 +5,7 @@
     <div class="pv2-copy-card__head">
       <h2 class="pv2-copy-card__title">Copy to days</h2>
       <button type="button" class="pv2-copy-card__close" aria-label="Close" @click="emit('close')">
-        <CdIcon name="close" :size="15" color="#1b1b1b" />
+        <CdIcon name="close" :size="15" color="var(--pv2-ink)" />
       </button>
     </div>
 
@@ -82,11 +82,11 @@ const weekdays = computed(() => {
 .pv2-copy-card {
   /* v2 neutral palette — same ink/paper/line family as the month surface and the
      edit card, not a warm-beige variant. */
-  --cc-ink: #1b1b1b;
-  --cc-ink-2: #6e6e6e;
-  --cc-ink-3: #b2b2b2;
-  --cc-line: #e2e2e2;
-  --cc-paper: #fafaf9;
+  --cc-ink: var(--pv2-ink);
+  --cc-ink-2: var(--pv2-ink-2);
+  --cc-ink-3: var(--pv2-ink-4);
+  --cc-line: var(--pv2-line-soft);
+  --cc-paper: var(--pv2-canvas);
 
   /* Matches the desktop popover width (EventPreviewPopoverV2 popWidth = 340 in copy
      mode); CdPopover fixes the wrapper to that and clips overflow, so the card must
@@ -246,7 +246,7 @@ const weekdays = computed(() => {
 }
 
 .pv2-copy-card__cell--source > span {
-  background: #ececea;
+  background: var(--pv2-fill-hover);
 }
 
 .pv2-copy-card__cell--blank {

@@ -6,7 +6,7 @@
   <div class="pv2-cust">
     <header class="pv2-cust__head">
       <button type="button" class="pv2-cust__back" aria-label="返回" @click="emit('back')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 5 L8 12 L15 19" />
         </svg>
       </button>
@@ -24,7 +24,7 @@
           <div class="pv2-cust__preview-scrim" :style="{ opacity: appearance.scrimOpacity }" />
         </div>
         <button type="button" class="pv2-cust__upload" :disabled="busy" @click="onUploadClick">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fafaf9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-canvas)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 16 V4 M7 9 l5-5 5 5 M5 20 h14" />
           </svg>
           {{ uploading ? 'Uploading…' : 'Upload image' }}
@@ -79,7 +79,7 @@
       <div class="pv2-cust__card pv2-cust__card--rows">
         <button type="button" class="pv2-cust__row" @click="emit('openTabs')">
           <span class="pv2-cust__row-icon" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2.5" y="7" width="19" height="10" rx="3" />
               <path d="M8.5 7 V17 M15.5 7 V17" />
             </svg>
@@ -214,7 +214,7 @@ async function onResetBackground(): Promise<void> {
   align-items: center;
   gap: 12px;
   padding: 16px 22px 16px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-cust__back {
@@ -224,7 +224,7 @@ async function onResetBackground(): Promise<void> {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #d6d6d0;
+  border: 1px solid var(--pv2-line);
   background: #fff;
   cursor: pointer;
 }
@@ -233,7 +233,7 @@ async function onResetBackground(): Promise<void> {
   margin: 0;
   font: 400 30px var(--cd-font-serif);
   line-height: 1;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-cust__scroll {
@@ -249,7 +249,7 @@ async function onResetBackground(): Promise<void> {
   font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-cust__group-label:not(:first-child) {
@@ -258,7 +258,7 @@ async function onResetBackground(): Promise<void> {
 
 /* 卡片：邊框無陰影，照設計稿 */
 .pv2-cust__card {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   background: #fff;
   padding: 16px;
@@ -300,14 +300,14 @@ async function onResetBackground(): Promise<void> {
   font: 600 13px var(--cd-font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-cust__row-sub {
   display: block;
   margin-top: 3px;
   font: 400 11px var(--cd-font-mono);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -317,7 +317,7 @@ async function onResetBackground(): Promise<void> {
   flex: none;
   font-size: 18px;
   line-height: 1;
-  color: #c4c4c4;
+  color: var(--pv2-line-strong);
 }
 
 /* 背景圖預覽：固定 190px 高，照設計稿 */
@@ -327,7 +327,7 @@ async function onResetBackground(): Promise<void> {
   place-items: center;
   width: 100%;
   height: 190px;
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 12px;
   background: #fff;
   overflow: hidden;
@@ -351,7 +351,7 @@ async function onResetBackground(): Promise<void> {
 
 .pv2-cust__preview-empty {
   font: 400 13px var(--cd-font-ui);
-  color: #b0b0aa;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-cust__upload {
@@ -364,7 +364,7 @@ async function onResetBackground(): Promise<void> {
   padding: 13px;
   border: none;
   border-radius: 12px;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   color: #fff;
   font: 600 12px var(--cd-font-mono);
   letter-spacing: 0.1em;
@@ -387,7 +387,7 @@ async function onResetBackground(): Promise<void> {
   padding: 4px;
   border: none;
   background: none;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -405,7 +405,7 @@ async function onResetBackground(): Promise<void> {
   margin: 10px 0 0;
   text-align: center;
   font: 400 11px var(--cd-font-ui);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   line-height: 1.5;
 }
 
@@ -428,7 +428,7 @@ async function onResetBackground(): Promise<void> {
   text-align: right;
   font: 600 11px var(--cd-font-mono);
   letter-spacing: 0.08em;
-  color: #6e6e6e;
+  color: var(--pv2-ink-2);
   /* 數字寬度固定，0% → 100% 不會推擠滑軌 */
   font-variant-numeric: tabular-nums;
 }
@@ -448,20 +448,20 @@ async function onResetBackground(): Promise<void> {
 .pv2-cust__slider::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: 2px;
-  background: #e2e2e2;
+  background: var(--pv2-line-soft);
 }
 
 .pv2-cust__slider::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: #e2e2e2;
+  background: var(--pv2-line-soft);
 }
 
 /* Firefox 專用：已選區間著墨色，Chromium 端則靠 track 底色 + thumb 位置表達 */
 .pv2-cust__slider::-moz-range-progress {
   height: 4px;
   border-radius: 2px;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
 }
 
 .pv2-cust__slider::-webkit-slider-thumb {
@@ -471,7 +471,7 @@ async function onResetBackground(): Promise<void> {
   height: 18px;
   border: none;
   border-radius: 50%;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
   /* 4px 軌道置中：(18 - 4) / 2 = 7 */
   margin-top: -7px;
 }
@@ -481,7 +481,7 @@ async function onResetBackground(): Promise<void> {
   height: 18px;
   border: none;
   border-radius: 50%;
-  background: #1b1b1b;
+  background: var(--pv2-ink);
 }
 
 .pv2-cust__slider:focus-visible::-webkit-slider-thumb {

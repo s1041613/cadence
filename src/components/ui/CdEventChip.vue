@@ -21,10 +21,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { QUAD_ICON_SRC } from './icons'
+import { readableInkOn, shadeOf, tintOf } from '@/components/v2/ui/event-colors'
 
 // CdEventChip — month cell event chip. design-research-report.md §3.5:
 //  - fmt='name'/'icon': font 700 14px; radius --cd-radius-xs; padding 3px 5px; border 1px solid quadColor.
-//  - all-day = solid fill (bg=color, text=white); timed = outline (border+text=color, transparent bg).
+//  - all-day = solid fill (bg=color, text measured against the fill); timed = tinted fill of the
+//    same colour, border at full strength, text at shadeOf(colour).
+//  - Neither text colour is fixed any more: the palette runs from pale blossom to deep berry
+//    (event-colors.ts), so white on a fill and the raw colour on the page are each legible for
+//    only half of it. readableInkOn/shadeOf pick per colour and both clear 4.5:1.
 //  - done: line-through + opacity .5.
 //  - fmt='name': title only (no icon — maximizes text room in narrow phone cells).
 //  - fmt='icon': 10px quadrant mini-icon (do=check, plan=flag, quick=bolt, later=moon, event=star) + title.
@@ -51,7 +56,7 @@ const solid = computed(() => props.allDay)
 
 const quadIconStyle = computed(() => {
   const src = QUAD_ICON_SRC[props.quad] ?? QUAD_ICON_SRC.event
-  const tint = solid.value ? '#fff' : props.color
+  const tint = solid.value ? readableInkOn(props.color) : shadeOf(props.color)
   return {
     width: '10px',
     height: '10px',
@@ -66,8 +71,10 @@ const quadIconStyle = computed(() => {
 })
 
 const chipStyle = computed(() => ({
-  background: props.fmt === 'dot' ? 'transparent' : solid.value ? props.color : 'transparent',
-  color: props.fmt === 'dot' ? undefined : solid.value ? '#fff' : props.color,
+  background: props.fmt === 'dot' ? 'transparent' : solid.value ? props.color : tintOf(props.color),
+  color: props.fmt === 'dot' ? undefined : solid.value ? readableInkOn(props.color) : shadeOf(props.color),
+  // The border stays at full strength on the timed chip: CdMonthGrid's CELL_METRICS chipH counts
+  // it, so it cannot be dropped, and it is what separates two tinted chips stacked in a cell.
   border: props.fmt === 'dot' ? 'none' : `1px solid ${props.color}`,
   fontFamily: 'var(--cd-font-title)'
 }))

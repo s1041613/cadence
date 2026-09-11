@@ -46,6 +46,9 @@ export default defineConfig((/* ctx */) => {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: [
+      // fonts.css first: it only declares @font-face, and it must stay out of app.css —
+      // see the note at the top of either file.
+      'fonts.css',
       'app.css'
     ],
 

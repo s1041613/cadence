@@ -10,7 +10,7 @@
   <div class="pv2-notif">
     <header class="pv2-notif__head">
       <button type="button" class="pv2-notif__back" aria-label="返回" @click="emit('back')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1b1b1b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 5 L8 12 L15 19" />
         </svg>
       </button>
@@ -167,7 +167,7 @@ function noopComingSoon(): void {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  background: #efefef;
+  background: var(--pv2-fill);
 }
 
 /* Same 22px column as Pv2SettingsRoot's title, so the header does not shift sideways when
@@ -178,7 +178,7 @@ function noopComingSoon(): void {
   align-items: center;
   gap: 12px;
   padding: 16px 22px 16px;
-  border-bottom: 1px solid #e2e2e2;
+  border-bottom: 1px solid var(--pv2-line-soft);
 }
 
 .pv2-notif__back {
@@ -188,7 +188,7 @@ function noopComingSoon(): void {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #d6d6d0;
+  border: 1px solid var(--pv2-line);
   background: #fff;
   cursor: pointer;
 }
@@ -197,7 +197,7 @@ function noopComingSoon(): void {
   margin: 0;
   font: 400 30px var(--cd-font-serif);
   line-height: 1;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-notif__scroll {
@@ -213,11 +213,11 @@ function noopComingSoon(): void {
   font: 600 10px var(--cd-font-mono);
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-notif__card {
-  border: 1px solid #e2e2e2;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: 16px;
   background: #fff;
   overflow: hidden;
@@ -238,7 +238,7 @@ function noopComingSoon(): void {
   left: 18px;
   right: 0;
   height: 1px;
-  background: #e2e2e2;
+  background: var(--pv2-line-soft);
 }
 
 .pv2-notif__row--muted {
@@ -253,19 +253,19 @@ function noopComingSoon(): void {
 .pv2-notif__row-label {
   font: 600 13px var(--cd-font-mono);
   letter-spacing: 0.06em;
-  color: #1b1b1b;
+  color: var(--pv2-ink);
 }
 
 .pv2-notif__row-sub {
   margin-top: 3px;
   font: 400 12px var(--cd-font-ui);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
 }
 
 .pv2-notif__caption {
   margin: 14px 4px 0;
   font: 400 11px var(--cd-font-ui);
-  color: #9c9c9c;
+  color: var(--pv2-ink-3);
   line-height: 1.5;
 }
 </style>

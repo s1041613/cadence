@@ -1,0 +1,32 @@
+/* Web font faces, deliberately kept out of app.css.
+ *
+ * app.css opens with @import "tailwindcss", which makes @tailwindcss/postcss inline
+ * everything imported into it. The @fontsource packages reference their files as
+ * url(./files/name.woff2), and once inlined that path is resolved relative to src/css/,
+ * where nothing of the sort exists — so Vite emits no font asset, leaves the URL as
+ * written, and every face 404s at /assets/files/*.woff2 in the built app. This file is
+ * outside that pipeline, so Vite rebases each url() and emits the hashed woff2.
+ *
+ * Registered in quasar.config.ts's css array, ahead of app.css.
+ */
+
+/* 自架字體（取代 demo 版本的 Google Fonts CDN，符合 CSP self-only 限制）
+ *
+ * Inter is the reading face (see cadence-tokens.css --cd-font-display / --cd-font-ui).
+ * It carries every weight in use (400–800; the lone 900 in CdDraftDrawer is
+ * synthesised). The italic is imported at 400 only, which is every weight the
+ * remaining italic call sites ask for — the week title and the day numeral.
+ *
+ * Noto Sans TC is no longer a mere fallback: Inter doesn't cover CJK, so
+ * every Chinese glyph in the app — event titles above all — renders in it. Its
+ * weight coverage therefore has to track what the UI actually asks for. */
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/400-italic.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/noto-sans-tc/400.css";
+@import "@fontsource/noto-sans-tc/500.css";
+@import "@fontsource/noto-sans-tc/600.css";
+@import "@fontsource/noto-sans-tc/700.css";
