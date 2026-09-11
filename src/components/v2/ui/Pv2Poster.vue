@@ -1,15 +1,17 @@
 <template>
-  <!-- 月曆海報標題：居中直排，粗體大字 + 年份小標。點擊開月/年輪盤。 -->
+  <!-- 月曆海報標題：居中直排，粗體大字。點擊開月/年輪盤。
+       年份只在「不是今年」時出現：設計稿沒有它，而它要回答的問題一年只有一次。 -->
   <button type="button" class="pv2-poster" @click="emit('openSheet')">
     <span class="pv2-poster__month">{{ monthName }}</span>
-    <span class="pv2-poster__year">{{ year }}</span>
+    <span v-if="year" class="pv2-poster__year">{{ year }}</span>
   </button>
 </template>
 
 <script setup lang="ts">
 defineProps<{
   monthName: string
-  year: string
+  /** Null on the current year — see the template. */
+  year: string | null
 }>()
 
 const emit = defineEmits<{
@@ -25,9 +27,11 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Tighter than the 25px it carried at 48px type: the title itself is the breathing room now,
-     and the grid below is flex:1 — every px spent here is a px the month's rows do not get. */
-  padding: 22px 0 14px;
+  /* The space above the title is the design's, and it is a lot: the month opens the page from
+     roughly a sixth of the way down rather than from its top edge. Measured off the reference
+     at 17% of the frame's width, which is 66px on the 393px frame.
+     Nothing below it: the gap to the cards is theirs to set (.mv2__todos). */
+  padding: 66px 0 0;
   border: none;
   background: none;
   cursor: pointer;
@@ -45,17 +49,18 @@ const emit = defineEmits<{
 .pv2-poster__month {
   text-align: center;
   /* Poster scale, sized so the LONGEST month name fits — one size for all twelve, not a size
-     per month: at a constant size the months are comparable. 'September' is the widest of the
-     twelve, and 13.5cqw puts it at roughly three quarters of the container — a cover rather
-     than a wall. The 62px ceiling only engages above a 459px container, i.e. never on a phone
-     frame. The plain px declaration is the fallback without container units.
+     per month: at a constant size the months are comparable. Sized off the reference, where
+     the month word spans 48% of the frame — 'September' is the widest of the twelve and
+     renders 5.367x its font-size in this face, so 0.48 / 5.367 is 9cqw. The 44px ceiling only
+     engages above a 489px container, i.e. never on a phone frame. The plain px declaration is
+     the fallback without container units.
      800, not 900: the UI face is loaded at 400–800 (fonts.css), and a call site asking for 900
      renders at 800 anyway — with the weight written down, that is a decision instead of a
      silent fallback. */
   font-family: var(--cd-font-poster);
   font-weight: 800;
-  font-size: 52px;
-  font-size: min(62px, 13.5cqw);
+  font-size: 36px;
+  font-size: min(44px, 9cqw);
   letter-spacing: -0.01em;
   line-height: 0.9;
   color: var(--pv2-poster-ink);
@@ -66,7 +71,7 @@ const emit = defineEmits<{
 .pv2-poster__year {
   display: flex;
   align-items: center;
-  margin-top: 6px;
+  margin-top: 8px;
   font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.16em;
   color: var(--pv2-ink);
