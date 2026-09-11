@@ -9,7 +9,7 @@
       <!-- No prev/next arrows here: the horizontal swipe replaces them. The poster stays
            tappable because the month/year wheel is still the only way to jump across years. -->
       <div class="mv2__poster">
-        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="String(year)" @open-sheet="openSheet" />
+        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="posterYear" @open-sheet="openSheet" />
       </div>
 
       <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。 -->
@@ -124,6 +124,9 @@ const cur = computed(() => parseISO(ui.selectedDate))
 const year = computed(() => cur.value.getFullYear())
 const month = computed(() => cur.value.getMonth())
 const monthName = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long' }).format(cur.value))
+// The current year is the one the reader is already in; printing it under every month spends a
+// line on an answer nobody asked for. Any other year is genuinely news, so it says so.
+const posterYear = computed(() => (year.value === new Date().getFullYear() ? null : String(year.value)))
 
 // 日曆過濾 chip：ALL + 各日曆，依 order 排序，重用 isVisible/toggleSelected。
 const chips = computed<Pv2ChipItem[]>(() =>
@@ -354,7 +357,9 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   display: flex;
   align-items: stretch;
   gap: 10px;
-  margin-top: 14px;
+  /* The design's gap between the month word and the cards. Measured from the title's descender,
+     which is why it is smaller than it looks: the poster box adds no padding below itself. */
+  margin-top: 26px;
   padding: 0 16px;
 }
 
