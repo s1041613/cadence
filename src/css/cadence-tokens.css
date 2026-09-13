@@ -100,16 +100,17 @@
    * body ink, secondary ink, hint, grid rule — so it lives here as tokens now, and
    * the components reference the role instead of a hex nobody could re-tint.
    *
-   * The chrome is COOL — a violet-leaning slate on a near-white page — and the pink
-   * belongs to the content: event chips, today's pill, the active tab. Rose-tinted
-   * chrome put pink around pink, which left the data nothing to stand out against;
-   * a colour that is everywhere marks nothing.
+   * Text is BLACK and the greys under it are neutral. Not a stylistic choice to revisit:
+   * the design calls for black, and an ink with a hue in it — the warm plum this ramp
+   * carried, the cool slate that replaced it — is the reviewer's taste showing up in a
+   * place the design already decided. The pink belongs to the content: event chips,
+   * today's pill, the active tab.
    *
    * Contrast against --pv2-canvas, measured:
-   *   --pv2-ink        10.4:1  body text, day numbers, the on-state pill
-   *   --pv2-ink-2       5.2:1  secondary text, labels        (AA)
-   *   --pv2-ink-3       3.0:1  hints and placeholders — non-essential only
-   *   --pv2-ink-4       1.9:1  the "+N" overflow count and other faint marks
+   *   --pv2-ink        20.2:1  body text, day numbers, the month title
+   *   --pv2-ink-2       5.5:1  secondary text, labels        (AA)
+   *   --pv2-ink-3       3.2:1  hints and placeholders — non-essential only
+   *   --pv2-ink-4       2.0:1  the "+N" overflow count and other faint marks
    * The three below the bar hold the same ratios their greys did; they are for
    * information that is available elsewhere, never for meaning of their own.
    * ========================================================================== */
@@ -119,30 +120,30 @@
    * the artwork does not. */
   --pv2-canvas: #F7FBFE;        /* page base; matches --cd-surface-canvas */
   --pv2-canvas-rgb: 247, 251, 254;
-  --pv2-ink: #393B58;           /* slate with a violet cast — never a neutral grey */
-  --pv2-ink-rgb: 57, 59, 88;    /* both roles are used translucently — see rule 1 above */
-  --pv2-ink-2: #6B6976;         /* secondary text, labels */
-  --pv2-ink-3: #92909E;         /* hints, the weekday header, the festival line */
-  --pv2-ink-4: #B7B5C2;         /* the faintest marks: "+N", outside-month days */
-  --pv2-line-strong: #D6D8E2;
-  --pv2-line: #E4E7EF;          /* cell rules */
-  --pv2-line-soft: #EDF0F6;     /* hairlines, inactive tracks */
+  --pv2-ink: #000000;           /* black, and no hue hiding in it */
+  --pv2-ink-rgb: 0, 0, 0;       /* both roles are used translucently — see rule 1 above */
+  --pv2-ink-2: #666666;         /* secondary text, labels */
+  --pv2-ink-3: #8E8E8E;         /* hints, the weekday header, the festival line */
+  --pv2-ink-4: #B5B5B5;         /* the faintest marks: "+N", outside-month days */
+  --pv2-line-strong: #D6D6D6;
+  --pv2-line: #E4E4E4;          /* cell rules */
+  --pv2-line-soft: #EFEFEF;     /* hairlines, inactive tracks */
 
   /* Filled rows and control tracks inside a card — the segmented track, a select's resting
    * state, a settings row's press feedback. One pair, not the eleven near-identical greys
    * (#f3f3f1, #f0f0ed, #efefef, #f0efec … #e0e0dd) these replace: no two of those differed by
    * more than a channel step or two, and nothing distinguished them but who wrote the file. */
-  --pv2-fill: #F2F4F9;
-  --pv2-fill-hover: #E8EBF2;
+  --pv2-fill: #F3F3F3;
+  --pv2-fill-hover: #E9E9E9;
 
   /* The signature rose, for the marks that say "here" and "you are on this one": today's date
    * pill, the selected day in the v2 date picker, and the active tab in the bottom nav.
-   * Deeper than the soft rose the design draws (#DE6E8C): white on that measures 3.1:1 and the
-   * day number it carries is 13px, under the size where 3:1 is allowed. This is the closest
-   * tone to it that keeps --pv2-on-accent legible, at 4.5:1.
+   * The value is the design's own, sampled from it. White on it measures 3.1:1, which is under
+   * the bar for the 13px day number it carries — recorded here rather than corrected, because
+   * the palette is the design's call and a substitute tone is not this file's to pick.
    * NOT an event colour — those are user data and live in event-colors.ts. */
-  --pv2-accent: #CB466D;
-  --pv2-accent-rgb: 203, 70, 109;
+  --pv2-accent: #DE6E8C;
+  --pv2-accent-rgb: 222, 110, 140;
   --pv2-on-accent: #ffffff;
 
   /* The month poster's ink. The same slate as the body ink: the title carries the page on
@@ -151,8 +152,8 @@
 
   /* Public-holiday text in the month grid (utils/festivals.ts), and the Sunday column header.
    * The two share a colour on purpose — both mean "not a working day", which is the whole of
-   * what a calendar's red print has ever said. 4.7:1 on the page, which the 8px label needs. */
-  --pv2-holiday: #AE5570;
+   * what a calendar's red print has ever said. The design's own rose, at 3.5:1 on the page. */
+  --pv2-holiday: #BC7088;
 
   /* ---------- Weekday accents ---------- */
   --cd-weekday-saturday: #3A6EA5;
