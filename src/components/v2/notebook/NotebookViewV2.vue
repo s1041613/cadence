@@ -146,8 +146,6 @@ function onSwipe(details: SwipeDetails): void {
   background: var(--pv2-fill);
 }
 
-/* Only the ACTIVE tag gets a solid shape. The rest carry the same quiet fill, so the one
-   that means "you are filtered to this" is the only high-contrast mark in the row. */
 .nbv__tag {
   min-width: 0;
   padding: 0 14px;
@@ -156,9 +154,20 @@ function onSwipe(details: SwipeDetails): void {
   cursor: pointer;
 }
 
+/* The calendar chip's on-state, borrowed whole (see Pv2Chip's .pv2-chip-tab--on): a 12% wash
+   of the accent under the accent itself. "You are filtered to this tag" and "you are on this
+   calendar" are the same statement, so they wear the same colour — and the accent's documented
+   consumers are exactly this kind of on-state mark.
+
+   The weight is this call site's own addition, and it is load-bearing rather than decorative:
+   --pv2-accent on its own 12% wash measures ~3:1, which is under AA for 15px text, and a wash
+   against --pv2-fill is a faint difference on its own. Carrying the state on weight as well as
+   on hue means the selected tag is never signalled by colour alone. Raising that ratio means
+   deepening --pv2-accent for every consumer, not substituting a colour here — the tone is the
+   design's (same note as Pv2Chip). */
 .nbv__tag--active {
-  background: var(--pv2-ink);
-  color: var(--pv2-canvas);
+  background: rgba(var(--pv2-accent-rgb), 0.12);
+  color: var(--pv2-accent);
   font-weight: 600;
 }
 
