@@ -40,7 +40,7 @@
    * They will reconcile when one generation retires; until then, replacing either
    * with the other moves measured contrast, so pick by which shell you are in.
    * Consumers: the five v2 page frames, Pv2PageBackdrop's scrim, and html/body. */
-  --cd-surface-canvas: #F7FBFE;
+  --cd-surface-canvas: #ffffff;
   --cd-surface-page: #F2F1EC;      /* the base; all text contrast is measured against this */
   --cd-surface-raised: #FBFAF7;    /* lighter than page — reads as a lift, not a border */
   --cd-surface-inset: #f1efe8;     /* darker than page; pairs with an inset shadow */
@@ -114,12 +114,11 @@
    * The three below the bar hold the same ratios their greys did; they are for
    * information that is available elsewhere, never for meaning of their own.
    * ========================================================================== */
-  /* A near-white with a breath of blue in it, not a flat #fff: the cards and chips that
-   * sit on it are white, and against pure white they would have no edge at all. The v2
-   * shells also paint a photographic backdrop over this, so the base shows only where
-   * the artwork does not. */
-  --pv2-canvas: #F7FBFE;        /* page base; matches --cd-surface-canvas */
-  --pv2-canvas-rgb: 247, 251, 254;
+  /* White. The whole v2 surface is one colour — page, sheets, nav — and the cards that sit
+   * on it are told apart by their shadow rather than by a tint. A wallpaper, when the user
+   * adds one, paints over this. */
+  --pv2-canvas: #ffffff;        /* page base; matches --cd-surface-canvas */
+  --pv2-canvas-rgb: 255, 255, 255;
   --pv2-ink: #000000;           /* black, and no hue hiding in it */
   --pv2-ink-rgb: 0, 0, 0;       /* both roles are used translucently — see rule 1 above */
   --pv2-ink-2: #666666;         /* secondary text, labels */

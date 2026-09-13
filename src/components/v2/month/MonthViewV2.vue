@@ -363,16 +363,15 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   padding: 0 16px;
 }
 
-/* 標題與 chip 列之間留白（headline 在上，chip 列不與標題相黏） */
+/* 80px between the two summary cards and the calendar filters. Specified, not derived: it is
+   the page's one real break — above it the cards answer "what am I doing"; below it the chips
+   and the grid are one object, the calendar. */
 .mv2__strip {
-  margin-top: 14px;
+  margin-top: 80px;
 }
 
-/* 80px between the calendar chips and the calendar. Specified, not derived: this is the one
-   place on the page where a gap is doing work rather than separating two things — it is what
-   makes the grid read as its own surface instead of as the next row after the filters. */
 .mv2__weekdays {
-  margin-top: 80px;
+  margin-top: 10px;
 }
 
 /* 星期表頭與格線之間，grid 撐滿剩餘高度 */

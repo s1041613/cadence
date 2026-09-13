@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { publicAssetPath } from '@/utils/public-assets'
 import { notifySyncError } from '@/lib/notify'
 import {
   fetchUserSettings,
@@ -26,9 +25,6 @@ export const MAX_SCRIM_OPACITY = 1
 
 const clampScrimOpacity = (value: number): number =>
   Math.min(MAX_SCRIM_OPACITY, Math.max(MIN_SCRIM_OPACITY, value))
-
-// 系統預設背景圖（使用者未上傳時使用）。放在 public/ 下，路徑需跟隨部署 base。
-export const DEFAULT_BACKGROUND = publicAssetPath('v2-backgrounds/default.jpg')
 
 /**
  * How long the slider waits after the last movement before writing.
@@ -56,13 +52,15 @@ export const useV2AppearanceStore = defineStore('v2-appearance', () => {
   let scrimTimer: ReturnType<typeof setTimeout> | null = null
 
   /**
-   * What the four calendar readers bind to. Kept a plain always-truthy string so
-   * MonthPageV2, WeekPageV2, DayPageV2 and the Customization preview need no
-   * change and no loading state: a public bucket URL works in `<img src>`
-   * exactly like the bundled asset path did.
+   * What the four calendar readers bind to, and null when there is no photo.
+   *
+   * Null is the DEFAULT now: the app ships a plain white page, and a wallpaper is something
+   * the user adds rather than something they have to remove. Both readers already handle it —
+   * Pv2PageBackdrop renders no layers and the frame's own colour shows through, and the
+   * Customization preview has its empty state.
    */
-  const backgroundImage = computed<string>(() =>
-    backgroundPath.value ? publicBackgroundUrl(backgroundPath.value) : DEFAULT_BACKGROUND
+  const backgroundImage = computed<string | null>(() =>
+    backgroundPath.value ? publicBackgroundUrl(backgroundPath.value) : null
   )
 
   /** Drives the Reset-to-default affordance, which only makes sense when there
