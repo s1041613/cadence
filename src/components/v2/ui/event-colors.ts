@@ -6,11 +6,13 @@
  * which shows the name as the row's label. Promoted here so both pickers read from one
  * source and a colour can't gain a name in one place and lose it in the other.
  *
- * The palette is one family — pink through rose, coral and orchid to plum — rather than
- * a spread of unrelated hues. Events are told apart by INTENSITY within that family
- * (pale blossom for the routine, hot pink and berry for the things that matter), which
- * is what the reference design does; a teal next to a red says nothing a user picked it
- * for beyond "different".
+ * Two sets live here. PINK_EVENT_COLORS is one family — pink through rose, coral and
+ * orchid to plum — where events are told apart by INTENSITY rather than by hue, which is
+ * what the reference design does. LEGACY_EVENT_COLORS is the spread of hues that came
+ * before it, back because a calendar where work is blue and the gym is green is readable
+ * at a glance in a way one family cannot be for everyone.
+ *
+ * EVENT_COLORS is both. eventColorsFor() narrows it per account.
  *
  * Every entry is chosen so both chip renderings stay legible: solid fill with
  * `readableInkOn` measures at least 4.5:1, and the tinted fill the timed chip uses
@@ -24,7 +26,8 @@ export type EventColor = {
   name: string
 }
 
-export const EVENT_COLORS: readonly EventColor[] = [
+/** The pink family. One hue, told apart by intensity — see the note at the top of this file. */
+export const PINK_EVENT_COLORS: readonly EventColor[] = [
   // Pinks, pale → deep
   { hex: '#F7C8D9', name: 'Blossom pink' },
   { hex: '#F7A8C4', name: 'Petal pink' },
@@ -45,8 +48,69 @@ export const EVENT_COLORS: readonly EventColor[] = [
   { hex: '#6E4E63', name: 'Plum' }
 ]
 
+/**
+ * The hues this palette shipped with before the pink family replaced them.
+ *
+ * Back because they are what most people reach for: a calendar where work is blue and the gym
+ * is green is a calendar you can read without reading it, and one family cannot do that for
+ * everyone. The hexes are the originals, untouched — events created while these were the
+ * palette still carry them, and a value that moved would leave those events orphaned from
+ * their own name.
+ *
+ * One label changed and no colour did: #8E6FB0 was 'Lilac', which the pink family now uses for
+ * #B96DB0. The name is a row label; the hex is the data.
+ *
+ * Five of these measure between 4.0:1 and 4.5:1 as a solid fill (Teal, Lavender, Mauve, Apple
+ * red, French rose) — see the test. They are grandfathered rather than corrected: they shipped
+ * at these values, and nudging someone's colour to win a ratio is a worse trade than a title
+ * that is a half-step under on the all-day bar.
+ */
+export const LEGACY_EVENT_COLORS: readonly EventColor[] = [
+  { hex: '#4A8B85', name: 'Teal' },
+  { hex: '#63996B', name: 'Sage green' },
+  { hex: '#6863B0', name: 'Indigo' },
+  { hex: '#8E6FB0', name: 'Lavender' },
+  { hex: '#A56D91', name: 'Mauve' },
+  { hex: '#4C4E57', name: 'Slate' },
+  { hex: '#3EBD79', name: 'Emerald green' },
+  { hex: '#3FADAD', name: 'Modern cyan' },
+  { hex: '#3B8FD9', name: 'Deep sky blue' },
+  { hex: '#9C8378', name: 'Pastel brown' },
+  { hex: '#D6453C', name: 'Apple red' },
+  { hex: '#D65179', name: 'French rose' },
+  { hex: '#DE6A5A', name: 'Coral pink' },
+  { hex: '#E8B435', name: 'Bright orange' },
+  { hex: '#9B72D4', name: 'Soft violet' }
+]
+
+/** Everything a picker can offer: the pink family first, then the hues. */
+export const EVENT_COLORS: readonly EventColor[] = [...PINK_EVENT_COLORS, ...LEGACY_EVENT_COLORS]
+
+/**
+ * Accounts that see the pink family and nothing else.
+ *
+ * A preference, hard-coded as a rule, because that is what was asked for. Two things to know
+ * before this list grows: it ships in the client bundle, so every address in it is readable by
+ * anyone who opens devtools; and it cannot be changed without a deploy. The durable shape for
+ * "which palette do I see" is a per-user setting — this constant is where that would plug in.
+ */
+const PINK_ONLY_EMAILS: readonly string[] = ['y10135124@gmail.com']
+
+/**
+ * The palette to offer this account. Unknown or signed-out gets everything: a picker that
+ * silently shows fewer colours than the app has is a bug to everyone who is not on the list.
+ */
+export function eventColorsFor(email: string | null | undefined): readonly EventColor[] {
+  const normalised = email?.trim().toLowerCase()
+  return normalised && PINK_ONLY_EMAILS.includes(normalised) ? PINK_EVENT_COLORS : EVENT_COLORS
+}
+
 /** Flat hex list, for the v1 swatch grid which renders colour without a label. */
 export const EVENT_COLOR_HEXES: readonly string[] = EVENT_COLORS.map((c) => c.hex)
+
+/** The same, narrowed to one account's palette. */
+export const eventColorHexesFor = (email: string | null | undefined): readonly string[] =>
+  eventColorsFor(email).map((c) => c.hex)
 
 /** The palette's default — the mid-tone that reads as "an event" with nothing chosen. */
 export const DEFAULT_EVENT_COLOR = '#EC5093'

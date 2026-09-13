@@ -12,7 +12,7 @@
     @keydown="onKeydown"
   >
     <button
-      v-for="(c, i) in EVENT_COLORS"
+      v-for="(c, i) in colors"
       :key="c.hex"
       :ref="(el) => setOptionEl(el, i)"
       type="button"
@@ -34,7 +34,8 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, type ComponentPublicInstance } from 'vue'
-import { EVENT_COLORS } from './event-colors'
+import { eventColorsFor } from './event-colors'
+import { useAuthStore } from '@/stores/auth-store'
 
 const props = withDefaults(
   defineProps<{
@@ -66,7 +67,11 @@ function isSelected(hex: string): boolean {
 // A radiogroup exposes exactly one tab stop. When the stored colour isn't in the palette
 // (an older event, a calendar's own colour) nothing is checked, so the first row takes the
 // stop rather than leaving the group unreachable by keyboard.
-const selectedIndex = computed(() => EVENT_COLORS.findIndex((c) => isSelected(c.hex)))
+const auth = useAuthStore()
+// The palette this account is offered — pink-only for some, everything for everyone else.
+const colors = computed(() => eventColorsFor(auth.email))
+
+const selectedIndex = computed(() => colors.value.findIndex((c) => isSelected(c.hex)))
 
 function tabIndexOf(i: number): number {
   const active = selectedIndex.value === -1 ? 0 : selectedIndex.value
@@ -81,8 +86,9 @@ function onKeydown(e: KeyboardEvent): void {
   if (delta === 0) return
   e.preventDefault()
   const from = selectedIndex.value === -1 ? 0 : selectedIndex.value
-  const next = (from + delta + EVENT_COLORS.length) % EVENT_COLORS.length
-  emit('preview', EVENT_COLORS[next]!.hex)
+  const list = colors.value
+  const next = (from + delta + list.length) % list.length
+  emit('preview', list[next]!.hex)
   // The tab stop follows the selection, so focus must move with it or the group would
   // strand focus on a row that is now tabindex -1.
   void nextTick(() => optionEls.value[next]?.focus())

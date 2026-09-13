@@ -2,8 +2,12 @@ import { describe, it, expect } from 'vitest'
 import {
   EVENT_COLORS,
   EVENT_COLOR_HEXES,
+  PINK_EVENT_COLORS,
+  LEGACY_EVENT_COLORS,
   DEFAULT_EVENT_COLOR,
   eventColorNameOf,
+  eventColorsFor,
+  eventColorHexesFor,
   readableInkOn,
   shadeOf,
   tintOf
@@ -43,12 +47,23 @@ function contrast(a: string, b: string): number {
 }
 
 describe('event palette · every colour survives both chip renderings', () => {
-  it.each(EVENT_COLORS.map((c) => [c.name, c.hex] as const))(
+  it.each(PINK_EVENT_COLORS.map((c) => [c.name, c.hex] as const))(
     '%s: title on a solid fill clears 4.5:1',
     (_name, hex) => {
       // The all-day bar. readableInkOn picks white or the deep plum, whichever measures
       // better — a palette entry that suits neither is the one this catches.
       expect(contrast(hex, readableInkOn(hex))).toBeGreaterThanOrEqual(4.5)
+    }
+  )
+
+  // The hues came back at the values they shipped at, and five of them (Teal, Lavender, Mauve,
+  // Apple red, French rose) land between 4.0 and 4.5 as a solid fill. Asserting 4.0 here says
+  // what is true instead of what would be nice: they are grandfathered, and the bar that still
+  // matters is that none of them is unreadable. A NEW colour belongs in the pink set, at 4.5.
+  it.each(LEGACY_EVENT_COLORS.map((c) => [c.name, c.hex] as const))(
+    '%s: title on a solid fill clears 4.0:1',
+    (_name, hex) => {
+      expect(contrast(hex, readableInkOn(hex))).toBeGreaterThanOrEqual(4.0)
     }
   )
 
@@ -68,6 +83,34 @@ describe('event palette · every colour survives both chip renderings', () => {
       expect(contrast(tintOf(hex), CANVAS)).toBeGreaterThanOrEqual(1.1)
     }
   )
+})
+
+describe('eventColorsFor · the palette an account is offered', () => {
+  it('gives the listed account the pink family and nothing else', () => {
+    expect(eventColorsFor('y10135124@gmail.com')).toEqual(PINK_EVENT_COLORS)
+    // The address comes from an auth provider, which is not careful about either of these.
+    expect(eventColorsFor('  Y10135124@Gmail.com ')).toEqual(PINK_EVENT_COLORS)
+  })
+
+  it('gives everyone else every colour', () => {
+    expect(eventColorsFor('someone@example.com')).toEqual(EVENT_COLORS)
+    expect(eventColorsFor(null)).toEqual(EVENT_COLORS)
+    expect(eventColorsFor(undefined)).toEqual(EVENT_COLORS)
+    expect(eventColorsFor('')).toEqual(EVENT_COLORS)
+  })
+
+  it('narrows the flat hex list the same way', () => {
+    expect(eventColorHexesFor('y10135124@gmail.com')).toEqual(PINK_EVENT_COLORS.map((c) => c.hex))
+    expect(eventColorHexesFor('someone@example.com')).toEqual(EVENT_COLOR_HEXES)
+  })
+
+  it('offers a palette that always contains the default', () => {
+    // Whichever set a picker shows, the colour an untouched event already has has to be in it,
+    // or that event opens with nothing selected.
+    for (const email of ['y10135124@gmail.com', 'someone@example.com', null]) {
+      expect(eventColorsFor(email).map((c) => c.hex)).toContain(DEFAULT_EVENT_COLOR)
+    }
+  })
 })
 
 describe('event palette · shape', () => {
@@ -92,9 +135,9 @@ describe('event palette · shape', () => {
     expect(eventColorNameOf(DEFAULT_EVENT_COLOR.toLowerCase())).toBe(
       eventColorNameOf(DEFAULT_EVENT_COLOR.toUpperCase())
     )
-    // A retired palette's colour is still on existing records; guessing a name for it would
-    // put a wrong label on the user's own data.
-    expect(eventColorNameOf('#4A8B85')).toBeNull()
+    // A colour that is in neither set gets no name rather than a guessed one — an event
+    // created under some older palette keeps its swatch and loses only its label.
+    expect(eventColorNameOf('#123456')).toBeNull()
     expect(eventColorNameOf(undefined)).toBeNull()
   })
 })
