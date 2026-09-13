@@ -1,5 +1,5 @@
 <template>
-  <!-- 日曆過濾 chip：藥丸，# 前綴。active 淺灰底深字、inactive 透明底描邊。 -->
+  <!-- 日曆過濾 chip：藥丸，# 前綴。active 淺粉底粉字、inactive 透明底描邊灰字。 -->
   <button
     type="button"
     class="pv2-chip-tab"
@@ -47,14 +47,17 @@ const emit = defineEmits<{
   content: '#';
 }
 
-/* 選中＝填一層淺色，不是塗成一顆墨球：這排 chip 是篩選器，不是這頁的主角，
-   而且多開幾本日曆時，一整排深色藥丸會比它們篩的月曆本身還搶眼。 */
+/* 選中＝淺粉底 + 粉字，與底部 nav 的選中態同一套語彙：這個粉在 app 裡講的就是
+   「你在這個上面」。外框收掉——底色就是訊號了，再加一圈線只會讓兩種狀態都像有框。
+
+   注意：--pv2-accent 的文字對這層淺粉底約 3:1，而這個標籤是 11px。設計的粉就是這個值，
+   記在這裡而不是自己換一個色；要提高對比就是把 --pv2-accent 壓深，兩個狀態一起變。 */
 .pv2-chip-tab--on {
-  background: var(--pv2-fill);
-  border-color: var(--pv2-line);
+  background: rgba(var(--pv2-accent-rgb), 0.12);
+  border-color: transparent;
 }
 
 .pv2-chip-tab--on .pv2-chip-tab__label {
-  color: var(--pv2-ink);
+  color: var(--pv2-accent);
 }
 </style>
