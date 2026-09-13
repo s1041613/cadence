@@ -61,15 +61,6 @@ afterEach(() => {
   vi.resetModules()
 })
 
-describe('DEFAULT_BACKGROUND', () => {
-  it('uses the configured public base for the default background image', async () => {
-    vi.stubEnv('BASE_URL', '/cadence/')
-    vi.resetModules()
-    const { DEFAULT_BACKGROUND } = await import('./v2-appearance-store')
-    expect(DEFAULT_BACKGROUND).toBe('/cadence/v2-backgrounds/default.jpg')
-  })
-})
-
 describe('loadFromRemote', () => {
   it('does not call the service when nobody is signed in', async () => {
     currentUserId = undefined
@@ -81,14 +72,14 @@ describe('loadFromRemote', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('keeps the bundled default when the user has no row yet', async () => {
+  it('leaves the page plain when the user has no row yet', async () => {
     fetchMock.mockResolvedValue(null)
-    const { useV2AppearanceStore, DEFAULT_BACKGROUND, DEFAULT_SCRIM_OPACITY } = await importStore()
+    const { useV2AppearanceStore, DEFAULT_SCRIM_OPACITY } = await importStore()
     const store = useV2AppearanceStore()
 
     await store.loadFromRemote()
 
-    expect(store.backgroundImage).toBe(DEFAULT_BACKGROUND)
+    expect(store.backgroundImage).toBeNull()
     expect(store.scrimOpacity).toBe(DEFAULT_SCRIM_OPACITY)
   })
 
@@ -110,14 +101,14 @@ describe('loadFromRemote', () => {
 
   it('never rejects, and stays silent, when the load fails', async () => {
     // It is awaited inside a Promise.all that the boot file invokes with `void`,
-    // so a rejection here takes sibling stores down with it. Falling back to the
-    // bundled wallpaper is cosmetic, so it also must not raise a toast.
+    // so a rejection here takes sibling stores down with it. Losing the wallpaper is
+    // cosmetic, so it also must not raise a toast.
     fetchMock.mockRejectedValue(new Error('offline'))
-    const { useV2AppearanceStore, DEFAULT_BACKGROUND } = await importStore()
+    const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
 
     await expect(store.loadFromRemote()).resolves.toBeUndefined()
-    expect(store.backgroundImage).toBe(DEFAULT_BACKGROUND)
+    expect(store.backgroundImage).toBeNull()
     expect(notifyMock).not.toHaveBeenCalled()
   })
 })
@@ -266,7 +257,7 @@ describe('resetLocal', () => {
   })
 
   it('restores the compiled-in defaults', async () => {
-    const { useV2AppearanceStore, DEFAULT_BACKGROUND, DEFAULT_SCRIM_OPACITY } = await importStore()
+    const { useV2AppearanceStore, DEFAULT_SCRIM_OPACITY } = await importStore()
     const store = useV2AppearanceStore()
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/abc.jpg',
@@ -278,7 +269,7 @@ describe('resetLocal', () => {
 
     store.resetLocal()
 
-    expect(store.backgroundImage).toBe(DEFAULT_BACKGROUND)
+    expect(store.backgroundImage).toBeNull()
     expect(store.scrimOpacity).toBe(DEFAULT_SCRIM_OPACITY)
   })
 })
@@ -396,8 +387,7 @@ describe('uploadBackground', () => {
     failUpload(new Error('boom'))
     await pending
 
-    const { DEFAULT_BACKGROUND } = await importStore()
-    expect(store.backgroundImage).toBe(DEFAULT_BACKGROUND)
+    expect(store.backgroundImage).toBeNull()
     expect(notifyMock).not.toHaveBeenCalled()
   })
 
@@ -442,8 +432,8 @@ describe('uploadBackground', () => {
 })
 
 describe('clearBackground', () => {
-  it('returns to the bundled default and removes the stored object', async () => {
-    const { useV2AppearanceStore, DEFAULT_BACKGROUND } = await importStore()
+  it('returns to the plain page and removes the stored object', async () => {
+    const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
     fetchMock.mockResolvedValue({
       backgroundPath: 'user-1/old.jpg',
@@ -455,7 +445,7 @@ describe('clearBackground', () => {
 
     await store.clearBackground()
 
-    expect(store.backgroundImage).toBe(DEFAULT_BACKGROUND)
+    expect(store.backgroundImage).toBeNull()
     expect(saveMock.mock.calls[0]?.[0]).toMatchObject({ backgroundPath: null })
     expect(deleteMock).toHaveBeenCalledWith('user-1/old.jpg')
   })
