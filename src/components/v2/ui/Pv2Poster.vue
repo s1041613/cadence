@@ -27,11 +27,10 @@ const emit = defineEmits<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* The space above the title is the design's, and it is a lot: the month opens the page from
-     roughly a fifth of the way down rather than from its top edge. 66px came off the reference
-     (17% of the 393px frame); the further 30px is asked for on top of it.
+  /* The title now opens close to the top of the frame instead of a fifth of the way down:
+     30px, asked for directly, replaces the 96px the reference poster used.
      Nothing below it: the gap to the cards is theirs to set (.mv2__todos). */
-  padding: 96px 0 0;
+  padding: 30px 0 0;
   border: none;
   background: none;
   cursor: pointer;
