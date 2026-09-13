@@ -22,6 +22,8 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref<string | null>(null)
 
   const isSignedIn = computed(() => user.value !== null)
+  /** Null when signed out. Read by the colour pickers, which narrow their palette per account. */
+  const email = computed(() => user.value?.email ?? null)
   const displayName = computed(() => {
     const metadata = user.value?.user_metadata
     return (metadata?.full_name as string | undefined) ?? user.value?.email ?? 'Cadence user'
@@ -101,6 +103,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     isConfigured: isSupabaseConfigured,
     isSignedIn,
+    email,
     displayName,
     avatarUrl,
     init,
