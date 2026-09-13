@@ -357,17 +357,16 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   display: flex;
   align-items: stretch;
   gap: 10px;
-  /* The design's gap between the month word and the cards. Measured from the title's descender,
-     which is why it is smaller than it looks: the poster box adds no padding below itself. */
-  margin-top: 26px;
+  /* 20px from the month word. Measured from the title's descender, since the poster box adds
+     no padding below itself. */
+  margin-top: 20px;
   padding: 0 16px;
 }
 
-/* 80px between the two summary cards and the calendar filters. Specified, not derived: it is
-   the page's one real break — above it the cards answer "what am I doing"; below it the chips
-   and the grid are one object, the calendar. */
+/* 20px between the two summary cards and the calendar filters — the same step the cards take
+   from the title, so the whole header stacks on one rhythm. */
 .mv2__strip {
-  margin-top: 80px;
+  margin-top: 20px;
 }
 
 .mv2__weekdays {
