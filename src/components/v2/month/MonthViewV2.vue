@@ -368,8 +368,11 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   margin-top: 14px;
 }
 
+/* 80px between the calendar chips and the calendar. Specified, not derived: this is the one
+   place on the page where a gap is doing work rather than separating two things — it is what
+   makes the grid read as its own surface instead of as the next row after the filters. */
 .mv2__weekdays {
-  margin-top: 10px;
+  margin-top: 80px;
 }
 
 /* 星期表頭與格線之間，grid 撐滿剩餘高度 */
