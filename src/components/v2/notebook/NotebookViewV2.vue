@@ -32,14 +32,14 @@
         />
       </form>
       <button v-else class="nbv__tag-add" type="button" aria-label="New tag" @click="startTag">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
           <path d="M12 5 V19 M5 12 H19" />
         </svg>
       </button>
     </div>
 
     <label class="nbv__search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink-3)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="6.5" />
         <path d="M16 16 L21 21" />
       </svg>
@@ -119,9 +119,12 @@ function onSwipe(details: SwipeDetails): void {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
-  padding: 10px 22px 6px;
+  /* 12 here and on the search below, then 8 on the feed: the filter and the query are one
+     group and sit a small step apart, and the larger step falls at the boundary between
+     that group and the notes. The old 10/6/8/10 ladder had no such grouping in it. */
+  padding: 12px 22px 0;
   scrollbar-width: none;
 }
 
@@ -129,36 +132,41 @@ function onSwipe(details: SwipeDetails): void {
   display: none;
 }
 
+/* Filled capsules, no outline. On a pure-white canvas an outlined chip, an outlined search
+   field and an outlined note card are three different jobs wearing one material, and the
+   hierarchy flattens. --pv2-fill is the documented resting state for a control track, and
+   it separates the chip from the page without drawing a line around it. */
 .nbv__tag,
 .nbv__tag-add,
 .nbv__tag-form {
   flex: none;
-  height: 27px;
-  border: 1px solid var(--pv2-line-soft);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.74);
+  height: 32px;
+  border: none;
+  border-radius: var(--cd-radius-pill);
+  background: var(--pv2-fill);
 }
 
+/* Only the ACTIVE tag gets a solid shape. The rest carry the same quiet fill, so the one
+   that means "you are filtered to this" is the only high-contrast mark in the row. */
 .nbv__tag {
-  min-width: 52px;
-  padding: 0 11px;
-  font: 600 11px var(--cd-font-mono);
-  color: var(--pv2-ink-2);
+  min-width: 0;
+  padding: 0 14px;
+  font: 400 15px var(--cd-font-ui);
+  color: var(--pv2-ink);
   cursor: pointer;
 }
 
 .nbv__tag--active {
-  border-color: var(--pv2-ink);
   background: var(--pv2-ink);
   color: var(--pv2-canvas);
+  font-weight: 600;
 }
 
 .nbv__tag-add {
-  width: 27px;
+  width: 32px;
   display: grid;
   place-items: center;
   padding: 0;
-  border-style: dashed;
   cursor: pointer;
 }
 
@@ -175,21 +183,23 @@ function onSwipe(details: SwipeDetails): void {
   border: none;
   outline: none;
   background: transparent;
-  font: 600 11px var(--cd-font-mono);
+  font: 400 15px var(--cd-font-ui);
   color: var(--pv2-ink);
 }
 
+/* Same fill as the chips above it, because it belongs to the same group: both narrow the
+   feed, neither is content. 36px and radius 9 are the iOS search field's own box. */
 .nbv__search {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 9px;
-  height: 44px;
-  margin: 8px 22px 10px;
-  padding: 0 14px;
-  border: 1px solid var(--pv2-line-soft);
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.86);
+  gap: 7px;
+  height: 36px;
+  margin: 12px 22px 0;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--cd-radius-sm);
+  background: var(--pv2-fill);
 }
 
 .nbv__search-input {
@@ -198,12 +208,12 @@ function onSwipe(details: SwipeDetails): void {
   border: none;
   outline: none;
   background: transparent;
-  font: 400 14px var(--cd-font-mono);
+  font: 400 17px var(--cd-font-ui);
   color: var(--pv2-ink);
 }
 
 .nbv__search-input::placeholder {
-  color: var(--pv2-ink-2);
+  color: var(--pv2-ink-3);
 }
 
 .nbv__feed {
@@ -214,7 +224,7 @@ function onSwipe(details: SwipeDetails): void {
   /* Bottom padding clears the floating Pv2BottomNav pill (var(--pv2-nav-h)), not a
      fixed guess — the feed is itself the scrolling element, so padding goes directly
      here rather than on a flex ancestor. */
-  padding: 10px 22px var(--pv2-nav-h);
+  padding: 8px 22px var(--pv2-nav-h);
   touch-action: pan-y;
   /* Repo idiom (see DayViewV2): hide the scrollbar while keeping the scroll. */
   scrollbar-width: none;
@@ -228,8 +238,8 @@ function onSwipe(details: SwipeDetails): void {
 
 .nbv__empty {
   margin: 24px 0 0;
-  font: 500 12px var(--cd-font-mono);
-  color: var(--pv2-ink-4);
+  font: 400 15px var(--cd-font-ui);
+  color: var(--pv2-ink-3);
   text-align: center;
 }
 </style>
