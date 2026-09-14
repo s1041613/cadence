@@ -361,25 +361,32 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
 
 /* The row the switcher floats on. It owns its distance from the top of the frame; the distance
    DOWN to the title is the title's (--pv2-poster-pad-top below), so neither pays twice.
-   14px, not 0: the control is a floating capsule with a soft shadow, and flush against the
-   frame's top edge that shadow is clipped and the whole thing reads as cut off. */
+   8px, not 0: the control is a floating capsule with a soft shadow, and flush against the
+   frame's top edge that shadow is clipped and the whole thing reads as cut off. 8 is that
+   shadow's own reach — --cd-shadow-overlay is `0 0 40px -12px`, so it extends 40/2 - 12 = 8px
+   past the capsule — which makes this the smallest top gap that still draws the control whole.
+   The header was asked to open 10px higher; 6 of those 10 come out of here, down to that floor,
+   and the other 4 out of the title's gap below. */
 .mv2__topbar {
   display: flex;
   justify-content: flex-end;
-  padding: 14px 16px 0;
+  padding: 8px 16px 0;
 }
 
 /* The title used to own its whole distance from the top of the frame. With a row above it, all
    it owes is the gap to that row.
 
    Measured on 393x852: this header already leaves the grid ~33px more room than its own
-   weeks x ROW_MAX_H cap can use, so neither this padding nor the 10px taken off it is spent out
-   of the grid — the rows land at 91.8px regardless (ROW_MAX_H is 92, and .pv2-grid's 1px
+   weeks x ROW_MAX_H cap can use, so neither this padding nor the 10px the header has since
+   given back is spent out of the grid — the rows land at 91.8px regardless (ROW_MAX_H is 92, and .pv2-grid's 1px
    border-top comes out of the capped border-box). That is two lanes per row, not the three the
    cap is named for, and it is the height the month actually renders at: see moreNeedsLane in
    month-lanes.ts, which is what stops those two lanes from collapsing to one. */
 .mv2__poster {
-  --pv2-poster-pad-top: 6px;
+  /* 2px of box padding, ~5px of visible gap: the month word's cap top lands at
+     paddingTop + fontSize x (lineHeight/2 - 0.37) = 2 + 44 x (0.45 - 0.37), so the optical
+     distance to the switcher row above is larger than the number here. */
+  --pv2-poster-pad-top: 2px;
 }
 
 /* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.
