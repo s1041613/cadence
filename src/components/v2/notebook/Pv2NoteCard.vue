@@ -178,12 +178,24 @@ function commit(): void {
 </script>
 
 <style scoped>
-/* No fill, no border, no shadow at rest — see the template comment. The row's only horizontal
-   inset comes from the feed, so the rule below runs the full content width. (The rounded press
-   fill further down belongs to the tap target, not to the row: it exists only while held.) */
+/* No fill, no border, no shadow at rest — see the template comment.
+
+   The negative margin and matching padding let the press fill below run 10px past the text
+   column on each side without moving a glyph: the text still sits exactly where the feed's 22px
+   inset puts it. The whole row lights up, date line and all, rather than just the text block —
+   a fill that stops above the date reads as a selection that missed something.
+
+   The press is driven by :has() on the body rather than by .nbk:active so that tapping copy or
+   delete doesn't light the row: those two act on the note, they don't open it. */
 .nbk {
   position: relative;
-  padding: 13px 0 14px;
+  margin: 0 -10px;
+  padding: 13px 10px 14px;
+  border-radius: var(--cd-radius-sm);
+}
+
+.nbk:has(.nbk__body:active) {
+  background: var(--pv2-fill);
 }
 
 /* The separator belongs BETWEEN rows, so it hangs off the second one of each pair: a
@@ -194,27 +206,26 @@ function commit(): void {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
+  /* Inset by the row's own gutter so the rule still lines up with the text, not with the wider
+     press fill. */
+  left: 10px;
+  right: 10px;
   height: 1px;
   background: var(--pv2-line);
 }
 
-/* The tappable region, and the only thing on the row that reacts to a finger. The negative
-   margin lets its press fill and its hit area run 10px wider and 6px taller than the text
-   without moving a glyph: the text column stays exactly where the feed's 22px inset puts it.
+/* The tappable region — tapping it opens the note for editing, which is also the only way to
+   read past the clamp. It carries no fill of its own; the row above wears the press for it, so
+   the feedback covers the whole object instead of a box around the text.
+   6px of vertical padding (cancelled by the negative top margin, so nothing moves) grows the hit
+   area into the gap above and below the text without changing the row's rhythm.
    A row of unstyled text on a white page reads as text lying ON the page rather than as an
    object you can open — the press state is what says otherwise, and it costs no resting ink. */
 .nbk__body {
-  margin: -6px -10px 0;
-  padding: 6px 10px;
-  border-radius: var(--cd-radius-sm);
+  margin: -6px 0 0;
+  padding: 6px 0;
   cursor: text;
   -webkit-tap-highlight-color: transparent;
-}
-
-.nbk__body:active {
-  background: var(--pv2-fill);
 }
 
 /* The lead line, at 15/500. Not 17/400: at 17 every note on the page was set in one voice at
