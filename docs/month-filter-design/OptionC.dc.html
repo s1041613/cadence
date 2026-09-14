@@ -13,15 +13,26 @@
     a { color: #DE6E8C; } a:hover { color: #C55A78; }
     * { box-sizing: border-box; }
 
-    .frame {
-      position: relative; width: 393px; height: 852px;
-      display: flex; flex-direction: column; overflow: hidden;
-      background: #ffffff; padding-top: 44px;
-    }
+    .frame { position: relative; width: 393px; height: 852px;
+             display: flex; flex-direction: column; overflow: hidden;
+             background: #ffffff; padding-top: 44px; isolation: isolate; }
     .body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 6px 8px 91px; }
 
+    /* Pv2PageBackdrop stand-in */
+    .wall { position: absolute; inset: 0; z-index: -1;
+            background:
+              radial-gradient(115% 78% at 14% 6%, #F0D3BE 0%, rgba(240,211,190,0) 58%),
+              radial-gradient(95% 66% at 88% 2%, #E3BFD1 0%, rgba(227,191,209,0) 55%),
+              radial-gradient(120% 88% at 74% 76%, #BFCEDD 0%, rgba(191,206,221,0) 60%),
+              radial-gradient(88% 58% at 18% 94%, #D2C7B6 0%, rgba(210,199,182,0) 60%),
+              linear-gradient(158deg, #E7D6C8, #C6D1D9); }
+    .wall__grain { position: absolute; inset: 0; z-index: -1; opacity: .18; mix-blend-mode: overlay;
+                   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    .wall__scrim { position: absolute; inset: 0; z-index: -1; background: #ffffff; }
+
     /* Pv2Poster — 9cqw of a 377px container, i.e. 33.93px */
-    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 30px 0 0; }
+    .topbar { display: flex; justify-content: flex-end; padding: 6px 16px 0; }
+    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 18px 0 0; }
     .poster__month { font-weight: 800; font-size: 33.93px; letter-spacing: -0.01em; line-height: 0.9; color: #000000; }
 
     /* Pv2TodoCard */
@@ -43,8 +54,6 @@
                 border: 1px solid #E4E4E4; font: 600 11px 'Inter','Noto Sans TC',sans-serif; line-height: 1;
                 letter-spacing: .02em; color: #8E8E8E; white-space: nowrap; }
     .chip-tab--on { background: rgba(222, 110, 140, .12); border-color: transparent; color: #DE6E8C; }
-    .strip__fade { position: absolute; top: 0; right: 0; bottom: 6px; width: 40px;
-                   background: linear-gradient(90deg, rgba(255,255,255,0), #fff); pointer-events: none; }
 
     /* Pv2WeekdayHeader */
     .weekdays { margin-top: 10px; display: grid; grid-template-columns: repeat(7, 1fr); padding-bottom: 6px; }
@@ -66,33 +75,37 @@
             padding: 2px 4px; font: 700 9px/1.2 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em;
             white-space: nowrap; overflow: hidden; }
 
-    /* ── the switcher: Pv2BottomNav's glass recipe, in a capsule ───────────── */
+    /* ── the switcher: clear glass. No white plate — the blur and the lit edge
+         are the whole material, so what shows through is the wallpaper itself. ─ */
     .sw { position: relative; flex: none; display: flex; align-items: center;
-          width: 140px; height: 44px; padding: 4px; border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.55);
-          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
-          backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
-          box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
+          width: 96px; height: 44px; padding: 4px; border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.5);
+          background: rgba(255,255,255,.06);
+          backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+          box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                      inset 0 -1px 1px rgba(255,255,255,.28),
+                      0 6px 20px rgba(40,38,30,.14); }
     .sw__thumb { position: absolute; top: 4px; left: 4px;
                  width: 44px; height: 36px; border-radius: 999px;
-                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(222, 110, 140, .12);
-                 backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-                 border: 1px solid rgba(255,255,255,.5);
-                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12);
+                 background: rgba(222, 110, 140, .20);
+                 backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                 border: 1px solid rgba(255,255,255,.42);
+                 box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14);
                  transition: transform .42s cubic-bezier(.34,1.56,.64,1); }
     .seg { position: relative; z-index: 1; flex: none; display: grid; place-items: center;
            width: 44px; height: 36px; border: none; background: none; padding: 0; cursor: pointer;
            transition: color .18s cubic-bezier(.22,1,.36,1); }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .sw { background: #fff; }
-      .sw__thumb { background: rgba(222, 110, 140, .16); }
+      .sw { background: rgba(255,255,255,.72); }
+      .sw__thumb { background: rgba(222, 110, 140, .26); }
     }
+    @media (prefers-reduced-motion: reduce) { .sw__thumb { transition: none; } }
 
     /* Pv2BottomNav */
     .nav { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 20;
            display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px; border-radius: 999px;
            border: 1px solid rgba(255,255,255,.55);
-           background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
+           background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #ffffff;
            backdrop-filter: blur(22px) saturate(140%); box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
     .nav__pill { position: absolute; top: 10px; bottom: 10px; left: 10px; width: calc((100% - 20px) / 4);
                  border-radius: 20px;
@@ -106,7 +119,11 @@
   </style>
 </helmet>
 <div class="frame">
+    <div class="wall"></div>
+    <div class="wall__grain"></div>
+    <div class="wall__scrim" style="opacity: 0.35"></div>
     <div class="body">
+      
       <div class="poster"><span class="poster__month">September</span></div>
       <div class="todos">
       <div class="todo">
@@ -118,7 +135,7 @@
         <div class="todo__item"><span class="todo__dot" style="background:#F4A9A0"></span><span class="todo__title">回覆供應商報價</span></div>
       </div>
     </div>
-      <div class="strip"><div class="strip__row"><span class="chip-tab chip-tab--on">#個人</span><span class="chip-tab chip-tab--on">#工作</span><span class="chip-tab">#家庭</span><span class="chip-tab">#健身</span><span class="chip-tab">#共享行事曆</span></div><div class="strip__fade"></div></div>
+      <div class="strip"><div class="strip__row"><span class="chip-tab chip-tab--on">#個人</span><span class="chip-tab chip-tab--on">#工作</span><span class="chip-tab">#家庭</span><span class="chip-tab">#健身</span><span class="chip-tab">#共享行事曆</span></div></div>
       <div class="weekdays"><span class="wd" style="color:#BC7088">Sun</span><span class="wd" style="color:#8E8E8E">Mon</span><span class="wd" style="color:#8E8E8E">Tue</span><span class="wd" style="color:#8E8E8E">Wed</span><span class="wd" style="color:#8E8E8E">Thu</span><span class="wd" style="color:#8E8E8E">Fri</span><span class="wd" style="color:#8E8E8E">Sat</span></div>
       <div class="grid">
         <div class="week">
@@ -308,11 +325,10 @@
         </div>
       </div>
     </div>
-    <div class="sw" role="group" aria-label="月曆顯示內容" style="position: absolute; z-index: 21; left: 50%; margin-left: -70px; bottom: 103px;">
+    <div class="sw" role="group" aria-label="月曆顯示內容" style="position: absolute; z-index: 21; left: 50%; margin-left: -48px; bottom: 103px;">
       <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>
       <button type="button" class="seg" aria-label="全部" aria-pressed="{{pAll}}" onClick="{{pickAll}}" style="color: {{cAll}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
       <button type="button" class="seg" aria-label="只看行事曆" aria-pressed="{{pEvents}}" onClick="{{pickEvents}}" style="color: {{cEvents}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></button>
-      <button type="button" class="seg" aria-label="只看待辦" aria-pressed="{{pTasks}}" onClick="{{pickTasks}}" style="color: {{cTasks}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg></button>
     </div>
     <nav class="nav">
       <div class="nav__pill"></div>
@@ -323,11 +339,11 @@
     </nav>
   </div>
 </x-dc>
-<script data-dc-script data-props='{"mode":{"editor":"enum","options":["all","events","tasks"],"default":"all","section":"顯示"},"$preview":{"width":393,"height":852}}'>
-const DATA = {"all":[[{"title":"台中出差","left":"215.429px","width":"161.571px","top":"38px","bg":"#6863B0","ink":"#ffffff"},{"title":"晨會","left":"107.714px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健檢預約","left":"269.286px","width":"53.857px","top":"55px","bg":"#fbdfdb","ink":"#7b5053"}],[{"title":"報帳單據","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"牙醫回診","left":"107.714px","width":"53.857px","top":"38px","bg":"#d7e6e4","ink":"#374448"},{"title":"退租通知信","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"},{"title":"產品週會","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健身房","left":"269.286px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"宜蘭小旅行","left":"215.429px","width":"161.571px","top":"38px","bg":"#63996B","ink":"#2A1420"},{"title":"1:1 with Ray","left":"53.857px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"送出季度報告","left":"53.857px","width":"53.857px","top":"55px","bg":"#fad5e5","ink":"#782c4e"},{"title":"回覆供應商報價","left":"107.714px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"整理設計系統文件","left":"215.429px","width":"53.857px","top":"55px","bg":"#f3dced","ink":"#704462"}],[{"title":"中秋連假","left":"269.286px","width":"53.857px","top":"38px","bg":"#D6453C","ink":"#ffffff"},{"title":"訂中秋伴手禮","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"健身房","left":"107.714px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"},{"title":"報稅資料備份","left":"161.571px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"面試回饋表","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"讀完 Refactoring UI","left":"53.857px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"季度回顧","left":"107.714px","width":"53.857px","top":"38px","bg":"#e3e3f1","ink":"#43345a"},{"title":"月結對帳","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"}]],"events":[[{"title":"台中出差","left":"215.429px","width":"161.571px","top":"38px","bg":"#6863B0","ink":"#ffffff"},{"title":"晨會","left":"107.714px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"牙醫回診","left":"107.714px","width":"53.857px","top":"38px","bg":"#d7e6e4","ink":"#374448"},{"title":"產品週會","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健身房","left":"269.286px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"宜蘭小旅行","left":"215.429px","width":"161.571px","top":"38px","bg":"#63996B","ink":"#2A1420"},{"title":"1:1 with Ray","left":"53.857px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"中秋連假","left":"269.286px","width":"53.857px","top":"38px","bg":"#D6453C","ink":"#ffffff"},{"title":"健身房","left":"107.714px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"季度回顧","left":"107.714px","width":"53.857px","top":"38px","bg":"#e3e3f1","ink":"#43345a"}]],"tasks":[[{"title":"健檢預約","left":"269.286px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"}],[{"title":"報帳單據","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"退租通知信","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"}],[{"title":"送出季度報告","left":"53.857px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"回覆供應商報價","left":"107.714px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"整理設計系統文件","left":"215.429px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"}],[{"title":"訂中秋伴手禮","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"報稅資料備份","left":"161.571px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"面試回饋表","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"讀完 Refactoring UI","left":"53.857px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"月結對帳","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"}]]};
+<script data-dc-script data-props='{"mode":{"editor":"enum","options":["all","events"],"default":"all","section":"顯示"},"$preview":{"width":393,"height":852}}'>
+const DATA = {"all":[[{"title":"台中出差","left":"215.429px","width":"161.571px","top":"38px","bg":"#6863B0","ink":"#ffffff"},{"title":"晨會","left":"107.714px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健檢預約","left":"269.286px","width":"53.857px","top":"55px","bg":"#fbdfdb","ink":"#7b5053"}],[{"title":"報帳單據","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"牙醫回診","left":"107.714px","width":"53.857px","top":"38px","bg":"#d7e6e4","ink":"#374448"},{"title":"退租通知信","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"},{"title":"產品週會","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健身房","left":"269.286px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"宜蘭小旅行","left":"215.429px","width":"161.571px","top":"38px","bg":"#63996B","ink":"#2A1420"},{"title":"1:1 with Ray","left":"53.857px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"送出季度報告","left":"53.857px","width":"53.857px","top":"55px","bg":"#fad5e5","ink":"#782c4e"},{"title":"回覆供應商報價","left":"107.714px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"整理設計系統文件","left":"215.429px","width":"53.857px","top":"55px","bg":"#f3dced","ink":"#704462"}],[{"title":"中秋連假","left":"269.286px","width":"53.857px","top":"38px","bg":"#D6453C","ink":"#ffffff"},{"title":"訂中秋伴手禮","left":"53.857px","width":"53.857px","top":"38px","bg":"#fbdfdb","ink":"#7b5053"},{"title":"健身房","left":"107.714px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"},{"title":"報稅資料備份","left":"161.571px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"面試回饋表","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"讀完 Refactoring UI","left":"53.857px","width":"53.857px","top":"38px","bg":"#ede1e6","ink":"#6a4d5b"},{"title":"季度回顧","left":"107.714px","width":"53.857px","top":"38px","bg":"#e3e3f1","ink":"#43345a"},{"title":"月結對帳","left":"161.571px","width":"53.857px","top":"38px","bg":"#f3dced","ink":"#704462"}]],"events":[[{"title":"台中出差","left":"215.429px","width":"161.571px","top":"38px","bg":"#6863B0","ink":"#ffffff"},{"title":"晨會","left":"107.714px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"牙醫回診","left":"107.714px","width":"53.857px","top":"38px","bg":"#d7e6e4","ink":"#374448"},{"title":"產品週會","left":"215.429px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"},{"title":"健身房","left":"269.286px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"宜蘭小旅行","left":"215.429px","width":"161.571px","top":"38px","bg":"#63996B","ink":"#2A1420"},{"title":"1:1 with Ray","left":"53.857px","width":"53.857px","top":"38px","bg":"#d0e4f6","ink":"#31456a"},{"title":"設計評審","left":"161.571px","width":"53.857px","top":"38px","bg":"#fad5e5","ink":"#782c4e"}],[{"title":"中秋連假","left":"269.286px","width":"53.857px","top":"38px","bg":"#D6453C","ink":"#ffffff"},{"title":"健身房","left":"107.714px","width":"53.857px","top":"38px","bg":"#d9e6db","ink":"#41493e"}],[{"title":"季度回顧","left":"107.714px","width":"53.857px","top":"38px","bg":"#e3e3f1","ink":"#43345a"}]]};
 const ACC = '#DE6E8C';
-const MUT = '#8E8E8E';
-const ORDER = ['all', 'events', 'tasks'];
+const MUT = '#666666';
+const ORDER = ['all', 'events'];
 
 class Component extends DCLogic {
   constructor(props) {
@@ -343,11 +359,9 @@ class Component extends DCLogic {
       thumbX: String(ORDER.indexOf(mode) * 44),
       cAll: mode === 'all' ? ACC : MUT,
       cEvents: mode === 'events' ? ACC : MUT,
-      cTasks: mode === 'tasks' ? ACC : MUT,
       pAll: mode === 'all' ? 'true' : 'false',
       pEvents: mode === 'events' ? 'true' : 'false',
-      pTasks: mode === 'tasks' ? 'true' : 'false',
-      pickAll: pick('all'), pickEvents: pick('events'), pickTasks: pick('tasks')
+      pickAll: pick('all'), pickEvents: pick('events')
     };
   }
 }

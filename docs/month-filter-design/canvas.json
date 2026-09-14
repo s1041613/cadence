@@ -1,91 +1,21 @@
 {
   "pages": [
-    {
-      "id": "page-1",
-      "name": "放置方案"
-    },
-    {
-      "id": "page-2",
-      "name": "規格"
-    }
+    { "id": "page-1", "name": "浮在右上角" },
+    { "id": "page-2", "name": "其他位置" },
+    { "id": "page-3", "name": "規格" }
   ],
   "artboards": [
-    {
-      "file": "OptionA.dc.html",
-      "x": 0,
-      "y": 0,
-      "w": 393,
-      "h": 852,
-      "page": "page-1",
-      "title": "方案 A · 月份標題右側",
-      "is_interactive": true
-    },
-    {
-      "file": "Main.dc.html",
-      "x": 500,
-      "y": 0,
-      "w": 393,
-      "h": 852,
-      "page": "page-1",
-      "title": "方案 B · 日曆篩選列開頭（建議）",
-      "is_interactive": true
-    },
-    {
-      "file": "OptionC.dc.html",
-      "x": 1000,
-      "y": 0,
-      "w": 393,
-      "h": 852,
-      "page": "page-1",
-      "title": "方案 C · 浮在底部 nav 上方",
-      "is_interactive": true
-    },
-    {
-      "file": "Spec.dc.html",
-      "x": 0,
-      "y": 0,
-      "w": 1040,
-      "h": 1480,
-      "page": "page-2",
-      "title": "規格"
-    }
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "採用 · 有桌布", "is_interactive": true },
+    { "file": "PlainCanvas.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "同一顆 · app 現在的白底", "is_interactive": true },
+    { "file": "OptionA.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "貼在月份標題右側", "is_interactive": true },
+    { "file": "OptionB.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "日曆篩選列開頭", "is_interactive": true },
+    { "file": "OptionC.dc.html", "x": 1000, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "浮在底部 nav 上方", "is_interactive": true },
+    { "file": "Spec.dc.html", "x": 0, "y": 0, "w": 1040, "h": 1560, "page": "page-3", "title": "規格" }
   ],
   "annotations": [
-    {
-      "id": "how-to",
-      "x": 0,
-      "y": -150,
-      "w": 1393,
-      "text": "三個方案的內容、資料、間距完全相同，只有切換器的位置不同。點左中右三段可以實際切換（全部 / 只看行事曆 / 只看待辦），格線會跟著換。",
-      "page": "page-1"
-    },
-    {
-      "id": "note-a",
-      "x": 0,
-      "y": 900,
-      "w": 393,
-      "text": "方案 A · 月份標題右側\n\n好處：最符合「在月份上面加一個切換」的直覺，也是 Apple Calendar 把檢視控制放導覽列尾端的作法。\n\n代價：393×852 的右上角是拇指最難到的地方，而且它跟海報標題搶同一條視線 —— 標題是這一頁的封面。",
-      "page": "page-1"
-    },
-    {
-      "id": "note-b",
-      "x": 500,
-      "y": 900,
-      "w": 393,
-      "text": "方案 B · 日曆篩選列開頭（建議）\n\n好處：這一列本來就在回答「格線要畫什麼」（#個人 #工作 …），把「畫哪一種」放進同一列，一列講完一件事。玻璃底座跟右側的 # chip 也拉開了層級。\n\n代價：吃掉 chip 列約 140px。日曆多的人一眼能看到的 chip 會從 4 個掉到 2 個。",
-      "page": "page-1"
-    },
-    {
-      "id": "note-c",
-      "x": 1000,
-      "y": 900,
-      "w": 393,
-      "text": "方案 C · 浮在底部 nav 上方\n\n好處：拇指最好按，而且是最接近 iOS 26 liquid glass 的讀法 —— 浮島 + 浮島。\n\n代價：兩個玻璃藥丸疊在底部，重心整個往下掉；而且它會蓋住月曆最後一週。",
-      "page": "page-1"
-    }
+    { "id": "note-main", "x": 0, "y": 900, "w": 393, "page": "page-1", "text": "浮在大標題上方、右對齊 —— 就是 Notes 放資料夾 / Edit 的那一排。兩段可以直接點：全部 / 只看行事曆，格線會跟著換。\n\n玻璃是純透明的：只有 blur(20px) saturate(180%) 加上下兩道邊緣高光，沒有白板。" },
+    { "id": "note-plain", "x": 500, "y": 900, "w": 393, "page": "page-1", "text": "一模一樣的玻璃，放在 app 現在的預設白底上。\n\n這就是要先決定的事：v2-appearance-store 預設 backgroundImage 是 null，而且就算設了桌布，DEFAULT_SCRIM_OPACITY = 0.8 也會把照片洗到接近白。沒有東西可以折射，透明玻璃就只剩一圈白邊。\n\n左邊那張的白紗是 0.35。" },
+    { "id": "note-others", "x": 0, "y": 900, "w": 1393, "page": "page-2", "text": "同樣的兩段玻璃控制，換三個位置。留著是為了對照，不是備案：右側（A）跟標題搶視線且拇指難到；篩選列開頭（B）語義最順但吃掉 chip 列約 96px；底部浮島（C）最好按，但兩個玻璃藥丸疊在底部重心太低，還會蓋住最後一週。" }
   ],
-  "launch": {
-    "view": "canvas",
-    "page": "page-1"
-  }
+  "launch": { "view": "canvas", "page": "page-1" }
 }

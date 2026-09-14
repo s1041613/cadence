@@ -1,7 +1,8 @@
-// Generates the .dc.html artboards for the month-view Event/Task filter mockup.
+// Generates the .dc.html artboards for the month-view "全部 / 只看行事曆" switcher mockup.
 // Every measurement here is lifted from the shipping components (MonthViewV2, Pv2Poster,
-// Pv2TodoCard, Pv2Chip, Pv2Cell, Pv2WeekRow, Pv2EventChip, Pv2BottomNav, cadence-tokens.css)
-// so the three placement options differ only in where the switcher sits.
+// Pv2TodoCard, Pv2Chip, Pv2Cell, Pv2WeekRow, Pv2EventChip, Pv2BottomNav) and
+// cadence-tokens.css, so the artboards differ only in where the switcher sits and what
+// is behind it.
 import { writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -21,36 +22,32 @@ const readableInkOn = (h) => (con(h, '#ffffff') >= con(h, CHIP_INK) ? '#ffffff' 
 
 /* ── tokens (src/css/cadence-tokens.css) ──────────────────────────────────── */
 const T = {
-  canvas: '#ffffff', ink: '#000000', ink2: '#666666', ink3: '#8E8E8E', ink4: '#B5B5B5',
+  canvas: '#ffffff', ink: '#000000', ink2: '#666666', ink3: '#8E8E8E',
   line: '#E4E4E4', lineSoft: '#EFEFEF', accent: '#DE6E8C', accentRgb: '222, 110, 140',
-  onAccent: '#ffffff', holiday: '#BC7088', fill: '#F3F3F3'
+  onAccent: '#ffffff', holiday: '#BC7088'
 }
 
-/* ── geometry (month-lanes.ts + the components' own paddings) ─────────────── */
+/* ── geometry ─────────────────────────────────────────────────────────────── */
 const FRAME_W = 393, FRAME_H = 852, SAFE_TOP = 44
-const GRID_W = FRAME_W - 16            // .mv2__body padding: 6px 8px
-const COL = GRID_W / 7                 // 53.857…px — never rounded
-const BARS_TOP = 38                    // CELL.padTop 4 + headH 20 + festivalH 11 + headGap 3
-const LANE_STEP = 17                   // CELL.chipH 15 + CELL.chipGap 2
-const ROW_MAX_H = 92                   // rowHeightForLanes(3)
+const COL = (FRAME_W - 16) / 7          // .mv2__body padding 6px 8px → 53.857…px, never rounded
+const BARS_TOP = 38                     // CELL.padTop 4 + headH 20 + festivalH 11 + headGap 3
+const LANE_STEP = 17                    // CELL.chipH 15 + CELL.chipGap 2
+const ROW_MAX_H = 92                    // rowHeightForLanes(3)
 
 /* ── September 2026, week starting Sunday ────────────────────────────────── */
-// Global cell index: Aug 30 = 0, so a September day d sits at index d + 1.
-const idxOf = (d) => d + 1
-const cellPos = (d) => ({ w: Math.floor(idxOf(d) / 7), c: idxOf(d) % 7 })
+const cellPos = (d) => ({ w: Math.floor((d + 1) / 7), c: (d + 1) % 7 })  // Aug 30 = index 0
 const TODAY = 14
 const FESTIVALS = { 25: { name: '中秋節', holiday: true } }
 
 const CELLS = []
 for (let i = 0; i < 35; i++) {
   const d = i - 1
-  if (d < 1) CELLS.push({ num: 30 + i, outside: true })            // Aug 30, Aug 31
-  else if (d > 30) CELLS.push({ num: d - 30, outside: true })       // Oct 1–3
+  if (d < 1) CELLS.push({ num: 30 + i, outside: true })
+  else if (d > 30) CELLS.push({ num: d - 30, outside: true })
   else CELLS.push({ num: d, outside: false, today: d === TODAY, fest: FESTIVALS[d] ?? null })
 }
 
 /* ── sample content ───────────────────────────────────────────────────────── */
-// Events: what is on the calendar. Colours are real palette entries (event-colors.ts).
 const EVENTS = [
   { d: 1, span: 1, allDay: false, title: '晨會', color: '#3B8FD9' },
   { d: 2, span: 1, allDay: false, title: '設計評審', color: '#EC5093' },
@@ -65,8 +62,7 @@ const EVENTS = [
   { d: 25, span: 1, allDay: true, title: '中秋連假', color: '#D6453C' },
   { d: 29, span: 1, allDay: false, title: '季度回顧', color: '#6863B0' }
 ]
-// Tasks: quadrant items. Colours are the four quadrants (use-theme.ts).
-const Q = { do: '#EC5093', plan: '#D98BC4', quick: '#F4A9A0', later: '#C9A3B3' }
+const Q = { do: '#EC5093', plan: '#D98BC4', quick: '#F4A9A0', later: '#C9A3B3' }  // use-theme.ts
 const TASKS = [
   { d: 4, span: 1, allDay: false, title: '健檢預約', color: Q.quick },
   { d: 7, span: 1, allDay: false, title: '報帳單據', color: Q.quick },
@@ -108,11 +104,8 @@ function layout(items) {
   })
 }
 
-const DATA = {
-  all: layout([...EVENTS, ...TASKS]),
-  events: layout(EVENTS),
-  tasks: layout(TASKS)
-}
+// Two modes only: everything, or the calendar alone.
+const DATA = { all: layout([...EVENTS, ...TASKS]), events: layout(EVENTS) }
 
 /* ── static cell markup (mode-independent: only the bars change) ──────────── */
 function cellMarkup(cell, weekIdx) {
@@ -123,40 +116,35 @@ function cellMarkup(cell, weekIdx) {
       ? `color:${T.line};text-shadow:none`
       : `color:${T.ink};text-shadow:0 1px 3px rgba(255,255,255,.9),0 0 2px rgba(255,255,255,.9)`
   const f = cell.fest
-  const festStyle = f
-    ? (f.holiday ? `color:${T.holiday};font-weight:700` : `color:${T.ink3}`)
-    : `color:${T.ink3}`
+  const festStyle = f && f.holiday ? `color:${T.holiday};font-weight:700` : `color:${T.ink3}`
   return `<div class="cell" style="border-bottom:${border}">
             <div class="cellhead"><span class="num" style="${numStyle}">${cell.num}</span></div>
             <div class="fest" style="${festStyle}">${f ? f.name : ''}</div>
           </div>`
 }
-
 const WEEK_CELLS = [0, 1, 2, 3, 4].map((w) =>
   CELLS.slice(w * 7, w * 7 + 7).map((c) => cellMarkup(c, w)).join('\n          ')
 )
 
 /* ── the switcher ─────────────────────────────────────────────────────────── */
-// 24-grid, stroke 1.7, round caps — the same drawing rules as pv2-nav-icons.ts.
-// EVENTS deliberately reuses the nav's own month glyph: in this app that shape
-// already means "calendar".
+// 24-grid, stroke 1.7, round caps — the drawing rules of pv2-nav-icons.ts.
+// 行事曆 deliberately reuses the nav's own month glyph: that shape already means
+// "calendar" in this app.
 const ICONS = {
   all: '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
-  events: '<rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/>',
-  tasks: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/>'
+  events: '<rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/>'
 }
 const svg = (paths) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`
 
 const SEG_W = 44, SEG_H = 36, TRACK_PAD = 4
-const TRACK_W = SEG_W * 3 + TRACK_PAD * 2   // 140
+const TRACK_W = SEG_W * 2 + TRACK_PAD * 2   // 96
 const TRACK_H = SEG_H + TRACK_PAD * 2       // 44
 
-// extraStyle lets each placement position the same control differently.
 function switcher(extraStyle) {
   const seg = (key, label, hole, handler, pressed) => `
       <button type="button" class="seg" aria-label="${label}" aria-pressed="{{${pressed}}}" onClick="{{${handler}}}" style="color: {{${hole}}}">${svg(ICONS[key])}</button>`
   return `<div class="sw" role="group" aria-label="月曆顯示內容" style="${extraStyle}">
-      <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>${seg('all', '全部', 'cAll', 'pickAll', 'pAll')}${seg('events', '只看行事曆', 'cEvents', 'pickEvents', 'pEvents')}${seg('tasks', '只看待辦', 'cTasks', 'pickTasks', 'pTasks')}
+      <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>${seg('all', '全部', 'cAll', 'pickAll', 'pAll')}${seg('events', '只看行事曆', 'cEvents', 'pickEvents', 'pEvents')}
     </div>`
 }
 
@@ -175,11 +163,9 @@ const NAV = `<nav class="nav">
         .join('\n      ')}
     </nav>`
 
-/* ── weekday header ───────────────────────────────────────────────────────── */
 const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   .map((w, i) => `<span class="wd" style="color:${i === 0 ? T.holiday : T.ink3}">${w}</span>`).join('')
 
-/* ── todo cards (Pv2TodoCard) ─────────────────────────────────────────────── */
 const card = (label, more, dotColor, title) => `<div class="todo">
         <div class="todo__head"><span class="todo__label">${label}</span>${more ? `<span class="todo__more">+${more}</span>` : ''}</div>
         <div class="todo__item"><span class="todo__dot" style="background:${dotColor}"></span><span class="todo__title">${title}</span></div>
@@ -189,26 +175,42 @@ const CARDS = `<div class="todos">
       ${card('UP NEXT 7 DAYS', 1, Q.quick, '回覆供應商報價')}
     </div>`
 
-/* ── calendar filter chips (Pv2Chip) ──────────────────────────────────────── */
-const chip = (label, on) => `<span class="chip-tab${on ? ' chip-tab--on' : ''}">#${label}</span>`
 const CHIPS = [['個人', true], ['工作', true], ['家庭', false], ['健身', false], ['共享行事曆', false]]
-  .map(([l, on]) => chip(l, on)).join('')
+  .map(([l, on]) => `<span class="chip-tab${on ? ' chip-tab--on' : ''}">#${l}</span>`).join('')
 
-/* ── page assembly ────────────────────────────────────────────────────────── */
+/* Simulated wallpaper for the Pv2PageBackdrop layer. The app paints a user photo plus a
+   white scrim; --pv2 has no wallpaper of its own to ship, so this stands in for one. */
+const GRAIN = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"
+const wallpaper = (scrim) => `<div class="wall"></div>
+    <div class="wall__grain"></div>
+    <div class="wall__scrim" style="opacity: ${scrim}"></div>`
+
+/* ── styles ───────────────────────────────────────────────────────────────── */
 const STYLE = `
     body { margin: 0; font-family: 'Inter', 'Noto Sans TC', sans-serif; -webkit-font-smoothing: antialiased; }
     a { color: ${T.accent}; } a:hover { color: #C55A78; }
     * { box-sizing: border-box; }
 
-    .frame {
-      position: relative; width: ${FRAME_W}px; height: ${FRAME_H}px;
-      display: flex; flex-direction: column; overflow: hidden;
-      background: ${T.canvas}; padding-top: ${SAFE_TOP}px;
-    }
+    .frame { position: relative; width: ${FRAME_W}px; height: ${FRAME_H}px;
+             display: flex; flex-direction: column; overflow: hidden;
+             background: ${T.canvas}; padding-top: ${SAFE_TOP}px; isolation: isolate; }
     .body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 6px 8px 91px; }
 
+    /* Pv2PageBackdrop stand-in */
+    .wall { position: absolute; inset: 0; z-index: -1;
+            background:
+              radial-gradient(115% 78% at 14% 6%, #F0D3BE 0%, rgba(240,211,190,0) 58%),
+              radial-gradient(95% 66% at 88% 2%, #E3BFD1 0%, rgba(227,191,209,0) 55%),
+              radial-gradient(120% 88% at 74% 76%, #BFCEDD 0%, rgba(191,206,221,0) 60%),
+              radial-gradient(88% 58% at 18% 94%, #D2C7B6 0%, rgba(210,199,182,0) 60%),
+              linear-gradient(158deg, #E7D6C8, #C6D1D9); }
+    .wall__grain { position: absolute; inset: 0; z-index: -1; opacity: .18; mix-blend-mode: overlay;
+                   background-image: url("${GRAIN}"); }
+    .wall__scrim { position: absolute; inset: 0; z-index: -1; background: ${T.canvas}; }
+
     /* Pv2Poster — 9cqw of a 377px container, i.e. 33.93px */
-    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 30px 0 0; }
+    .topbar { display: flex; justify-content: flex-end; padding: 6px 16px 0; }
+    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 18px 0 0; }
     .poster__month { font-weight: 800; font-size: 33.93px; letter-spacing: -0.01em; line-height: 0.9; color: ${T.ink}; }
 
     /* Pv2TodoCard */
@@ -230,8 +232,6 @@ const STYLE = `
                 border: 1px solid ${T.line}; font: 600 11px 'Inter','Noto Sans TC',sans-serif; line-height: 1;
                 letter-spacing: .02em; color: ${T.ink3}; white-space: nowrap; }
     .chip-tab--on { background: rgba(${T.accentRgb}, .12); border-color: transparent; color: ${T.accent}; }
-    .strip__fade { position: absolute; top: 0; right: 0; bottom: 6px; width: 40px;
-                   background: linear-gradient(90deg, rgba(255,255,255,0), #fff); pointer-events: none; }
 
     /* Pv2WeekdayHeader */
     .weekdays { margin-top: 10px; display: grid; grid-template-columns: repeat(7, 1fr); padding-bottom: 6px; }
@@ -253,33 +253,37 @@ const STYLE = `
             padding: 2px 4px; font: 700 9px/1.2 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em;
             white-space: nowrap; overflow: hidden; }
 
-    /* ── the switcher: Pv2BottomNav's glass recipe, in a capsule ───────────── */
+    /* ── the switcher: clear glass. No white plate — the blur and the lit edge
+         are the whole material, so what shows through is the wallpaper itself. ─ */
     .sw { position: relative; flex: none; display: flex; align-items: center;
           width: ${TRACK_W}px; height: ${TRACK_H}px; padding: ${TRACK_PAD}px; border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.55);
-          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
-          backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
-          box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
+          border: 1px solid rgba(255,255,255,.5);
+          background: rgba(255,255,255,.06);
+          backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+          box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                      inset 0 -1px 1px rgba(255,255,255,.28),
+                      0 6px 20px rgba(40,38,30,.14); }
     .sw__thumb { position: absolute; top: ${TRACK_PAD}px; left: ${TRACK_PAD}px;
                  width: ${SEG_W}px; height: ${SEG_H}px; border-radius: 999px;
-                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(${T.accentRgb}, .12);
-                 backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
-                 border: 1px solid rgba(255,255,255,.5);
-                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12);
+                 background: rgba(${T.accentRgb}, .20);
+                 backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                 border: 1px solid rgba(255,255,255,.42);
+                 box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14);
                  transition: transform .42s cubic-bezier(.34,1.56,.64,1); }
     .seg { position: relative; z-index: 1; flex: none; display: grid; place-items: center;
            width: ${SEG_W}px; height: ${SEG_H}px; border: none; background: none; padding: 0; cursor: pointer;
            transition: color .18s cubic-bezier(.22,1,.36,1); }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .sw { background: #fff; }
-      .sw__thumb { background: rgba(${T.accentRgb}, .16); }
+      .sw { background: rgba(255,255,255,.72); }
+      .sw__thumb { background: rgba(${T.accentRgb}, .26); }
     }
+    @media (prefers-reduced-motion: reduce) { .sw__thumb { transition: none; } }
 
     /* Pv2BottomNav */
     .nav { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 20;
            display: grid; grid-template-columns: repeat(4, 1fr); padding: 10px; border-radius: 999px;
            border: 1px solid rgba(255,255,255,.55);
-           background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
+           background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), ${T.canvas};
            backdrop-filter: blur(22px) saturate(140%); box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
     .nav__pill { position: absolute; top: 10px; bottom: 10px; left: 10px; width: calc((100% - 20px) / 4);
                  border-radius: 20px;
@@ -292,27 +296,24 @@ const STYLE = `
     .nav__label { font: 400 9px 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
 `
 
-function weekMarkup(w, barsHole) {
-  return `<div class="week">
+const GRID = `<div class="grid">
+        ${[0, 1, 2, 3, 4].map((w) => `<div class="week">
           ${WEEK_CELLS[w]}
           <div class="bars">
-            <sc-for list="{{${barsHole}}}" as="b" hint-placeholder-count="2">
+            <sc-for list="{{bars${w}}}" as="b" hint-placeholder-count="2">
               <div class="bar" style="left: {{b.left}}; width: {{b.width}}; top: {{b.top}}">
                 <span class="chip" style="background: {{b.bg}}; color: {{b.ink}}">{{b.title}}</span>
               </div>
             </sc-for>
           </div>
-        </div>`
-}
-const GRID = `<div class="grid">
-        ${[0, 1, 2, 3, 4].map((w) => weekMarkup(w, `bars${w}`)).join('\n        ')}
+        </div>`).join('\n        ')}
       </div>`
 
 const LOGIC = `
 const DATA = ${JSON.stringify(DATA)};
 const ACC = '${T.accent}';
-const MUT = '${T.ink3}';
-const ORDER = ['all', 'events', 'tasks'];
+const MUT = '${T.ink2}';
+const ORDER = ['all', 'events'];
 
 class Component extends DCLogic {
   constructor(props) {
@@ -328,19 +329,16 @@ class Component extends DCLogic {
       thumbX: String(ORDER.indexOf(mode) * ${SEG_W}),
       cAll: mode === 'all' ? ACC : MUT,
       cEvents: mode === 'events' ? ACC : MUT,
-      cTasks: mode === 'tasks' ? ACC : MUT,
       pAll: mode === 'all' ? 'true' : 'false',
       pEvents: mode === 'events' ? 'true' : 'false',
-      pTasks: mode === 'tasks' ? 'true' : 'false',
-      pickAll: pick('all'), pickEvents: pick('events'), pickTasks: pick('tasks')
+      pickAll: pick('all'), pickEvents: pick('events')
     };
   }
 }`
 
-const PROPS = `{"mode":{"editor":"enum","options":["all","events","tasks"],"default":"all","section":"顯示"},"$preview":{"width":${FRAME_W},"height":${FRAME_H}}}`
+const PROPS = `{"mode":{"editor":"enum","options":["all","events"],"default":"all","section":"顯示"},"$preview":{"width":${FRAME_W},"height":${FRAME_H}}}`
 
-function page(bodyMarkup) {
-  return `<!doctype html>
+const page = (bodyMarkup) => `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -359,54 +357,44 @@ ${bodyMarkup}
 </body>
 </html>
 `
-}
 
-/* ── Option A: trailing edge of the poster row ────────────────────────────── */
-const optionA = page(`<div class="frame">
-    <div class="body">
-      <div class="poster">
-        <span class="poster__month">September</span>
-        ${switcher('position: absolute; right: 16px; top: 23px;')}
-      </div>
-      ${CARDS}
-      <div class="strip"><div class="strip__row">${CHIPS}</div><div class="strip__fade"></div></div>
-      <div class="weekdays">${WD}</div>
-      ${GRID}
-    </div>
-    ${NAV}
-  </div>`)
-
-/* ── Option B (Main): pinned at the head of the filter strip ──────────────── */
-const optionB = page(`<div class="frame">
-    <div class="body">
-      <div class="poster"><span class="poster__month">September</span></div>
-      ${CARDS}
-      <div class="strip">
+/* ── screens ──────────────────────────────────────────────────────────────── */
+// `top` is the chosen placement: floating above the month title, right-aligned —
+// the row iOS Notes puts its folder/Edit buttons on.
+function screen({ scrim, placement }) {
+  const backdrop = scrim === null ? '' : wallpaper(scrim)
+  const topRow = placement === 'top' ? `<div class="topbar">${switcher('')}</div>` : ''
+  const poster = placement === 'beside'
+    ? `<div class="poster"><span class="poster__month">September</span>${switcher('position: absolute; right: 16px; top: 11px;')}</div>`
+    : `<div class="poster"><span class="poster__month">September</span></div>`
+  const strip = placement === 'strip'
+    ? `<div class="strip">
         ${switcher('margin-right: 10px; margin-bottom: 6px;')}
         <div style="width: 1px; height: 22px; margin-right: 10px; margin-bottom: 6px; background: ${T.lineSoft};"></div>
         <div class="strip__row" style="flex: 1; min-width: 0;">${CHIPS}</div>
-        <div class="strip__fade"></div>
-      </div>
-      <div class="weekdays">${WD}</div>
-      ${GRID}
-    </div>
-    ${NAV}
-  </div>`)
-
-/* ── Option C: floating island above the bottom nav ───────────────────────── */
-const optionC = page(`<div class="frame">
+      </div>`
+    : `<div class="strip"><div class="strip__row">${CHIPS}</div></div>`
+  const floating = placement === 'bottom'
+    ? switcher(`position: absolute; z-index: 21; left: 50%; margin-left: ${-TRACK_W / 2}px; bottom: 103px;`)
+    : ''
+  return page(`<div class="frame">
+    ${backdrop}
     <div class="body">
-      <div class="poster"><span class="poster__month">September</span></div>
+      ${topRow}
+      ${poster}
       ${CARDS}
-      <div class="strip"><div class="strip__row">${CHIPS}</div><div class="strip__fade"></div></div>
+      ${strip}
       <div class="weekdays">${WD}</div>
       ${GRID}
     </div>
-    ${switcher(`position: absolute; z-index: 21; left: 50%; margin-left: ${-TRACK_W / 2}px; bottom: 103px;`)}
+    ${floating}
     ${NAV}
   </div>`)
+}
 
-writeFileSync(join(OUT, 'OptionA.dc.html'), optionA)
-writeFileSync(join(OUT, 'Main.dc.html'), optionB)
-writeFileSync(join(OUT, 'OptionC.dc.html'), optionC)
-console.log('wrote OptionA.dc.html, Main.dc.html, OptionC.dc.html')
+writeFileSync(join(OUT, 'Main.dc.html'), screen({ scrim: 0.35, placement: 'top' }))
+writeFileSync(join(OUT, 'PlainCanvas.dc.html'), screen({ scrim: null, placement: 'top' }))
+writeFileSync(join(OUT, 'OptionA.dc.html'), screen({ scrim: 0.35, placement: 'beside' }))
+writeFileSync(join(OUT, 'OptionB.dc.html'), screen({ scrim: 0.35, placement: 'strip' }))
+writeFileSync(join(OUT, 'OptionC.dc.html'), screen({ scrim: 0.35, placement: 'bottom' }))
+console.log('wrote Main, PlainCanvas, OptionA, OptionB, OptionC')
