@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Pv2WeekRow, { type Pv2WeekBar, type Pv2WeekCell } from './Pv2WeekRow.vue'
-import { CELL, ROW_MAX_H, computeHidden } from '@/utils/month-lanes'
+import { CELL, ROW_MAX_H, computeHidden, moreNeedsLane } from '@/utils/month-lanes'
 
 export interface Pv2GridWeek {
   /** Stable across renders; the week's first date. */
@@ -55,16 +55,25 @@ onMounted(() => {
 onBeforeUnmount(() => resizeObserver?.disconnect())
 
 // One observer on the grid, not one per week row — the rows are all 1fr of the same box, so a
-// single measurement answers for all of them.
+// single measurement answers for all of them. 0 until the first callback lands.
+const rowH = computed(() => gridHeight.value / Math.max(1, props.weeks.length))
+
 const maxLanes = computed(() => {
   if (gridHeight.value <= 0) return 3 // pre-measure fallback
-  const rowH = gridHeight.value / Math.max(1, props.weeks.length)
-  const availH = rowH - CELL.padTop - CELL.padBottom - CELL.headGap - CELL.headH - CELL.festivalH
+  const availH = rowH.value - CELL.padTop - CELL.padBottom - CELL.headGap - CELL.headH - CELL.festivalH
   return Math.max(1, Math.floor((availH + CELL.chipGap) / (CELL.chipH + CELL.chipGap)))
 })
 
+// Whether an overflowing week has to spend a lane on its "+N" label, or can keep every lane and
+// let the label sit in the space below them. Unmeasured pairs with the maxLanes fallback above,
+// where three lanes leave nothing underneath — so assume the label needs its own.
+const reserveLane = computed(
+  () => gridHeight.value <= 0 || moreNeedsLane(rowH.value, maxLanes.value)
+)
+
 // Each week overflows independently: one crowded week must not cost the others a lane.
-const overflowFor = (week: Pv2GridWeek) => computeHidden(week.bars, maxLanes.value)
+const overflowFor = (week: Pv2GridWeek) =>
+  computeHidden(week.bars, maxLanes.value, reserveLane.value)
 const visibleLanesFor = (week: Pv2GridWeek) => overflowFor(week).visibleLanes
 const hiddenPerDayFor = (week: Pv2GridWeek) => overflowFor(week).hiddenPerDay
 </script>

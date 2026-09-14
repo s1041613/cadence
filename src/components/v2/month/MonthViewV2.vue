@@ -372,14 +372,14 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
 /* The title used to own its whole distance from the top of the frame. With a row above it, all
    it owes is the gap to that row.
 
-   Measured on 393x852: this header leaves the grid ~33px more room than its own
-   weeks x ROW_MAX_H cap can use, so the 30px the two declarations above spend between them is
-   not taken from the grid at all. Worth stating because it reads like it should be: the grid's
-   rows land at 91.8px either way — ROW_MAX_H is 92, and .pv2-grid's 1px border-top comes out of
-   the capped border-box — so the month has been drawing two lanes per row, not three, since
-   before this control existed. */
+   Measured on 393x852: this header already leaves the grid ~33px more room than its own
+   weeks x ROW_MAX_H cap can use, so neither this padding nor the 10px taken off it is spent out
+   of the grid — the rows land at 91.8px regardless (ROW_MAX_H is 92, and .pv2-grid's 1px
+   border-top comes out of the capped border-box). That is two lanes per row, not the three the
+   cap is named for, and it is the height the month actually renders at: see moreNeedsLane in
+   month-lanes.ts, which is what stops those two lanes from collapsing to one. */
 .mv2__poster {
-  --pv2-poster-pad-top: 16px;
+  --pv2-poster-pad-top: 6px;
 }
 
 /* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.

@@ -58,7 +58,15 @@ export const CELL = {
      one. A blank line on an ordinary day costs the row 11px; a collision costs it the label. */
   festivalH: 11,
   chipH: 15,
-  chipGap: 2
+  chipGap: 2,
+  /* The cell's "+N" label (Pv2Cell's .pv2-cell__more): 8px mono at ~1.2 line-height, rounded up.
+     It is absolutely positioned in the cell's bottom-right corner, so it costs the row no layout
+     height — what it costs is the band it sits in, and a lane whose chip reaches into that band
+     is drawn straight through it. See moreNeedsLane. */
+  moreH: 10,
+  /* The label's distance from the bottom of the cell's border box: Pv2Cell's own 3px inset plus
+     the cell's 1px bottom border, which the inset is measured inside of. */
+  moreBottom: 4
 } as const
 
 /** Vertical offset of the bar overlay from the top of a week row. */
@@ -87,11 +95,28 @@ export const rowHeightForLanes = (lanes: number): number =>
  * It is a ceiling, not a density target — the rows are still 1fr, so a short screen shrinks
  * them below this; what it stops is six near-empty rows splitting a tall phone between them.
  *
- * Three lanes, not two, because an overflowing day spends one of them on its "+N" (see
- * computeHidden): at two the grid shows a single chip and a "+N" under it, which is a list of
- * one. Three lands on the reference's density — two titles and a count of what is left.
+ * Three lanes, not two, for density: it is the reference's. It is not what the month renders at,
+ * though — .pv2-grid is capped at weeks x this as a border box and its 1px border-top comes out
+ * of the cap, so the rows land at 91.8px and fit two. Which is fine, and is the case
+ * moreNeedsLane below exists for: two lanes leave room under them for the "+N", so an
+ * overflowing day keeps both its chips. A row at the full 92 would have to give one back.
  */
 export const ROW_MAX_H = rowHeightForLanes(3)
+
+/**
+ * Whether a row has to buy its "+N" label with a lane.
+ *
+ * It used to always cost one, and computeHidden still assumes so by default: back when the chips
+ * were laid out inside the day cell, "+N" was simply the next item in that list. It is now
+ * absolutely positioned in the cell's bottom-right corner, so it costs height only when the last
+ * visible lane's chip reaches down into the band it occupies — which is a question about the
+ * row's rendered height, not about the lane count alone.
+ *
+ * `rowH` is the rendered height of one week row, the same number maxLanes was floored out of.
+ */
+export const moreNeedsLane = (rowH: number, maxLanes: number): boolean =>
+  BARS_TOP + (maxLanes - 1) * (CELL.chipH + CELL.chipGap) + CELL.chipH >
+  rowH - CELL.moreBottom - CELL.moreH
 
 /** Top offset of a lane within the overlay. */
 export const laneTop = (lane: number): number => lane * (CELL.chipH + CELL.chipGap)
@@ -182,11 +207,19 @@ export interface HiddenLayout {
 /**
  * Decides how many lanes actually render and how many entries that hides on each day.
  *
- * The "+N" row occupies a lane's worth of height, so it can only be afforded by giving one up —
- * which may itself push another bar out of view. Hence the second count against the reduced
- * budget rather than the original.
+ * `reserveLane` is the caller's answer to moreNeedsLane: when the "+N" label cannot fit in the
+ * space left under the last lane, it has to be afforded by giving that lane up — which may
+ * itself push another bar out of view, hence the second count against the reduced budget rather
+ * than the original. When it fits below them, every lane keeps its bar and the label is pure
+ * overlay. It defaults to true because that was the only behaviour before the label became
+ * absolutely positioned, and a caller that has not thought about row height should not silently
+ * get the denser one.
  */
-export function computeHidden(bars: readonly PlacedBar[], maxLanes: number): HiddenLayout {
+export function computeHidden(
+  bars: readonly PlacedBar[],
+  maxLanes: number,
+  reserveLane = true
+): HiddenLayout {
   const countHidden = (threshold: number): number[] => {
     const perDay = Array<number>(DAYS_PER_WEEK).fill(0)
     for (const bar of bars) {
@@ -197,7 +230,9 @@ export function computeHidden(bars: readonly PlacedBar[], maxLanes: number): Hid
   }
 
   const ifAllFit = countHidden(maxLanes)
-  if (ifAllFit.every((n) => n === 0)) return { visibleLanes: maxLanes, hiddenPerDay: ifAllFit }
+  if (!reserveLane || ifAllFit.every((n) => n === 0)) {
+    return { visibleLanes: maxLanes, hiddenPerDay: ifAllFit }
+  }
 
   const visibleLanes = Math.max(1, maxLanes - 1)
   return { visibleLanes, hiddenPerDay: countHidden(visibleLanes) }
