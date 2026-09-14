@@ -140,16 +140,20 @@ function onSwipe(details: SwipeDetails): void {
 .nbv__tag-add,
 .nbv__tag-form {
   flex: none;
-  height: 32px;
+  height: 30px;
   border: none;
   border-radius: var(--cd-radius-pill);
   background: var(--pv2-fill);
 }
 
+/* 13/500, not 15/400. A filter is chrome and the notes are content, so the chip must sit below
+   the note's 15px lead — at 15 the row of tags was set in the same size as the thing it filters
+   and read as the loudest band on the page. The weight goes up as the size comes down so a
+   13px CJK chip keeps its stroke detail. */
 .nbv__tag {
   min-width: 0;
-  padding: 0 14px;
-  font: 400 15px var(--cd-font-ui);
+  padding: 0 13px;
+  font: 500 13px var(--cd-font-ui);
   color: var(--pv2-ink);
   cursor: pointer;
 }
@@ -160,7 +164,7 @@ function onSwipe(details: SwipeDetails): void {
    consumers are exactly this kind of on-state mark.
 
    The weight is this call site's own addition, and it is load-bearing rather than decorative:
-   --pv2-accent on its own 12% wash measures ~3:1, which is under AA for 15px text, and a wash
+   --pv2-accent on its own 12% wash measures ~3:1, which is under AA for 13px text, and a wash
    against --pv2-fill is a faint difference on its own. Carrying the state on weight as well as
    on hue means the selected tag is never signalled by colour alone. Raising that ratio means
    deepening --pv2-accent for every consumer, not substituting a colour here — the tone is the
@@ -172,7 +176,7 @@ function onSwipe(details: SwipeDetails): void {
 }
 
 .nbv__tag-add {
-  width: 32px;
+  width: 30px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -186,13 +190,16 @@ function onSwipe(details: SwipeDetails): void {
   padding: 0 8px;
 }
 
+/* Deliberately NOT the chip's 13: iOS Safari zooms the page when a focused field is set below
+   16px. The size only shows while a name is being typed, and a moment of slightly large text
+   beats the page scaling under the keyboard. */
 .nbv__tag-input {
   width: 100%;
   min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font: 400 15px var(--cd-font-ui);
+  font: 400 16px var(--cd-font-ui);
   color: var(--pv2-ink);
 }
 
@@ -211,8 +218,9 @@ function onSwipe(details: SwipeDetails): void {
   background: var(--pv2-fill);
 }
 
-/* 16, matching the lead line of the notes below it: the query and the thing it filters are the
-   same kind of text, and at 17 the field was the largest type on the page after the title. */
+/* 16, down from 17: the field was the largest type on the page after the title, above even the
+   notes it searches. It stops at 16 rather than following the chips down to 13 because iOS
+   Safari zooms the page when a focused field is set below 16px. */
 .nbv__search-input {
   flex: 1;
   min-width: 0;
