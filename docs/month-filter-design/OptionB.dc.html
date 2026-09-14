@@ -124,11 +124,7 @@
     <div class="wall__scrim" style="opacity: 0.35"></div>
     <div class="body">
       
-      <div class="poster"><span class="poster__month">September</span><div class="sw" role="group" aria-label="月曆顯示內容" style="position: absolute; right: 16px; top: 11px;">
-      <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>
-      <button type="button" class="seg" aria-label="全部" aria-pressed="{{pAll}}" onClick="{{pickAll}}" style="color: {{cAll}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
-      <button type="button" class="seg" aria-label="只看行事曆" aria-pressed="{{pEvents}}" onClick="{{pickEvents}}" style="color: {{cEvents}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></button>
-    </div></div>
+      <div class="poster"><span class="poster__month">September</span></div>
       <div class="todos">
       <div class="todo">
         <div class="todo__head"><span class="todo__label">TODAY'S TASKS</span></div>
@@ -139,7 +135,15 @@
         <div class="todo__item"><span class="todo__dot" style="background:#F4A9A0"></span><span class="todo__title">回覆供應商報價</span></div>
       </div>
     </div>
-      <div class="strip"><div class="strip__row"><span class="chip-tab chip-tab--on">#個人</span><span class="chip-tab chip-tab--on">#工作</span><span class="chip-tab">#家庭</span><span class="chip-tab">#健身</span><span class="chip-tab">#共享行事曆</span></div></div>
+      <div class="strip">
+        <div class="sw" role="group" aria-label="月曆顯示內容" style="margin-right: 10px; margin-bottom: 6px;">
+      <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>
+      <button type="button" class="seg" aria-label="全部" aria-pressed="{{pAll}}" onClick="{{pickAll}}" style="color: {{cAll}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+      <button type="button" class="seg" aria-label="只看行事曆" aria-pressed="{{pEvents}}" onClick="{{pickEvents}}" style="color: {{cEvents}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></button>
+    </div>
+        <div style="width: 1px; height: 22px; margin-right: 10px; margin-bottom: 6px; background: #EFEFEF;"></div>
+        <div class="strip__row" style="flex: 1; min-width: 0;"><span class="chip-tab chip-tab--on">#個人</span><span class="chip-tab chip-tab--on">#工作</span><span class="chip-tab">#家庭</span><span class="chip-tab">#健身</span><span class="chip-tab">#共享行事曆</span></div>
+      </div>
       <div class="weekdays"><span class="wd" style="color:#BC7088">Sun</span><span class="wd" style="color:#8E8E8E">Mon</span><span class="wd" style="color:#8E8E8E">Tue</span><span class="wd" style="color:#8E8E8E">Wed</span><span class="wd" style="color:#8E8E8E">Thu</span><span class="wd" style="color:#8E8E8E">Fri</span><span class="wd" style="color:#8E8E8E">Sat</span></div>
       <div class="grid">
         <div class="week">

@@ -119,16 +119,14 @@
   </style>
 </helmet>
 <div class="frame">
-    <div class="wall"></div>
-    <div class="wall__grain"></div>
-    <div class="wall__scrim" style="opacity: 0.35"></div>
+    
     <div class="body">
-      
-      <div class="poster"><span class="poster__month">September</span><div class="sw" role="group" aria-label="月曆顯示內容" style="position: absolute; right: 16px; top: 11px;">
+      <div class="topbar"><div class="sw" role="group" aria-label="月曆顯示內容" style="">
       <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>
       <button type="button" class="seg" aria-label="全部" aria-pressed="{{pAll}}" onClick="{{pickAll}}" style="color: {{cAll}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
       <button type="button" class="seg" aria-label="只看行事曆" aria-pressed="{{pEvents}}" onClick="{{pickEvents}}" style="color: {{cEvents}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></button>
     </div></div>
+      <div class="poster"><span class="poster__month">September</span></div>
       <div class="todos">
       <div class="todo">
         <div class="todo__head"><span class="todo__label">TODAY'S TASKS</span></div>
