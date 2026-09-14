@@ -1,6 +1,6 @@
 <template>
   <!--
-    月曆格線的顯示切換：全部 / 只看行事曆。浮在月份標題上方、靠右——
+    月曆格線的顯示切換：只看行事曆 / 全部。浮在月份標題上方、靠右——
     iOS Notes 把資料夾與 Edit 放的那一排。
 
     玻璃整組沿用 Pv2BottomNav，底座那層白漸層是刻意留下的。純透明的版本（只有模糊與
@@ -46,9 +46,12 @@ const emit = defineEmits<{
 const SEG_W = 42
 
 // Order is the thumb's coordinate system: index 0 sits at rest, index 1 is one SEG_W along.
+// 'event' is first because it is the default (ui-store's monthFilter) — a fresh mount has to find
+// the thumb already under the icon it parks at, and the resting end of a two-segment track is the
+// left one.
 const OPTIONS: readonly { value: MonthFilter; label: string }[] = [
-  { value: 'all', label: '全部' },
-  { value: 'event', label: '只看行事曆' }
+  { value: 'event', label: '只看行事曆' },
+  { value: 'all', label: '全部' }
 ]
 
 // Icon-only, so the aria-label above is the whole accessible name — the labels are not decoration.
@@ -58,8 +61,8 @@ const OPTIONS: readonly { value: MonthFilter; label: string }[] = [
 // 'all' is a 2x2 of rounded squares — drawn on the same 24 grid at stroke 1.7 round, which is
 // what makes it sit next to an icon it did not come from.
 const ICONS: Record<MonthFilter, string> = {
-  all: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
-  event: PV2_NAV_ICON_PATHS.month
+  event: PV2_NAV_ICON_PATHS.month,
+  all: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>'
 }
 
 // An unknown value parks the thumb at rest rather than translating it off the track.

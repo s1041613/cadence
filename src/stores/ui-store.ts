@@ -42,9 +42,10 @@ export const useUiStore = defineStore('ui', () => {
 
   const activeView = ref<ActiveView>('month')
   // Deliberately not in settings-store and deliberately not synced: this is a state the view is
-  // in right now, not a preference the account carries. A reload lands back on 'all' — a user who
-  // is shown a filtered month but has forgotten filtering it is just being shown a broken calendar.
-  const monthFilter = ref<MonthFilter>('all')
+  // in right now, not a preference the account carries. A reload lands back on 'event' — the
+  // calendar alone, which is what the grid is for; the quadrant tasks are one tap away and a user
+  // who has forgotten turning them on is still looking at a calendar, not a broken one.
+  const monthFilter = ref<MonthFilter>('event')
   const selectedDate = ref(iso(new Date()))
   const eventComposerInitialValues = ref<Partial<Task> | null>(null)
   const focusTaskId = ref<string | null>(null)
