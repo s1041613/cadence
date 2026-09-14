@@ -116,6 +116,21 @@
                  gap: 4px; padding: 8px 4px; }
     .nav__icon { display: grid; place-items: center; width: 24px; height: 24px; }
     .nav__label { font: 400 9px 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+
+    /* Same material as .sw: no white plate, the blur and the lit edges are all of it. */
+    .nav--clear { background: rgba(255,255,255,.06);
+                  backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+                  box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                              inset 0 -1px 1px rgba(255,255,255,.28),
+                              0 6px 20px rgba(40,38,30,.14); }
+    .nav--clear .nav__pill { background: rgba(222, 110, 140, .20);
+                             backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                             border: 1px solid rgba(255,255,255,.42);
+                             box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14); }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .nav--clear { background: rgba(255,255,255,.72); }
+      .nav--clear .nav__pill { background: rgba(222, 110, 140, .26); }
+    }
   </style>
 </helmet>
 <div class="frame">

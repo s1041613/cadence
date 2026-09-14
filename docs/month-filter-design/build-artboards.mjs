@@ -156,10 +156,13 @@ const NAV_ICONS = {
   setting: '<circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v3M12 18.5v3M4.5 12h-3M22.5 12h-3M6.3 6.3L4.2 4.2M19.8 19.8l-2.1-2.1M17.7 6.3l2.1-2.1M4.2 19.8l2.1-2.1"/>'
 }
 const navSvg = (paths) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`
-const NAV = `<nav class="nav">
+// clear: the nav drops its white plate too, so it is the same material as the switcher.
+// Its resting ink goes up a step (ink-3 → ink-2) for the same reason the switcher's did:
+// without a white plate under it, #8E8E8E stops holding onto the wallpaper.
+const nav = (clear) => `<nav class="nav${clear ? ' nav--clear' : ''}">
       <div class="nav__pill"></div>
       ${[['month', 'month', true], ['day', 'day', false], ['notes', 'notes', false], ['setting', 'setting', false]]
-        .map(([k, label, on]) => `<div class="nav__item"><span class="nav__icon" style="color:${on ? T.accent : T.ink3}">${navSvg(NAV_ICONS[k])}</span><span class="nav__label" style="color:${on ? T.accent : T.ink3}">${label}</span></div>`)
+        .map(([k, label, on]) => `<div class="nav__item"><span class="nav__icon" style="color:${on ? T.accent : (clear ? T.ink2 : T.ink3)}">${navSvg(NAV_ICONS[k])}</span><span class="nav__label" style="color:${on ? T.accent : (clear ? T.ink2 : T.ink3)}">${label}</span></div>`)
         .join('\n      ')}
     </nav>`
 
@@ -294,6 +297,21 @@ const STYLE = `
                  gap: 4px; padding: 8px 4px; }
     .nav__icon { display: grid; place-items: center; width: 24px; height: 24px; }
     .nav__label { font: 400 9px 'Inter', sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+
+    /* Same material as .sw: no white plate, the blur and the lit edges are all of it. */
+    .nav--clear { background: rgba(255,255,255,.06);
+                  backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+                  box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                              inset 0 -1px 1px rgba(255,255,255,.28),
+                              0 6px 20px rgba(40,38,30,.14); }
+    .nav--clear .nav__pill { background: rgba(${T.accentRgb}, .20);
+                             backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                             border: 1px solid rgba(255,255,255,.42);
+                             box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14); }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .nav--clear { background: rgba(255,255,255,.72); }
+      .nav--clear .nav__pill { background: rgba(${T.accentRgb}, .26); }
+    }
 `
 
 const GRID = `<div class="grid">
@@ -361,7 +379,7 @@ ${bodyMarkup}
 /* ── screens ──────────────────────────────────────────────────────────────── */
 // `top` is the chosen placement: floating above the month title, right-aligned —
 // the row iOS Notes puts its folder/Edit buttons on.
-function screen({ scrim, placement }) {
+function screen({ scrim, placement, clearNav = false }) {
   const backdrop = scrim === null ? '' : wallpaper(scrim)
   const topRow = placement === 'top' ? `<div class="topbar">${switcher('')}</div>` : ''
   const poster = placement === 'beside'
@@ -388,13 +406,15 @@ function screen({ scrim, placement }) {
       ${GRID}
     </div>
     ${floating}
-    ${NAV}
+    ${nav(clearNav)}
   </div>`)
 }
 
 writeFileSync(join(OUT, 'Main.dc.html'), screen({ scrim: 0.35, placement: 'top' }))
+writeFileSync(join(OUT, 'ClearNav.dc.html'), screen({ scrim: 0.35, placement: 'top', clearNav: true }))
 writeFileSync(join(OUT, 'PlainCanvas.dc.html'), screen({ scrim: null, placement: 'top' }))
+writeFileSync(join(OUT, 'ClearNavPlain.dc.html'), screen({ scrim: null, placement: 'top', clearNav: true }))
 writeFileSync(join(OUT, 'OptionA.dc.html'), screen({ scrim: 0.35, placement: 'beside' }))
 writeFileSync(join(OUT, 'OptionB.dc.html'), screen({ scrim: 0.35, placement: 'strip' }))
 writeFileSync(join(OUT, 'OptionC.dc.html'), screen({ scrim: 0.35, placement: 'bottom' }))
-console.log('wrote Main, PlainCanvas, OptionA, OptionB, OptionC')
+console.log('wrote Main, ClearNav, PlainCanvas, ClearNavPlain, OptionA, OptionB, OptionC')
