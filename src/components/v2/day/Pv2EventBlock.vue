@@ -47,7 +47,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import CdIcon from '@/components/ui/CdIcon.vue'
-import { readableInkOn } from '@/components/v2/ui/event-colors'
 import type { Subtask } from '@/types/subtask'
 
 // Pv2EventBlock — the day grid's event card.
@@ -115,10 +114,6 @@ const MIN_CONTENT_HEIGHT = PAD_Y + TITLE_LH_SM // 31 — the compact head, title
 const REGULAR_MIN = MIN_CONTENT_HEIGHT + META_LH // 47 — the same head with the time on its own row
 const TALL_MIN = 96 // ~85 min: the first height with room for a 20px title AND a detail line
 
-// v2 paper. Kept as a literal rather than a --cd-* token: the whole v2 tree hardcodes its
-// neutral palette so the app-wide warm tokens cannot leak in.
-const V2_PAPER = 'var(--pv2-canvas)'
-
 /** The height actually rendered — short blocks are floored, so the row budget must use this. */
 const renderedHeight = computed(() => Math.max(MIN_CONTENT_HEIGHT, props.height))
 
@@ -184,6 +179,14 @@ function withWrappedNote(lines: DetailLine[], room: number): DetailLine[] {
   return [...lines.slice(0, -1), { ...last, rows: 1 + spare }]
 }
 
+/**
+ * Geometry, plus the event's colour as a custom property.
+ *
+ * Nothing else: the fill, the lift and the in-progress ring are all expressed in the
+ * stylesheet against --pv2-block-color, so the whole look of a block can be read in one place
+ * instead of half here and half there. Inline styles also win over every rule in the sheet,
+ * which makes them the wrong home for anything a reader might expect to override.
+ */
 const blockStyle = computed(() => ({
   position: 'absolute' as const,
   top: `${props.top}px`,
@@ -191,15 +194,29 @@ const blockStyle = computed(() => ({
   left: props.left,
   right: props.right,
   zIndex: 3 + props.lane,
-  borderLeft: `3px solid ${props.color}`,
-  background: props.active ? props.color : `color-mix(in srgb, ${props.color} 22%, ${V2_PAPER})`,
-  // Measured against the fill rather than fixed to white — an active block filled with Blossom
-  // pink and titled in white is a blank card.
-  color: props.active ? readableInkOn(props.color) : 'var(--pv2-ink)'
+  '--pv2-block-color': props.color
 }))
 </script>
 
 <style scoped>
+/*
+ * A block is a card that floats over the axis, washed with its event's colour — NOT a panel
+ * filled with it.
+ *
+ * The fill used to be 22% of the event colour, with the in-progress block at a full 100%.
+ * That is a defensible density for a 30-minute block and a wall of colour for a four-hour one:
+ * the same rule, applied to a shape whose height is the clock, necessarily overdoses the long
+ * events. And the colour was doing a job it does not have here — in Month a chip is too small
+ * to carry its title, so the colour has to say which event it is, but in Day the title is
+ * right there in 15px type. So the colour is turned down to a wash that only has to say
+ * "these pixels belong to one event", and the card's edge is drawn by a shadow instead.
+ *
+ * Two shadow layers, because one cannot do both jobs: the 1px contact shadow separates the
+ * card from the hour line it sits on, and the 16px ambient one is what actually reads as
+ * height. Heavier than the flat v2 cards (Pv2TodoCard, Pv2GoalCard) on purpose — those sit on
+ * empty paper and only need an edge, while these sit on a ruled grid with no border of their
+ * own, so the shadow IS the border.
+ */
 .pv2-event-block {
   cursor: pointer;
   box-sizing: border-box;
@@ -208,6 +225,26 @@ const blockStyle = computed(() => ({
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  color: var(--pv2-ink);
+  background: color-mix(in srgb, var(--pv2-block-color) 10%, var(--pv2-canvas));
+  box-shadow:
+    0 1px 2px rgba(var(--pv2-ink-rgb), 0.05),
+    0 6px 16px -6px rgba(var(--pv2-ink-rgb), 0.16);
+}
+
+/*
+ * In progress. Lifted one step higher and ringed in its own colour, rather than inverted to a
+ * solid fill: on a four-hour shift that solid fill was the loudest thing on the page, and the
+ * now line already says where "now" is — the block only has to say which event contains it.
+ * The wash goes up by six points, which is enough to read as "this one" beside its neighbours
+ * without becoming the panel again.
+ */
+.pv2-event-block--active {
+  background: color-mix(in srgb, var(--pv2-block-color) 16%, var(--pv2-canvas));
+  box-shadow:
+    0 2px 4px rgba(var(--pv2-ink-rgb), 0.07),
+    0 10px 24px -8px rgba(var(--pv2-ink-rgb), 0.22),
+    inset 0 0 0 1.5px var(--pv2-block-color);
 }
 
 /* Compact: title and time share one row. The time is pinned to its natural width and the
@@ -259,16 +296,18 @@ const blockStyle = computed(() => ({
   text-overflow: ellipsis;
 }
 
-/* Only ever rendered on an in-progress block, which is solid-filled — so it rides the
-   inherited ink and earns its emphasis from weight rather than a colour of its own. */
+/* Only ever rendered on an in-progress block. Earns its emphasis from weight rather than a
+   colour of its own — the countdown is the one moving number on the page and does not need
+   help being noticed. */
 .pv2-event-block__left {
   font-weight: 700;
 }
 
-/* In-progress blocks invert to a solid fill, so the time line rides the inherited white. */
+/* The in-progress block keeps the page's ink, so its time line is marked by weight, not by
+   the inverted white a solid fill used to demand. */
 .pv2-event-block--active .pv2-event-block__time {
-  color: inherit;
-  opacity: 0.85;
+  color: var(--pv2-ink);
+  font-weight: 700;
 }
 
 .pv2-event-block__details {
@@ -333,8 +372,10 @@ const blockStyle = computed(() => ({
   -webkit-box-orient: vertical;
 }
 
+/* ink-3, not the ink-4 the faintest marks use: struck through AND at 2:1 over a 10% wash, a
+   finished subtask stopped being readable at all — done is not the same as gone. */
 .pv2-event-block__details li[data-done='true'] {
-  color: var(--pv2-ink-4);
+  color: var(--pv2-ink-3);
 }
 
 .pv2-event-block__details li[data-done='true'] .pv2-event-block__detail-text {
@@ -344,10 +385,5 @@ const blockStyle = computed(() => ({
 .pv2-event-block__more {
   font-weight: 700;
   color: var(--pv2-ink-3);
-}
-
-.pv2-event-block--active .pv2-event-block__details li {
-  color: inherit;
-  opacity: 0.8;
 }
 </style>
