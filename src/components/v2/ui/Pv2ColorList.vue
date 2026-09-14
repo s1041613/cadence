@@ -34,8 +34,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, type ComponentPublicInstance } from 'vue'
-import { eventColorsFor } from './event-colors'
-import { useAuthStore } from '@/stores/auth-store'
+import { EVENT_COLORS } from './event-colors'
 
 const props = withDefaults(
   defineProps<{
@@ -67,11 +66,9 @@ function isSelected(hex: string): boolean {
 // A radiogroup exposes exactly one tab stop. When the stored colour isn't in the palette
 // (an older event, a calendar's own colour) nothing is checked, so the first row takes the
 // stop rather than leaving the group unreachable by keyboard.
-const auth = useAuthStore()
-// The palette this account is offered — pink-only for some, everything for everyone else.
-const colors = computed(() => eventColorsFor(auth.email))
+const colors = EVENT_COLORS
 
-const selectedIndex = computed(() => colors.value.findIndex((c) => isSelected(c.hex)))
+const selectedIndex = computed(() => colors.findIndex((c) => isSelected(c.hex)))
 
 function tabIndexOf(i: number): number {
   const active = selectedIndex.value === -1 ? 0 : selectedIndex.value
@@ -86,7 +83,7 @@ function onKeydown(e: KeyboardEvent): void {
   if (delta === 0) return
   e.preventDefault()
   const from = selectedIndex.value === -1 ? 0 : selectedIndex.value
-  const list = colors.value
+  const list = colors
   const next = (from + delta + list.length) % list.length
   emit('preview', list[next]!.hex)
   // The tab stop follows the selection, so focus must move with it or the group would

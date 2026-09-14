@@ -87,8 +87,7 @@
 <script setup lang="ts">
 import { computed, defineComponent, h, ref } from 'vue'
 import CdIcon from './CdIcon.vue'
-import { eventColorHexesFor } from '@/components/v2/ui/event-colors'
-import { useAuthStore } from '@/stores/auth-store'
+import { EVENT_COLOR_HEXES } from '@/components/v2/ui/event-colors'
 import type { IconName } from './icons'
 
 const props = defineProps<{
@@ -116,9 +115,7 @@ const TABS = [
 // v1 renders colour as a bare swatch grid with no labels, so it only needs the hexes — but
 // it reads them from the same palette the v2 colour list names, so the two pickers can't
 // drift apart. Order is preserved by EVENT_COLORS.
-// Narrowed per account, same as the v2 list: some accounts are offered the pink family only.
-const auth = useAuthStore()
-const COLOR_SWATCHES = computed(() => eventColorHexesFor(auth.email))
+const COLOR_SWATCHES = EVENT_COLOR_HEXES
 
 const CATEGORIES: Array<{ key: 'general' | 'life' | 'work'; label: string; icon: IconName; icons: IconName[] }> = [
   { key: 'general', label: 'General', icon: 'star', icons: ['calendar', 'star', 'bell', 'clock', 'note', 'info', 'eye', 'layers', 'image', 'copy'] },
