@@ -59,6 +59,9 @@
             :start-label="block.startLabel"
             :active="block.active"
             :subtasks="block.subtasks"
+            :location="block.location"
+            :notes="block.notes"
+            :remaining-label="block.remainingLabel"
             @click="(e) => emit('eventClick', block.id, e)"
           />
         </div>
@@ -88,6 +91,10 @@ export interface Pv2GridEvent {
   /** Rendered inline so a block's intent is readable without opening it. Optional: callers
    *  that have no checklist to show simply omit it. */
   subtasks?: Subtask[]
+  /** Same contract as subtasks: extra detail a tall block fills its height with, dropped
+   *  silently when the block has no room for it. */
+  location?: string
+  notes?: string
 }
 
 export interface Pv2GridAllDayEvent {
@@ -175,6 +182,11 @@ interface LaidOutBlock {
   startLabel: string
   active: boolean
   subtasks: Subtask[]
+  location: string
+  notes: string
+  /** Non-empty only while the block is in progress. The grid owns nowMinutes, so the
+   *  countdown is computed here rather than re-deriving "now" inside every block. */
+  remainingLabel: string
 }
 
 const laidOutBlocks = computed<LaidOutBlock[]>(() => {
@@ -198,7 +210,10 @@ const laidOutBlocks = computed<LaidOutBlock[]>(() => {
       lane: l.lane,
       startLabel: `${minutesToLabel(ev.start)} – ${minutesToLabel(ev.end)}`,
       active,
-      subtasks: ev.subtasks ?? []
+      subtasks: ev.subtasks ?? [],
+      location: ev.location ?? '',
+      notes: ev.notes ?? '',
+      remainingLabel: active ? remainingLabel(ev.end - props.nowMinutes) : ''
     }
   })
 })
@@ -211,6 +226,21 @@ function minutesToLabel(m: number): string {
 
 function hourLabel(h: number): string {
   return String(h).padStart(2, '0')
+}
+
+/**
+ * How long the in-progress block still has to run.
+ *
+ * Deliberately not fmtDur(), the app's duration helper: it renders a part-hour as a decimal
+ * ("1.7 hr"), which is fine for an estimate someone is comparing but unreadable as a countdown
+ * — nobody reads their own shift as 1.7 hours. Whole units, and no unit that is zero.
+ */
+function remainingLabel(minutesLeft: number): string {
+  const m = Math.max(0, Math.round(minutesLeft))
+  if (m < 60) return `${m} min left`
+  const h = Math.floor(m / 60)
+  const rem = m % 60
+  return rem === 0 ? `${h} hr left` : `${h} hr ${rem} min left`
 }
 
 // ALL-DAY chip fill = a wash of the event colour, mixed against v2 paper rather than the warm

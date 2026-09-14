@@ -59,7 +59,9 @@ const timedEvents = computed<Pv2GridEvent[]>(() =>
       // Clipped to the rendered day: a span reaching into the next day would otherwise
       // subtract to a negative height (22:00 -> 02:00 = -1200 minutes).
       ...clipToDay(t, ui.selectedDate),
-      subtasks: tasksStore.subtasksFor(t.id)
+      subtasks: tasksStore.subtasksFor(t.id),
+      location: t.location,
+      notes: t.notes
     }))
     // Sorted on the clipped start, not the stored one: a span's middle day begins at
     // midnight, and ordering it by its original 22:00 would place it after the whole day.
