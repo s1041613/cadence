@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { compareForLane, computeHidden, layoutWeek, weekRows, type LaneTask } from './month-lanes'
+import {
+  ROW_MAX_H,
+  compareForLane,
+  computeHidden,
+  layoutWeek,
+  moreNeedsLane,
+  weekRows,
+  type LaneTask
+} from './month-lanes'
 import { monthGridCells } from './month-grid'
 
 // Minimal shape the lane layout needs. Real Tasks carry far more, but nothing here reads it.
@@ -252,5 +260,35 @@ describe('computeHidden', () => {
 
   it('never drops below one visible lane', () => {
     expect(computeHidden([barAt(0, 0), barAt(1, 0)], 1).visibleLanes).toBe(1)
+  })
+
+  // The other half of the pair above: when the "+N" fits under the last lane it buys nothing to
+  // give one up, so every lane keeps its bar and only what is genuinely past the budget is
+  // counted. This is the case the month actually renders in — two lanes at 91.8px.
+  it('keeps every lane when the +N needs no lane of its own', () => {
+    const bars = [barAt(0, 0), barAt(1, 0), barAt(2, 0)]
+    const result = computeHidden(bars, 2, false)
+
+    expect(result.visibleLanes).toBe(2)
+    expect(result.hiddenPerDay[0]).toBe(1)
+  })
+})
+
+// The month grid renders its rows at 91.8px, not ROW_MAX_H: .pv2-grid is capped at
+// weeks x ROW_MAX_H as a border box and its 1px border-top comes out of that. Both heights are
+// pinned here because the two answers differ, and the 91.8 one is what users see.
+describe('moreNeedsLane', () => {
+  const RENDERED_ROW_H = 91.8
+
+  it('lets the label sit below two lanes at the height the grid renders at', () => {
+    expect(moreNeedsLane(RENDERED_ROW_H, 2)).toBe(false)
+  })
+
+  it('makes the third lane pay for the label at the full cap height', () => {
+    expect(moreNeedsLane(ROW_MAX_H, 3)).toBe(true)
+  })
+
+  it('leaves a single lane room to spare', () => {
+    expect(moreNeedsLane(RENDERED_ROW_H, 1)).toBe(false)
   })
 })
