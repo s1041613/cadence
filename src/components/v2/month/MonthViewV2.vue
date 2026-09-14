@@ -19,8 +19,10 @@
         <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="posterYear" @open-sheet="openSheet" />
       </div>
 
-      <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。 -->
-      <div class="mv2__todos">
+      <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。
+           目前預設關閉（SHOW_TODO_CARDS），等之後接上真正的開關再打開；
+           整段連同資料計算都留在原地，屆時只換旗標來源即可。 -->
+      <div v-if="SHOW_TODO_CARDS" class="mv2__todos">
         <Pv2TodoCard
           label="TODAY'S TASKS"
           :total="todayTodos.length"
@@ -122,6 +124,11 @@ import { compareForLane, layoutWeek, weekRows } from '@/utils/month-lanes'
 import type { Task } from '@/types/task'
 import { monthGridCells, stepMonth } from '@/utils/month-grid'
 import { resolveDaySheetStep, useDateSwipe } from '@/composables/use-date-swipe'
+
+// 待辦雙卡的總開關。現在一律關著：使用者要先看沒有這兩張卡的月曆，之後才決定要不要
+// 做成設定。寫成常數而不是刪掉，是因為要打開時只改這一行——真的加設定時，把它換成
+// 讀 store/settings 的 computed 就好，模板與下面的 todosBetween 都不用動。
+const SHOW_TODO_CARDS = false
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
