@@ -70,8 +70,8 @@ const thumbStyle = computed(() => ({
 
 <style scoped>
 /* The same glass as .pv2-nav, at capsule scale. Height is 36, not the 44 a standalone button
-   would take: the month page has a fixed height budget and every px spent above the grid comes
-   out of its lane budget (month-lanes.ts ROW_MAX_H). The 44px touch target is restored on the
+   would take — that is a segmented control's height, and the month header has no room to spend
+   on a control that outweighs the title above it. The 44px touch target is restored on the
    segments themselves, where it costs no layout. */
 .pv2-typeswitch {
   position: relative;

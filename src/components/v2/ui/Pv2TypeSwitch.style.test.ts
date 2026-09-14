@@ -71,8 +71,9 @@ describe('Pv2TypeSwitch · readable without a wallpaper', () => {
   })
 
   it('restores a 44px touch target outside the 36px capsule', () => {
-    // The visible height is 36 so the grid keeps its third lane (month-lanes.ts ROW_MAX_H). The
-    // target that buys back is on the pseudo-element, where it costs no layout.
+    // The visible height is 36 — a segmented control's height, not a button's — so the header
+    // stays proportionate. The 44px target that buys back is on the pseudo-element, where it
+    // costs no layout.
     expect(decl(sw, '.pv2-typeswitch__seg::after', 'width')).toBe('44px')
     expect(decl(sw, '.pv2-typeswitch__seg::after', 'height')).toBe('44px')
     expect(decl(sw, '.pv2-typeswitch__seg::after', 'position')).toBe('absolute')

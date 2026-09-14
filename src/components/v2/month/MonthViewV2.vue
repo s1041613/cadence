@@ -359,23 +359,27 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   touch-action: pan-y;
 }
 
-/* The row the switcher floats on. No vertical padding of its own: the distance down to the
-   title belongs to the title (--pv2-poster-pad-top below), and paying for it twice is how a
-   header drifts. The month page has a fixed height budget — every px above the grid is taken
-   out of its lane budget (month-lanes.ts ROW_MAX_H), which is why the control is 36 tall and
-   this row adds nothing to it. */
+/* The row the switcher floats on. It owns its distance from the top of the frame; the distance
+   DOWN to the title is the title's (--pv2-poster-pad-top below), so neither pays twice.
+   14px, not 0: the control is a floating capsule with a soft shadow, and flush against the
+   frame's top edge that shadow is clipped and the whole thing reads as cut off. */
 .mv2__topbar {
   display: flex;
   justify-content: flex-end;
-  padding: 0 16px;
+  padding: 14px 16px 0;
 }
 
 /* The title used to own its whole distance from the top of the frame. With a row above it, all
-   it owes is the gap to that row — and it is kept tight on purpose. The page's fixed height has
-   to leave the grid weeks x ROW_MAX_H (month-lanes.ts) or a week row drops from three lanes to
-   two; on a 5-week month with a home indicator that ceiling now clears by single-digit px. */
+   it owes is the gap to that row.
+
+   Measured on 393x852: this header leaves the grid ~33px more room than its own
+   weeks x ROW_MAX_H cap can use, so the 30px the two declarations above spend between them is
+   not taken from the grid at all. Worth stating because it reads like it should be: the grid's
+   rows land at 91.8px either way — ROW_MAX_H is 92, and .pv2-grid's 1px border-top comes out of
+   the capped border-box — so the month has been drawing two lanes per row, not three, since
+   before this control existed. */
 .mv2__poster {
-  --pv2-poster-pad-top: 10px;
+  --pv2-poster-pad-top: 16px;
 }
 
 /* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.
