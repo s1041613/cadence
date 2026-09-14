@@ -31,8 +31,8 @@
     .wall__scrim { position: absolute; inset: 0; z-index: -1; background: #ffffff; }
 
     /* Pv2Poster — 9cqw of a 377px container, i.e. 33.93px */
-    .topbar { display: flex; justify-content: flex-end; padding: 6px 16px 0; }
-    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 18px 0 0; }
+    .topbar { display: flex; justify-content: flex-end; padding: 0 16px; }
+    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 0 0; }
     .poster__month { font-weight: 800; font-size: 33.93px; letter-spacing: -0.01em; line-height: 0.9; color: #000000; }
 
     /* Pv2TodoCard */
@@ -75,29 +75,42 @@
             padding: 2px 4px; font: 700 9px/1.2 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em;
             white-space: nowrap; overflow: hidden; }
 
-    /* ── the switcher: clear glass. No white plate — the blur and the lit edge
-         are the whole material, so what shows through is the wallpaper itself. ─ */
+    /* ── the switcher, as shipped: Pv2BottomNav's glass, at capsule scale. The white
+         plate stays because the app's default canvas has no wallpaper to refract. ──── */
     .sw { position: relative; flex: none; display: flex; align-items: center;
-          width: 96px; height: 44px; padding: 4px; border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.5);
-          background: rgba(255,255,255,.06);
-          backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-          box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
-                      inset 0 -1px 1px rgba(255,255,255,.28),
-                      0 6px 20px rgba(40,38,30,.14); }
-    .sw__thumb { position: absolute; top: 4px; left: 4px;
-                 width: 44px; height: 36px; border-radius: 999px;
-                 background: rgba(222, 110, 140, .20);
-                 backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
-                 border: 1px solid rgba(255,255,255,.42);
-                 box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14);
+          width: 90px; height: 36px; padding: 3px; border-radius: 999px;
+          border: 1px solid rgba(255,255,255,.55);
+          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #ffffff;
+          backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+          box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
+    .sw__thumb { position: absolute; top: 3px; left: 3px;
+                 width: 42px; height: 30px; border-radius: 999px;
+                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(222, 110, 140, .12);
+                 backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+                 border: 1px solid rgba(255,255,255,.5);
+                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12);
                  transition: transform .42s cubic-bezier(.34,1.56,.64,1); }
     .seg { position: relative; z-index: 1; flex: none; display: grid; place-items: center;
-           width: 44px; height: 36px; border: none; background: none; padding: 0; cursor: pointer;
+           width: 42px; height: 30px; border: none; background: none; padding: 0; cursor: pointer;
            transition: color .18s cubic-bezier(.22,1,.36,1); }
+    /* The 44px touch target, taken outside the layout box so the capsule stays 36 tall. */
+    .seg::after { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px;
+                  transform: translate(-50%, -50%); }
+
+    /* The rejected direction, kept for the comparison boards: no plate at all. */
+    .sw--clear { background: rgba(255,255,255,.06);
+                 backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+                 box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                             inset 0 -1px 1px rgba(255,255,255,.28),
+                             0 6px 20px rgba(40,38,30,.14); }
+    .sw--clear .sw__thumb { background: rgba(222, 110, 140, .20);
+                            backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                            border: 1px solid rgba(255,255,255,.42);
+                            box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14); }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .sw { background: rgba(255,255,255,.72); }
-      .sw__thumb { background: rgba(222, 110, 140, .26); }
+      .sw { background: #ffffff; }
+      .sw__thumb { background: rgba(222, 110, 140, .16); }
+      .sw--clear { background: rgba(255,255,255,.72); }
     }
     @media (prefers-reduced-motion: reduce) { .sw__thumb { transition: none; } }
 
@@ -136,7 +149,7 @@
 <div class="frame">
     
     <div class="body">
-      <div class="topbar"><div class="sw" role="group" aria-label="月曆顯示內容" style="">
+      <div class="topbar"><div class="sw sw--clear" role="group" aria-label="月曆顯示內容" style="">
       <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>
       <button type="button" class="seg" aria-label="全部" aria-pressed="{{pAll}}" onClick="{{pickAll}}" style="color: {{cAll}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
       <button type="button" class="seg" aria-label="只看行事曆" aria-pressed="{{pEvents}}" onClick="{{pickEvents}}" style="color: {{cEvents}}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></button>
@@ -369,7 +382,7 @@ class Component extends DCLogic {
     const pick = (m) => () => this.setState({ mode: m });
     return {
       bars0: weeks[0], bars1: weeks[1], bars2: weeks[2], bars3: weeks[3], bars4: weeks[4],
-      thumbX: String(ORDER.indexOf(mode) * 44),
+      thumbX: String(ORDER.indexOf(mode) * 42),
       cAll: mode === 'all' ? ACC : MUT,
       cEvents: mode === 'events' ? ACC : MUT,
       pAll: mode === 'all' ? 'true' : 'false',

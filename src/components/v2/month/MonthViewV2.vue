@@ -8,6 +8,13 @@
     <div class="mv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <!-- No prev/next arrows here: the horizontal swipe replaces them. The poster stays
            tappable because the month/year wheel is still the only way to jump across years. -->
+      <!-- The control row sits above the title, right-aligned, and is not part of the poster:
+           tapping the poster opens the month wheel, so a button living inside it would be a
+           target inside a target. -->
+      <div class="mv2__topbar">
+        <Pv2TypeSwitch v-model="ui.monthFilter" />
+      </div>
+
       <div class="mv2__poster">
         <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="posterYear" @open-sheet="openSheet" />
       </div>
@@ -95,6 +102,7 @@
 import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
 import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
+import Pv2TypeSwitch from '@/components/v2/ui/Pv2TypeSwitch.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridWeek } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -142,8 +150,18 @@ function onToggleCalendar(id: string): void {
 // Events covering this day whose calendar is visible. The grid and the day sheet share
 // one predicate so they can never disagree about what a day contains; spansDate puts a
 // multi-day event on every day it covers.
+//
+// ui.monthFilter is deliberately NOT applied here. It governs the grid and only the grid: a cell
+// you tap has to show everything that day holds, or the sheet turns the filter into "my things
+// disappeared". The same reasoning keeps it off the two todo cards above the grid — those are
+// labelled TASKS and answer a different question than "what is drawn this month".
 function visibleTasksForDate(date: string): Task[] {
   return tasksStore.tasks.filter((t) => spansDate(t, date) && calendarsStore.isVisible(t.calendarId))
+}
+
+/** The grid's half of the pair above: what ui.monthFilter actually hides. */
+function matchesMonthFilter(t: Task): boolean {
+  return ui.monthFilter === 'all' || t.type === 'event'
 }
 
 // One layout pass per week row; a multi-day event gets one bar spanning its columns there.
@@ -190,7 +208,9 @@ function onTodoClick(id: string, e: MouseEvent): void {
 
 const gridWeeks = computed<Pv2GridWeek[]>(() => {
   const today = iso(new Date())
-  const visible = tasksStore.tasks.filter((t) => calendarsStore.isVisible(t.calendarId))
+  const visible = tasksStore.tasks.filter(
+    (t) => calendarsStore.isVisible(t.calendarId) && matchesMonthFilter(t)
+  )
 
   return weekRows(monthGridCells(year.value, month.value, settings.firstDay)).map((week) => {
     const dates = week.map((c) => c.date)
@@ -337,6 +357,25 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
   overflow: hidden;
   /* The horizontal month-swipe lives here; pan-y leaves the vertical axis to the browser. */
   touch-action: pan-y;
+}
+
+/* The row the switcher floats on. No vertical padding of its own: the distance down to the
+   title belongs to the title (--pv2-poster-pad-top below), and paying for it twice is how a
+   header drifts. The month page has a fixed height budget — every px above the grid is taken
+   out of its lane budget (month-lanes.ts ROW_MAX_H), which is why the control is 36 tall and
+   this row adds nothing to it. */
+.mv2__topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px;
+}
+
+/* The title used to own its whole distance from the top of the frame. With a row above it, all
+   it owes is the gap to that row — and it is kept tight on purpose. The page's fixed height has
+   to leave the grid weeks x ROW_MAX_H (month-lanes.ts) or a week row drops from three lanes to
+   two; on a 5-week month with a home indicator that ceiling now clears by single-digit px. */
+.mv2__poster {
+  --pv2-poster-pad-top: 10px;
 }
 
 /* Pv2Poster is a shrink-to-fit button that used to be stretched by Pv2PosterNav's flex row.

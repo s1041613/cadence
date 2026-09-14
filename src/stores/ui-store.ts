@@ -6,6 +6,9 @@ import { iso } from '@/utils/convert-date-time'
 import type { PopoverAnchor } from '@/components/ui/CdPopover.vue'
 
 export type ActiveView = 'day' | 'week' | 'month'
+
+/** What the month grid draws. 'event' puts the quadrant tasks away and leaves the calendar. */
+export type MonthFilter = 'all' | 'event'
 export type SettingsPane =
   | 'root'
   | 'account'
@@ -38,6 +41,10 @@ export const useUiStore = defineStore('ui', () => {
   const tasksStore = useTasksStore()
 
   const activeView = ref<ActiveView>('month')
+  // Deliberately not in settings-store and deliberately not synced: this is a state the view is
+  // in right now, not a preference the account carries. A reload lands back on 'all' — a user who
+  // is shown a filtered month but has forgotten filtering it is just being shown a broken calendar.
+  const monthFilter = ref<MonthFilter>('all')
   const selectedDate = ref(iso(new Date()))
   const eventComposerInitialValues = ref<Partial<Task> | null>(null)
   const focusTaskId = ref<string | null>(null)
@@ -68,6 +75,7 @@ export const useUiStore = defineStore('ui', () => {
 
   return {
     activeView,
+    monthFilter,
     selectedDate,
     eventComposerInitialValues,
     focusTaskId,

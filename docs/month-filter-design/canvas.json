@@ -1,26 +1,24 @@
 {
   "pages": [
-    { "id": "page-1", "name": "浮在右上角" },
-    { "id": "page-2", "name": "其他位置" },
+    { "id": "page-1", "name": "出貨的樣子" },
+    { "id": "page-2", "name": "評估過但沒選" },
     { "id": "page-3", "name": "規格" }
   ],
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "桌布 · nav 保留白板", "is_interactive": true },
-    { "file": "ClearNav.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "桌布 · nav 也變透明", "is_interactive": true },
-    { "file": "PlainCanvas.dc.html", "x": 0, "y": 1150, "w": 393, "h": 852, "page": "page-1", "title": "白底 · nav 保留白板", "is_interactive": true },
-    { "file": "ClearNavPlain.dc.html", "x": 500, "y": 1150, "w": 393, "h": 852, "page": "page-1", "title": "白底 · nav 也變透明", "is_interactive": true },
-    { "file": "OptionA.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "貼在月份標題右側", "is_interactive": true },
-    { "file": "OptionB.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "日曆篩選列開頭", "is_interactive": true },
-    { "file": "OptionC.dc.html", "x": 1000, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "浮在底部 nav 上方", "is_interactive": true },
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "有桌布", "is_interactive": true },
+    { "file": "PlainCanvas.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-1", "title": "白底（app 預設）", "is_interactive": true },
+    { "file": "ClearNav.dc.html", "x": 0, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "純透明玻璃 · 有桌布", "is_interactive": true },
+    { "file": "ClearNavPlain.dc.html", "x": 500, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "純透明玻璃 · 白底", "is_interactive": true },
+    { "file": "OptionA.dc.html", "x": 1000, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "貼在月份標題右側", "is_interactive": true },
+    { "file": "OptionB.dc.html", "x": 1500, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "日曆篩選列開頭", "is_interactive": true },
+    { "file": "OptionC.dc.html", "x": 2000, "y": 0, "w": 393, "h": 852, "page": "page-2", "title": "浮在底部 nav 上方", "is_interactive": true },
     { "file": "Spec.dc.html", "x": 0, "y": 0, "w": 1040, "h": 1560, "page": "page-3", "title": "規格" }
   ],
   "annotations": [
-    { "id": "matrix", "x": 0, "y": -170, "w": 893, "page": "page-1", "text": "左右＝底部 nav 有沒有白板，上下＝有沒有桌布。切換器四張都是純透明玻璃。兩段都可以直接點。" },
-    { "id": "note-main", "x": 0, "y": 900, "w": 393, "page": "page-1", "text": "現況的走法：切換器純透明，nav 維持 Pv2BottomNav 原本那層白板（rgba(255,255,255,.72 → .46)）。\n\n兩顆放在一起會看出材質不一樣 —— 上面那顆是玻璃，下面那顆是毛玻璃貼了張白紙。" },
-    { "id": "note-clearnav", "x": 500, "y": 900, "w": 393, "page": "page-1", "text": "nav 也拿掉白板，兩顆同一種材質。\n\nnav 底下剛好只有桌布（body 的 padding-bottom 91px 已經幫月曆讓開，nav 不會壓到最後一週），所以透明化沒有壓到任何內容 —— 這比我原本預期的安全。\n\n代價是 nav 的字。靜止態從 --pv2-ink-3 (#8E8E8E) 提到 --pv2-ink-2 (#666666) 才勉強抓得住桌布；9px 的 MONTH / DAY / NOTES 還是這一頁最脆弱的字。" },
-    { "id": "note-plain", "x": 0, "y": 2050, "w": 393, "page": "page-1", "text": "app 現在的預設白底。切換器只剩一圈白邊，nav 因為有白板反而還看得到。" },
-    { "id": "note-clearplain", "x": 500, "y": 2050, "w": 393, "page": "page-1", "text": "最壞情況：白底 + 兩顆都透明。\n\n整個底部 nav 消失成一條白框，只剩粉色藥丸跟圖示浮在白紙上。這不是玻璃，是沒有背景。\n\n所以透明玻璃不能無條件開 —— 沒有桌布時必須退回帶白板的版本。" },
-    { "id": "note-others", "x": 0, "y": 900, "w": 1393, "page": "page-2", "text": "同樣的兩段玻璃控制，換三個位置。留著是為了對照，不是備案：右側（A）跟標題搶視線且拇指難到；篩選列開頭（B）語義最順但吃掉 chip 列約 96px；底部浮島（C）最好按，但兩個玻璃藥丸疊在底部重心太低，還會蓋住最後一週。" }
+    { "id": "shipped", "x": 0, "y": -150, "w": 893, "page": "page-1", "text": "已經進 code 的版本（Pv2TypeSwitch.vue）。兩段可以直接點：全部 / 只看行事曆，格線會跟著換。玻璃整組沿用 Pv2BottomNav，白板留著。" },
+    { "id": "note-main", "x": 0, "y": 900, "w": 393, "page": "page-1", "text": "有桌布時的樣子（白紗 0.35）。控制元件與底部 nav 同一種材質 —— 它們本來就是同一組值，只是一個是藥丸一個是長條。\n\n控制元件 90×36，點擊區用 ::after 撐到 44×44。36 不是省事：標題區每多一 px 都是從 grid 的 lane 預算扣的。" },
+    { "id": "note-plain", "x": 500, "y": 900, "w": 393, "page": "page-1", "text": "app 現在的預設：沒有桌布。\n\n這張就是白板留著的理由。同一顆控制元件在這裡還是讀得出來，而隔壁那頁的純透明版在這個背景下只剩一圈白邊。" },
+    { "id": "note-rejected", "x": 0, "y": 900, "w": 1893, "page": "page-2", "text": "左邊兩張是純透明玻璃（連底部 nav 一起拿掉白板）。有桌布時更好看，白底時整條 nav 消失成一個白框 —— 那不是玻璃，是沒有背景。\n\n右邊三張是切換器的其他位置：貼在標題右側跟標題搶視線且拇指難到；篩選列開頭語義最順但吃掉 chip 列約 90px；底部浮島最好按，但兩個玻璃藥丸疊在底部重心太低。" }
   ],
   "launch": { "view": "canvas", "page": "page-1" }
 }
