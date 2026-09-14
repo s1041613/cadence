@@ -12,7 +12,7 @@
  * before it, back because a calendar where work is blue and the gym is green is readable
  * at a glance in a way one family cannot be for everyone.
  *
- * EVENT_COLORS is both. eventColorsFor() narrows it per account.
+ * EVENT_COLORS is both, and every account is offered all of it.
  *
  * Every entry is chosen so both chip renderings stay legible: solid fill with
  * `readableInkOn` measures at least 4.5:1, and the tinted fill the timed chip uses
@@ -86,31 +86,8 @@ export const LEGACY_EVENT_COLORS: readonly EventColor[] = [
 /** Everything a picker can offer: the pink family first, then the hues. */
 export const EVENT_COLORS: readonly EventColor[] = [...PINK_EVENT_COLORS, ...LEGACY_EVENT_COLORS]
 
-/**
- * Accounts that see the pink family and nothing else.
- *
- * A preference, hard-coded as a rule, because that is what was asked for. Two things to know
- * before this list grows: it ships in the client bundle, so every address in it is readable by
- * anyone who opens devtools; and it cannot be changed without a deploy. The durable shape for
- * "which palette do I see" is a per-user setting — this constant is where that would plug in.
- */
-const PINK_ONLY_EMAILS: readonly string[] = ['y10135124@gmail.com']
-
-/**
- * The palette to offer this account. Unknown or signed-out gets everything: a picker that
- * silently shows fewer colours than the app has is a bug to everyone who is not on the list.
- */
-export function eventColorsFor(email: string | null | undefined): readonly EventColor[] {
-  const normalised = email?.trim().toLowerCase()
-  return normalised && PINK_ONLY_EMAILS.includes(normalised) ? PINK_EVENT_COLORS : EVENT_COLORS
-}
-
 /** Flat hex list, for the v1 swatch grid which renders colour without a label. */
 export const EVENT_COLOR_HEXES: readonly string[] = EVENT_COLORS.map((c) => c.hex)
-
-/** The same, narrowed to one account's palette. */
-export const eventColorHexesFor = (email: string | null | undefined): readonly string[] =>
-  eventColorsFor(email).map((c) => c.hex)
 
 /** The palette's default — the mid-tone that reads as "an event" with nothing chosen. */
 export const DEFAULT_EVENT_COLOR = '#EC5093'

@@ -6,8 +6,6 @@ import {
   LEGACY_EVENT_COLORS,
   DEFAULT_EVENT_COLOR,
   eventColorNameOf,
-  eventColorsFor,
-  eventColorHexesFor,
   readableInkOn,
   shadeOf,
   tintOf
@@ -83,34 +81,6 @@ describe('event palette · every colour survives both chip renderings', () => {
       expect(contrast(tintOf(hex), CANVAS)).toBeGreaterThanOrEqual(1.1)
     }
   )
-})
-
-describe('eventColorsFor · the palette an account is offered', () => {
-  it('gives the listed account the pink family and nothing else', () => {
-    expect(eventColorsFor('y10135124@gmail.com')).toEqual(PINK_EVENT_COLORS)
-    // The address comes from an auth provider, which is not careful about either of these.
-    expect(eventColorsFor('  Y10135124@Gmail.com ')).toEqual(PINK_EVENT_COLORS)
-  })
-
-  it('gives everyone else every colour', () => {
-    expect(eventColorsFor('someone@example.com')).toEqual(EVENT_COLORS)
-    expect(eventColorsFor(null)).toEqual(EVENT_COLORS)
-    expect(eventColorsFor(undefined)).toEqual(EVENT_COLORS)
-    expect(eventColorsFor('')).toEqual(EVENT_COLORS)
-  })
-
-  it('narrows the flat hex list the same way', () => {
-    expect(eventColorHexesFor('y10135124@gmail.com')).toEqual(PINK_EVENT_COLORS.map((c) => c.hex))
-    expect(eventColorHexesFor('someone@example.com')).toEqual(EVENT_COLOR_HEXES)
-  })
-
-  it('offers a palette that always contains the default', () => {
-    // Whichever set a picker shows, the colour an untouched event already has has to be in it,
-    // or that event opens with nothing selected.
-    for (const email of ['y10135124@gmail.com', 'someone@example.com', null]) {
-      expect(eventColorsFor(email).map((c) => c.hex)).toContain(DEFAULT_EVENT_COLOR)
-    }
-  })
 })
 
 describe('event palette · shape', () => {
