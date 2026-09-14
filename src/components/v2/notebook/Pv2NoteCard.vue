@@ -14,6 +14,13 @@
     The body is edit-in-place: clicking it swaps the text for a textarea, and blurring or
     pressing Escape commits. There is no explicit save button — the note is the only content
     in the row, so leaving the field is an unambiguous "done".
+
+    At rest the row is a PREVIEW, not the note: a lead line over the first couple of lines of
+    what follows, both clamped. Rendering every note in full at one size was the whole of the
+    "wall of text" — a 40-line prompt and a two-word reminder arrived on the page as the same
+    kind of object, with nothing to scan by and no way to tell where one ended. The split is
+    presentational only (Note has no title field); tapping in still opens the raw body, one
+    plain voice, exactly as typed.
   -->
   <article class="nbk">
     <textarea
@@ -27,7 +34,10 @@
       @keydown.esc.prevent="commit"
       @input="autoGrow"
     />
-    <p v-else class="nbk__body" @click="startEditing">{{ note.body }}</p>
+    <div v-else class="nbk__body" @click="startEditing">
+      <p class="nbk__lead">{{ lead }}</p>
+      <p v-if="rest" class="nbk__rest">{{ rest }}</p>
+    </div>
 
     <div class="nbk__meta">
       <span class="nbk__when">{{ label }}</span>
@@ -104,6 +114,20 @@ const props = defineProps<{
 // this", and editing deliberately leaves createdAt alone.
 const label = computed(() => relativeDayLabel(props.note.createdAt, props.now))
 
+/** Splits the body at its first line break for display only — see the template comment.
+ *  The store trims the body, so a leading blank line should not occur; findIndex covers it
+ *  anyway rather than letting one empty line become the whole lead. A body with no break at
+ *  all is all lead and no rest, which is the right answer: a pasted paragraph has no second
+ *  part to preview, and the clamp below is what keeps it from taking the page. */
+const parts = computed(() => {
+  const lines = props.note.body.split('\n')
+  const first = lines.findIndex((line) => line.trim() !== '')
+  if (first === -1) return { lead: props.note.body, rest: '' }
+  return { lead: lines[first]!.trim(), rest: lines.slice(first + 1).join('\n').trim() }
+})
+const lead = computed(() => parts.value.lead)
+const rest = computed(() => parts.value.rest)
+
 const emit = defineEmits<{
   delete: []
   edit: [body: string]
@@ -154,8 +178,9 @@ function commit(): void {
 </script>
 
 <style scoped>
-/* No fill, no border, no radius, no shadow — see the template comment. The row's only
-   horizontal inset comes from the feed, so the rule below runs the full content width. */
+/* No fill, no border, no shadow at rest — see the template comment. The row's only horizontal
+   inset comes from the feed, so the rule below runs the full content width. (The rounded press
+   fill further down belongs to the tap target, not to the row: it exists only while held.) */
 .nbk {
   position: relative;
   padding: 13px 0 14px;
@@ -175,22 +200,72 @@ function commit(): void {
   background: var(--pv2-line);
 }
 
+/* The tappable region, and the only thing on the row that reacts to a finger. The negative
+   margin lets its press fill and its hit area run 10px wider and 6px taller than the text
+   without moving a glyph: the text column stays exactly where the feed's 22px inset puts it.
+   A row of unstyled text on a white page reads as text lying ON the page rather than as an
+   object you can open — the press state is what says otherwise, and it costs no resting ink. */
 .nbk__body {
-  margin: 0;
-  /* iOS Body, 17/22 — widened to 1.45 because the notes are mostly Chinese, whose glyphs
-     need more leading than the Latin metrics that ratio was set for. The previous 15px was
-     below the platform's body size at a size where CJK loses stroke detail first. */
-  font: 400 17px var(--cd-font-ui);
-  line-height: 1.45;
-  color: var(--pv2-ink);
-  /* Not in the mock, but real data hits both: without pre-wrap multi-line text collapses to
-     one line, and without overflow-wrap a long URL bursts the row's bounds. */
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  margin: -6px -10px 0;
+  padding: 6px 10px;
+  border-radius: var(--cd-radius-sm);
   cursor: text;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Matches the paragraph exactly, so entering edit mode does not shift the text by a pixel. */
+.nbk__body:active {
+  background: var(--pv2-fill);
+}
+
+/* The lead line, at 15/500. Not 17/400: at 17 every note on the page was set in one voice at
+   one size, so a page of notes had no ladder in it at all — and CJK fills its em where Inter's
+   Latin leaves sidebearings, so the platform's 17pt Body renders visibly larger in Chinese than
+   the metric it was calibrated on. Two steps down with the emphasis carried on weight instead
+   keeps the lead the loudest thing in the row while taking the bulk out of it; 16/600 was tried
+   first and reads as the same wall, because Noto Sans TC's 500 and 600 are near-identical in
+   colour and the size is what was loud.
+   Two lines, because a Chinese lead wraps where an English one would not; a third would put
+   the wall back. */
+.nbk__lead {
+  margin: 0;
+  font: 500 15px var(--cd-font-ui);
+  line-height: 1.45;
+  color: var(--pv2-ink);
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* What follows the lead, at 13.5 in the AA secondary role: quiet enough that the eye scans leads
+   down the page and drops into a preview only where it means to. A whole step below the lead,
+   not the half-step 14 would be — the two share a column and differ in nothing but size and
+   grey, so the size has to do visible work.
+   pre-wrap keeps the note's own line breaks (a preview of a list should look like a list) and
+   overflow-wrap stops a long URL bursting the row — both still needed under the clamp. */
+.nbk__rest {
+  margin: 3px 0 0;
+  font: 400 13.5px var(--cd-font-ui);
+  line-height: 1.55;
+  color: var(--pv2-ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Editing drops the lead/rest split — that split is how the row PREVIEWS the note, and what
+   you edit is the note. So the field is the raw body in one plain voice, sharing the body's box
+   so the text column does not move when the row opens.
+   16, not the lead's 15: iOS Safari zooms the page when a focused field is set below 16px, and
+   index.html's maximum-scale=1 is a guard I would rather not be the only thing standing between
+   a tapped note and the whole page jumping. One pixel of growth on tap is not visible; the page
+   scaling under the keyboard is. */
 .nbk__body--editing {
   display: block;
   width: 100%;
@@ -199,23 +274,30 @@ function commit(): void {
   background: transparent;
   resize: none;
   overflow: hidden;
-  font-family: inherit;
+  font: 400 16px var(--cd-font-ui);
+  line-height: 1.4;
+  color: var(--pv2-ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
+/* 0 rather than the old 5: the body's own 6px bottom padding now carries this gap. */
 .nbk__meta {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 5px;
+  margin-top: 0;
 }
 
-/* iOS Footnote, 13/18. Was 10px in --pv2-ink-4, which measures 2.0:1 — a size and a
-   contrast that together made the one piece of metadata on the row the hardest thing on
-   the page to read. --pv2-ink-2 is the AA role for secondary text. */
+/* iOS Caption 1, 12/16. It shares --pv2-ink-2 with the preview above it, so a 13 next to that
+   13.5 read as one more line of note rather than as the row's footer; a whole step down is what
+   separates them. Still nowhere near the 10px in --pv2-ink-4 this started as — that measured
+   2.0:1 and made the one piece of metadata on the row the hardest thing on the page to read.
+   --pv2-ink-2 is the AA role, and the date is information, not decoration. */
 .nbk__when {
   flex: 1;
-  font: 400 13px var(--cd-font-ui);
-  line-height: 18px;
+  font: 400 12px var(--cd-font-ui);
+  line-height: 16px;
   color: var(--pv2-ink-2);
 }
 

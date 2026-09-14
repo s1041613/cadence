@@ -211,13 +211,15 @@ function onSwipe(details: SwipeDetails): void {
   background: var(--pv2-fill);
 }
 
+/* 16, matching the lead line of the notes below it: the query and the thing it filters are the
+   same kind of text, and at 17 the field was the largest type on the page after the title. */
 .nbv__search-input {
   flex: 1;
   min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font: 400 17px var(--cd-font-ui);
+  font: 400 16px var(--cd-font-ui);
   color: var(--pv2-ink);
 }
 
