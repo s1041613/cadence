@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <style>
+    body { margin: 0; font-family: 'Inter', 'Noto Sans TC', sans-serif; -webkit-font-smoothing: antialiased; }
+    a { color: #DE6E8C; } a:hover { color: #C55A78; }
+    * { box-sizing: border-box; }
+    .h2 { font: 600 11px 'Inter', sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E; margin: 0; }
+    .panel { background: #fff; border: 1px solid #EFEFEF; border-radius: 18px; padding: 26px 28px 28px;
+             box-shadow: 0 2px 10px rgba(0,0,0,.04); display: flex; flex-direction: column; gap: 18px; }
+    .body { font: 400 13px/1.65 'Inter','Noto Sans TC',sans-serif; color: #666666; margin: 0; }
+    .mono { font: 400 11.5px/1.7 'JetBrains Mono', ui-monospace, monospace; color: #2A1420; }
+    .kv { display: grid; grid-template-columns: 148px 1fr; gap: 7px 16px; align-items: baseline; }
+    .k { font: 500 11.5px 'Inter', sans-serif; color: #8E8E8E; }
+    .v { font: 400 11.5px 'JetBrains Mono', ui-monospace, monospace; color: #000; }
+
+    /* the control — identical recipe to the phone artboards */
+    .sw { position: relative; display: flex; align-items: center; width: 140px; height: 44px; padding: 4px;
+          border-radius: 999px; border: 1px solid rgba(255,255,255,.55);
+          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
+          backdrop-filter: blur(22px) saturate(140%); box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
+    .sw__thumb { position: absolute; top: 4px; left: 4px; width: 44px; height: 36px; border-radius: 999px;
+                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(222,110,140,.12);
+                 backdrop-filter: blur(14px) saturate(160%); border: 1px solid rgba(255,255,255,.5);
+                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12); }
+    .seg { position: relative; z-index: 1; display: grid; place-items: center; width: 44px; height: 36px; }
+    .stage { display: grid; place-items: center; height: 132px; border-radius: 14px;
+             background: linear-gradient(135deg, #F7C8D9 0%, #F4A9A0 48%, #D98BC4 100%); }
+  </style>
+</helmet>
+<div style="width: 1040px; padding: 56px 56px 64px; background: #FBFBFB; display: flex; flex-direction: column; gap: 34px;">
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <span class="h2">Cadence · Month view</span>
+    <h1 style="margin: 0; font: 800 40px/1.05 'Inter','Noto Sans TC',sans-serif; letter-spacing: -0.02em; color: #000;">行事曆 / 待辦 顯示切換器</h1>
+    <p class="body" style="max-width: 700px;">一個三段式玻璃 segmented control，只管月曆格線畫什麼：<strong style="color:#000;font-weight:600;">全部</strong>、<strong style="color:#000;font-weight:600;">只看行事曆</strong>（<span class="mono">type === 'event'</span>）、<strong style="color:#000;font-weight:600;">只看待辦</strong>（<span class="mono">type === 'quadrant'</span>）。玻璃配方直接沿用 <span class="mono">Pv2BottomNav</span> 的底座與滑塊，不是新的一套語彙。</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="panel">
+      <span class="h2">解剖</span>
+      <div class="stage">
+        <div style="transform: scale(2); transform-origin: center;">
+          <div class="sw">
+            <div class="sw__thumb"></div>
+            <span class="seg" style="color:#DE6E8C"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+            <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></span>
+            <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg></span>
+          </div>
+        </div>
+      </div>
+      <div class="kv">
+        <span class="k">Track</span><span class="v">140 × 44 · radius 999 · padding 4</span>
+        <span class="k">Segment</span><span class="v">44 × 36（點擊區 44 × 44）</span>
+        <span class="k">Thumb</span><span class="v">44 × 36 · radius 999</span>
+        <span class="k">Icon</span><span class="v">20px，畫在 24 grid，stroke 1.7 round</span>
+        <span class="k">Icon 靜止</span><span class="v">--pv2-ink-3 · #8E8E8E</span>
+        <span class="k">Icon 選中</span><span class="v">--pv2-accent · #DE6E8C</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <span class="h2">玻璃配方（沿用，不是新增）</span>
+      <p class="mono" style="margin:0; white-space: pre-wrap;">/* 底座 —— 與 .pv2-nav 同一組值 */
+border: 1px solid rgba(255,255,255,.55);
+background:
+  linear-gradient(180deg, rgba(255,255,255,.72),
+                          rgba(255,255,255,.46)),
+  var(--pv2-canvas);
+backdrop-filter: blur(22px) saturate(140%);
+box-shadow: var(--cd-shadow-overlay);
+
+/* 滑塊 —— 與 .pv2-nav__pill 同一組值 */
+background:
+  linear-gradient(160deg, rgba(255,255,255,.55),
+                          rgba(255,255,255,.18)),
+  rgba(var(--pv2-accent-rgb), .12);
+backdrop-filter: blur(14px) saturate(160%);
+transition: transform var(--cd-duration-glass)
+                      var(--cd-ease-glass);  /* .42s / 彈性回彈 */</p>
+      <div style="height:1px;background:#EFEFEF;"></div>
+      <p class="body" style="margin:0;">不支援 <span class="mono">backdrop-filter</span> 時退回不透明底（<span class="mono">@supports not</span>），與 nav 相同的處理。<span class="mono">prefers-reduced-motion</span> 時滑塊不做位移動畫，只換顏色。</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <span class="h2">三個狀態</span>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px;">
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="sw" style="box-shadow:0 2px 10px rgba(0,0,0,.08)">
+          <div class="sw__thumb" style="transform: translateX(0px)"></div>
+          <span class="seg" style="color:#DE6E8C"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></span>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span style="font:600 14px 'Inter','Noto Sans TC',sans-serif;color:#000;">全部（預設）</span>
+          <span class="v" style="color:#8E8E8E;">aria-label=&quot;全部&quot;</span>
+          <p class="body" style="margin:4px 0 0;">格線畫所有項目，與現在完全一樣。</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="sw" style="box-shadow:0 2px 10px rgba(0,0,0,.08)">
+          <div class="sw__thumb" style="transform: translateX(44px)"></div>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+          <span class="seg" style="color:#DE6E8C"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></span>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span style="font:600 14px 'Inter','Noto Sans TC',sans-serif;color:#000;">只看行事曆</span>
+          <span class="v" style="color:#8E8E8E;">t.type === 'event'</span>
+          <p class="body" style="margin:4px 0 0;">圖示直接沿用 nav 的 month 字符 —— 在這個 app 裡那個形狀已經代表「行事曆」。</p>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="sw" style="box-shadow:0 2px 10px rgba(0,0,0,.08)">
+          <div class="sw__thumb" style="transform: translateX(88px)"></div>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
+          <span class="seg" style="color:#8E8E8E"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></span>
+          <span class="seg" style="color:#DE6E8C"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></svg></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;">
+          <span style="font:600 14px 'Inter','Noto Sans TC',sans-serif;color:#000;">只看待辦</span>
+          <span class="v" style="color:#8E8E8E;">t.type === 'quadrant'</span>
+          <p class="body" style="margin:4px 0 0;">格線只剩四象限色。上面兩張 TASKS 卡不受影響 —— 它們本來就只講待辦。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px;">
+    <div class="panel">
+      <span class="h2">程式落點</span>
+      <div class="kv" style="grid-template-columns: 210px 1fr;">
+        <span class="k">ui-store / settings-store</span><span class="v">monthFilter: 'all' | 'event' | 'quadrant'</span>
+        <span class="k">MonthViewV2.vue</span><span class="v">gridWeeks 的 visible 多一層 filter</span>
+        <span class="k">新元件</span><span class="v">Pv2TypeSwitch.vue</span>
+      </div>
+      <div style="height:1px;background:#EFEFEF;"></div>
+      <p class="mono" style="margin:0;white-space:pre-wrap;">// MonthViewV2.vue — 唯一的資料改動
+const visible = tasksStore.tasks.filter(
+  (t) =&gt; calendarsStore.isVisible(t.calendarId)
+      &amp;&amp; matchesFilter(t)            // ← 新增這行
+)</p>
+      <p class="body" style="margin:0;">日檢視、週檢視、<span class="mono">Pv2DaySheet</span> 不吃這個 filter：一格點下去還是看得到那天的全部內容，否則會有「東西不見了」的錯覺。</p>
+    </div>
+
+    <div class="panel">
+      <span class="h2">無障礙</span>
+      <ul class="body" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;">
+        <li>純圖示，所以每段一定要有 <span class="mono">aria-label</span>；<span class="mono">role="group"</span> + <span class="mono">aria-pressed</span>。</li>
+        <li>點擊區 44 × 44，圖示 20px 置中 —— 視覺高度 36，靠上下 4px padding 補到 44。</li>
+        <li>選中只靠粉色滑塊，色差對淺底約 1.2:1。<strong style="color:#000;font-weight:600;">這是這個設計最大的風險</strong>：色盲或強光下可能看不出選中的是哪一段。要補的話，選中那段的圖示改 stroke 2.2，用線寬再講一次。</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":1040,"height":1480}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>
