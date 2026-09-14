@@ -12,14 +12,17 @@ import { readFile } from 'node:fs/promises'
  *  - the track losing its white plate → invisible on the default canvas, which ships with no
  *    wallpaper at all (v2-appearance-store: backgroundImage null, scrim 0.8)
  *  - the filter reaching the day sheet → a tapped cell hides the very tasks it exists to show
+ *  - the resting segment drifting from the store's default → the pill loads under the wrong icon
  */
 
 let sw = ''
 let monthView = ''
+let uiStore = ''
 
 beforeAll(async () => {
   sw = await readFile(new URL('./Pv2TypeSwitch.vue', import.meta.url), 'utf8')
   monthView = await readFile(new URL('../month/MonthViewV2.vue', import.meta.url), 'utf8')
+  uiStore = await readFile(new URL('../../../stores/ui-store.ts', import.meta.url), 'utf8')
 })
 
 /**
@@ -53,10 +56,20 @@ describe('Pv2TypeSwitch · the thumb lands on a segment', () => {
   })
 
   it('orders the options the way the thumb counts them', () => {
-    // The thumb's offset is the option's INDEX. 'all' is the resting state, so it has to be
-    // index 0 or a fresh mount shows the pill parked on the wrong icon.
+    // The thumb's offset is the option's INDEX. 'event' is the resting state — ui-store's
+    // monthFilter default — so it has to be index 0 or a fresh mount shows the pill parked on
+    // the wrong icon.
     const order = [...sw.matchAll(/\{ value: '(\w+)', label:/g)].map((m) => m[1])
-    expect(order).toEqual(['all', 'event'])
+    expect(order).toEqual(['event', 'all'])
+  })
+
+  it('parks at the option the store actually starts on', () => {
+    // The two files are the same statement said twice: the switch's index 0 and the store's
+    // default. Drift between them is silent — the pill just sits under the wrong icon on load.
+    const dflt = uiStore.match(/const monthFilter = ref<MonthFilter>\('(\w+)'\)/)?.[1]
+    const first = sw.match(/\{ value: '(\w+)', label:/)?.[1]
+    expect(dflt).toBe('event')
+    expect(first).toBe(dflt)
   })
 })
 
