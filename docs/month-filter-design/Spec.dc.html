@@ -23,16 +23,16 @@
     .warn { border-left: 0; background: #FDF6F8; border: 1px solid #F3DCE4; border-radius: 14px; padding: 18px 20px; }
 
     /* the control — identical recipe to the phone artboards */
-    .sw { position: relative; display: flex; align-items: center; width: 96px; height: 44px; padding: 4px;
-          border-radius: 999px; border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.06);
-          backdrop-filter: blur(20px) saturate(180%);
-          box-shadow: inset 0 1px 1px rgba(255,255,255,.7), inset 0 -1px 1px rgba(255,255,255,.28),
-                      0 6px 20px rgba(40,38,30,.14); }
-    .sw__thumb { position: absolute; top: 4px; left: 4px; width: 44px; height: 36px; border-radius: 999px;
-                 background: rgba(222,110,140,.20); backdrop-filter: blur(10px) saturate(160%);
-                 border: 1px solid rgba(255,255,255,.42);
-                 box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14); }
-    .seg { position: relative; z-index: 1; display: grid; place-items: center; width: 44px; height: 36px; }
+    .sw { position: relative; display: flex; align-items: center; width: 90px; height: 36px; padding: 3px;
+          border-radius: 999px; border: 1px solid rgba(255,255,255,.55);
+          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), #fff;
+          backdrop-filter: blur(22px) saturate(140%);
+          box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
+    .sw__thumb { position: absolute; top: 3px; left: 3px; width: 42px; height: 30px; border-radius: 999px;
+                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(222,110,140,.12);
+                 backdrop-filter: blur(14px) saturate(160%); border: 1px solid rgba(255,255,255,.5);
+                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12); }
+    .seg { position: relative; z-index: 1; display: grid; place-items: center; width: 42px; height: 30px; }
     .stage { display: grid; place-items: center; height: 148px; border-radius: 14px; overflow: hidden;
              background:
                radial-gradient(115% 78% at 14% 6%, #F0D3BE 0%, rgba(240,211,190,0) 58%),
@@ -47,7 +47,7 @@
   <div style="display: flex; flex-direction: column; gap: 10px;">
     <span class="h2">Cadence · Month view</span>
     <h1 style="margin: 0; font: 800 40px/1.05 'Inter','Noto Sans TC',sans-serif; letter-spacing: -0.02em; color: #000;">顯示切換器</h1>
-    <p class="body" style="max-width: 720px;">兩段式透明玻璃控制，浮在月份大標題上方、右對齊 —— iOS Notes 放資料夾 / Edit 按鈕的那一排。它只管月曆格線畫什麼：<strong style="color:#000;font-weight:600;">全部</strong>，或<strong style="color:#000;font-weight:600;">只看行事曆</strong>（<span class="mono">type === 'event'</span>，把待辦收起來）。</p>
+    <p class="body" style="max-width: 720px;">兩段式玻璃控制，浮在月份大標題上方、右對齊 —— iOS Notes 放資料夾 / Edit 按鈕的那一排。它只管月曆格線畫什麼：<strong style="color:#000;font-weight:600;">全部</strong>，或<strong style="color:#000;font-weight:600;">只看行事曆</strong>（<span class="mono">type === 'event'</span>，把待辦收起來）。已實作於 <span class="mono">Pv2TypeSwitch.vue</span>。</p>
   </div>
 
   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
@@ -63,34 +63,37 @@
         </div>
       </div>
       <div class="kv">
-        <span class="k">Track</span><span class="v">96 × 44 · radius 999 · padding 4</span>
-        <span class="k">Segment / Thumb</span><span class="v">44 × 36（點擊區 44 × 44）</span>
+        <span class="k">Track</span><span class="v">90 × 36 · radius 999 · padding 3</span>
+        <span class="k">Segment / Thumb</span><span class="v">42 × 30（點擊區 44 × 44）</span>
         <span class="k">Icon</span><span class="v">20px，畫在 24 grid，stroke 1.7 round</span>
         <span class="k">Icon 靜止</span><span class="v">--pv2-ink-2 · #666666</span>
         <span class="k">Icon 選中</span><span class="v">--pv2-accent · #DE6E8C</span>
         <span class="k">位置</span><span class="v">標題列上方，右緣距框 24px</span>
       </div>
-      <p class="body" style="margin:0;">靜止用 <span class="mono">--pv2-ink-2</span> 而不是 nav 的 <span class="mono">--pv2-ink-3</span>：nav 底下墊了一層白，這顆沒有，灰再淺一階就浮不起來。</p>
+      <p class="body" style="margin:0;">高度 36 不是 44：月曆一頁的高度是有限的，標題區每多一 px 都是從 grid 的 lane 預算扣（<span class="mono">month-lanes.ts</span> 的 <span class="mono">ROW_MAX_H</span>）。44 的點擊區用 <span class="mono">::after</span> 撐出去，不佔版面。靜止色用 <span class="mono">--pv2-ink-2</span> 而不是 nav 的 <span class="mono">--pv2-ink-3</span>：這顆可能落在桌布上，提示灰抓不住照片。</p>
     </div>
 
     <div class="panel">
-      <span class="h2">玻璃配方 —— 沒有白底</span>
-      <p class="mono" style="margin:0; white-space: pre-wrap;">/* 底座：模糊 + 邊緣高光就是全部的材質 */
-border: 1px solid rgba(255,255,255,.5);
-background: rgba(255,255,255,.06);   /* 幾乎不填 */
-backdrop-filter: blur(20px) saturate(180%);
-box-shadow:
-  inset  0  1px 1px rgba(255,255,255,.70),  /* 上緣受光 */
-  inset  0 -1px 1px rgba(255,255,255,.28),  /* 下緣反光 */
-         0  6px 20px rgba(40,38,30,.14);
+      <span class="h2">玻璃配方 —— 整組沿用 nav</span>
+      <p class="mono" style="margin:0; white-space: pre-wrap;">/* 底座 —— 與 .pv2-nav 同一組值，白板留著 */
+border: 1px solid rgba(255,255,255,.55);
+background:
+  linear-gradient(180deg, rgba(255,255,255,.72),
+                          rgba(255,255,255,.46)),
+  var(--pv2-canvas);
+backdrop-filter: blur(22px) saturate(140%);
+box-shadow: var(--cd-shadow-overlay);
 
-/* 滑塊：粉色本身就是材質，不疊白 */
-background: rgba(var(--pv2-accent-rgb), .20);
-backdrop-filter: blur(10px) saturate(160%);
+/* 滑塊 —— 與 .pv2-nav__pill 同一組值 */
+background:
+  linear-gradient(160deg, rgba(255,255,255,.55),
+                          rgba(255,255,255,.18)),
+  rgba(var(--pv2-accent-rgb), .12);
+backdrop-filter: blur(14px) saturate(160%);
 transition: transform var(--cd-duration-glass)
                       var(--cd-ease-glass);  /* .42s 彈性 */</p>
       <div style="height:1px;background:#EFEFEF;"></div>
-      <p class="body" style="margin:0;">與 <span class="mono">Pv2BottomNav</span> 的差別只有一處：nav 疊了 <span class="mono">linear-gradient(rgba(255,255,255,.72) → .46)</span> 的白板，這顆拿掉了。動畫曲線、邊框、陰影都照舊。</p>
+      <p class="body" style="margin:0;">與 <span class="mono">Pv2BottomNav</span> 沒有任何差別，只是縮到藥丸尺寸。曾經考慮拿掉那層白板做成純透明玻璃（見下一欄），最後沒有 —— 理由在右邊那張對照。</p>
     </div>
   </div>
 
@@ -112,7 +115,7 @@ transition: transform var(--cd-duration-glass)
 
       <div style="display:flex;gap:18px;align-items:flex-start;">
         <div class="sw" style="flex:none;">
-          <div class="sw__thumb" style="transform: translateX(44px)"></div>
+          <div class="sw__thumb" style="transform: translateX(42px)"></div>
           <span class="seg" style="color:#666666"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span>
           <span class="seg" style="color:#DE6E8C"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10H20M8.5 3v3.5M15.5 3v3.5"/></svg></span>
         </div>
@@ -126,7 +129,7 @@ transition: transform var(--cd-duration-glass)
   </div>
 
   <div class="panel warn" style="gap:14px;">
-    <span class="h2" style="color:#BC7088;">透明玻璃的前提</span>
+    <span class="h2" style="color:#BC7088;">為什麼白板留著</span>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start;">
       <div class="stage" style="height:96px;">
         <div class="sw">
@@ -143,22 +146,23 @@ transition: transform var(--cd-duration-glass)
         </div>
       </div>
     </div>
-    <p class="body" style="margin:0;color:#2A1420;">同一顆，左邊有桌布、右邊是 app 現在的預設。玻璃要有東西可以折射才存在 —— 白底上它只剩一圈白邊。而 <span class="mono">v2-appearance-store.ts</span> 現在是 <span class="mono">backgroundImage: null</span>（預設沒桌布）、<span class="mono">DEFAULT_SCRIM_OPACITY = 0.8</span>（就算設了桌布也洗到接近白）。<strong style="color:#000;font-weight:600;">要讓這個設計成立，白紗要壓到 0.35 上下。</strong>兩條路：把控制元件跟桌布綁在一起（沒桌布就退回 nav 那種帶白板的玻璃），或是把預設白紗調淡。</p>
+    <p class="body" style="margin:0;color:#2A1420;">上面兩張是<strong style="color:#000;font-weight:600;">純透明版</strong>（沒有白板），左邊有桌布、右邊是 app 現在的預設白底。玻璃要有東西可以折射才存在 —— 白底上它只剩一圈白邊。而 <span class="mono">v2-appearance-store.ts</span> 是 <span class="mono">backgroundImage: null</span>（預設沒桌布）、<span class="mono">DEFAULT_SCRIM_OPACITY = 0.8</span>（就算設了桌布也洗到接近白）。所以出貨的是帶白板那版：<strong style="color:#000;font-weight:600;">在兩種情況下都讀得出來，勝過只在一種情況下漂亮。</strong>Canvas 第二頁留著純透明版的四張對照。</p>
   </div>
 
   <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px;">
     <div class="panel">
       <span class="h2">程式落點</span>
       <div class="kv" style="grid-template-columns: 210px 1fr;">
-        <span class="k">ui-store / settings-store</span><span class="v">monthFilter: 'all' | 'event'</span>
-        <span class="k">MonthViewV2.vue</span><span class="v">gridWeeks 的 visible 多一層 filter</span>
+        <span class="k">ui-store.ts</span><span class="v">monthFilter: MonthFilter（不同步，重整回 all）</span>
+        <span class="k">MonthViewV2.vue</span><span class="v">.mv2__topbar + matchesMonthFilter</span>
+        <span class="k">Pv2Poster.vue</span><span class="v">--pv2-poster-pad-top，預設 30px</span>
         <span class="k">新元件</span><span class="v">Pv2TypeSwitch.vue</span>
       </div>
       <div style="height:1px;background:#EFEFEF;"></div>
       <p class="mono" style="margin:0;white-space:pre-wrap;">// MonthViewV2.vue — 唯一的資料改動
 const visible = tasksStore.tasks.filter(
   (t) =&gt; calendarsStore.isVisible(t.calendarId)
-      &amp;&amp; (filter === 'all' || t.type === 'event')
+      &amp;&amp; matchesMonthFilter(t)
 )</p>
       <p class="body" style="margin:0;">日檢視、週檢視、<span class="mono">Pv2DaySheet</span> 不吃這個 filter：一格點下去還是看得到那天的全部內容，否則會有「東西不見了」的錯覺。上面兩張 TASKS 卡同理不受影響 —— 它們本來就只講待辦。</p>
     </div>
@@ -166,7 +170,8 @@ const visible = tasksStore.tasks.filter(
     <div class="panel">
       <span class="h2">還沒解決的</span>
       <ul class="body" style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:9px;">
-        <li>兩段只能「把待辦藏起來」，沒有「只看待辦」。要的話第三段隨時可以加回來，控制元件從 96 變 140。</li>
+        <li>兩段只能「把待辦藏起來」，沒有「只看待辦」。要的話第三段隨時可以加回來：<span class="mono">OPTIONS</span> 多一筆，控制元件從 90 變 132，其他都不用動。</li>
+        <li>高度預算很緊。5 週的月份 + home indicator 時，grid 距離三 lane 的天花板只剩個位數 px；6 週的月份本來就是兩 lane（改動前就是）。真的擠掉了就把 <span class="mono">--pv2-poster-pad-top</span> 再收一點。</li>
         <li>純圖示，每段一定要 <span class="mono">aria-label</span>；<span class="mono">role="group"</span> + <span class="mono">aria-pressed</span>。</li>
         <li>選中只靠粉色滑塊，色差對淺底約 1.2:1。色盲或強光下可能看不出選中哪一段 —— 要補的話，選中那段的圖示 stroke 從 1.7 加到 2.2，用線寬再講一次。</li>
       </ul>

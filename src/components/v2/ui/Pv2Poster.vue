@@ -29,8 +29,11 @@ const emit = defineEmits<{
   align-items: center;
   /* The title now opens close to the top of the frame instead of a fifth of the way down:
      30px, asked for directly, replaces the 96px the reference poster used.
-     Nothing below it: the gap to the cards is theirs to set (.mv2__todos). */
-  padding: 30px 0 0;
+     It is a DEFAULT rather than a fixed value because the month view now floats a control row
+     above the title (.mv2__topbar), which supplies the top gap itself — there the poster only
+     owes its distance to that row. Nothing below it either way: the gap to the cards is theirs
+     to set (.mv2__todos). */
+  padding: var(--pv2-poster-pad-top, 30px) 0 0;
   border: none;
   background: none;
   cursor: pointer;

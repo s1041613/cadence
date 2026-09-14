@@ -136,14 +136,14 @@ const ICONS = {
 }
 const svg = (paths) => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`
 
-const SEG_W = 44, SEG_H = 36, TRACK_PAD = 4
+const SEG_W = 42, SEG_H = 30, TRACK_PAD = 3
 const TRACK_W = SEG_W * 2 + TRACK_PAD * 2   // 96
 const TRACK_H = SEG_H + TRACK_PAD * 2       // 44
 
-function switcher(extraStyle) {
+function switcher(extraStyle, clear = false) {
   const seg = (key, label, hole, handler, pressed) => `
       <button type="button" class="seg" aria-label="${label}" aria-pressed="{{${pressed}}}" onClick="{{${handler}}}" style="color: {{${hole}}}">${svg(ICONS[key])}</button>`
-  return `<div class="sw" role="group" aria-label="月曆顯示內容" style="${extraStyle}">
+  return `<div class="sw${clear ? ' sw--clear' : ''}" role="group" aria-label="月曆顯示內容" style="${extraStyle}">
       <div class="sw__thumb" style="transform: translateX({{thumbX}}px)"></div>${seg('all', '全部', 'cAll', 'pickAll', 'pAll')}${seg('events', '只看行事曆', 'cEvents', 'pickEvents', 'pEvents')}
     </div>`
 }
@@ -212,8 +212,8 @@ const STYLE = `
     .wall__scrim { position: absolute; inset: 0; z-index: -1; background: ${T.canvas}; }
 
     /* Pv2Poster — 9cqw of a 377px container, i.e. 33.93px */
-    .topbar { display: flex; justify-content: flex-end; padding: 6px 16px 0; }
-    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 18px 0 0; }
+    .topbar { display: flex; justify-content: flex-end; padding: 0 16px; }
+    .poster { position: relative; display: flex; flex-direction: column; align-items: center; padding: 10px 0 0; }
     .poster__month { font-weight: 800; font-size: 33.93px; letter-spacing: -0.01em; line-height: 0.9; color: ${T.ink}; }
 
     /* Pv2TodoCard */
@@ -256,29 +256,42 @@ const STYLE = `
             padding: 2px 4px; font: 700 9px/1.2 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em;
             white-space: nowrap; overflow: hidden; }
 
-    /* ── the switcher: clear glass. No white plate — the blur and the lit edge
-         are the whole material, so what shows through is the wallpaper itself. ─ */
+    /* ── the switcher, as shipped: Pv2BottomNav's glass, at capsule scale. The white
+         plate stays because the app's default canvas has no wallpaper to refract. ──── */
     .sw { position: relative; flex: none; display: flex; align-items: center;
           width: ${TRACK_W}px; height: ${TRACK_H}px; padding: ${TRACK_PAD}px; border-radius: 999px;
-          border: 1px solid rgba(255,255,255,.5);
-          background: rgba(255,255,255,.06);
-          backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-          box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
-                      inset 0 -1px 1px rgba(255,255,255,.28),
-                      0 6px 20px rgba(40,38,30,.14); }
+          border: 1px solid rgba(255,255,255,.55);
+          background: linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), ${T.canvas};
+          backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+          box-shadow: 0 0 40px -12px rgba(40,38,30,.44); }
     .sw__thumb { position: absolute; top: ${TRACK_PAD}px; left: ${TRACK_PAD}px;
                  width: ${SEG_W}px; height: ${SEG_H}px; border-radius: 999px;
-                 background: rgba(${T.accentRgb}, .20);
-                 backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
-                 border: 1px solid rgba(255,255,255,.42);
-                 box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14);
+                 background: linear-gradient(160deg, rgba(255,255,255,.55), rgba(255,255,255,.18)), rgba(${T.accentRgb}, .12);
+                 backdrop-filter: blur(14px) saturate(160%); -webkit-backdrop-filter: blur(14px) saturate(160%);
+                 border: 1px solid rgba(255,255,255,.5);
+                 box-shadow: inset 0 1px 2px rgba(255,255,255,.6), 0 2px 8px rgba(0,0,0,.12);
                  transition: transform .42s cubic-bezier(.34,1.56,.64,1); }
     .seg { position: relative; z-index: 1; flex: none; display: grid; place-items: center;
            width: ${SEG_W}px; height: ${SEG_H}px; border: none; background: none; padding: 0; cursor: pointer;
            transition: color .18s cubic-bezier(.22,1,.36,1); }
+    /* The 44px touch target, taken outside the layout box so the capsule stays 36 tall. */
+    .seg::after { content: ''; position: absolute; top: 50%; left: 50%; width: 44px; height: 44px;
+                  transform: translate(-50%, -50%); }
+
+    /* The rejected direction, kept for the comparison boards: no plate at all. */
+    .sw--clear { background: rgba(255,255,255,.06);
+                 backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+                 box-shadow: inset 0 1px 1px rgba(255,255,255,.7),
+                             inset 0 -1px 1px rgba(255,255,255,.28),
+                             0 6px 20px rgba(40,38,30,.14); }
+    .sw--clear .sw__thumb { background: rgba(${T.accentRgb}, .20);
+                            backdrop-filter: blur(10px) saturate(160%); -webkit-backdrop-filter: blur(10px) saturate(160%);
+                            border: 1px solid rgba(255,255,255,.42);
+                            box-shadow: inset 0 1px 1px rgba(255,255,255,.55), 0 2px 8px rgba(40,38,30,.14); }
     @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-      .sw { background: rgba(255,255,255,.72); }
-      .sw__thumb { background: rgba(${T.accentRgb}, .26); }
+      .sw { background: ${T.canvas}; }
+      .sw__thumb { background: rgba(${T.accentRgb}, .16); }
+      .sw--clear { background: rgba(255,255,255,.72); }
     }
     @media (prefers-reduced-motion: reduce) { .sw__thumb { transition: none; } }
 
@@ -379,21 +392,21 @@ ${bodyMarkup}
 /* ── screens ──────────────────────────────────────────────────────────────── */
 // `top` is the chosen placement: floating above the month title, right-aligned —
 // the row iOS Notes puts its folder/Edit buttons on.
-function screen({ scrim, placement, clearNav = false }) {
+function screen({ scrim, placement, clear = false }) {
   const backdrop = scrim === null ? '' : wallpaper(scrim)
-  const topRow = placement === 'top' ? `<div class="topbar">${switcher('')}</div>` : ''
+  const topRow = placement === 'top' ? `<div class="topbar">${switcher('', clear)}</div>` : ''
   const poster = placement === 'beside'
-    ? `<div class="poster"><span class="poster__month">September</span>${switcher('position: absolute; right: 16px; top: 11px;')}</div>`
+    ? `<div class="poster"><span class="poster__month">September</span>${switcher('position: absolute; right: 16px; top: 14px;', clear)}</div>`
     : `<div class="poster"><span class="poster__month">September</span></div>`
   const strip = placement === 'strip'
     ? `<div class="strip">
-        ${switcher('margin-right: 10px; margin-bottom: 6px;')}
+        ${switcher('margin-right: 10px; margin-bottom: 6px;', clear)}
         <div style="width: 1px; height: 22px; margin-right: 10px; margin-bottom: 6px; background: ${T.lineSoft};"></div>
         <div class="strip__row" style="flex: 1; min-width: 0;">${CHIPS}</div>
       </div>`
     : `<div class="strip"><div class="strip__row">${CHIPS}</div></div>`
   const floating = placement === 'bottom'
-    ? switcher(`position: absolute; z-index: 21; left: 50%; margin-left: ${-TRACK_W / 2}px; bottom: 103px;`)
+    ? switcher(`position: absolute; z-index: 21; left: 50%; margin-left: ${-TRACK_W / 2}px; bottom: 103px;`, clear)
     : ''
   return page(`<div class="frame">
     ${backdrop}
@@ -406,15 +419,15 @@ function screen({ scrim, placement, clearNav = false }) {
       ${GRID}
     </div>
     ${floating}
-    ${nav(clearNav)}
+    ${nav(clear)}
   </div>`)
 }
 
 writeFileSync(join(OUT, 'Main.dc.html'), screen({ scrim: 0.35, placement: 'top' }))
-writeFileSync(join(OUT, 'ClearNav.dc.html'), screen({ scrim: 0.35, placement: 'top', clearNav: true }))
 writeFileSync(join(OUT, 'PlainCanvas.dc.html'), screen({ scrim: null, placement: 'top' }))
-writeFileSync(join(OUT, 'ClearNavPlain.dc.html'), screen({ scrim: null, placement: 'top', clearNav: true }))
+writeFileSync(join(OUT, 'ClearNav.dc.html'), screen({ scrim: 0.35, placement: 'top', clear: true }))
+writeFileSync(join(OUT, 'ClearNavPlain.dc.html'), screen({ scrim: null, placement: 'top', clear: true }))
 writeFileSync(join(OUT, 'OptionA.dc.html'), screen({ scrim: 0.35, placement: 'beside' }))
 writeFileSync(join(OUT, 'OptionB.dc.html'), screen({ scrim: 0.35, placement: 'strip' }))
 writeFileSync(join(OUT, 'OptionC.dc.html'), screen({ scrim: 0.35, placement: 'bottom' }))
-console.log('wrote Main, ClearNav, PlainCanvas, ClearNavPlain, OptionA, OptionB, OptionC')
+console.log('wrote 7 artboards')
