@@ -28,7 +28,9 @@ export interface V2Tab {
 // it. This is NOT the default shown order — see DEFAULT_SHOWN_KEYS.
 //
 // key 'draft' → /v2/day and key 'notes' → /v2/notebook are historical mismatches
-// documented in routes.ts. Do not rename them in passing.
+// documented in routes.ts. Do not rename them in passing. Same for key 'setting'
+// against its 'Settings' label/title: the key is what shownTabKeys persists, so
+// renaming it would orphan every saved nav layout.
 export const V2_TAB_CATALOGUE: readonly V2Tab[] = [
   {
     key: 'month',
@@ -65,8 +67,8 @@ export const V2_TAB_CATALOGUE: readonly V2Tab[] = [
   {
     key: 'setting',
     glyph: 's',
-    label: 'setting',
-    title: 'Setting',
+    label: 'settings',
+    title: 'Settings',
     description: '帳號、外觀與通知',
     to: '/v2/settings'
   }
