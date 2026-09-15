@@ -180,3 +180,37 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 **仍未做真機驗收**：截圖是把動畫暫停在指定時間點拍的，實際的節奏感（節點亮起的
 密度、收攏的快慢、與登入頁的銜接）還是要跑起來看。冷啟動路徑建議用 hard reload
 或無痕視窗。
+
+---
+
+# 改版：靜態 icon + 粉色底（2026-09）
+
+網絡動畫換成使用者提供的像素風行事曆 icon（`public/icons/splash-icon.png`），
+靜態顯示、淡入即可，不再做節點/連線的分鏡。
+
+## 改了什麼
+
+| 項目 | 改版前 | 改版後 |
+| --- | --- | --- |
+| 底色 | 深底 `#0b0b0b` | 淺粉 `#fae9ee`（由 `--pv2-accent` #DE6E8C 與白混出的 tint） |
+| 主體 | 內嵌 SVG：12 節點 + 15 連線 + CADENCE 字標 | 單一 `<img>`，128×128，淡入＋輕微 scale-in |
+| 字檔 | `public/fonts/inter-500.woff2`（供字標首繪用）+ `<link rel=preload>` | 移除——沒有文字要畫了 |
+| `MIN_MS` | 2300（配合網絡動畫最後一拍） | 600（只需蓋過 icon 淡入的 0.5s，留一點緩衝） |
+
+兩層保險絲（JS 6s + CSS fail-open 8s）、`.is-out` 淡出、reduced-motion 處理
+（直接跳到淡入完成的狀態）都沒變。
+
+`splash-icon.png` 是使用者提供圖的縮圖＋調色盤壓縮版（400×400 → 384×384、
+128 色），從原始 1.5MB 壓到 ~96KB——這張圖跟 JS bundle 搶頻寬，压太大會拖慢
+它自己的淡入。
+
+## 待確認
+
+- 這次只換了 `index.html` 裡的進場動畫，**沒有**動到實際的 app icon／favicon／
+  PWA manifest（`public/icons/favicon-*.png`、`apple-touch-icon-180x180.png`、
+  `manifest.json` 的 icons 陣列）。如果這個新設計也要變成正式 app icon，
+  需要另外產出各尺寸並替換。
+- 背景色 `#fae9ee` 是從 `--pv2-accent` 推的 tint，不是直接採樣使用者圖片
+  （圖片本身的底色更接近純白 `#fefafa`）。如果覺得不夠「粉」或太粉，這行在
+  `index.html` 的 `#cd-splash { background: ... }` 改一個值就好。
+- 未做真機驗收。

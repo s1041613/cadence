@@ -3,23 +3,23 @@ import { useAuthStore } from '@/stores/auth-store'
 import { useTasksStore } from '@/stores/tasks-store'
 
 /*
- * Teardown for the launch animation. The animation itself lives in index.html as
- * pure CSS (the page CSP is script-src 'self', so no inline script can run there);
- * this only decides when it may be dismissed and removes the element.
+ * Teardown for the launch splash. The splash itself lives in index.html as pure
+ * CSS/markup (the page CSP is script-src 'self', so no inline script can run
+ * there); this only decides when it may be dismissed and removes the element.
  *
  * Dismiss conditions:
  *   1. Auth has resolved, and either the user is signed out (going straight to the
  *      sign-in page) or the tasks store has finished loading.
- *   2. Shown for at least MIN_MS, so the brand beat is never cut off mid-play.
+ *   2. Shown for at least MIN_MS, so the icon's fade-in is never cut off mid-play.
  *   3. At most MAX_MS — a slow network must never trap the user behind the splash.
  *
  * Once dismissed, the per-page "loading" states no longer appear on the cold-start
  * path: the data is already there.
  */
 
-// MIN_MS matches the end of the animation's last beat (CADENCE settles at 2.28s),
-// so the brand moment is never cut off mid-play.
-const MIN_MS = 2_300
+// MIN_MS covers the icon's own fade-in (index.html's cd-splash-icon keyframe
+// finishes at .5s) plus a small buffer, so it never flashes and vanishes.
+const MIN_MS = 600
 const MAX_MS = 6_000
 const FADE_MS = 400
 
