@@ -224,7 +224,7 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 
 ## 點是怎麼來的
 
-`docs/splash-animation/gen-dots.mjs`。用 headless Chromium 把真正的 Inter 500
+`scripts/gen-splash-dots.mjs`。用 headless Chromium 把真正的 Inter 500
 畫到 canvas 上，依 `STEP` 的格距取樣，再**只留邊界格**——實心的點陣塊看起來像
 螢幕截圖，輪廓才看得出是畫出來的，而且只要三分之一的點。
 

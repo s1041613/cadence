@@ -33,8 +33,8 @@
          fades, so there is no dark-to-light jump on a cold start.
 
          The dots are static SVG, sampled from the real Inter 500 outlines ahead of
-         time by docs/splash-animation/gen-dots.mjs. Because the letters are drawn
-         rather than typeset, the cold-start path loads no font at all.
+         time by scripts/gen-splash-dots.mjs. Because the letters are drawn rather
+         than typeset, the cold-start path loads no font at all.
 
          The CSP above is script-src 'self', so no inline <script> may run here;
          style-src allows 'unsafe-inline', so the animation is written as CSS
@@ -86,7 +86,8 @@
         fill: #A8566E;
       }
 
-      /* One --d per column, inherited from the wrapping <g> — see gen-dots.mjs. */
+      /* One --d per column, inherited from the wrapping <g> —
+         see scripts/gen-splash-dots.mjs. */
       .cd-splash__dots circle {
         opacity: 0;
         /* Scale each dot about its own centre rather than the viewBox origin */
