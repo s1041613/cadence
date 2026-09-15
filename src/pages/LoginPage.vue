@@ -1,8 +1,19 @@
 <template>
   <div class="login">
     <div class="login__frame">
-      <!-- HERO — pale blue-grey gradient, script wordmark -->
+      <!-- HERO — rotating month-photo carousel behind the script wordmark -->
       <div class="login__hero">
+        <div class="login__hero-carousel" aria-hidden="true">
+          <img
+            v-for="(src, i) in heroPhotos"
+            :key="src"
+            :src="src"
+            alt=""
+            class="login__hero-photo"
+            :class="{ 'login__hero-photo--active': i === activePhotoIndex }"
+          />
+          <div class="login__hero-scrim"></div>
+        </div>
         <div class="login__wordmark">Cadence</div>
         <div class="login__subtitle">your handwritten week</div>
       </div>
@@ -46,12 +57,30 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth-store'
+import { defaultMonthPhotoPaths } from '@/utils/public-assets'
 
 const auth = useAuthStore()
 const router = useRouter()
+
+// Jan → Dec default month photos, cross-fading one at a time behind the wordmark. No user is
+// signed in yet on this page, so there's no monthlyPhotos upload to prefer — always the defaults.
+const heroPhotos = Array.from({ length: 12 }, (_, i) => defaultMonthPhotoPaths(i)[0]!)
+const activePhotoIndex = ref(0)
+let carouselTimer: ReturnType<typeof setInterval> | undefined
+
+onMounted(() => {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  carouselTimer = setInterval(() => {
+    activePhotoIndex.value = (activePhotoIndex.value + 1) % heroPhotos.length
+  }, 5000)
+})
+
+onUnmounted(() => {
+  clearInterval(carouselTimer)
+})
 
 watch(
   () => auth.isSignedIn,
@@ -98,7 +127,9 @@ function signInWithApple(): void {
 /* ---------- Hero ---------- */
 .login__hero {
   flex: 7;
-  background: linear-gradient(180deg, #e8edf0 0%, #eef2f4 100%);
+  position: relative;
+  overflow: hidden;
+  background: #e8edf0; /* shows only while the first photo is still loading */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -106,22 +137,53 @@ function signInWithApple(): void {
   padding-bottom: 30px;
 }
 
+.login__hero-carousel {
+  position: absolute;
+  inset: 0;
+}
+
+.login__hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.4s var(--cd-ease-standard);
+}
+
+.login__hero-photo--active {
+  opacity: 1;
+}
+
+/* darkens the lower half so the wordmark stays legible over any month's photo */
+.login__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20, 22, 26, 0.1) 0%, rgba(20, 22, 26, 0.5) 100%);
+}
+
 /* Instrument Serif italic, the same face as the month poster headline — the wordmark and
    the month title are the two places the brand serif appears. --cd-font-script resolved to
-   Zen Kaku, so the mark read as plain UI sans. */
+   Zen Kaku, so the mark read as plain UI sans. Light + shadowed now that it sits over a photo
+   instead of the old pale gradient. */
 .login__wordmark {
+  position: relative;
   font-family: var(--cd-font-serif);
   font-style: italic;
   font-weight: 400;
   font-size: var(--cd-fs-46);
   line-height: 1;
-  color: var(--cd-ink);
+  color: #ffffff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
 }
 
 .login__subtitle {
+  position: relative;
   margin-top: 10px;
   font: 400 var(--cd-fs-15) var(--cd-font-ui);
-  color: var(--cd-ink-muted);
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* ---------- Panel ---------- */
