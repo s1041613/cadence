@@ -1,13 +1,33 @@
 <template>
   <div class="login">
     <div class="login__frame">
-      <!-- HERO — pale blue-grey gradient, script wordmark -->
-      <div class="login__hero">
-        <div class="login__wordmark">Cadence</div>
-        <div class="login__subtitle">your handwritten week</div>
+      <!-- Decorative sparkles/marks scattered over the hero. Purely ornamental — hidden from a11y tree. -->
+      <div class="login__decor" aria-hidden="true">
+        <svg class="login__mark login__mark--sparkle-a" viewBox="0 0 24 24" fill="none">
+          <path d="M12 1c0 5 2 8 7 9-5 1-7 4-7 9-0-5-2-8-7-9 5-1 7-4 7-9Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+        </svg>
+        <svg class="login__mark login__mark--sparkle-b" viewBox="0 0 24 24" fill="none">
+          <path d="M12 1c0 5 2 8 7 9-5 1-7 4-7 9-0-5-2-8-7-9 5-1 7-4 7-9Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+        </svg>
+        <svg class="login__mark login__mark--plus-a" viewBox="0 0 24 24">
+          <path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <div class="login__mark login__mark--pixel">
+          <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="login__blob"></div>
+        <div class="login__ticks">
+          <span class="login__tick login__tick--a"></span>
+          <span class="login__tick login__tick--b"></span>
+        </div>
       </div>
 
-      <!-- PANEL — warm paper surface, sign-in affordances -->
+      <!-- HERO — graph-paper ground, cross-stitched wordmark -->
+      <div class="login__hero">
+        <img class="login__wordmark" src="@/assets/login-wordmark.svg" alt="Cadence" />
+      </div>
+
+      <!-- PANEL — floating card, sign-in affordances -->
       <div class="login__panel">
         <button
           type="button"
@@ -30,8 +50,8 @@
 
         <button type="button" class="login__oauth-btn login__oauth-btn--apple" @click="signInWithApple">
           <span class="login__oauth-icon" aria-hidden="true">
-            <!-- Apple logo — monochrome, unmodified per brand guidelines -->
-            <svg width="17" height="20" viewBox="0 0 17 20" fill="#FFFFFF">
+            <!-- Apple logo — monochrome, unmodified per brand guidelines; recolored via currentColor for the tinted lockup -->
+            <svg width="17" height="20" viewBox="0 0 17 20" fill="currentColor">
               <path d="M14.06 15.53c-.28.64-.6 1.23-.98 1.78-.52.73-.94 1.24-1.27 1.52-.5.46-1.05.7-1.63.71-.42 0-.92-.12-1.5-.36-.58-.24-1.12-.36-1.6-.36-.5 0-1.05.12-1.66.36-.6.24-1.1.37-1.46.38-.56.02-1.12-.22-1.68-.73-.36-.3-.8-.82-1.32-1.57-.56-.8-1.02-1.72-1.38-2.78C.7 13.57.5 12.5.5 11.46c0-1.2.26-2.23.78-3.1a4.6 4.6 0 0 1 1.63-1.65 4.4 4.4 0 0 1 2.2-.62c.44 0 1.02.14 1.75.4.72.27 1.19.4 1.4.4.15 0 .67-.16 1.55-.47.83-.29 1.53-.41 2.1-.36 1.55.13 2.72.74 3.5 1.84-1.39.84-2.07 2.02-2.06 3.53.01 1.18.44 2.16 1.28 2.94.38.36.8.64 1.28.84-.1.3-.21.59-.33.87zM11.2.4c0 .9-.33 1.74-.98 2.51-.79.92-1.74 1.45-2.77 1.37a2.8 2.8 0 0 1-.02-.34c0-.86.38-1.78 1.05-2.53.33-.38.76-.7 1.28-.95.52-.25 1.01-.39 1.47-.41.01.12.02.24.02.35z" />
             </svg>
           </span>
@@ -40,6 +60,12 @@
         </button>
 
         <p v-if="auth.error" class="login__error">{{ auth.error }}</p>
+      </div>
+
+      <!-- FOOTER — tagline over the graph paper; the corner blob lives in .login__decor
+           so it anchors to the frame's own corner instead of the footer's (short) box -->
+      <div class="login__footer">
+        <p class="login__tagline">Plan <span class="login__tagline-dot">✦</span> Focus <span class="login__tagline-dot">✦</span> A kinder you</p>
       </div>
     </div>
   </div>
@@ -80,12 +106,17 @@ function signInWithApple(): void {
 }
 
 .login__frame {
+  position: relative;
   width: 100%;
   max-width: 420px;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background-color: #fbf0ed;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(199, 108, 122, .14) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(199, 108, 122, .14) 0 1px, transparent 1px 28px);
 }
 
 /* 桌面才做 letterbox 框；手機一律滿版（Pro Max 956pt 若被 cap 在 900 會留永久色帶） */
@@ -95,45 +126,128 @@ function signInWithApple(): void {
   }
 }
 
+/* ---------- Decor: sparkles + plus marks scattered over the hero ---------- */
+.login__decor {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.login__mark {
+  position: absolute;
+}
+
+.login__mark--sparkle-a {
+  top: 11%;
+  left: 17%;
+  width: 15px;
+  height: 15px;
+  color: #d98298;
+}
+
+.login__mark--sparkle-b {
+  top: 18%;
+  left: 7%;
+  width: 28px;
+  height: 28px;
+  color: #d98298;
+}
+
+.login__mark--plus-a {
+  top: 25%;
+  left: 15%;
+  width: 13px;
+  height: 13px;
+  color: #2e2a28;
+}
+
+/* A tiny stepped 2x2 pixel cluster, echoing the wordmark's stitch texture. */
+.login__mark--pixel {
+  top: 46%;
+  right: 8%;
+  width: 14px;
+  height: 14px;
+}
+
+.login__mark--pixel span {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #d98298;
+}
+
+.login__mark--pixel span:nth-child(1) { top: 0; left: 4px; }
+.login__mark--pixel span:nth-child(2) { top: 4px; left: 0; }
+.login__mark--pixel span:nth-child(3) { top: 4px; left: 8px; }
+.login__mark--pixel span:nth-child(4) { top: 8px; left: 4px; }
+
+.login__blob {
+  position: absolute;
+  left: -70px;
+  bottom: -90px;
+  width: 240px;
+  height: 240px;
+  border-radius: 58% 42% 55% 45% / 55% 45% 58% 42%;
+  background: #f3cdd1;
+  opacity: .9;
+}
+
+.login__ticks {
+  position: absolute;
+  left: 22px;
+  bottom: 46px;
+}
+
+.login__tick {
+  position: absolute;
+  width: 3px;
+  height: 16px;
+  border-radius: var(--cd-radius-pill);
+  background: #d98298;
+}
+
+.login__tick--a {
+  transform: rotate(-22deg);
+}
+
+.login__tick--b {
+  left: 12px;
+  top: -4px;
+  transform: rotate(-22deg);
+}
+
 /* ---------- Hero ---------- */
 .login__hero {
+  position: relative;
+  z-index: 1;
   flex: 7;
-  background: linear-gradient(180deg, #e8edf0 0%, #eef2f4 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 30px;
+  padding-bottom: 26px;
 }
 
-/* Instrument Serif italic, the same face as the month poster headline — the wordmark and
-   the month title are the two places the brand serif appears. --cd-font-script resolved to
-   Zen Kaku, so the mark read as plain UI sans. */
+/* Cross-stitched lockup (stars + "Cadence" + flourish) — generated from the same
+   star/flourish paths this page used to draw live, rasterized to a stitch grid and
+   redrawn as X-stitches. A live web font could not reproduce the fabric texture, so
+   this one lockup ships as a static asset (src/assets/login-wordmark.svg); every
+   other mark on this page stays plain vector. */
 .login__wordmark {
-  font-family: var(--cd-font-serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: var(--cd-fs-46);
-  line-height: 1;
-  color: var(--cd-ink);
-}
-
-.login__subtitle {
-  margin-top: 10px;
-  font: 400 var(--cd-fs-15) var(--cd-font-ui);
-  color: var(--cd-ink-muted);
+  width: min(78%, 300px);
+  height: auto;
 }
 
 /* ---------- Panel ---------- */
 .login__panel {
-  flex: 3;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 26px 22px 22px;
+  border-radius: 32px 32px 0 0;
   background: var(--cd-surface-raised);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Real bottom padding now that the fineprint was removed — it used to be the only thing
-     keeping the Apple button off the panel's edge. */
-  padding: 22px 24px;
+  box-shadow: 0 -10px 28px -14px rgba(46, 30, 26, .2);
 }
 
 /* ---------- OAuth buttons ---------- */
@@ -145,8 +259,9 @@ function signInWithApple(): void {
   padding: 15px 18px;
   margin-bottom: 12px;
   font: 700 var(--cd-fs-15) var(--cd-font-ui);
-  border: 1px solid transparent;
+  border: none;
   cursor: pointer;
+  box-shadow: 0 8px 16px -8px rgba(46, 30, 26, .22);
   transition: background var(--cd-duration-micro-3) var(--cd-ease-standard),
     transform var(--cd-duration-micro-1) var(--cd-ease-standard);
 }
@@ -180,12 +295,9 @@ function signInWithApple(): void {
   width: 20px;
 }
 
-/* Level 1 (flat): no shadow. The border already separates the white button from the
-   page, so the shadow was decoration on something that does not float. */
 .login__oauth-btn--google {
   background: #ffffff;
   color: var(--cd-ink);
-  border-color: var(--cd-control-off);
 }
 
 .login__oauth-btn--google:hover {
@@ -193,25 +305,50 @@ function signInWithApple(): void {
 }
 
 .login__oauth-btn--apple {
-  background: #1a1a1a;
-  color: #ffffff;
-  border-color: #1a1a1a;
+  background: #e7c9c7;
+  color: #3a2a28;
 }
 
 .login__oauth-btn--apple:hover {
-  background: #262626;
+  background: #e0bcba;
 }
 
 .login__oauth-btn--apple .login__oauth-icon svg {
   margin-top: -2px;
 }
 
-/* ---------- Fine print + home indicator ---------- */
 .login__error {
   width: 100%;
   margin: 10px 0 0;
   font: 400 var(--cd-fs-12) var(--cd-font-ui);
   color: #9a3328;
   text-align: center;
+}
+
+/* ---------- Footer: tagline over the graph paper ---------- */
+.login__footer {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 24px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.login__tagline {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font: 600 var(--cd-fs-11) var(--cd-font-ui);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--cd-ink-muted);
+  text-align: center;
+}
+
+.login__tagline-dot {
+  color: #d98298;
+  letter-spacing: 0;
 }
 </style>
