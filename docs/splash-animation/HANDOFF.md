@@ -180,3 +180,57 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 **仍未做真機驗收**：截圖是把動畫暫停在指定時間點拍的，實際的節奏感（節點亮起的
 密度、收攏的快慢、與登入頁的銜接）還是要跑起來看。冷啟動路徑建議用 hard reload
 或無痕視窗。
+
+---
+
+# 改版：靜態開場（2026-09）
+
+「開場背景用專案裡的這張圖，靜態顯示就好。」
+動畫全部拿掉，開場改成一張不會動的畫面：app 標記 `public/icons/favicon-512x512.png`
+置中，底色用同一張圖角落取樣出來的 `#fcf7f6`，兩者之間看不出接縫。
+
+## 改了什麼
+
+| 檔案 | 動作 |
+| --- | --- |
+| `index.html` | 移除 SVG 網絡 markup、節點／連線／收攏／浮起／字距所有 keyframes；`#cd-splash` 換成淺底＋`.cd-splash__stage`（圖 + CADENCE）；加 `<link rel="preload" as="image">` |
+| `src/composables/use-app-splash.ts` | `MIN_MS` 2300 → 700 |
+| `src/App.vue` | 只有註解用字（animation → screen） |
+
+## 版面
+
+| 項目 | 值 |
+| --- | --- |
+| 底色 | `#fcf7f6`（圖片角落的實際像素值） |
+| 圖 | `min(58vmin, 260px)` 正方形，`background ... center / contain` |
+| 位置 | 整組 `translateY(-4vh)`，圖在視覺重心、字在下方 |
+| 字 | CADENCE，Inter 500 / 17px / `letter-spacing .28em` / `#8a807c` |
+| 收尾 | 只有 opacity 淡出 400ms，與改版前相同 |
+
+## 沒動到的部分
+
+- **兩層保險絲**原封不動：JS 6s（`MAX_MS`）、CSS fail-open 8s。fail-open 是容器上
+  唯一剩下的 `animation`，它是安全計時器不是動態效果
+- **收尾條件**不變：`auth.isReady && (!auth.isSignedIn || !tasks.isLoading)`
+- CSP、PWA meta、icon 連結、字檔 preload 都沒碰
+
+`prefers-reduced-motion` 區塊直接刪掉了 —— 現在沒有任何東西會動，沒有需要關掉的效果。
+
+`MIN_MS` 從 2300 降到 700：原本那個數字是為了讓動畫最後一拍播完，靜態畫面沒有
+「播完」這回事，只需要一個下限避免熱啟動時圖一閃而過。
+
+## 驗證
+
+| 項目 | 結果 |
+| --- | --- |
+| `npm run typecheck` | 通過 |
+| `npm test` | 60 檔 974 測試全過 |
+| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/icons/favicon-512x512.png` 已出貨 |
+| Playwright 截圖 | 393×852 與 1280×800 兩種視窗，圖與字置中、底色無接縫 |
+
+**仍未做真機驗收。** 另外兩件值得注意的：
+
+- 圖是 318 KB 的 PNG。已用 `<link rel="preload" as="image" fetchpriority="high">`
+  拉前，但慢速網路上仍可能先看到純色底、圖片稍後才進來（底色相同，不會閃白）
+- splash 底色 `#fcf7f6` 與 app 紙色 `#fafaf9` 不完全一樣，淡出時會有極輕微的色偏。
+  要完全無縫就得二選一：改 app 紙色，或替圖片換底
