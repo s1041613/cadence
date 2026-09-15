@@ -8,7 +8,12 @@
       :aria-label="ariaLabel"
       @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
     >
-      <option v-for="option in options" :key="option.value" :value="option.value">
+      <option
+        v-for="option in options"
+        :key="option.value"
+        :value="option.value"
+        :disabled="option.disabled"
+      >
         {{ option.label }}
       </option>
     </select>
@@ -40,6 +45,9 @@ import Pv2Chevron from './Pv2Chevron.vue'
 export interface Pv2SelectOption {
   value: string
   label: string
+  /** Listed but not choosable — the Time pane uses it to show the timezones that are
+   *  coming without letting one be picked. Absent means selectable, as before. */
+  disabled?: boolean
 }
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
 <template>
   <!--
     v2 設定 root 主選單（照設計稿）。Account 卡、PREFERENCES 列、Privacy/Log out、頁尾。
-    子頁（Calendars/Time/…）尚未實作 → 列可見但不可點（Zoe：先只做 root）。
+    PREFERENCES 四個子頁都已實作；Privacy 仍是佔位，列可見但不可點。
     Log out 重用 auth-store.signOut()。
   -->
   <div class="pv2-set">
@@ -18,7 +18,7 @@
         <span class="pv2-set__chev" aria-hidden="true">›</span>
       </button>
 
-      <!-- PREFERENCES：Customization 已實作可點；其餘子頁尚未實作、不可點 -->
+      <!-- PREFERENCES：四列皆已實作可點 -->
       <p class="pv2-set__group-label">Preferences</p>
       <div class="pv2-set__card">
         <button
@@ -58,9 +58,9 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth-store'
 
-// Customization 與 Notifications 可導航；其餘子頁尚未實作
+// Calendars / Time / Customization / Notifications 皆已實作；Privacy 尚未
 const emit = defineEmits<{
-  open: [pane: 'customization' | 'notifications']
+  open: [pane: NavPane]
 }>()
 
 const auth = useAuthStore()
@@ -87,9 +87,9 @@ const ICON_PRIVACY =
 const ICON_LOGOUT =
   '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c56a5e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 H5 a2 2 0 0 0-2 2 v10 a2 2 0 0 0 2 2 h4 M15 8 l4 4-4 4 M19 12 H9"/></svg>'
 
-// enabled 的子頁才可點；目前 Customization 與 Notifications 已實作。
+// enabled 的子頁才可點；Privacy 之外的 PREFERENCES 子頁都已實作。
 // key 用字面量聯集，讓可導航列 emit 出的型別對得上 emit('open', ...) 的簽章。
-type NavPane = 'customization' | 'notifications'
+type NavPane = 'calendars' | 'time' | 'customization' | 'notifications'
 interface PrefRow {
   key: string
   label: string
@@ -98,8 +98,8 @@ interface PrefRow {
   pane?: NavPane
 }
 const prefRows: PrefRow[] = [
-  { key: 'calendars', label: 'Calendars', icon: ICON_CAL, enabled: false },
-  { key: 'time', label: 'Time', icon: ICON_TIME, enabled: false },
+  { key: 'calendars', label: 'Calendars', icon: ICON_CAL, enabled: true, pane: 'calendars' },
+  { key: 'time', label: 'Time', icon: ICON_TIME, enabled: true, pane: 'time' },
   { key: 'customization', label: 'Customization', icon: ICON_CUSTOM, enabled: true, pane: 'customization' },
   { key: 'notifications', label: 'Notifications', icon: ICON_NOTIF, enabled: true, pane: 'notifications' }
 ]

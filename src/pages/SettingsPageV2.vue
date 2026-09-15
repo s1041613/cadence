@@ -1,13 +1,29 @@
 <template>
   <!--
     v2 settings shell. On desktop the 393px phone frame is centred (as in MonthPageV2).
-    Panes: root menu + Customization / Notifications, with Tab bar nested under
-    Customization. Switching is local state; the bottom nav is the shared component.
+    Panes: root menu + Calendars / Time / Customization / Notifications, with Tab bar
+    nested under Customization and Calendar detail nested under Calendars.
+    Switching is local state; the bottom nav is the shared component.
   -->
   <div class="sp2" :class="{ 'sp2--desktop': isDesktop }">
     <div class="sp2__frame">
       <div class="sp2__content">
         <Pv2SettingsRoot v-if="pane === 'root'" @open="pane = $event" />
+        <Pv2SettingsCalendars
+          v-else-if="pane === 'calendars'"
+          @back="pane = 'root'"
+          @open-detail="openCalendarDetail"
+        />
+        <!-- Calendar detail is entered from Calendars, so Back returns there, not to root.
+             `key` forces a fresh component (and so a fresh draft + member fetch) when the
+             same pane is re-entered for a different calendar. -->
+        <Pv2SettingsCalendarDetail
+          v-else-if="pane === 'calendarDetail'"
+          :key="detailCalendarId ?? 'new'"
+          :calendar-id="detailCalendarId"
+          @back="pane = 'calendars'"
+        />
+        <Pv2SettingsTime v-else-if="pane === 'time'" @back="pane = 'root'" />
         <Pv2SettingsCustomization
           v-else-if="pane === 'customization'"
           @back="pane = 'root'"
@@ -27,14 +43,27 @@ import { ref } from 'vue'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import Pv2SettingsRoot from '@/components/v2/settings/Pv2SettingsRoot.vue'
+import Pv2SettingsCalendars from '@/components/v2/settings/Pv2SettingsCalendars.vue'
+import Pv2SettingsCalendarDetail from '@/components/v2/settings/Pv2SettingsCalendarDetail.vue'
+import Pv2SettingsTime from '@/components/v2/settings/Pv2SettingsTime.vue'
 import Pv2SettingsCustomization from '@/components/v2/settings/Pv2SettingsCustomization.vue'
 import Pv2SettingsTabBar from '@/components/v2/settings/Pv2SettingsTabBar.vue'
 import Pv2SettingsNotifications from '@/components/v2/settings/Pv2SettingsNotifications.vue'
 
 const { isDesktop } = useBreakpoint()
 
-// root, customization, tabs, notifications; the remaining sub-pages are unimplemented
-const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
+// Every pane but Privacy, which is still a placeholder row on the root menu
+const pane = ref<
+  'root' | 'calendars' | 'calendarDetail' | 'time' | 'customization' | 'tabs' | 'notifications'
+>('root')
+
+// Which calendar the detail pane is editing; null is the "add calendar" flow.
+const detailCalendarId = ref<string | null>(null)
+
+function openCalendarDetail(id: string | null): void {
+  detailCalendarId.value = id
+  pane.value = 'calendarDetail'
+}
 </script>
 
 <style scoped>
