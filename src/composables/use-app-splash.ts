@@ -17,9 +17,10 @@ import { useTasksStore } from '@/stores/tasks-store'
  * path: the data is already there.
  */
 
-// MIN_MS matches the end of the animation's last beat (CADENCE settles at 2.28s),
-// so the brand moment is never cut off mid-play.
-const MIN_MS = 2_300
+// MIN_MS matches the end of the animation's last beat (the sweep reaches the final
+// column at 1.43s and its dots settle 0.42s later), so the brand moment is never cut
+// off mid-play.
+const MIN_MS = 2_000
 const MAX_MS = 6_000
 const FADE_MS = 400
 

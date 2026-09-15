@@ -2,10 +2,10 @@
 
 分支 `feat/splash-animation`，來源設計 [Web Splash.dc.html](https://claude.ai/design/p/6b2e6720-08d2-442d-9737-1147150093ff?file=Web+Splash.dc.html)。
 
-> **2026-08 改版：** 動畫內容已換成新的「思考的網絡」稿
-> （[CADENCE Mobile 畫面設計](https://claude.ai/code/artifact/c7896a64-815c-434d-bcba-bfed5888f6ef)）。
+> **2026-09 改版：** 動畫內容已換成「點陣字」稿——CADENCE 以點陣呈現，
+> 由一條 playhead 從左掃到右逐欄點亮。這也讓 splash 不再需要字檔。
 > 下面的**做法、兩層保險絲、收尾條件**都沒變，只有畫面與時間軸換了 ——
-> 見文末〈改版：思考的網絡〉。
+> 見文末〈改版：點陣字〉。中間那一版見〈改版：思考的網絡〉。
 
 ## 問題
 
@@ -180,3 +180,83 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 **仍未做真機驗收**：截圖是把動畫暫停在指定時間點拍的，實際的節奏感（節點亮起的
 密度、收攏的快慢、與登入頁的銜接）還是要跑起來看。冷啟動路徑建議用 hard reload
 或無痕視窗。
+
+---
+
+# 改版：點陣字（2026-09）
+
+參考的呈現方式：把字**點陣化**——只保留輪廓經過的格子，每格畫一顆等大的圓點。
+不是網點（halftone，靠點的大小表現濃淡），這裡的點只有有／無兩種狀態，所以
+讀起來像點陣顯示器或燙鑽稿，而不是一張低解析度的圖。
+
+動畫本身就是產品名字的意思：一條 playhead 由左往右掃過，掃到哪一欄，那一欄的
+點就亮起來——CADENCE 是被節拍敲出來的，不是淡入的。
+
+## 新時間軸
+
+| 時間 | 畫面 |
+| --- | --- |
+| 0.00s | 畫面即為淺玫瑰底 `#FBEDF1` |
+| 0.28s | playhead 由最左欄起步，第一欄的點彈入 |
+| 0.28→1.43s | 41 欄依序亮起（每欄間隔 28ms），playhead 等速同行 |
+| 1.43s | playhead 走完並淡出，最後一欄開始彈入 |
+| 1.85s | 最後一欄落定，字完整 |
+| ≥2.00s | 資料到齊即淡出（opacity 0，400ms） |
+| 6.00s / 8.00s | 兩層保險絲，與前兩版相同 |
+
+## 實作差異
+
+| 項目 | 思考的網絡 | 點陣字 |
+| --- | --- | --- |
+| 底色 | 深底 `#0b0b0b` | 淺玫瑰 `#FBEDF1`，點 `#A8566E`（對比 4.4:1） |
+| 主體 | 12 節點 + 15 連線，收攏後換成文字 | 167 顆點組成的 CADENCE，無第二段 |
+| 字 | Inter 500 17px 實際排版 | 沒有字：字形在建置前就取樣成點了 |
+| 字檔 | `public/fonts/inter-500.woff2`（22 KB，preload） | **已移除**——冷啟動路徑上不再載任何字檔 |
+| `index.html` | 9.9 KB | 13.2 KB（建置後 10.3 KB，gzip 2.8 KB） |
+| `MIN_MS` | 2300 | 2000 |
+
+深色開場拿掉了。前一版是刻意的（那三秒的「意義感」），但它換來一次
+深→淺的跳動：動畫收掉的瞬間畫面從 `#0b0b0b` 翻成 app 的白。玫瑰底和
+`--pv2-accent` 同一個色族，收掉時只是變淡，沒有那一下。
+**這個決定最大的風險是**：淺底的品牌感比深底弱，開場少了一點份量；
+要換回去只需改 `#cd-splash` 的 `background` 與 `.cd-splash__dots` 的 `fill`，
+動畫本身不用動。
+
+## 點是怎麼來的
+
+`docs/splash-animation/gen-dots.mjs`。用 headless Chromium 把真正的 Inter 500
+畫到 canvas 上，依 `STEP` 的格距取樣，再**只留邊界格**——實心的點陣塊看起來像
+螢幕截圖，輪廓才看得出是畫出來的，而且只要三分之一的點。
+
+`STEP` 是被手機決定的，不是被美感決定的：字在 393px 寬的螢幕上約佔 330px，
+`STEP = 13` 讓每顆點約 6px，還讀得出是「點」。取樣再細（9 在桌機上輪廓更漂亮）
+手機上每顆點不到 4px，點陣的質感就消失了，只剩一行糊掉的字——那就失去意義了。
+
+每一欄共用一個 `--d`（自訂屬性會繼承），所以 markup 裡是 41 個延遲值而不是 167 個。
+playhead 的行程 `--travel` 由 script 連同 markup 一起輸出，keyframes 讀回來用，
+換了 `STEP` 之後兩邊不會對不上。
+
+script 需要 playwright，而 playwright 不是專案相依。輸出已經 checked in，
+要重跑才需要 `npm i -D playwright`。
+
+## 驗證（點陣字改版）
+
+| 項目 | 結果 |
+| --- | --- |
+| `npm run typecheck` | 通過 |
+| `npm test` | 60 檔 974 測試全過 |
+| `npm run build` | 成功（spa） |
+| 產出檢查 | `dist/spa/index.html` 含 `cd-splash__matrix` / `__dots` / `__beat`，無殘留 `<%=`；`dist/spa/fonts/` 已不存在；app 本身的 Inter 仍由 bundle 出貨 |
+| 真 CSP 下播放 | 把 `dist/spa` 用 http 服起來跑 Playwright，393×852 逐拍截圖：動畫正常播完、splash 正常收掉，沒有 CSP 擋到 splash 的任何資源 |
+| reduced-motion | 直接顯示完成狀態，playhead 不出現 |
+
+**仍未做真機驗收**：截圖是照時間點拍的，實際的節奏感（掃過的快慢、點彈入的手感、
+與登入頁的銜接）還是要跑起來看。
+
+## 順帶發現，不在這次範圍
+
+`dist/spa` 在真 CSP 下 console 會噴一串 `Refused to load the font 'data:font/woff2;...'`：
+Vite 把小的 Noto Sans TC 子集內聯成 data: URI，而 `index.html` 的 CSP 是
+`default-src 'self'` 且沒有設 `font-src`，所以中文字檔被擋掉、fallback 到系統字。
+這是既有問題，與這次改版無關（splash 自己已經不用字檔了），但值得另開一張處理——
+補 `font-src 'self' data:`，或把 `assetsInlineLimit` 調到 0。
