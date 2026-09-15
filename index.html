@@ -27,8 +27,10 @@
     <link rel="icon" type="image/ico" href="favicon.ico">
 
     <!-- ---------- Launch splash (pure CSS) ----------
-         Static app icon on a pale rose ground — the app underneath keeps its own
-         paper colour, so dismissing the splash returns to #fafaf9.
+         Static app icon on a ground colour matched to the icon's own tile fill
+         (#fbf6f4), so the rounded-square edge disappears and only the linework
+         reads as floating on the page. The app underneath keeps its own paper
+         colour, so dismissing the splash returns to #fafaf9.
 
          The CSP above is script-src 'self', so no inline <script> may run here;
          style-src allows 'unsafe-inline', so the fade-in is written as a CSS
@@ -42,7 +44,7 @@
         z-index: 9999;
         display: grid;
         place-items: center;
-        background: #fae9ee;
+        background: #fbf6f4;
         transition: opacity .4s cubic-bezier(.22, 1, .36, 1);
         /* Fail-open. use-app-splash.ts only runs once App.vue mounts, and the auth
            boot file awaits getSession() before that — so a hung or very slow auth

@@ -192,7 +192,7 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 
 | 項目 | 改版前 | 改版後 |
 | --- | --- | --- |
-| 底色 | 深底 `#0b0b0b` | 淺粉 `#fae9ee`（由 `--pv2-accent` #DE6E8C 與白混出的 tint） |
+| 底色 | 深底 `#0b0b0b` | `#fbf6f4`——直接採樣 icon 圖磚本身的底色，不是憑空選粉色 |
 | 主體 | 內嵌 SVG：12 節點 + 15 連線 + CADENCE 字標 | 單一 `<img>`，128×128，淡入＋輕微 scale-in |
 | 字檔 | `public/fonts/inter-500.woff2`（供字標首繪用）+ `<link rel=preload>` | 移除——沒有文字要畫了 |
 | `MIN_MS` | 2300（配合網絡動畫最後一拍） | 600（只需蓋過 icon 淡入的 0.5s，留一點緩衝） |
@@ -200,9 +200,14 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 兩層保險絲（JS 6s + CSS fail-open 8s）、`.is-out` 淡出、reduced-motion 處理
 （直接跳到淡入完成的狀態）都沒變。
 
-`splash-icon.png` 是使用者提供圖的縮圖＋調色盤壓縮版（400×400 → 384×384、
-128 色），從原始 1.5MB 壓到 ~96KB——這張圖跟 JS bundle 搶頻寬，压太大會拖慢
-它自己的淡入。
+`splash-icon.png` 是透明背景的 PNG（只有圖磚本身＋線稿，沒有外層陰影/光暈），
+裁到 bbox、補成正方形、縮到 384×384，RGB 量化到 96 色但保留 alpha，
+從原始 1.5MB 壓到 ~130KB。
+
+第一版曾經拿掉透明底、把整張「icon 貼在紙面上」的截圖當底圖，底色跟外層
+`#cd-splash` 背景對不起來，圓角方塊邊緣看得出一圈斷層。換成透明 PNG 後，
+背景色改成直接採樣圖磚內部實色（見上表），圓角邊緣才真的融進背景、只剩
+線稿浮著。
 
 ## 待確認
 
@@ -210,7 +215,4 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
   PWA manifest（`public/icons/favicon-*.png`、`apple-touch-icon-180x180.png`、
   `manifest.json` 的 icons 陣列）。如果這個新設計也要變成正式 app icon，
   需要另外產出各尺寸並替換。
-- 背景色 `#fae9ee` 是從 `--pv2-accent` 推的 tint，不是直接採樣使用者圖片
-  （圖片本身的底色更接近純白 `#fefafa`）。如果覺得不夠「粉」或太粉，這行在
-  `index.html` 的 `#cd-splash { background: ... }` 改一個值就好。
 - 未做真機驗收。
