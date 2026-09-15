@@ -26,34 +26,21 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <link rel="icon" type="image/ico" href="favicon.ico">
 
-    <link rel="preload" as="font" type="font/woff2" crossorigin
-          href="<%= publicPath %>fonts/inter-500.woff2">
-
     <!-- ---------- Launch screen (static) ----------
-         A still opening screen: the app mark on its own paper colour. The ground
-         (#fcf7f6) is sampled from the artwork's own corner, so the image reads as
-         one full-bleed background rather than a pasted-on square.
+         A still opening screen: the app mark alone on its own paper colour. The
+         ground (#fcf7f6) is sampled from the artwork's own corner, so the image
+         reads as one full-bleed background rather than a pasted-on square.
 
          No motion by design — the only animation left in here is the fail-open
          safety timer below. The CSP above is script-src 'self', so no inline
          <script> may run on this page; style-src allows 'unsafe-inline', so the
          screen is plain CSS over static markup. It paints before the JS bundle has
-         downloaded, so a cold start is not a blank page. Teardown lives in the
+         downloaded, so a cold start is not a blank page — and with no text on it,
+         it needs no webfont to be correct at first paint. Teardown lives in the
          bundle, in src/composables/use-app-splash.ts. -->
     <link rel="preload" as="image" fetchpriority="high"
           href="<%= publicPath %>icons/favicon-512x512.png">
     <style>
-      /* app.css imports Inter via @fontsource, but that only lands once
-         the bundle does. This copy in public/fonts/ is what makes the mark render
-         with the right face on the very first paint. */
-      @font-face {
-        font-family: 'Inter Splash';
-        src: url('<%= publicPath %>fonts/inter-500.woff2') format('woff2');
-        font-style: normal;
-        font-weight: 500;
-        font-display: block;
-      }
-
       #cd-splash {
         position: fixed;
         inset: 0;
@@ -87,15 +74,6 @@
         pointer-events: none;
       }
 
-      .cd-splash__stage {
-        display: grid;
-        justify-items: center;
-        gap: 32px;
-        /* Lifted off dead centre: the mark sits where the eye looks first, and the
-           word below it still clears the bottom of a short window. */
-        transform: translateY(-4vh);
-      }
-
       .cd-splash__art {
         /* vmin keeps the square square-ish relative to the smaller axis, so it
            neither fills a narrow phone edge to edge nor shrinks on a wide window;
@@ -104,24 +82,12 @@
         height: min(58vmin, 260px);
         background: url('<%= publicPath %>icons/favicon-512x512.png') center / contain no-repeat;
       }
-
-      .cd-splash__word {
-        font: 500 17px/1 'Inter Splash', 'Inter', system-ui, sans-serif;
-        color: #8a807c;
-        letter-spacing: .28em;
-        /* Letter-spacing adds a trailing gap after the last glyph; the matching
-           left padding keeps the word optically centred. */
-        padding-left: .28em;
-      }
     </style>
   </head>
   <body>
     <!-- Launch screen: sits outside the quasar mount point so mounting cannot replace it -->
     <div id="cd-splash" aria-hidden="true">
-      <div class="cd-splash__stage">
-        <div class="cd-splash__art"></div>
-        <span class="cd-splash__word">CADENCE</span>
-      </div>
+      <div class="cd-splash__art"></div>
     </div>
 
     <!-- quasar:entry-point -->
