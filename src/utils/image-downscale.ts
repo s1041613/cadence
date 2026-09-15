@@ -20,6 +20,17 @@ const JPEG_QUALITY = 0.85
 
 const OUTPUT_TYPE = 'image/jpeg'
 
+/** Longest edge for a sticker. Stickers render small (a fraction of a day/month
+ *  surface, itself a phone-width frame), so unlike a full-bleed background photo
+ *  there is no case for keeping them anywhere near MAX_EDGE_PX. */
+export const STICKER_MAX_EDGE_PX = 512
+
+/** PNG, not JPEG or WebP: a sticker needs its alpha channel (transparent
+ *  background) to composite over whatever is underneath it, and is typically
+ *  flat line art / solid shapes where PNG's lossless encode avoids the
+ *  compression artifacts a lossy re-encode would put on a hard edge. */
+const STICKER_OUTPUT_TYPE = 'image/png'
+
 export interface FittedSize {
   width: number
   height: number
@@ -42,18 +53,23 @@ export function fittedSize(width: number, height: number, maxEdge: number): Fitt
 }
 
 /**
- * Returns a downscaled JPEG, or the original file if it cannot be processed.
+ * Shared re-encode path behind downscaleImage and downscaleSticker: decode,
+ * fit to maxEdge, redraw onto a canvas at that size, re-encode as outputType.
  *
- * Every failure path falls back to the original rather than throwing. A photo
- * that is larger than ideal still works; a failed upload does not. The caller
- * enforces the hard size ceiling, so this function's only job is to make the
- * common case cheap.
+ * Every failure path falls back to the original file rather than throwing. A
+ * photo (or sticker) that is larger than ideal still works; a failed upload
+ * does not.
  */
-export async function downscaleImage(file: File): Promise<Blob> {
+async function reencodeDownscaled(
+  file: File,
+  maxEdge: number,
+  outputType: string,
+  quality?: number
+): Promise<Blob> {
   try {
     const bitmap = await createImageBitmap(file)
     try {
-      const { width, height } = fittedSize(bitmap.width, bitmap.height, MAX_EDGE_PX)
+      const { width, height } = fittedSize(bitmap.width, bitmap.height, maxEdge)
 
       const canvas = document.createElement('canvas')
       canvas.width = width
@@ -64,12 +80,13 @@ export async function downscaleImage(file: File): Promise<Blob> {
       context.drawImage(bitmap, 0, 0, width, height)
 
       const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, OUTPUT_TYPE, JPEG_QUALITY)
+        canvas.toBlob(resolve, outputType, quality)
       })
       if (!blob) return file
 
-      // Re-encoding a small PNG can come out larger than the original. Keeping
-      // whichever is smaller means this never makes the upload worse.
+      // Re-encoding a small source image can come out larger than the
+      // original. Keeping whichever is smaller means this never makes the
+      // upload worse.
       return blob.size < file.size ? blob : file
     } finally {
       // Bitmaps hold decoded pixels off-heap; on a phone this is tens of MB.
@@ -80,4 +97,27 @@ export async function downscaleImage(file: File): Promise<Blob> {
     // all. The original is still a valid upload.
     return file
   }
+}
+
+/**
+ * Returns a downscaled JPEG, or the original file if it cannot be processed.
+ *
+ * The caller enforces the hard size ceiling, so this function's only job is to
+ * make the common case cheap.
+ */
+export async function downscaleImage(file: File): Promise<Blob> {
+  return reencodeDownscaled(file, MAX_EDGE_PX, OUTPUT_TYPE, JPEG_QUALITY)
+}
+
+/**
+ * Returns a downscaled, alpha-preserving PNG, or the original file if it
+ * cannot be processed.
+ *
+ * Deliberately its own function rather than an `{ alpha: true }` option on
+ * downscaleImage: keeping them separate makes it impossible to accidentally
+ * route a transparent sticker through the JPEG path and get a black
+ * background back.
+ */
+export async function downscaleSticker(file: File): Promise<Blob> {
+  return reencodeDownscaled(file, STICKER_MAX_EDGE_PX, STICKER_OUTPUT_TYPE)
 }

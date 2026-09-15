@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { fittedSize, downscaleImage, MAX_EDGE_PX } from './image-downscale'
+import { fittedSize, downscaleImage, downscaleSticker, MAX_EDGE_PX, STICKER_MAX_EDGE_PX } from './image-downscale'
 
 describe('fittedSize', () => {
   it('leaves an image smaller than the cap untouched', () => {
@@ -76,5 +76,40 @@ describe('downscaleImage', () => {
 
   it('exposes the cap it downscales to', () => {
     expect(MAX_EDGE_PX).toBe(1920)
+  })
+})
+
+describe('downscaleSticker', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('returns the original file when the canvas path is unavailable', async () => {
+    // Same fallback contract as downscaleImage: a decode failure must never
+    // block placing the sticker.
+    vi.stubGlobal('createImageBitmap', vi.fn().mockRejectedValue(new Error('nope')))
+
+    const file = new File(['x'], 'sticker.png', { type: 'image/png' })
+    const result = await downscaleSticker(file)
+
+    expect(result).toBe(file)
+  })
+
+  it('returns the original file when there is no createImageBitmap at all', async () => {
+    vi.stubGlobal('createImageBitmap', undefined as unknown as typeof createImageBitmap)
+
+    const file = new File(['x'], 'sticker.png', { type: 'image/png' })
+    const result = await downscaleSticker(file)
+
+    expect(result).toBe(file)
+  })
+
+  // The successful encode path is deliberately not unit-tested, same reasoning
+  // as downscaleImage above: verified by hand instead (upload a transparent
+  // sticker and check the stored object still has an alpha channel).
+
+  it('exposes the smaller cap it downscales to, distinct from photo uploads', () => {
+    expect(STICKER_MAX_EDGE_PX).toBe(512)
+    expect(STICKER_MAX_EDGE_PX).toBeLessThan(MAX_EDGE_PX)
   })
 })
