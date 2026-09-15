@@ -27,9 +27,10 @@
     <link rel="icon" type="image/ico" href="favicon.ico">
 
     <!-- ---------- Launch screen (static) ----------
-         A still opening screen: the app mark alone on its own paper colour. The
-         ground (#fcf7f6) is sampled from the artwork's own corner, so the image
-         reads as one full-bleed background rather than a pasted-on square.
+         A still opening screen: the app mark alone, centred. The artwork
+         (public/splash-mark.png) is transparent, so the ground is simply the app's
+         own paper colour — dismissing the screen reveals the same #fafaf9
+         underneath and there is no colour shift across the fade.
 
          No motion by design — the only animation left in here is the fail-open
          safety timer below. The CSP above is script-src 'self', so no inline
@@ -39,7 +40,7 @@
          it needs no webfont to be correct at first paint. Teardown lives in the
          bundle, in src/composables/use-app-splash.ts. -->
     <link rel="preload" as="image" fetchpriority="high"
-          href="<%= publicPath %>icons/favicon-512x512.png">
+          href="<%= publicPath %>splash-mark.png">
     <style>
       #cd-splash {
         position: fixed;
@@ -47,8 +48,8 @@
         z-index: 9999;
         display: grid;
         place-items: center;
-        /* Same colour as the artwork's background, so the two never show a seam */
-        background: #fcf7f6;
+        /* --color-bg from app.css: the paper the app itself is painted on */
+        background: #fafaf9;
         transition: opacity .4s cubic-bezier(.22, 1, .36, 1);
         /* Fail-open. use-app-splash.ts only runs once App.vue mounts, and the auth
            boot file awaits getSession() before that — so a hung or very slow auth
@@ -75,12 +76,13 @@
       }
 
       .cd-splash__art {
-        /* vmin keeps the square square-ish relative to the smaller axis, so it
-           neither fills a narrow phone edge to edge nor shrinks on a wide window;
-           the px cap stops it ballooning on a desktop monitor. */
-        width: min(58vmin, 260px);
-        height: min(58vmin, 260px);
-        background: url('<%= publicPath %>icons/favicon-512x512.png') center / contain no-repeat;
+        /* vmin sizes off the smaller axis, so the mark neither runs edge to edge on
+           a narrow phone nor shrinks on a wide window; the px cap stops it
+           ballooning on a desktop monitor. aspect-ratio is the artwork's own, so
+           `contain` letterboxes nothing. */
+        width: min(72vmin, 320px);
+        aspect-ratio: 768 / 663;
+        background: url('<%= publicPath %>splash-mark.png') center / contain no-repeat;
       }
     </style>
   </head>

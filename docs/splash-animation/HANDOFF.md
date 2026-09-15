@@ -185,16 +185,19 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 
 # 改版：靜態開場（2026-09）
 
-「開場背景用專案裡的這張圖，靜態顯示就好」「不要 CADENCE 的字了」。
-動畫全部拿掉，開場改成一張不會動的畫面：只有 app 標記
-`public/icons/favicon-512x512.png` 置中，底色用同一張圖角落取樣出來的 `#fcf7f6`，
-兩者之間看不出接縫。畫面上沒有任何文字。
+「開場背景用專案裡的這張圖，靜態顯示就好」「不要 CADENCE 的字了」「換這張圖」。
+動畫全部拿掉，開場改成一張不會動的畫面：只有 app 標記 `public/splash-mark.png`
+置中，底色是 app 自己的紙色 `#fafaf9`。畫面上沒有任何文字。
+
+標記先用過 `public/icons/favicon-512x512.png`（那是 app icon，圖裡已經烘進圓角底板
+與自己的米色底），再換成透明底、沒有底板的新圖。app icon 本身沒動。
 
 ## 改了什麼
 
 | 檔案 | 動作 |
 | --- | --- |
 | `index.html` | 移除 SVG 網絡 markup 與所有 keyframes、CADENCE 字樣、`@font-face` 與字檔 preload；`#cd-splash` 換成淺底＋`.cd-splash__art` 一個方塊；加 `<link rel="preload" as="image">` |
+| `public/splash-mark.png` | 新增，768×663、202 KB。來源稿 1254×1254、426 KB，裁掉透明邊界（alpha ≥ 2 的 bounding box，1050×906）後縮到 768 寬，並把 alpha ≤ 12 的殘影壓成全透明 —— 那層幾乎看不見的光暈鋪滿整張畫布，是壓縮率的主要殺手 |
 | `src/composables/use-app-splash.ts` | `MIN_MS` 2300 → 700 |
 | `src/App.vue` | 只有註解用字（animation → screen） |
 | `public/fonts/inter-500.woff2` | 刪除。那份複本只為了讓 CADENCE 在首次繪製時有字，字拿掉後沒人用了（`public/fonts/` 因此整個消失） |
@@ -203,8 +206,8 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 
 | 項目 | 值 |
 | --- | --- |
-| 底色 | `#fcf7f6`（圖片角落的實際像素值） |
-| 圖 | `min(58vmin, 260px)` 正方形，`background ... center / contain` |
+| 底色 | `#fafaf9`（`app.css` 的 `--color-bg`） |
+| 圖 | `width: min(72vmin, 320px)` + `aspect-ratio: 768 / 663`，`background ... center / contain` |
 | 位置 | 置中（`place-items: center`），沒有偏移 |
 | 字 | 無 |
 | 收尾 | 只有 opacity 淡出 400ms，與改版前相同 |
@@ -221,18 +224,23 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 `MIN_MS` 從 2300 降到 700：原本那個數字是為了讓動畫最後一拍播完，靜態畫面沒有
 「播完」這回事，只需要一個下限避免熱啟動時圖一閃而過。
 
+底色跟著圖換：舊圖自帶米底，所以 splash 底色必須配合它（`#fcf7f6`），淡出到 app 的
+`#fafaf9` 時會有極輕微色偏。新圖是透明底，底色就沒有被綁住，直接用 app 的紙色，
+收掉 splash 的瞬間前後同色。
+
 ## 驗證
 
 | 項目 | 結果 |
 | --- | --- |
 | `npm run typecheck` | 通過 |
 | `npm test` | 60 檔 974 測試全過 |
-| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/icons/favicon-512x512.png` 已出貨、`dist/spa/fonts/` 不再產生 |
+| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/splash-mark.png` 已出貨、`dist/spa/fonts/` 不再產生 |
 | Playwright 截圖 | 393×852 與 1280×800 兩種視窗，圖置中、底色無接縫 |
 
 **仍未做真機驗收。** 另外兩件值得注意的：
 
-- 圖是 318 KB 的 PNG。已用 `<link rel="preload" as="image" fetchpriority="high">`
-  拉前，但慢速網路上仍可能先看到純色底、圖片稍後才進來（底色相同，不會閃白）
-- splash 底色 `#fcf7f6` 與 app 紙色 `#fafaf9` 不完全一樣，淡出時會有極輕微的色偏。
-  要完全無縫就得二選一：改 app 紙色，或替圖片換底
+- 圖是 202 KB 的 PNG。已用 `<link rel="preload" as="image" fetchpriority="high">`
+  拉前，但慢速網路上仍可能先看到純色底、圖片稍後才進來（底色是 app 紙色，不會閃白）。
+  202 KB 已經是裁邊＋縮到 768＋清掉 alpha 殘影之後的結果；還要更小就得動畫本身 ——
+  成本在成千上萬個小方塊的圓角反鋸齒，那是稿子的特性，不是壓縮參數的問題
+- 顯示時最寬 320 CSS px，圖 768 px 約等於 2.4×。3× 螢幕上硬邊會稍微軟一點點
