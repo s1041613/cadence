@@ -185,17 +185,19 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 
 # 改版：靜態開場（2026-09）
 
-「開場背景用專案裡的這張圖，靜態顯示就好。」
-動畫全部拿掉，開場改成一張不會動的畫面：app 標記 `public/icons/favicon-512x512.png`
-置中，底色用同一張圖角落取樣出來的 `#fcf7f6`，兩者之間看不出接縫。
+「開場背景用專案裡的這張圖，靜態顯示就好」「不要 CADENCE 的字了」。
+動畫全部拿掉，開場改成一張不會動的畫面：只有 app 標記
+`public/icons/favicon-512x512.png` 置中，底色用同一張圖角落取樣出來的 `#fcf7f6`，
+兩者之間看不出接縫。畫面上沒有任何文字。
 
 ## 改了什麼
 
 | 檔案 | 動作 |
 | --- | --- |
-| `index.html` | 移除 SVG 網絡 markup、節點／連線／收攏／浮起／字距所有 keyframes；`#cd-splash` 換成淺底＋`.cd-splash__stage`（圖 + CADENCE）；加 `<link rel="preload" as="image">` |
+| `index.html` | 移除 SVG 網絡 markup 與所有 keyframes、CADENCE 字樣、`@font-face` 與字檔 preload；`#cd-splash` 換成淺底＋`.cd-splash__art` 一個方塊；加 `<link rel="preload" as="image">` |
 | `src/composables/use-app-splash.ts` | `MIN_MS` 2300 → 700 |
 | `src/App.vue` | 只有註解用字（animation → screen） |
+| `public/fonts/inter-500.woff2` | 刪除。那份複本只為了讓 CADENCE 在首次繪製時有字，字拿掉後沒人用了（`public/fonts/` 因此整個消失） |
 
 ## 版面
 
@@ -203,8 +205,8 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 | --- | --- |
 | 底色 | `#fcf7f6`（圖片角落的實際像素值） |
 | 圖 | `min(58vmin, 260px)` 正方形，`background ... center / contain` |
-| 位置 | 整組 `translateY(-4vh)`，圖在視覺重心、字在下方 |
-| 字 | CADENCE，Inter 500 / 17px / `letter-spacing .28em` / `#8a807c` |
+| 位置 | 置中（`place-items: center`），沒有偏移 |
+| 字 | 無 |
 | 收尾 | 只有 opacity 淡出 400ms，與改版前相同 |
 
 ## 沒動到的部分
@@ -212,7 +214,7 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 - **兩層保險絲**原封不動：JS 6s（`MAX_MS`）、CSS fail-open 8s。fail-open 是容器上
   唯一剩下的 `animation`，它是安全計時器不是動態效果
 - **收尾條件**不變：`auth.isReady && (!auth.isSignedIn || !tasks.isLoading)`
-- CSP、PWA meta、icon 連結、字檔 preload 都沒碰
+- CSP、PWA meta、icon 連結都沒碰（字檔 preload 隨字一起移除）
 
 `prefers-reduced-motion` 區塊直接刪掉了 —— 現在沒有任何東西會動，沒有需要關掉的效果。
 
@@ -225,8 +227,8 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 | --- | --- |
 | `npm run typecheck` | 通過 |
 | `npm test` | 60 檔 974 測試全過 |
-| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/icons/favicon-512x512.png` 已出貨 |
-| Playwright 截圖 | 393×852 與 1280×800 兩種視窗，圖與字置中、底色無接縫 |
+| `npm run build` | 成功（spa）；`dist/spa/index.html` 含 splash markup、無殘留 `<%=` 樣板、`dist/spa/icons/favicon-512x512.png` 已出貨、`dist/spa/fonts/` 不再產生 |
+| Playwright 截圖 | 393×852 與 1280×800 兩種視窗，圖置中、底色無接縫 |
 
 **仍未做真機驗收。** 另外兩件值得注意的：
 
