@@ -187,10 +187,17 @@ function commit(): void {
 
    The press is driven by :has() on the body rather than by .nbk:active so that tapping copy or
    delete doesn't light the row: those two act on the note, they don't open it. */
+/* 15/16 of vertical padding, up from 13/14. Each row is up to four lines of text under a
+   clamp, so at 13/14 the gap BETWEEN two notes (27px of padding) was barely wider than the
+   gap between a note's own lead and its date line — the rule was doing all the separating on
+   its own, and a list where only a hairline says where one item ends reads as a block of
+   text with lines drawn through it. At 15/16 the whitespace says it too.
+   The asymmetry is kept: the bottom sits a pixel below the top so the row's optical centre
+   lands on the body rather than on the quieter date line under it. */
 .nbk {
   position: relative;
   margin: 0 -10px;
-  padding: 13px 10px 14px;
+  padding: 15px 10px 16px;
   border-radius: var(--cd-radius-sm);
 }
 
@@ -237,10 +244,12 @@ function commit(): void {
    colour and the size is what was loud.
    Two lines, because a Chinese lead wraps where an English one would not; a third would put
    the wall back. */
+/* 1.5, not 1.45: the lead clamps at two lines and CJK fills its em, so at 1.45 a wrapped
+   Chinese lead set its two lines closer together than the row's own rhythm. */
 .nbk__lead {
   margin: 0;
   font: 500 15px var(--cd-font-ui);
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--pv2-ink);
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -257,7 +266,7 @@ function commit(): void {
    pre-wrap keeps the note's own line breaks (a preview of a list should look like a list) and
    overflow-wrap stops a long URL bursting the row — both still needed under the clamp. */
 .nbk__rest {
-  margin: 3px 0 0;
+  margin: 4px 0 0;
   font: 400 13.5px var(--cd-font-ui);
   line-height: 1.55;
   color: var(--pv2-ink-2);
@@ -292,12 +301,14 @@ function commit(): void {
   overflow-wrap: anywhere;
 }
 
-/* 0 rather than the old 5: the body's own 6px bottom padding now carries this gap. */
+/* 2 rather than the old 5: the body's own 6px bottom padding carries most of this gap, and
+   the 2 on top of it is what keeps the date from sitting on the preview's last descender now
+   that the preview's leading has opened up. */
 .nbk__meta {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 0;
+  margin-top: 2px;
 }
 
 /* iOS Caption 1, 12/16. It shares --pv2-ink-2 with the preview above it, so a 13 next to that

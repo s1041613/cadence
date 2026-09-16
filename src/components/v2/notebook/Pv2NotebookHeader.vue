@@ -22,18 +22,28 @@
   padding: 17px 22px 14px;
 }
 
-/* The month view's title treatment, borrowed whole: --cd-font-poster at 800 with the same
-   negative tracking and leading (see Pv2Poster's .pv2-poster__month). Notebook is the only
-   other page whose title is the first thing on the screen rather than a bar above content,
-   so the two should carry the page the same way — on size and weight, not on a second face.
+/* The month view's title treatment, borrowed in size and face: --cd-font-poster at 36px with
+   the poster's leading (see Pv2Poster's .pv2-poster__month). Notebook is the only other page
+   whose title is the first thing on the screen rather than a bar above content, so the two
+   should carry the page the same way — on size, not on a second face.
    What is NOT borrowed is the poster's container-query size (min(44px, 9cqw)): that exists to
    fit the longest of twelve month names at one constant size, and a fixed word has nothing to
    solve for. 36px is the poster's own no-container fallback.
-   Colour stays --pv2-ink, not --pv2-poster-ink: this is a page title, not a poster. */
+   Colour stays --pv2-ink, not --pv2-poster-ink: this is a page title, not a poster.
+
+   700, not the poster's 800, and tracking at −0.005em rather than −0.01em. Month no longer
+   SHOWS its 800: it renders a drawn wordmark and only falls back to type when a month's art
+   is missing, so matching that number matches a fallback rather than the page. Against the
+   wordmark's thin, drawn strokes an 800 grotesque at tight tracking is the heaviest mark in
+   the app, and a nine-letter word has none of the constraints that earn Day its 800 (two
+   digits at 48px need the weight to hold a column). One step down keeps the title the largest
+   thing on the page without it being the darkest.
+   Neither change moves the glyphs vertically — cap height is a family metric, constant across
+   weights, and tracking is horizontal — so the padding-top derivation above still holds. */
 .nbh__title {
   margin: 0;
-  font: 800 36px var(--cd-font-poster);
-  letter-spacing: -0.01em;
+  font: 700 36px var(--cd-font-poster);
+  letter-spacing: -0.005em;
   line-height: 0.9;
   color: var(--pv2-ink);
 }
