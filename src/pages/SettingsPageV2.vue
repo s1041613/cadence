@@ -48,13 +48,31 @@ const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
    the rule, not an omission. The wallpaper belongs to the content pages (Month / Day /
    Week / Notes) — see the comment on Pv2PageBackdrop. */
 .sp2__frame {
+  /* ---- Settings palette ----
+     The Settings UI spec asks this page for a warmer, softer set of values than the v2 ramp
+     carries: an off-white page instead of #fff, a near-black ink instead of black, and a
+     pink-tinted hairline. They live here, on the page frame, rather than in cadence-tokens.css
+     because they are this page's deviation from the global ramp — promoting them would read as
+     a palette-wide change of mind about black ink, which the tokens file is explicit is the
+     design's call and not a reviewer's. Every settings pane inherits them from this element.
+
+     The pink accent is NOT restated: the spec says reuse Month's, so anything tinted here
+     composes from --pv2-accent-rgb and re-tints with it. */
+  --pv2-set-canvas: #fdfbfa;      /* warm off-white; the spec rules out a cold pure white */
+  --pv2-set-ink: #2f2f2f;         /* primary text — dark grey, not dead black */
+  --pv2-set-ink-2: #9a9a9a;       /* email, section labels, version line */
+  --pv2-set-line: #ece8e9;        /* card borders and row dividers */
+  --pv2-set-line-pink: #f4e7ea;   /* the profile card's border, on its pink surface */
+  --pv2-set-surface-pink: #fff7f8;
+  --pv2-set-chev: #c7c2c3;        /* chevrons: present, deliberately quiet */
+  --pv2-set-danger: #c56a5e;      /* Log out's coral accent — an accent, not an alarm */
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--cd-surface-canvas);
+  background: var(--pv2-set-canvas);
 }
 
 .sp2__content {
