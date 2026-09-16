@@ -29,3 +29,16 @@ export function defaultMonthPhotoPaths(monthIndex: number): string[] {
   const fileName = MONTH_PHOTO_FILES[monthIndex % 12]
   return MONTH_PHOTO_EXTENSIONS.map((ext) => publicAssetPath(`month-photos/${fileName}.${ext}`))
 }
+
+// sep.png … — a hand-set wordmark for the month name, drawn rather than typeset, shown by the v2
+// poster in place of its title. Only the months listed here have art; every other month falls
+// back to the typeset title, so this map is the record of what has been drawn so far. Keys are
+// month indexes, 0 = January.
+const MONTH_WORDMARK_FILES: Record<number, string> = {
+  8: 'sep'
+}
+
+export function monthWordmarkPath(monthIndex: number): string | null {
+  const fileName = MONTH_WORDMARK_FILES[monthIndex % 12]
+  return fileName ? publicAssetPath(`month-wordmarks/${fileName}.png`) : null
+}
