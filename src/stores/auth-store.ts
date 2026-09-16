@@ -4,6 +4,15 @@ import type { Session, User } from '@supabase/supabase-js'
 import { authCallbackUrl, isSupabaseConfigured, supabase } from '@/lib/supabase'
 import { useUiStore } from './ui-store'
 
+/**
+ * Shown on the login page when the app has no Supabase credentials. The variable names are a
+ * developer's fix and useless to a signed-out visitor, so production states the effect only —
+ * naming the app's configuration keys on a public page tells an attacker where to aim.
+ */
+const NOT_CONFIGURED = import.meta.env.DEV
+  ? 'Supabase is not configured. Set QCLI_SUPABASE_URL and QCLI_SUPABASE_ANON_KEY.'
+  : 'Sign-in is unavailable right now. Please try again later.'
+
 export const useAuthStore = defineStore('auth', () => {
   const ui = useUiStore()
   const session = ref<Session | null>(null)
@@ -40,7 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!supabase) {
       isLoading.value = false
       isReady.value = true
-      error.value = 'Supabase is not configured. Set QCLI_SUPABASE_URL and QCLI_SUPABASE_ANON_KEY.'
+      error.value = NOT_CONFIGURED
       return
     }
 
@@ -69,7 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function signInWithGoogle(): Promise<void> {
     if (!supabase) {
-      error.value = 'Supabase is not configured. Set QCLI_SUPABASE_URL and QCLI_SUPABASE_ANON_KEY.'
+      error.value = NOT_CONFIGURED
       return
     }
 

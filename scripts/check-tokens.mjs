@@ -21,6 +21,7 @@ const ROOT = new URL('..', import.meta.url).pathname
 const SCAN_TARGETS = [
   'src/components/ui',
   'src/components/shell',
+  'src/components/login',
   'src/components/month',
   'src/components/week',
   'src/components/day',
