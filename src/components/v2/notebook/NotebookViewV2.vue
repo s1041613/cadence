@@ -123,7 +123,9 @@ function onSwipe(details: SwipeDetails): void {
   overflow-x: auto;
   /* 12 here and on the search below, then 8 on the feed: the filter and the query are one
      group and sit a small step apart, and the larger step falls at the boundary between
-     that group and the notes. The old 10/6/8/10 ladder had no such grouping in it. */
+     that group and the notes. The old 10/6/8/10 ladder had no such grouping in it.
+     The feed's 8 is smaller than the 12s and still the larger step, because the first note
+     adds its own 15px of top padding on top of it — 23 against 12. */
   padding: 12px 22px 0;
   scrollbar-width: none;
 }
@@ -136,11 +138,15 @@ function onSwipe(details: SwipeDetails): void {
    field and an outlined note card are three different jobs wearing one material, and the
    hierarchy flattens. --pv2-fill is the documented resting state for a control track, and
    it separates the chip from the page without drawing a line around it. */
+/* 32px, up from 30. The radius is already at the pill's ceiling, so the only thing left that
+   can make the capsule read rounder is the corner's arc, and the arc is half the height: a
+   30px pill's 15px radius against a 38px search field below it looked like two different
+   families of control. 32/19 against the field's 14 is one family. */
 .nbv__tag,
 .nbv__tag-add,
 .nbv__tag-form {
   flex: none;
-  height: 30px;
+  height: 32px;
   border: none;
   border-radius: var(--cd-radius-pill);
   background: var(--pv2-fill);
@@ -150,11 +156,16 @@ function onSwipe(details: SwipeDetails): void {
    the note's 15px lead — at 15 the row of tags was set in the same size as the thing it filters
    and read as the loudest band on the page. The weight goes up as the size comes down so a
    13px CJK chip keeps its stroke detail. */
+/* --pv2-ink-2, not --pv2-ink. Full black on a grey capsule made the unselected filters the
+   hardest row of marks on a page whose content — the notes — is set in that same black: the
+   chrome was competing with what it filters. The AA secondary role reads as a label, and it
+   widens the gap to the selected chip, which now differs in hue AND weight AND darkness
+   rather than in hue and weight alone. */
 .nbv__tag {
   min-width: 0;
-  padding: 0 13px;
+  padding: 0 14px;
   font: 500 13px var(--cd-font-ui);
-  color: var(--pv2-ink);
+  color: var(--pv2-ink-2);
   cursor: pointer;
 }
 
@@ -176,7 +187,7 @@ function onSwipe(details: SwipeDetails): void {
 }
 
 .nbv__tag-add {
-  width: 30px;
+  width: 32px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -204,17 +215,27 @@ function onSwipe(details: SwipeDetails): void {
 }
 
 /* Same fill as the chips above it, because it belongs to the same group: both narrow the
-   feed, neither is content. 36px and radius 9 are the iOS search field's own box. */
+   feed, neither is content. The fill stays neutral --pv2-fill deliberately — the rose wash
+   this page could reach for (rgba(--pv2-accent-rgb, .12)) is the SELECTED chip's on-state
+   three rows up, and a resting field wearing the same material would say "this is chosen".
+   cadence-tokens.css makes the same call for the whole v2 ramp: the greys are neutral and
+   the pink belongs to the content.
+
+   Radius 14 (--cd-radius-field, the documented field corner), up from the 9 this borrowed
+   from iOS's search box. 9 was the one hard corner on a page of pills and a round FAB, and
+   iOS's own number is derived from a 36px box inside a nav bar, which is not where this sits.
+   Height follows to 38 so the corner has the room to be an arc rather than a bevel, and the
+   horizontal padding to 12 so the icon isn't pushed into the curve. */
 .nbv__search {
   flex: none;
   display: flex;
   align-items: center;
-  gap: 7px;
-  height: 36px;
+  gap: 8px;
+  height: 38px;
   margin: 12px 22px 0;
-  padding: 0 10px;
+  padding: 0 12px;
   border: none;
-  border-radius: var(--cd-radius-sm);
+  border-radius: var(--cd-radius-field);
   background: var(--pv2-fill);
 }
 
