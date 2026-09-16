@@ -107,7 +107,7 @@
    * today's pill, the active tab.
    *
    * Contrast against --pv2-canvas, measured:
-   *   --pv2-ink        20.2:1  body text, day numbers, the month title
+   *   --pv2-ink        20.2:1  body text and the month title (day numbers: --pv2-date-ink)
    *   --pv2-ink-2       5.5:1  secondary text, labels        (AA)
    *   --pv2-ink-3       3.2:1  hints and placeholders — non-essential only
    *   --pv2-ink-4       2.0:1  the "+N" overflow count and other faint marks
@@ -148,6 +148,14 @@
   /* The month poster's ink. The same slate as the body ink: the title carries the page on
    * size and weight, and the pink it used to wear competed with the chips under it. */
   --pv2-poster-ink: var(--pv2-ink);
+
+  /* The month grid's day numbers. Softer than --pv2-ink: the grid prints 35 of these at once,
+   * and at full black the numbers out-weigh the event chips that are the actual content — the
+   * date is what you scan past, not what you read. 10.9:1 on --pv2-canvas, so softening it
+   * costs no legibility. Today's pill and the outside-month days keep their own colours.
+   * A separate role rather than a third step on the ink ramp: --pv2-ink-2 (5.5:1) is the
+   * secondary-text role and is too light to carry a 13px Caveat numeral. */
+  --pv2-date-ink: #3D3D3D;
 
   /* Public-holiday text in the month grid (utils/festivals.ts), and the Sunday column header.
    * The two share a colour on purpose — both mean "not a working day", which is the whole of
