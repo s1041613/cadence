@@ -79,10 +79,28 @@
         /* vmin sizes off the smaller axis, so the mark neither runs edge to edge on
            a narrow phone nor shrinks on a wide window; the px cap stops it
            ballooning on a desktop monitor. aspect-ratio is the artwork's own, so
-           `contain` letterboxes nothing. */
-        width: min(72vmin, 320px);
+           `contain` letterboxes nothing.
+
+           44vmin lands at ~177pt on a 402pt-wide phone: a launch mark, not a
+           full-bleed illustration. The artwork's own file is cropped tight to its
+           ink on all four sides, so centring the box centres what you see — the
+           margin to the screen edge is equal left and right, and equal top and
+           bottom. */
+        width: min(44vmin, 200px);
         aspect-ratio: 768 / 663;
         background: url('<%= publicPath %>splash-mark.png') center / contain no-repeat;
+      }
+
+      /* Installed to the home screen, the page starts below the OS status bar, so
+         the page's own centre sits half a status bar below the centre of the screen
+         — which is what the eye judges against, since the app is the whole screen.
+         Lift the mark by that half so it reads centred, the way a native launch
+         image does. 28px is half of a modern iPhone's 54-62pt status bar; in a
+         browser tab the page IS the frame, so there is no lift. */
+      @media (display-mode: standalone) {
+        .cd-splash__art {
+          transform: translateY(-28px);
+        }
       }
     </style>
   </head>
