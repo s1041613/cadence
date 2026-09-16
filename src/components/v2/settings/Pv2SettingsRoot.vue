@@ -1,64 +1,63 @@
 <template>
   <!--
-    v2 設定 root 主選單（照設計稿）。Account 卡、PREFERENCES 列、Privacy/Log out、頁尾。
-    子頁（Calendars/Time/…）尚未實作 → 列可見但不可點（Zoe：先只做 root）。
-    Log out 重用 auth-store.signOut()。
+    v2 Settings root menu, rebuilt to the Settings UI spec.
+
+    Structure is the spec's own: BrandHeader → ProfileCard → section label → two card groups
+    (Preferences, then Privacy/Log out) → version → the shared bottom nav (owned by the page).
+    Rows are Pv2SettingsRow so the 64px height and 40px icon container can't drift apart.
+
+    Sub-pages that don't exist yet (Calendars / Time / Privacy) render as disabled rows: the
+    spec's menu is four items plus Privacy, and hiding the unbuilt ones would quietly change
+    the page it describes. Log out reuses auth-store.signOut().
   -->
   <div class="pv2-set">
-    <h1 class="pv2-set__title">Settings</h1>
-
     <div class="pv2-set__scroll">
-      <!-- Account 卡 -->
-      <button type="button" class="pv2-set__account" disabled>
-        <span class="pv2-set__avatar">{{ initials }}</span>
-        <span class="pv2-set__account-text">
+      <Pv2SettingsBrandHeader />
+
+      <!-- Account. Disabled until there is a profile pane to open; the chevron is the spec's,
+           and it stays so the row reads the same once that pane lands. -->
+      <button type="button" class="pv2-set__profile" disabled>
+        <img v-if="avatarUrl" class="pv2-set__avatar" :src="avatarUrl" alt="" @error="avatarFailed = true" />
+        <span v-else class="pv2-set__avatar pv2-set__avatar--initials">{{ initials }}</span>
+        <span class="pv2-set__profile-text">
           <span class="pv2-set__name">{{ displayName }}</span>
           <span class="pv2-set__email">{{ email }}</span>
         </span>
-        <span class="pv2-set__chev" aria-hidden="true">›</span>
+        <span class="pv2-set__profile-chev" aria-hidden="true" v-html="PV2_SETTINGS_CHEVRON" />
       </button>
 
-      <!-- PREFERENCES：Customization 已實作可點；其餘子頁尚未實作、不可點 -->
       <p class="pv2-set__group-label">Preferences</p>
       <div class="pv2-set__card">
-        <button
+        <Pv2SettingsRow
           v-for="(row, i) in prefRows"
-          :key="row.key"
-          type="button"
-          class="pv2-set__row"
-          :class="{ 'pv2-set__row--divided': i > 0, 'pv2-set__row--enabled': row.enabled }"
-          :disabled="!row.enabled"
+          :key="row.icon"
+          :icon="row.icon"
+          :label="row.label"
+          :divided="i > 0"
+          :disabled="!row.pane"
           @click="row.pane && emit('open', row.pane)"
-        >
-          <span class="pv2-set__row-icon" v-html="row.icon" />
-          <span class="pv2-set__row-label">{{ row.label }}</span>
-          <span class="pv2-set__chev" aria-hidden="true">›</span>
-        </button>
+        />
       </div>
 
-      <!-- Privacy / Log out -->
       <div class="pv2-set__card">
-        <button type="button" class="pv2-set__row" disabled>
-          <span class="pv2-set__row-icon" v-html="ICON_PRIVACY" />
-          <span class="pv2-set__row-label">Privacy</span>
-          <span class="pv2-set__chev" aria-hidden="true">›</span>
-        </button>
-        <button type="button" class="pv2-set__row pv2-set__row--divided pv2-set__row--danger" @click="onLogout">
-          <span class="pv2-set__row-icon" v-html="ICON_LOGOUT" />
-          <span class="pv2-set__row-label">Log out</span>
-        </button>
+        <Pv2SettingsRow icon="privacy" label="Privacy" disabled />
+        <Pv2SettingsRow icon="logout" label="Log out" divided tone="danger" :chevron="false" @click="onLogout" />
       </div>
 
-      <p class="pv2-set__footer">Cadence · <span class="pv2-set__footer-ver">v2.0</span></p>
+      <p class="pv2-set__version">Cadence · v2.0</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth-store'
+import Pv2SettingsBrandHeader from './Pv2SettingsBrandHeader.vue'
+import Pv2SettingsRow from './Pv2SettingsRow.vue'
+import { PV2_SETTINGS_CHEVRON } from './pv2-settings-icons'
+import type { Pv2SettingsIconKey } from './pv2-settings-icons'
 
-// Customization 與 Notifications 可導航；其餘子頁尚未實作
+// Customization and Notifications are built; the rest of the menu isn't yet.
 const emit = defineEmits<{
   open: [pane: 'customization' | 'notifications']
 }>()
@@ -69,39 +68,28 @@ const displayName = computed(() => auth.displayName)
 const email = computed(() => auth.user?.email ?? '')
 const initials = computed(() => displayName.value.slice(0, 2))
 
+// A provider avatar URL can 404 long after sign-in (the account changed picture, the CDN
+// expired the link). Falling back to initials keeps the 56px disc filled either way.
+const avatarFailed = ref(false)
+const avatarUrl = computed(() => (avatarFailed.value ? null : auth.avatarUrl))
+
 async function onLogout(): Promise<void> {
   await auth.signOut()
 }
 
-// 線條 icon（照設計稿風格，stroke 1.7，深色）
-const ICON_CAL =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="16" rx="2.5"/><path d="M4 9.5 H20 M8 3 V6 M16 3 V6"/></svg>'
-const ICON_TIME =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7 V12 L15.5 14"/></svg>'
-const ICON_CUSTOM =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="8.5" cy="9" r="1.6"/><path d="M20 15 L15 10 L5 20"/></svg>'
-const ICON_NOTIF =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9 a6 6 0 0 1 12 0 c0 5 2 6 2 6 H4 s2-1 2-6"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>'
-const ICON_PRIVACY =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L19 6 V11 c0 5-3 8-7 10 c-4-2-7-5-7-10 V6 Z"/></svg>'
-const ICON_LOGOUT =
-  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c56a5e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5 H5 a2 2 0 0 0-2 2 v10 a2 2 0 0 0 2 2 h4 M15 8 l4 4-4 4 M19 12 H9"/></svg>'
-
-// enabled 的子頁才可點；目前 Customization 與 Notifications 已實作。
-// key 用字面量聯集，讓可導航列 emit 出的型別對得上 emit('open', ...) 的簽章。
+// `pane` doubles as "is this built": a row without one is disabled. Keyed by icon because
+// each row uses its icon exactly once, so there is no second id to keep in step.
 type NavPane = 'customization' | 'notifications'
 interface PrefRow {
-  key: string
+  icon: Pv2SettingsIconKey
   label: string
-  icon: string
-  enabled: boolean
   pane?: NavPane
 }
 const prefRows: PrefRow[] = [
-  { key: 'calendars', label: 'Calendars', icon: ICON_CAL, enabled: false },
-  { key: 'time', label: 'Time', icon: ICON_TIME, enabled: false },
-  { key: 'customization', label: 'Customization', icon: ICON_CUSTOM, enabled: true, pane: 'customization' },
-  { key: 'notifications', label: 'Notifications', icon: ICON_NOTIF, enabled: true, pane: 'notifications' }
+  { icon: 'calendars', label: 'Calendars' },
+  { icon: 'time', label: 'Time' },
+  { icon: 'customization', label: 'Customization', pane: 'customization' },
+  { icon: 'notifications', label: 'Notifications', pane: 'notifications' }
 ]
 </script>
 
@@ -111,178 +99,120 @@ const prefRows: PrefRow[] = [
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  /* Inherit the frame's paper (var(--pv2-canvas)) rather than painting a slightly greyer
-     var(--pv2-fill) here — the old mismatch left a lighter band above the title where the
-     safe-area padding showed the frame colour through. One surface, top to bottom. */
+  /* The page's warm off-white comes from the frame (SettingsPageV2), so this inherits it
+     rather than painting a second, slightly different white over the top. */
   background: transparent;
 }
 
-/* Horizontal padding is 22, not 24, so the title starts on the same column as the rows
-   below it — .pv2-set__scroll has always been 22, and the sub-panes match. */
-.pv2-set__title {
-  flex: none;
-  margin: 0;
-  padding: 16px 22px 16px;
-  font: 400 30px var(--cd-font-serif);
-  line-height: 1;
-  color: var(--pv2-ink);
-  border-bottom: 1px solid var(--pv2-line-soft);
-}
-
+/* 24px page padding (spec §1); the bottom clears the floating Pv2BottomNav pill with 12px to
+   spare, so the version line never sits under the glass on a short iPhone frame. */
 .pv2-set__scroll {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  /* Bottom clears the floating Pv2BottomNav pill. */
-  padding: 20px 22px var(--pv2-nav-h);
+  padding: 14px 24px calc(var(--pv2-nav-h) + 12px);
 }
 
-/* Account 卡 */
-.pv2-set__account {
+/* ---- Profile card ---- */
+.pv2-set__profile {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
-  padding: 16px 18px;
-  border: 1px solid var(--pv2-line-soft);
-  border-radius: 16px;
-  background: #fff;
+  /* 30px sits mid-spec (28–32) for the gap under the brand mark. */
+  margin-top: 30px;
+  height: 92px;
+  box-sizing: border-box;
+  padding: 0 18px;
+  border: 1px solid var(--pv2-set-line-pink);
+  border-radius: 20px;
+  background: var(--pv2-set-surface-pink);
   cursor: default;
   text-align: left;
 }
 
 .pv2-set__avatar {
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: #6e839b;
-  color: #fff;
-  font: 700 18px var(--cd-font-ui);
+  object-fit: cover;
+  background: rgba(var(--pv2-accent-rgb), 0.16);
 }
 
-.pv2-set__account-text {
+.pv2-set__avatar--initials {
+  display: grid;
+  place-items: center;
+  color: var(--pv2-set-ink);
+  font: 600 18px var(--cd-font-ui);
+  text-transform: uppercase;
+}
+
+.pv2-set__profile-text {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .pv2-set__name {
-  font: 600 16px var(--cd-font-mono);
-  letter-spacing: 0.04em;
-  color: var(--pv2-ink);
-  line-height: 1;
+  font: 600 17px var(--cd-font-ui);
+  line-height: 1.2;
+  color: var(--pv2-set-ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .pv2-set__email {
-  margin-top: 2px;
-  font: 400 13px var(--cd-font-ui);
-  color: var(--pv2-ink-3);
+  font: 400 14px var(--cd-font-ui);
+  line-height: 1.2;
+  color: var(--pv2-set-ink-2);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* group label */
-.pv2-set__group-label {
-  margin: 26px 0 10px 4px;
-  font: 600 10px var(--cd-font-mono);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--pv2-ink-3);
+.pv2-set__profile-chev {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--pv2-set-chev);
 }
 
-/* 卡片群組：邊框無陰影，照設計稿 */
+/* ---- Section label ---- */
+/* The one place on this page that is still tracked-out and uppercase: it labels the group
+   below it, and nothing in that group competes with it at 12px. */
+.pv2-set__group-label {
+  margin: 28px 0 14px 4px;
+  font: 500 12px var(--cd-font-ui);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--pv2-set-ink-2);
+}
+
+/* ---- Card groups ---- */
+/* Flat, bordered cards — the v2 elevation rule is that only things which actually float get a
+   shadow, and these sit on the page. Same radius and hairline as the profile card above. */
 .pv2-set__card {
-  border: 1px solid var(--pv2-line-soft);
-  border-radius: 16px;
+  border: 1px solid var(--pv2-set-line);
+  border-radius: 20px;
   background: #fff;
   overflow: hidden;
 }
 
 .pv2-set__card + .pv2-set__card {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
-.pv2-set__row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 16px 18px;
-  border: none;
-  background: none;
-  cursor: default;
-  text-align: left;
-}
-
-/* 分隔線：用 ::before 畫，從文字起點開始（讓開 padding 18 + icon 22 + gap 14 = 54px），
-   不縮排 row 本身，照設計稿 */
-.pv2-set__row--divided::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 54px;
-  right: 0;
-  height: 1px;
-  background: var(--pv2-line-soft);
-}
-
-.pv2-set__row-icon {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-}
-
-.pv2-set__row-label {
-  flex: 1;
-  font: 600 13px var(--cd-font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--pv2-ink);
-}
-
-.pv2-set__row--enabled {
-  cursor: pointer;
-}
-
-.pv2-set__row--danger {
-  cursor: pointer;
-}
-
-.pv2-set__row--danger .pv2-set__row-label {
-  color: #c56a5e;
-}
-
-.pv2-set__chev {
-  flex: none;
-  font-size: 18px;
-  line-height: 1;
-  color: var(--pv2-line-strong);
-}
-
-.pv2-set__footer {
-  margin: 26px 0 0;
+/* ---- Version ---- */
+.pv2-set__version {
+  margin: 28px 0 0;
   text-align: center;
-  font: 500 11px var(--cd-font-mono);
-  letter-spacing: 0.18em;
+  font: 500 12px var(--cd-font-ui);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--pv2-ink-4);
-}
-
-.pv2-set__footer-ver {
-  font: italic 400 15px var(--cd-font-serif);
-  text-transform: none;
-  letter-spacing: 0;
+  color: var(--pv2-set-ink-2);
 }
 </style>

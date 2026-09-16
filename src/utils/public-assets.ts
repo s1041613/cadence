@@ -38,3 +38,11 @@ export function defaultMonthPhotoPaths(monthIndex: number): string[] {
 export function monthWordmarkPath(monthIndex: number): string {
   return publicAssetPath(`month-wordmarks/${MONTH_FILE_STEMS[monthIndex % 12]!}.png`)
 }
+
+// A page's own drawn title, in the same hand as the month wordmarks above but keyed by page
+// rather than by month — hence a directory of its own instead of a thirteenth month. Settings
+// is the only one drawn so far; it is the page's h1, not decoration, so it carries the page
+// name as its alt text at the call site.
+export function pageWordmarkPath(page: 'settings'): string {
+  return publicAssetPath(`wordmarks/${page}.png`)
+}
