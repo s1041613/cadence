@@ -31,19 +31,23 @@
    solve for. 36px is the poster's own no-container fallback.
    Colour stays --pv2-ink, not --pv2-poster-ink: this is a page title, not a poster.
 
-   700, not the poster's 800, and tracking at −0.005em rather than −0.01em. Month no longer
-   SHOWS its 800: it renders a drawn wordmark and only falls back to type when a month's art
-   is missing, so matching that number matches a fallback rather than the page. Against the
-   wordmark's thin, drawn strokes an 800 grotesque at tight tracking is the heaviest mark in
+   500, not the poster's 800, and tracking neutral rather than −0.01em. Month no longer SHOWS
+   its 800: it renders a drawn wordmark and only falls back to type when a month's art is
+   missing, so matching that number matched a fallback rather than the page. Against the
+   wordmark's thin, drawn strokes an 800 grotesque at tight tracking was the heaviest mark in
    the app, and a nine-letter word has none of the constraints that earn Day its 800 (two
-   digits at 48px need the weight to hold a column). One step down keeps the title the largest
-   thing on the page without it being the darkest.
+   digits at 48px need the weight to hold a column) or the poster its −0.01em (that tracking
+   buys back width so 'September' fits at one size for all twelve months — 'Notebook' has no
+   such fit to make, and the negative value only closes up a word that is already short).
+   500 rather than 400 or 600, picked against the reference render at all four: 400 goes
+   fragile at 36px over a photo, 600 is back to reading as bold. The title stays the largest
+   thing on the page and stops being the darkest.
    Neither change moves the glyphs vertically — cap height is a family metric, constant across
    weights, and tracking is horizontal — so the padding-top derivation above still holds. */
 .nbh__title {
   margin: 0;
-  font: 700 36px var(--cd-font-poster);
-  letter-spacing: -0.005em;
+  font: 500 36px var(--cd-font-poster);
+  letter-spacing: 0;
   line-height: 0.9;
   color: var(--pv2-ink);
 }
