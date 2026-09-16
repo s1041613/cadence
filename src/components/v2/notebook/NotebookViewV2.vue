@@ -134,38 +134,46 @@ function onSwipe(details: SwipeDetails): void {
   display: none;
 }
 
-/* Filled capsules, no outline. On a pure-white canvas an outlined chip, an outlined search
-   field and an outlined note card are three different jobs wearing one material, and the
-   hierarchy flattens. --pv2-fill is the documented resting state for a control track, and
-   it separates the chip from the page without drawing a line around it. */
-/* 32px, up from 30. The radius is already at the pill's ceiling, so the only thing left that
-   can make the capsule read rounder is the corner's arc, and the arc is half the height: a
-   30px pill's 15px radius against a 38px search field below it looked like two different
-   families of control. 32/19 against the field's 14 is one family. */
+/* WHITE capsules on a hairline, not grey ones. The premise this rule used to carry — "on a
+   pure-white canvas" — was never true of this page: Notebook mounts Pv2PageBackdrop exactly as
+   Month/Day/Week do, so every fill here sits on the user's photo under a white scrim (0.8 by
+   default). A --pv2-fill capsule on a washed photo is a grey patch laid over an image, and the
+   row of them read as smudges; white reads as a clean chip lifted off the picture, which is
+   what the page is actually doing.
+
+   The hairline is what makes white safe rather than decoration. The scrim slider runs to 1.0
+   and the photo can be cleared outright (Pv2PageBackdrop's v-if), and at either the page IS
+   pure white — a naked white capsule on it is not a quiet chip, it is an invisible one. The
+   softest line role holds the shape there and all but disappears at any scrim below it.
+   Border-box (Quasar's reset sets it on html) keeps the 1px inside the 32.
+
+   32px tall, up from 30. The radius is already at the pill's ceiling, so the only thing left
+   that can make the capsule read rounder is the corner's arc, and the arc is half the height:
+   a 30px pill's 15px radius against a 38px search field looked like two different families of
+   control. 32/19 against the field's 14 is one family. */
 .nbv__tag,
 .nbv__tag-add,
 .nbv__tag-form {
   flex: none;
   height: 32px;
-  border: none;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: var(--cd-radius-pill);
-  background: var(--pv2-fill);
+  background: var(--pv2-canvas);
 }
 
 /* 13/500, not 15/400. A filter is chrome and the notes are content, so the chip must sit below
    the note's 15px lead — at 15 the row of tags was set in the same size as the thing it filters
    and read as the loudest band on the page. The weight goes up as the size comes down so a
    13px CJK chip keeps its stroke detail. */
-/* --pv2-ink-2, not --pv2-ink. Full black on a grey capsule made the unselected filters the
-   hardest row of marks on a page whose content — the notes — is set in that same black: the
-   chrome was competing with what it filters. The AA secondary role reads as a label, and it
-   widens the gap to the selected chip, which now differs in hue AND weight AND darkness
-   rather than in hue and weight alone. */
+/* Back to --pv2-ink, which the grey capsule could not carry: the label was being softened to
+   compensate for its own background, and now that the capsule is white the text is free to be
+   the page's ink again. The chip reads as a label rather than as content because it is 13/500
+   against the note's 15, which is where that job belongs — in the type scale, not in a grey. */
 .nbv__tag {
   min-width: 0;
   padding: 0 14px;
   font: 500 13px var(--cd-font-ui);
-  color: var(--pv2-ink-2);
+  color: var(--pv2-ink);
   cursor: pointer;
 }
 
@@ -181,6 +189,10 @@ function onSwipe(details: SwipeDetails): void {
    deepening --pv2-accent for every consumer, not substituting a colour here — the tone is the
    design's (same note as Pv2Chip). */
 .nbv__tag--active {
+  /* The hairline goes transparent rather than tinting, so the wash is one solid capsule —
+     same move as Pv2Chip's on-state. A line around a filled chip makes both states look
+     framed and neither look chosen. */
+  border-color: transparent;
   background: rgba(var(--pv2-accent-rgb), 0.12);
   color: var(--pv2-accent);
   font-weight: 600;
@@ -214,12 +226,13 @@ function onSwipe(details: SwipeDetails): void {
   color: var(--pv2-ink);
 }
 
-/* Same fill as the chips above it, because it belongs to the same group: both narrow the
-   feed, neither is content. The fill stays neutral --pv2-fill deliberately — the rose wash
-   this page could reach for (rgba(--pv2-accent-rgb, .12)) is the SELECTED chip's on-state
-   three rows up, and a resting field wearing the same material would say "this is chosen".
-   cadence-tokens.css makes the same call for the whole v2 ramp: the greys are neutral and
-   the pink belongs to the content.
+/* White on the same hairline as the chips above it, because it belongs to the same group:
+   both narrow the feed, neither is content, and on a washed photo they have to lift off the
+   picture the same way (see the chip rule for why white and why the line).
+   The fill stays NEUTRAL — the rose wash this page could reach for
+   (rgba(--pv2-accent-rgb, .12)) is the SELECTED chip's on-state three rows up, and a resting
+   field wearing the same material would say "this is chosen". cadence-tokens.css makes the
+   same call for the whole v2 ramp: the greys are neutral, the pink belongs to the content.
 
    Radius 14 (--cd-radius-field, the documented field corner), up from the 9 this borrowed
    from iOS's search box. 9 was the one hard corner on a page of pills and a round FAB, and
@@ -234,9 +247,9 @@ function onSwipe(details: SwipeDetails): void {
   height: 38px;
   margin: 12px 22px 0;
   padding: 0 12px;
-  border: none;
+  border: 1px solid var(--pv2-line-soft);
   border-radius: var(--cd-radius-field);
-  background: var(--pv2-fill);
+  background: var(--pv2-canvas);
 }
 
 /* 16, down from 17: the field was the largest type on the page after the title, above even the
