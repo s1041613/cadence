@@ -256,7 +256,8 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 從真機截圖（1206×2622，iPhone 16 Pro @3×）量出來的事實：
 
 - 標記寬 785 px = **螢幕寬的 65%**。那是滿版插圖，不是開場標記 →
-  `min(72vmin, 320px)` 改成 `min(44vmin, 200px)`（402pt 手機上約 177pt）。
+  `min(72vmin, 320px)` 改成 `min(32vmin, 150px)`（402pt 手機上約 129pt，螢幕寬的
+  三分之一）。中間先落在 `min(44vmin, 200px)`（44%），實機看還是太大，再往下一階。
 - 標記**本來就置中**：它的方塊中心 y=1404，頁面中心也是 y=1404，同一個像素。
   看起來偏低是因為**安裝成 App 之後，頁面是從系統狀態列下面才開始的**（該機 62pt），
   所以頁面中心比螢幕中心低 31pt —— 而 App 佔滿整個螢幕時，眼睛比的是螢幕。
@@ -310,7 +311,7 @@ SVG 用預設的 `xMidYMid meet`，所以整張網會隨視窗縮放並維持置
 | `npm run build` | 成功；`dist/spa/` 兩張 PNG 都有、無殘留 `<%=` 樣板 |
 | Playwright 逐拍截圖 | 402×874，把 `getAnimations()` 暫停在 0/200/350/500/650/800/1020/1400/2300ms 各拍一張，星星依序亮起、位置不跑掉 |
 | reduced-motion | 只剩 fail-open 在跑，其餘 0 個動畫 |
-| 版面量測 | 寬 177px、左右邊距相等（113 / 402−289） |
+| 版面量測 | 寬 129px（螢幕寬 32%）、左右邊距相等 |
 
 **未驗證：** `@media (display-mode: standalone)` 的上提。headless Chromium 的
 `Emulation.setEmulatedMedia` 吃不到 `display-mode`（`matchMedia` 回 false），
