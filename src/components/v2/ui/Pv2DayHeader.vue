@@ -49,21 +49,33 @@ const emit = defineEmits<{
   min-width: 0;
 }
 
-/* 與 month 的「September」同一個處理：不斜體、800、-0.01em（見 Pv2Poster）。
-   這段以前寫的是 italic 400，註解卻宣稱「與 month 一致」——那句是錯的：Pv2Poster 的註解
-   明寫「刻意不是 italic」，設計稿的月份是一個平的粗體 grotesque。字體從來沒有分家過
-   （--cd-font-serif 與 --cd-font-poster 都指回 Inter，見 cadence-tokens.css），差的一直
-   只有字重與斜度，現在補上。
+/* 不斜體、平的 grotesque，這點與 month 的月份字樣同一個處理（見 Pv2Poster）。字體從來沒有
+   分家過（--cd-font-serif 與 --cd-font-poster 都指回 Inter，見 cadence-tokens.css）。
 
-   字級維持 48px，不跟著 month 的 min(44px, 9cqw)（在手機寬度上算出來約 34px）：那是為了
-   讓十二個月名中最長的 September 塞得下而推導出來的比例，兩個數字的日期沒有那個約束。
+   字重是 300，不是原本的 800。month 頁現在的封面是手繪字樣（.pv2-poster__wordmark），筆畫
+   細；日期數字以 800 排出來在同一個 app 裡明顯比它重，兩頁擺在一起不像同一套東西。
 
-   line-height 0.9 也照 month。改這兩項時量過：數字的視覺頂端只移動 0.21px——它在
-   .pv2-dh__row 裡是靠下對齊（align-items: flex-end），line box 長高會從上面長，底線不動，
-   所以 DayViewV2 裡那段量出來的 padding-top 不需要跟著改。 */
+   300 與 50px 都是從設計稿量出來的，不是憑感覺挑的。稿上手機框寬 861px 對應 393pt（2.19x）：
+   數字高 78px ≈ 35.6 CSS px，直筆寬 8px ≈ 3.65 CSS px，筆畫/字高 = 0.103。把同一段 markup
+   以真的 Inter 排出來量（見下），50px 的字高正好是 35.6 CSS px，而筆畫比例 800 是 0.232、
+   400 是 0.127、300 是 0.089——稿上那個 0.103 落在 300 與 400 之間，靠 300 那側；截圖本身
+   有縮放模糊，細筆畫只會被糊得更寬不會更窄，所以真值比 0.103 更低，取 300。
+
+   300 需要 fonts.css 一併把該字重載進來（已加）：沒載的字重不會報錯，只會退回 400，數字就
+   靜悄悄地變回偏重。
+
+   字級 50px 比原本的 48px 大一點點，補回掉字重之後少掉的份量。仍然不跟 month 的
+   min(44px, 9cqw)：那個比例是為了讓十二個月名中最長的 September 塞得下推出來的，兩位數的
+   日期沒有那個約束。
+
+   letter-spacing 拿掉（原本 -0.01em）：負字距是為了收束 800 的厚筆畫，Light 不需要，
+   稿上的數字也是正常字距。
+
+   line-height 0.9 照 month 不動。字級從 48 到 50 時量過：數字是 .pv2-dh__lead 裡最高的
+   元素，line box 從上緣往下長，視覺頂端只移動 0.17px，所以 DayViewV2 裡那段量出來的
+   padding-top 不需要跟著改。 */
 .pv2-dh__num {
-  font: 800 48px var(--cd-font-ui);
-  letter-spacing: -0.01em;
+  font: 300 50px var(--cd-font-ui);
   line-height: 0.9;
   color: var(--pv2-ink);
 }
