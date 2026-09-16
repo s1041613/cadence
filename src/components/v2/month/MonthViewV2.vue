@@ -16,7 +16,13 @@
       </div>
 
       <div class="mv2__poster">
-        <Pv2Poster class="mv2__poster-title" :month-name="monthName" :year="posterYear" @open-sheet="openSheet" />
+        <Pv2Poster
+          class="mv2__poster-title"
+          :month-name="monthName"
+          :month-index="month"
+          :year="posterYear"
+          @open-sheet="openSheet"
+        />
       </div>
 
       <!-- 待辦雙卡（照參考圖）：標題與月曆之間的一眼區。 -->
