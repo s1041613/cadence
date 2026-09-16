@@ -80,7 +80,9 @@ const emit = defineEmits<{
   border-radius: 999px;
   font: 700 13px var(--cd-font-caveat);
   line-height: 1;
-  color: var(--pv2-ink);
+  /* --pv2-date-ink, not --pv2-ink: a full-black numeral in every one of 35 cells out-weighs the
+     event chips beneath it. Soft, still 10.9:1 on the canvas. */
+  color: var(--pv2-date-ink);
   text-shadow: 0 1px 3px rgba(var(--pv2-canvas-rgb), 0.9), 0 0 2px rgba(var(--pv2-canvas-rgb), 0.9);
 }
 
