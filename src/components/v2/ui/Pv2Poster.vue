@@ -2,8 +2,8 @@
   <!-- 月曆海報標題：居中直排，粗體大字。點擊開月/年輪盤。
        年份只在「不是今年」時出現：設計稿沒有它，而它要回答的問題一年只有一次。 -->
   <button type="button" class="pv2-poster" @click="emit('openSheet')">
-    <!-- 有畫好的月份字樣就用圖，沒有的月份仍然走原本的排版標題。alt 給的是月份名稱本身：
-         這張圖說的就是那個字，不是裝飾。 -->
+    <!-- 十二個月都有畫好的字樣，所以標題預設是圖；圖載不進來才退回排版標題。alt 給的是月份名稱
+         本身：這張圖說的就是那個字，不是裝飾。 -->
     <img
       v-if="wordmarkSrc"
       class="pv2-poster__wordmark"
@@ -32,9 +32,9 @@ const emit = defineEmits<{
   openSheet: []
 }>()
 
-// The map in public-assets already says which months have art, so this only has to catch the
-// file being missing at runtime (a bad deploy) — and it resets per month, because a month
-// whose file failed says nothing about the next one's.
+// Every month has art, so this only has to catch the file being missing at runtime (a bad
+// deploy) — and it resets per month, because a month whose file failed says nothing about the
+// next one's.
 const wordmarkFailed = ref(false)
 watch(() => props.monthIndex, () => { wordmarkFailed.value = false })
 
@@ -94,8 +94,9 @@ function onWordmarkError() {
   color: var(--pv2-poster-ink);
 }
 
-/* 畫好的月份字樣。以寬度定尺寸而不是高度：這是一個字樣，它與版面的關係是「橫向佔多寬」，
-   高度就隨各月的字形長短自己去變。
+/* 畫好的月份字樣。以寬度定尺寸而不是高度：這是一個字樣，它與版面的關係是「橫向佔多寬」。
+   十二張圖都畫在同一個 3:1 的畫布上，所以高度不必寫死也不會跟著月份跳動——換月時標題框是同
+   一個大小，底下的月曆不會被推上推下。
 
    52cqw 是從它取代的那個排版標題量出來的：在 393px 的手機框上，'September' 以 9cqw 排出來是
    179.6px 寬、31.8px 高，橫跨版面 45.7%。這張字樣的筆畫細得多，同寬會顯得輕，所以往上帶到
