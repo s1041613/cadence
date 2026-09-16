@@ -19,7 +19,7 @@
           <span class="pv2-ds__date">{{ dateLabel }}</span>
         </div>
         <button type="button" class="pv2-ds__add" aria-label="新增事件" @click="emit('create')">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-canvas)" stroke-width="2.2" stroke-linecap="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--pv2-canvas)" stroke-width="2.2" stroke-linecap="round">
             <path d="M12 5 V19 M5 12 H19" />
           </svg>
         </button>
@@ -191,12 +191,13 @@ function onSwipeHorizontal(details: SwipeDetails): void {
   color: var(--pv2-ink);
 }
 
+/* 44px 是點擊目標的下限（iOS HIG），也讓這顆圓不再比旁邊 24px 的日期標題還搶眼。 */
 .pv2-ds__add {
   flex: none;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   background: var(--pv2-ink);
