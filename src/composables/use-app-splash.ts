@@ -17,9 +17,11 @@ import { useTasksStore } from '@/stores/tasks-store'
  * path: the data is already there.
  */
 
-// Nothing animates any more, so this is only a floor on how briefly the mark may
-// show: long enough to register as a launch screen, short enough not to be a wait.
-const MIN_MS = 700
+// The entrance in index.html finishes at 1.02s — the last sparkle pops at .6s and
+// takes .42s to land — so this is the floor that lets it be seen through instead of
+// cut off mid-pop, plus a beat for the finished mark to sit still. Every cold start
+// pays it, so it is the length of the entrance and nothing more.
+const MIN_MS = 1200
 const MAX_MS = 6_000
 const FADE_MS = 400
 

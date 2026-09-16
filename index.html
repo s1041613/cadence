@@ -26,21 +26,31 @@
     <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16x16.png">
     <link rel="icon" type="image/ico" href="favicon.ico">
 
-    <!-- ---------- Launch screen (static) ----------
-         A still opening screen: the app mark alone, centred. The artwork
-         (public/splash-mark.png) is transparent, so the ground is simply the app's
-         own paper colour — dismissing the screen reveals the same #fafaf9
+    <!-- ---------- Launch screen ----------
+         The app mark, centred, arriving: the calendar rises and fades in while the
+         sparkles light up one after another and then keep breathing for as long as
+         the screen is up. Both layers are transparent, so the ground is simply the
+         app's own paper colour — dismissing the screen reveals the same #fafaf9
          underneath and there is no colour shift across the fade.
 
-         No motion by design — the only animation left in here is the fail-open
-         safety timer below. The CSP above is script-src 'self', so no inline
+         The artwork ships as two layers cut from the one drawing:
+         splash-core.png is the calendar and its tail, splash-sparks.png is the six
+         sparkles, both on the same 768x663 canvas so stacking them registers exactly.
+         Each sparkle is one more copy of the sparkle layer clipped to that sparkle's
+         own box (clip-path) and scaled about its own centre (transform-origin), which
+         buys per-sparkle timing without per-sparkle files.
+
+         All of it is CSS keyframes: the CSP above is script-src 'self', so no inline
          <script> may run on this page; style-src allows 'unsafe-inline', so the
-         screen is plain CSS over static markup. It paints before the JS bundle has
-         downloaded, so a cold start is not a blank page — and with no text on it,
-         it needs no webfont to be correct at first paint. Teardown lives in the
-         bundle, in src/composables/use-app-splash.ts. -->
+         screen is plain CSS over static markup. It paints and starts animating before
+         the JS bundle has downloaded, so a cold start is not a blank page — and with
+         no text on it, it needs no webfont to be correct at first paint. Teardown
+         lives in the bundle, in src/composables/use-app-splash.ts, whose MIN_MS is
+         what guarantees the entrance is seen rather than cut off. -->
     <link rel="preload" as="image" fetchpriority="high"
-          href="<%= publicPath %>splash-mark.png">
+          href="<%= publicPath %>splash-core.png">
+    <link rel="preload" as="image" fetchpriority="high"
+          href="<%= publicPath %>splash-sparks.png">
     <style>
       #cd-splash {
         position: fixed;
@@ -86,9 +96,81 @@
            ink on all four sides, so centring the box centres what you see — the
            margin to the screen edge is equal left and right, and equal top and
            bottom. */
+        position: relative;
         width: min(44vmin, 200px);
         aspect-ratio: 768 / 663;
-        background: url('<%= publicPath %>splash-mark.png') center / contain no-repeat;
+      }
+
+      /* Both layers fill the same box and carry the same canvas, so they line up
+         however the box is sized. */
+      .cd-splash__core,
+      .cd-splash__spark {
+        position: absolute;
+        inset: 0;
+        background: center / contain no-repeat;
+      }
+
+      .cd-splash__core {
+        background-image: url('<%= publicPath %>splash-core.png');
+        animation: cd-splash-rise .56s cubic-bezier(.22, 1, .36, 1) .06s both;
+      }
+
+      .cd-splash__spark {
+        background-image: url('<%= publicPath %>splash-sparks.png');
+        /* Pops in on its own beat, then breathes forever — the loop is what keeps a
+           slow cold start from freezing into a still. The two delays below pair with
+           these two animations in order. */
+        animation:
+          cd-splash-pop .42s cubic-bezier(.34, 1.56, .64, 1) both,
+          cd-splash-twinkle 2.6s ease-in-out infinite;
+      }
+
+      /* One sparkle each: clipped to its own box, scaled about its own centre, lit
+         90ms after the one before it. Boxes are measured from the artwork and do not
+         overlap, so no sparkle is drawn twice. */
+      .cd-splash__spark--1 {
+        clip-path: inset(9.2% 80.7% 64.9% 0);
+        transform-origin: 9.4% 22.1%;
+        animation-delay: .24s, .66s;
+      }
+
+      .cd-splash__spark--2 {
+        clip-path: inset(0 74.1% 89% 16.4%);
+        transform-origin: 21.1% 5.2%;
+        animation-delay: .33s, .75s;
+      }
+
+      .cd-splash__spark--3 {
+        clip-path: inset(37.4% 0 51.4% 91.1%);
+        transform-origin: 95.6% 42.9%;
+        animation-delay: .42s, .84s;
+      }
+
+      .cd-splash__spark--4 {
+        clip-path: inset(52% 2.2% 13.7% 73.6%);
+        transform-origin: 85.6% 69.1%;
+        animation-delay: .51s, .93s;
+      }
+
+      .cd-splash__spark--5 {
+        clip-path: inset(50.2% 86.3% 40.4% 5.9%);
+        transform-origin: 9.7% 54.8%;
+        animation-delay: .6s, 1.02s;
+      }
+
+      @keyframes cd-splash-rise {
+        from { opacity: 0; transform: translateY(10px) scale(.97); }
+        to { opacity: 1; transform: none; }
+      }
+
+      @keyframes cd-splash-pop {
+        from { opacity: 0; transform: scale(.3); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes cd-splash-twinkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .55; transform: scale(.92); }
       }
 
       /* Installed to the home screen, the page starts below the OS status bar, so
@@ -102,12 +184,29 @@
           transform: translateY(-28px);
         }
       }
+
+      /* Reduced motion: the mark, already arrived. The selector is `#cd-splash *`,
+         children only — the fail-open on the container is a safety timer, not an
+         effect, and must keep running. */
+      @media (prefers-reduced-motion: reduce) {
+        #cd-splash * {
+          animation: none;
+        }
+      }
+
     </style>
   </head>
   <body>
     <!-- Launch screen: sits outside the quasar mount point so mounting cannot replace it -->
     <div id="cd-splash" aria-hidden="true">
-      <div class="cd-splash__art"></div>
+      <div class="cd-splash__art">
+        <div class="cd-splash__core"></div>
+        <div class="cd-splash__spark cd-splash__spark--1"></div>
+        <div class="cd-splash__spark cd-splash__spark--2"></div>
+        <div class="cd-splash__spark cd-splash__spark--3"></div>
+        <div class="cd-splash__spark cd-splash__spark--4"></div>
+        <div class="cd-splash__spark cd-splash__spark--5"></div>
+      </div>
     </div>
 
     <!-- quasar:entry-point -->
