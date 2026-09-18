@@ -14,18 +14,6 @@ live against Supabase.
 
 ---
 
-## Why I built it
-
-Existing calendars tell you *when* something is. They don't help you *do* it. I wanted the
-gap closed: tap an event, and the timer that starts is already scoped to that block, already
-knows how long the block is, and warns you when you're about to run past it.
-
-The shared-calendar half came from the same place — most household and small-team scheduling
-happens over screenshots and chat messages. A standing invite link and a push notification
-when someone adds an event removes that whole layer.
-
----
-
 ## What it does
 
 ### Shared calendars
