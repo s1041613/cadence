@@ -56,36 +56,6 @@ when someone adds an event removes that whole layer.
 
 ---
 
-## Engineering notes
-
-These are the parts I'd want to talk through in an interview.
-
-**Pure logic, thin stores.** The focus timer's state machine lives in
-`src/utils/focus-timer.ts` as pure functions (`startSession`, `advanceExpired`, `projectFocus`,
-`decideRehydrate`). The Pinia store in `src/stores/focus-store.ts` only owns the interval, the
-audio, and the single clock read. That split is why the timer has meaningful unit tests at all —
-time-dependent behavior is testable when time is an argument rather than a call to `Date.now()`.
-
-**Services own I/O, stores own orchestration.** Every `src/services/*.ts` module talks to
-Supabase and nothing else — no store imports, no component awareness. All requests carry a
-10-second `AbortSignal.timeout`.
-
-**Row-level security as the real boundary.** Authorization lives in Postgres RLS policies
-(`supabase/migrations/`), not in the client. A membership check on event updates is enforced by
-the database, so a tampered client can't write into a calendar it doesn't belong to.
-
-**A lint rule for design tokens.** `scripts/check-tokens.mjs` fails the build when a palette
-value is hardcoded instead of referencing a CSS custom property. The motivation: `#B3AC91` and
-`var(--cd-olive)` render identically while one palette ships, so the divergence is invisible
-until a second theme is applied — and the `rgba(179, 172, 145, a)` form is worse, since grepping
-for the token name reports success while the value stays frozen. The script makes both visible.
-
-**A dev-only component gallery instead of Storybook.** `/dev/gallery` renders components for
-visual checks and is stripped from production builds via an `import.meta.env.DEV` route guard —
-the same verification value without a second build pipeline to maintain.
-
----
-
 ## Tests
 
 811 unit tests across 53 files in `src/`, plus 12 for the Edge Function. All passing.
@@ -99,7 +69,7 @@ npm run check:tokens            # design-token guard
 
 Coverage is concentrated where the risk is: timer state transitions, date/time conversion,
 service-layer request shaping, and store orchestration. Components are verified visually
-through the gallery rather than through snapshot tests.
+through a dev-only component gallery at `/dev/gallery` rather than through snapshot tests.
 
 > Note: `npm test` currently also picks up stale copies under `.worktrees/`. Use the scoped
 > `--dir` commands above for an accurate run.
