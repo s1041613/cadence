@@ -184,10 +184,13 @@ function groupHead(label, { select = false } = {}) {
 }
 
 /**
- * The one surface. Height follows the content up to MAX; past that the list scrolls,
- * and every overdue task is in it — no cap, no collapsed group, no second tap.
+ * The one surface. ONE fixed height, whatever the list holds: 56% of the frame (477 on the
+ * 852 mock). Short list leaves white space, long list scrolls — it opens the same every time.
+ * Every overdue task is in it: no cap, no collapsed group, no second tap.
  */
-function sheet({ groups, count, h, select = false, confirmAt = null, clipped = false } = {}) {
+const SHEET_H = 477
+
+function sheet({ groups, count, h = SHEET_H, select = false, confirmAt = null, clipped = false } = {}) {
   let n = -1
   const body = groups
     .map(
@@ -302,37 +305,25 @@ boards['Main.dc.html'] = page('日檢視 · 收合', 393, 852, screen(`${header(
     ${grid()}`))
 
 boards['SheetShort.dc.html'] = page(
-  '3 筆 · sheet 貼著內容',
+  '3 筆 · 一樣的高度',
   393,
   852,
   screen(
     `${header({ toggle: 'on', count: 3 })}
     ${grid()}
-    ${sheet({ groups: SHORT_GROUPS, count: 3, h: 320 })}`,
-    { withNav: false }
-  )
-)
-
-boards['SheetHalf.dc.html'] = page(
-  '15 筆 · 預設停在一半',
-  393,
-  852,
-  screen(
-    `${header({ toggle: 'on', count: 15 })}
-    ${grid()}
-    ${sheet({ groups: GROUPS, count: 15, h: 450, clipped: true })}`,
+    ${sheet({ groups: SHORT_GROUPS, count: 3 })}`,
     { withNav: false }
   )
 )
 
 boards['SheetAll.dc.html'] = page(
-  '15 筆 · 往上拖看到全部',
+  '15 筆 · 捲動',
   393,
   852,
   screen(
     `${header({ toggle: 'on', count: 15 })}
     ${grid()}
-    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true })}`,
+    ${sheet({ groups: GROUPS, count: 15, clipped: true })}`,
     { withNav: false }
   )
 )
@@ -344,7 +335,7 @@ boards['Confirm.dc.html'] = page(
   screen(
     `${header({ toggle: 'on', count: 15 })}
     ${grid()}
-    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true, confirmAt: 3 })}`,
+    ${sheet({ groups: GROUPS, count: 15, clipped: true, confirmAt: 3 })}`,
     { withNav: false }
   )
 )
@@ -356,7 +347,7 @@ boards['SheetSelect.dc.html'] = page(
   screen(
     `${header({ toggle: 'on', count: 15 })}
     ${grid()}
-    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true, select: true })}`,
+    ${sheet({ groups: GROUPS, count: 15, clipped: true, select: true })}`,
     { withNav: false }
   )
 )
@@ -444,7 +435,7 @@ boards['Anatomy.dc.html'] = page(
     <div style="display: flex; flex-direction: column; gap: 8px;">
       <span style="font: 600 11px ${UI}; letter-spacing: .14em; text-transform: uppercase; color: ${INK3};">Cadence · Day view</span>
       <h1 style="margin: 0; font: 700 34px/1.1 ${UI}; letter-spacing: -.02em; color: ${INK};">未完成待辦</h1>
-      <p style="margin: 0; max-width: 780px; font: 400 13px/1.7 ${UI}; color: ${INK2};">標題列右側一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，一張 sheet 由下往上長出來，<strong style="font-weight: 600; color: ${INK};">浮在日檢視上面、不推擠它</strong>，裡面是<strong style="font-weight: 600; color: ${INK};">全部</strong>——不截斷、不收合、不用再點一次。預設停在一半，時間軸還看得到；往上拖就看完整份。</p>
+      <p style="margin: 0; max-width: 780px; font: 400 13px/1.7 ${UI}; color: ${INK2};">標題列右側一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，一張 sheet 由下往上長出來，<strong style="font-weight: 600; color: ${INK};">浮在日檢視上面、不推擠它</strong>，裡面是<strong style="font-weight: 600; color: ${INK};">全部</strong>——不截斷、不收合、不用再點一次。高度<strong style="font-weight: 600; color: ${INK};">固定</strong>：3 筆和 30 筆打開來一樣高，上面永遠留著日期和一段時間軸。</p>
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -498,9 +489,11 @@ boards['Anatomy.dc.html'] = page(
         'sheet · 高度與分組',
         kv([
           ['浮在上面', '不推擠時間軸；日檢視的版面一格都不動'],
-          ['預設高度', 'min(內容, 52vh)——短清單就是矮 sheet'],
-          ['第二段', '往上拖 / 上滑 → 82vh，看完整份'],
-          ['超過高度', '清單自己捲；組標題 sticky'],
+          ['高度', '固定 56% 頁框高（852 → 477），與內容無關'],
+          ['為什麼是 %', 'vh 在桌面的 device frame 裡會量錯，要量頁框'],
+          ['裝不下時', '清單自己捲；組標題 sticky'],
+          ['裝得下時', '下面就是留白——穩定比貼合重要'],
+          ['拖曳', '往下拖關掉；沒有第二段高度'],
           ['分組', '昨天 / 本週 / 更早，全部展開，沒有收合'],
           ['組標題', `600 11 ${MONO} · ${INK3} · sticky · 半透明白底`],
           ['組動作', '每組右上「整組移到今天」'],
@@ -537,7 +530,6 @@ const H = 852
 const row1 = [
   'Main.dc.html',
   'SheetShort.dc.html',
-  'SheetHalf.dc.html',
   'SheetAll.dc.html',
   'Confirm.dc.html',
   'SheetSelect.dc.html',
@@ -546,9 +538,8 @@ const row1 = [
 ]
 const titles = {
   'Main.dc.html': '收合（預設）',
-  'SheetShort.dc.html': '3 筆 · sheet 貼著內容',
-  'SheetHalf.dc.html': '15 筆 · 預設停在一半',
-  'SheetAll.dc.html': '15 筆 · 往上拖看到全部',
+  'SheetShort.dc.html': '3 筆 · 一樣的高度',
+  'SheetAll.dc.html': '15 筆 · 一樣的高度，捲動',
   'Confirm.dc.html': '刪除確認',
   'SheetSelect.dc.html': '選取模式',
   'Undo.dc.html': '移到今天之後',

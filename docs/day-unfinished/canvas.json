@@ -22,45 +22,38 @@
       "y": 0,
       "w": 393,
       "h": 852,
-      "title": "3 筆 · sheet 貼著內容"
+      "title": "3 筆 · 一樣的高度"
     },
-    "SheetHalf.dc.html": {
+    "SheetAll.dc.html": {
       "x": 946,
       "y": 0,
       "w": 393,
       "h": 852,
-      "title": "15 筆 · 預設停在一半"
-    },
-    "SheetAll.dc.html": {
-      "x": 1419,
-      "y": 0,
-      "w": 393,
-      "h": 852,
-      "title": "15 筆 · 往上拖看到全部"
+      "title": "15 筆 · 一樣的高度，捲動"
     },
     "Confirm.dc.html": {
-      "x": 1892,
+      "x": 1419,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "刪除確認"
     },
     "SheetSelect.dc.html": {
-      "x": 2365,
+      "x": 1892,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "選取模式"
     },
     "Undo.dc.html": {
-      "x": 2838,
+      "x": 2365,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "移到今天之後"
     },
     "Empty.dc.html": {
-      "x": 3311,
+      "x": 2838,
       "y": 0,
       "w": 393,
       "h": 852,
@@ -91,7 +84,6 @@
   "order": [
     "Main.dc.html",
     "SheetShort.dc.html",
-    "SheetHalf.dc.html",
     "SheetAll.dc.html",
     "Confirm.dc.html",
     "SheetSelect.dc.html",
