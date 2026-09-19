@@ -46,10 +46,11 @@ describe('the checkbox costs the block no vertical space', () => {
     expect(pxDecl('.pv2-event-block__check', 'height')).toBe(constant('TITLE_LH_SM'))
   })
 
-  it('the tall variant is one large title line box tall', () => {
-    expect(pxDecl('.pv2-event-block--tall .pv2-event-block__check', 'height')).toBe(
-      constant('TITLE_LH_LG')
-    )
+  // One title line box, and only one: no tier-scoped rule may give the button a height of its
+  // own, or the row budget starts lying about what fits.
+  it('no tier overrides the button height', () => {
+    const heights = block.match(/^\.pv2-event-block[^{]*__check \{[^}]*height:/gm) ?? []
+    expect(heights).toHaveLength(1)
   })
 })
 

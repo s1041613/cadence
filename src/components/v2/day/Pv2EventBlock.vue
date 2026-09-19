@@ -23,7 +23,7 @@
         @click.stop="emit('toggleDone')"
       >
         <span class="pv2-event-block__box">
-          <CdIcon v-if="done" name="check" :size="checkGlyph" :stroke-width="3" color="#fff" />
+          <CdIcon v-if="done" name="check" :size="CHECK_GLYPH" :stroke-width="3" color="#fff" />
         </span>
       </button>
 
@@ -80,21 +80,25 @@ import type { Subtask } from '@/types/subtask'
 // remainder with the event's own detail (where, what's on the checklist, the first line of the
 // notes) rather than leaving it blank.
 //
-// The three tiers, and why the thresholds are where they are:
+// The two tiers, and why the threshold is where it is:
 //
-//   compact  (< 47px, i.e. under ~40 min)  title and time share one row, as before. There is
-//                                          no room for a second line at this height and a
-//                                          shrunken two-line stack reads worse than one line.
-//   regular  (47–95px, ~40 min to 1½ hr)   the time drops UNDER the title. On one row the mono
+//   compact  (< 47px, i.e. under ~40 min)  title and time share one row. There is no room for
+//                                          a second line at this height and a shrunken
+//                                          two-line stack reads worse than one line.
+//   regular  (>= 47px)                     the time drops UNDER the title. On one row the mono
 //                                          time carried the same visual weight as the title it
 //                                          sits beside — the hierarchy was inverted.
-//   tall     (>= 96px)                     title at poster size (20px), and the detail list
-//                                          gets real room.
 //
-// Every threshold below is line-box arithmetic against the constants, not a taste number: the
-// tier boundaries ARE the height each tier's head occupies, so a block only enters a tier once
-// that tier actually fits inside it. Change a font size and the constant it feeds must change
-// with it, or a head starts overflowing its own block.
+// The head is the same size in both, and at every block height above them: a block earns MORE
+// DETAIL as it grows, never a bigger title. There was a third tier that set a 20px title above
+// ~87 minutes, and it made duration read as importance — the day's largest type landed on
+// whatever happened to run longest, which is lunch as often as it is the thing that matters.
+// Height is the clock, and the clock is not a priority.
+//
+// The threshold below is line-box arithmetic against the constants, not a taste number: it IS
+// the height the stacked head occupies, so a block only enters the tier once that head
+// actually fits inside it. Change a font size and the constant it feeds must change with it,
+// or a head starts overflowing its own block.
 const props = withDefaults(
   defineProps<{
     title: string
@@ -141,9 +145,8 @@ const emit = defineEmits<{
 
 // --- Line-box constants. Each mirrors a declaration in the stylesheet below. ---
 const PAD_Y = 12 // .pv2-event-block padding: 6px top + 6px bottom
-const TITLE_LH_SM = 19 // .pv2-event-block__title       15px/19px
-const TITLE_LH_LG = 24 // --tall .pv2-event-block__title 20px/24px
-const META_LH = 16 // .pv2-event-block__time         12px/16px
+const TITLE_LH_SM = 19 // .pv2-event-block__title  15px/19px
+const META_LH = 16 // .pv2-event-block__time   12px/16px
 const DETAIL_GAP = 2 // .pv2-event-block__details margin-top
 const DETAIL_LINE_H = 17 // one .pv2-event-block__details li
 
@@ -154,31 +157,20 @@ const DETAIL_LINE_H = 17 // one .pv2-event-block__details li
 // since an unreadable block is worse than one that borrows a few pixels.
 const MIN_CONTENT_HEIGHT = PAD_Y + TITLE_LH_SM // 31 — the compact head, title and time on one row
 const REGULAR_MIN = MIN_CONTENT_HEIGHT + META_LH // 47 — the same head with the time on its own row
-const TALL_MIN = 96 // ~85 min: the first height with room for a 20px title AND a detail line
 
 /** The height actually rendered — short blocks are floored, so the row budget must use this. */
 const renderedHeight = computed(() => Math.max(MIN_CONTENT_HEIGHT, props.height))
 
-const tier = computed<'compact' | 'regular' | 'tall'>(() => {
-  if (renderedHeight.value >= TALL_MIN) return 'tall'
-  if (renderedHeight.value >= REGULAR_MIN) return 'regular'
-  return 'compact'
-})
+const tier = computed<'compact' | 'regular'>(() =>
+  renderedHeight.value >= REGULAR_MIN ? 'regular' : 'compact'
+)
 
-/**
- * The checkmark inside the circle, by tier. It tracks the circle (13/14/15 in the stylesheet)
- * rather than staying one size: a 10px glyph drawn inside a 13px circle touches the rim, and an
- * 8px one rattles around inside a 15px circle.
- */
-const CHECK_GLYPH = { compact: 8, regular: 9, tall: 10 } as const
+/** The checkmark inside the 14px circle — one size, since the circle is one size. */
+const CHECK_GLYPH = 9
 
-const checkGlyph = computed(() => CHECK_GLYPH[tier.value])
-
-const headHeight = computed(() => {
-  if (tier.value === 'compact') return MIN_CONTENT_HEIGHT
-  if (tier.value === 'regular') return REGULAR_MIN
-  return PAD_Y + TITLE_LH_LG + META_LH
-})
+const headHeight = computed(() =>
+  tier.value === 'compact' ? MIN_CONTENT_HEIGHT : REGULAR_MIN
+)
 
 interface DetailLine {
   key: string
@@ -308,10 +300,6 @@ const blockStyle = computed(() => ({
   min-width: 0;
 }
 
-.pv2-event-block--tall .pv2-event-block__head {
-  gap: 10px;
-}
-
 .pv2-event-block__headtext {
   flex: 1;
   min-width: 0;
@@ -343,12 +331,12 @@ const blockStyle = computed(() => ({
  * The completion checkbox — tasks only.
  *
  * The button is one TITLE LINE BOX tall and centres the circle inside it, the same trick
- * .pv2-event-block__lead uses on a wrapped note: on regular and tall the time sits under the
+ * .pv2-event-block__lead uses on a wrapped note: on a regular block the time sits under the
  * title, and a checkbox centred on the head as a whole would float between the two lines
  * instead of level with the word it belongs to. It also means the checkbox costs the block no
- * vertical space at all — every constant above (PAD_Y, TITLE_LH_*, the tier thresholds, the
+ * vertical space at all — every constant above (PAD_Y, TITLE_LH_SM, the tier threshold, the
  * detail row budget) is untouched by it. The only cost is horizontal: the title gives up
- * box + gap, 21px on compact, 22px on regular and 25px on tall.
+ * box + gap, 22px in both tiers.
  */
 .pv2-event-block__check {
   position: relative;
@@ -361,15 +349,6 @@ const blockStyle = computed(() => ({
   display: grid;
   place-items: center;
   cursor: pointer;
-}
-
-.pv2-event-block--compact .pv2-event-block__check {
-  width: 13px;
-}
-
-.pv2-event-block--tall .pv2-event-block__check {
-  width: 15px;
-  height: 24px; /* TITLE_LH_LG */
 }
 
 /* A finger is not 14px. The hit area is pushed out past the circle without moving it, and it
@@ -392,16 +371,6 @@ const blockStyle = computed(() => ({
   display: grid;
   place-items: center;
   transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
-}
-
-.pv2-event-block--compact .pv2-event-block__box {
-  width: 13px;
-  height: 13px;
-}
-
-.pv2-event-block--tall .pv2-event-block__box {
-  width: 15px;
-  height: 15px;
 }
 
 .pv2-event-block__check:hover:not(:disabled) .pv2-event-block__box {
@@ -432,13 +401,6 @@ const blockStyle = computed(() => ({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* The only size step in the block. A block this tall is the day's headline event; at 15px it
-   read as a label floating in a field of colour. */
-.pv2-event-block--tall .pv2-event-block__title {
-  font: 600 20px/24px var(--cd-font-ui);
-  letter-spacing: -0.01em;
 }
 
 .pv2-event-block__time {

@@ -60,10 +60,12 @@ describe('layout constants mirror the stylesheet', () => {
     expect(constant('TITLE_LH_SM')).toBe(fontLineHeight('.pv2-event-block__title'))
   })
 
-  it('TITLE_LH_LG is the tall title line box', () => {
-    expect(constant('TITLE_LH_LG')).toBe(
-      fontLineHeight('.pv2-event-block--tall .pv2-event-block__title')
-    )
+  // The block deliberately has NO title size step: height is the clock, and a block that
+  // grew its type as it grew would render duration as importance. One font declaration for
+  // .pv2-event-block__title, and no tier-scoped rule allowed to override it.
+  it('the title is one size at every block height', () => {
+    const titleFonts = src.match(/^\.pv2-event-block[^{]*__title \{[^}]*font:/gm) ?? []
+    expect(titleFonts).toHaveLength(1)
   })
 
   it('META_LH is the time line box', () => {
@@ -94,13 +96,6 @@ describe('tier thresholds are the heights each tier actually occupies', () => {
   it('regular begins only once the stacked head fits', () => {
     expect(constant('PAD_Y') + constant('TITLE_LH_SM') + constant('META_LH')).toBe(47)
   })
-
-  it('tall begins above its own head, leaving room for at least one detail row', () => {
-    const tallHead = constant('PAD_Y') + constant('TITLE_LH_LG') + constant('META_LH')
-    expect(constant('TALL_MIN')).toBeGreaterThanOrEqual(
-      tallHead + constant('DETAIL_GAP') + constant('DETAIL_LINE_H')
-    )
-  })
 })
 
 describe('detail row budget at real block heights', () => {
@@ -109,11 +104,7 @@ describe('detail row budget at real block heights', () => {
 
   function rowsFor(height: number): number {
     const h = Math.max(31, height)
-    const head = h >= constant('TALL_MIN')
-      ? constant('PAD_Y') + constant('TITLE_LH_LG') + constant('META_LH')
-      : h >= 47
-        ? 47
-        : 31
+    const head = h >= 47 ? 47 : 31
     return Math.max(0, Math.floor((h - head - constant('DETAIL_GAP')) / constant('DETAIL_LINE_H')))
   }
 
@@ -131,6 +122,13 @@ describe('detail row budget at real block heights', () => {
 
   it('a four-hour block fills its height rather than leaving it blank', () => {
     expect(blockHeight(240)).toBe(270)
-    expect(rowsFor(blockHeight(240))).toBe(12)
+    expect(rowsFor(blockHeight(240))).toBe(13)
+  })
+
+  // What a long block gets for its height is ROWS, not a bigger head. A 90-minute block used
+  // to spend 5 of its px on a 20px title and show 2 details; the same block now shows 3.
+  it('a 90-minute block spends its height on detail, not on type', () => {
+    expect(blockHeight(90)).toBe(100)
+    expect(rowsFor(blockHeight(90))).toBe(3)
   })
 })
