@@ -17,3 +17,17 @@ export function notifySyncError(message: string, retry: () => void): void {
     actions: [{ label: 'retry', color: 'white', handler: retry }]
   })
 }
+
+// Confirmation toast for a write that can be taken back — a task moved onto another day, a
+// batch of them moved at once. Not `type: 'positive'` for the same reason notifySyncError
+// blanks its icon: the type's glyph arrives as a material-icons ligature and prints as the
+// literal word. A neutral toast with one action is the whole of what this needs.
+export function notifyUndo(message: string, undo: () => void): void {
+  Notify.create({
+    icon: '',
+    color: 'dark',
+    message,
+    timeout: 6000,
+    actions: [{ label: '復原', color: 'white', handler: undo }]
+  })
+}

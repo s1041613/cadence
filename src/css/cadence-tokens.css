@@ -145,6 +145,13 @@
   --pv2-accent-rgb: 222, 110, 140;
   --pv2-on-accent: #ffffff;
 
+  /* The same rose, darkened until it can carry text. --pv2-accent is 3.1:1 on the canvas, which
+   * is fine for the fills and glyphs it was picked for and not fine for an 11px count or a
+   * 12px action label; this one measures 5.8:1. Use it wherever the accent has to be READ —
+   * icon-only controls keep --pv2-accent. Same hue, so the two sit together without reading
+   * as two pinks. */
+  --pv2-accent-ink: #A8425E;
+
   /* The month poster's ink. The same slate as the body ink: the title carries the page on
    * size and weight, and the pink it used to wear competed with the chips under it. */
   --pv2-poster-ink: var(--pv2-ink);

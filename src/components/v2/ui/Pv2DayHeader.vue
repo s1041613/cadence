@@ -1,6 +1,7 @@
 <template>
   <!--
-    日檢視標題：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側 TODAY 鈕。
+    日檢視標題：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側控制叢集。
+    控制叢集＝未完成待辦鈕（有逾期時才畫）+ TODAY 鈕。
   -->
   <div class="pv2-dh">
     <div class="pv2-dh__row">
@@ -11,7 +12,28 @@
           <span class="pv2-dh__my">{{ monthYear }}</span>
         </span>
       </div>
-      <Pv2HeaderNav today-label="回到今天" @today="emit('today')" />
+      <div class="pv2-dh__controls">
+        <!-- 只有真的有逾期時才存在。一顆永遠只會說「沒有」的鈕是噪音，
+             而數字本身就是這顆鈕全部的內容。 -->
+        <button
+          v-if="unfinishedCount > 0"
+          type="button"
+          class="pv2-dh__unfinished"
+          :class="{ 'pv2-dh__unfinished--on': unfinishedOpen }"
+          :aria-pressed="unfinishedOpen"
+          :aria-label="`${unfinishedOpen ? '隱藏' : '顯示'} ${unfinishedCount} 筆未完成待辦`"
+          @click="emit('toggleUnfinished')"
+        >
+          <svg class="pv2-dh__unfinished-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="4" width="7.5" height="7.5" rx="2.2" />
+            <rect x="3" y="14" width="7.5" height="7.5" rx="2.2" />
+            <path d="M14.5 7.75H21M14.5 17.75H21" />
+          </svg>
+          <!-- 照實顯示，不截成 9+：47 筆和 10 筆不該長得一樣。 -->
+          <span class="pv2-dh__unfinished-count">{{ unfinishedCount }}</span>
+        </button>
+        <Pv2HeaderNav today-label="回到今天" @today="emit('today')" />
+      </div>
     </div>
   </div>
 </template>
@@ -23,10 +45,14 @@ defineProps<{
   dayNum: number
   dow: string // "FRI"
   monthYear: string // "JUL 2026"
+  /** Tasks dated before this day and still unticked. 0 hides the control entirely. */
+  unfinishedCount: number
+  unfinishedOpen: boolean
 }>()
 
 const emit = defineEmits<{
   today: []
+  toggleUnfinished: []
 }>()
 </script>
 
@@ -39,6 +65,74 @@ const emit = defineEmits<{
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
+}
+
+/* The pill sits level with TODAY rather than with the numeral's baseline: the two are one
+   control cluster, and .pv2-dh__row aligns on flex-end for the numeral's sake. */
+.pv2-dh__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding-bottom: 2px;
+}
+
+/* Same capsule as Pv2HeaderNav's TODAY — height, radius and shadow all match, because the
+   header already has a pill vocabulary and this is another pill in it. Not the month view's
+   glass segmented switch: that control picks between two sets of contents, this one opens a
+   list, and they should not share a shape. */
+.pv2-dh__unfinished {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  color: var(--pv2-ink-2);
+  cursor: pointer;
+}
+
+/* The 44px touch target, taken outside the layout box so the capsule stays 28 tall —
+   same construction as .pv2-typeswitch__seg. */
+.pv2-dh__unfinished::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  min-width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+
+/* --pv2-accent-ink, not --pv2-accent: this carries an 11px numeral, and the accent proper is
+   3.1:1 on white. */
+.pv2-dh__unfinished--on {
+  background: rgba(var(--pv2-accent-rgb), 0.12);
+  border-color: rgba(var(--pv2-accent-rgb), 0.38);
+  box-shadow: none;
+  color: var(--pv2-accent-ink);
+}
+
+.pv2-dh__unfinished-icon {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pv2-dh__unfinished-count {
+  font: 600 11px var(--cd-font-mono);
+  font-variant-numeric: var(--cd-numeric-aligned);
+  line-height: 1;
 }
 
 /* 大數字 + 右側 DOW/月年 疊放，底線對齊 */
