@@ -71,7 +71,8 @@ describe('what the checkbox is, and who gets one', () => {
     expect(asked, 'no stroke-width on the checkmark').not.toBeNull()
     const weights = /check:\s*\{[\s\S]*?weights:\s*\{([^}]*)\}/.exec(icons)
     expect(weights, 'no weights map for check in icons.ts').not.toBeNull()
-    expect([...weights![1].matchAll(/'([\d.]+)'/g)].map((m) => m[1])).toContain(asked![1])
+    const shipped = [...weights![1]!.matchAll(/'([\d.]+)'/g)].map((m) => m[1]!)
+    expect(shipped).toContain(asked![1]!)
   })
 
   it('it is a circle', () => {
