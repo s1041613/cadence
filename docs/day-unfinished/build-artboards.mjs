@@ -11,9 +11,7 @@ const INK3 = '#8E8E8E'
 const INK4 = '#B5B5B5'
 const LINE_SOFT = '#EFEFEF'
 const FILL = '#F3F3F3'
-const ACCENT = '#DE6E8C'
-// Darkened accent for text/glyphs: #DE6E8C is 3.1:1 on white and fails at these sizes.
-const ACCENT_INK = '#A8425E'
+const ACCENT_INK = '#A8425E' // --pv2-accent is 3.1:1 on white; text and glyphs need this one
 const ACCENT_TINT = 'rgba(222,110,140,.12)'
 const ACCENT_EDGE = 'rgba(222,110,140,.38)'
 const UI = "'Inter','Noto Sans TC',sans-serif"
@@ -66,7 +64,7 @@ const ICON_UNDO = '<path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H9"/><path d="M8 4.5 3.5
 // ---- pieces ----
 
 /** Day header. `toggle`: 'off' | 'on' | 'none' (no unfinished tasks — the control is not drawn). */
-function header({ toggle = 'off', count = 3 } = {}) {
+function header({ toggle = 'off', count = 15 } = {}) {
   const on = toggle === 'on'
   const toggleBtn =
     toggle === 'none'
@@ -98,14 +96,11 @@ const ACT_BTN = (label, icon, kind) => {
   return `<button type="button" aria-label="${label}" style="flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; border: none; background: ${tinted ? ACCENT_TINT : 'transparent'}; color: ${tinted ? ACCENT_INK : INK3}; cursor: pointer;">${svg(icon, 16)}</button>`
 }
 
-/**
- * One unfinished row. `state`: 'idle' | 'confirm' (inline delete confirmation) |
- * 'select' (Option B multi-select).
- */
+/** One overdue row. `state`: 'idle' | 'confirm' | 'select'. */
 function row({ title, meta, color, state = 'idle', checked = false, last = false }) {
-  const rule = last ? '' : `<div style="height: 1px; background: ${LINE_SOFT}; margin-left: 27px;"></div>`
+  const rule = last ? '' : `<div style="height: 1px; background: ${LINE_SOFT}; margin-left: 31px;"></div>`
   if (state === 'confirm') {
-    return `<div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px; background: #FDF6F8;">
+    return `<div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px; background: #FDF6F8;">
         <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: ${color};"></span>
         <span style="flex-grow: 1; min-width: 0; font: 500 13px/17px ${UI}; color: ${INK2};">刪除「${title}」？</span>
         <button type="button" style="flex: none; height: 30px; padding: 0 10px; border: none; border-radius: 9px; background: transparent; color: ${INK2}; font: 600 12px ${UI}; cursor: pointer;">取消</button>
@@ -118,10 +113,8 @@ function row({ title, meta, color, state = 'idle', checked = false, last = false
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: ${color};"></span>`
       : `<span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: ${color};"></span>`
   const tail =
-    state === 'select'
-      ? ''
-      : `${ACT_BTN('移到今天', ICON_MOVE, 'primary')}${ACT_BTN('刪除', ICON_TRASH, 'quiet')}`
-  const inner = `<div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+    state === 'select' ? '' : `${ACT_BTN('移到今天', ICON_MOVE, 'primary')}${ACT_BTN('刪除', ICON_TRASH, 'quiet')}`
+  const inner = `<div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       ${lead}
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
         <span style="font: 600 14px/18px ${UI}; color: ${INK}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</span>
@@ -134,50 +127,120 @@ function row({ title, meta, color, state = 'idle', checked = false, last = false
     : `${inner}${rule}`
 }
 
-const ROWS = [
-  { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do },
-  { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
-  { title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan }
+// ---- the data the boards draw ----
+const GROUPS = [
+  {
+    label: '昨天 · 2',
+    rows: [
+      { title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan },
+      { title: '回覆設計系統的 PR', meta: '09/18 · 逾期 1 天', color: Q.do }
+    ]
+  },
+  {
+    label: '本週 · 4',
+    rows: [
+      { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
+      { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do },
+      { title: '補上 focus 頁的 e2e', meta: '09/15 · 逾期 4 天', color: Q.plan },
+      { title: '整理 Q3 收據', meta: '09/14 · 逾期 5 天', color: Q.later }
+    ]
+  },
+  {
+    label: '更早 · 9',
+    rows: [
+      { title: '把設計稿的字級表補完', meta: '09/08 · 逾期 11 天', color: Q.plan },
+      { title: '退訂那個電子報', meta: '09/07 · 逾期 12 天', color: Q.later },
+      { title: '回 Ian 的 email', meta: '09/05 · 逾期 14 天', color: Q.quick },
+      { title: '換機車機油', meta: '09/02 · 逾期 17 天', color: Q.later },
+      { title: '寫 focus timer 的 ADR', meta: '08/30 · 逾期 20 天', color: Q.plan },
+      { title: '整理桌機的截圖資料夾', meta: '08/28 · 逾期 22 天', color: Q.later },
+      { title: '問房東冷氣的事', meta: '08/25 · 逾期 25 天', color: Q.quick },
+      { title: '備份舊硬碟', meta: '08/21 · 逾期 29 天', color: Q.plan },
+      { title: '把 v1 的 token 表存檔', meta: '08/18 · 逾期 32 天', color: Q.later }
+    ]
+  }
 ]
 
-/** The unfinished panel. `variant`: 'actions' | 'confirm' | 'select'. */
-function panel({ variant = 'actions' } = {}) {
-  const select = variant === 'select'
-  const body = ROWS.map((r, i) =>
-    row({
-      ...r,
-      state: variant === 'confirm' && i === 1 ? 'confirm' : select ? 'select' : 'idle',
-      checked: select && i !== 2,
-      last: i === ROWS.length - 1
-    })
-  ).join('\n      ')
-  const head = `<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px;">
-        <span style="font: 600 11px ${MONO}; letter-spacing: .12em; color: ${INK3};">UNFINISHED · ${ROWS.length}</span>
+const SHORT_GROUPS = [
+  { label: '昨天 · 1', rows: [{ title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan }] },
+  {
+    label: '本週 · 2',
+    rows: [
+      { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
+      { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do }
+    ]
+  }
+]
+
+function groupHead(label, { select = false } = {}) {
+  return `<div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 18px 8px; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        <span style="font: 600 11px ${MONO}; letter-spacing: .1em; color: ${INK3};">${label}</span>
         ${
           select
-            ? `<button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">全選</button>`
-            : `<div style="display: flex; align-items: center; gap: 4px;">
-          <button type="button" style="border: none; background: none; padding: 4px 6px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">全部移到今天</button>
-          <button type="button" aria-label="收起未完成待辦" style="display: grid; place-items: center; width: 24px; height: 24px; border: none; border-radius: 8px; background: none; color: ${INK3}; cursor: pointer;">${svg(ICON_CHEVRON_UP, 15)}</button>
-        </div>`
+            ? ''
+            : `<button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">整組移到今天</button>`
         }
       </div>`
-  const foot = select
-    ? `<div style="display: flex; align-items: center; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid ${LINE_SOFT};">
-        <button type="button" style="flex-grow: 1; height: 38px; border: none; border-radius: 12px; background: ${ACCENT_INK}; color: #fff; font: 600 13px ${UI}; cursor: pointer;">移到今天 · 2</button>
-        <button type="button" aria-label="刪除選取的 2 筆" style="flex: none; display: grid; place-items: center; width: 38px; height: 38px; border: none; border-radius: 12px; background: ${FILL}; color: ${INK2}; cursor: pointer;">${svg(ICON_TRASH, 17)}</button>
-      </div>`
+}
+
+/**
+ * The one surface. Height follows the content up to MAX; past that the list scrolls,
+ * and every overdue task is in it — no cap, no collapsed group, no second tap.
+ */
+function sheet({ groups, count, h, select = false, confirmAt = null, clipped = false } = {}) {
+  let n = -1
+  const body = groups
+    .map(
+      (g) =>
+        `${groupHead(g.label, { select })}
+      ${g.rows
+        .map((r, i) => {
+          n += 1
+          return row({
+            ...r,
+            state: confirmAt === n ? 'confirm' : select ? 'select' : 'idle',
+            checked: select && [0, 2, 3].includes(n),
+            last: i === g.rows.length - 1
+          })
+        })
+        .join('\n      ')}`
+    )
+    .join('\n      ')
+
+  const fade = clipped
+    ? `<div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);"></div>`
     : ''
-  return `<div style="margin: 16px 22px 0; border-radius: 18px; background: #fff; border: 1px solid ${LINE_SOFT}; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 28px -16px rgba(0,0,0,.22); overflow: hidden;">
-      ${head}
-      <div style="height: 1px; background: ${LINE_SOFT}; margin: 0 14px;"></div>
-      ${body}
-      ${foot}
+
+  const foot = select
+    ? `<div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 18px 26px; border-top: 1px solid ${LINE_SOFT}; background: #fff;">
+        <button type="button" style="flex-grow: 1; height: 44px; border: none; border-radius: 14px; background: ${ACCENT_INK}; color: #fff; font: 600 14px ${UI}; cursor: pointer;">移到今天 · 3</button>
+        <button type="button" aria-label="刪除選取的 3 筆" style="flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: none; border-radius: 14px; background: ${FILL}; color: ${INK2}; cursor: pointer;">${svg(ICON_TRASH, 18)}</button>
+      </div>`
+    : `<div style="flex: none; height: 26px;"></div>`
+
+  return `<div style="position: absolute; inset: 0; z-index: 30; display: flex; align-items: flex-end; background: rgba(0,0,0,.32);">
+      <div role="dialog" aria-label="未完成待辦" style="display: flex; flex-direction: column; width: 100%; height: ${h}px; border-radius: 28px 28px 0 0; background: #fff; box-shadow: 0 -18px 44px -20px rgba(0,0,0,.4); overflow: hidden;">
+        <div style="flex: none; display: grid; place-items: center; padding: 8px 0 2px;">
+          <span style="width: 38px; height: 4px; border-radius: 999px; background: ${LINE_SOFT};"></span>
+        </div>
+        <div style="flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 8px 18px 10px; border-bottom: 1px solid ${LINE_SOFT};">
+          <span style="display: flex; align-items: baseline; gap: 8px;">
+            <span style="font: 600 17px ${UI}; color: ${INK};">未完成</span>
+            <span style="font: 500 12px ${MONO}; color: ${INK3};">${count} 筆</span>
+          </span>
+          <button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 12.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">${select ? '完成' : '選取'}</button>
+        </div>
+        <div style="position: relative; flex-grow: 1; min-height: 0; overflow: hidden;">
+          ${body}
+          ${fade}
+        </div>
+        ${foot}
+      </div>
     </div>`
 }
 
-/** The time grid behind everything. `squeeze` = px of height the open panel takes from it. */
-function grid({ squeeze = 0, highlight = false } = {}) {
+/** The time grid behind everything. */
+function grid({ highlight = false } = {}) {
   const hours = ['09', '10', '11', '12', '13', '14', '15', '16']
   const lines = hours
     .map(
@@ -185,18 +248,17 @@ function grid({ squeeze = 0, highlight = false } = {}) {
         <span style="position: absolute; left: 0; top: ${i * 58 - 7}px; font: 500 12px/14px ${UI}; color: ${INK3};">${h}</span>`
     )
     .join('\n        ')
-  const block = (top, height, color, title, time, done = false, ring = false) =>
+  const block = (top, height, color, title, time, ring = false) =>
     `<div style="position: absolute; left: 44px; right: 0; top: ${top}px; height: ${height}px; border-radius: 8px; padding: 6px 12px; overflow: hidden; background: color-mix(in srgb, ${color} 10%, #fff); box-shadow: ${ring ? `0 0 0 2px ${ACCENT_EDGE}, ` : ''}0 1px 2px rgba(0,0,0,.05), 0 6px 16px -6px rgba(0,0,0,.16);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid ${done ? ACCENT_INK : 'rgba(0,0,0,.28)'}; background: ${done ? ACCENT_INK : 'transparent'};"></span>
+            <span style="flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28);"></span>
             <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
               <span style="font: 600 15px/19px ${UI}; color: ${INK}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</span>
               <span style="font: 500 12px/16px ${MONO}; color: ${INK2};">${time}</span>
             </span>
           </div>
         </div>`
-  const moved = highlight ? block(58, 52, Q.do, '送出設計稿給 Zoe', '10:00', false, true) : ''
-  return `<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: ${18 - Math.min(squeeze, 6)}px 22px 0;">
+  return `<div style="flex-grow: 1; min-height: 0; display: flex; flex-direction: column; padding: 18px 22px 0;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span style="flex: none; width: 58px; font: 600 11px ${MONO}; letter-spacing: .12em; color: ${INK3};">ALL-DAY</span>
         <span style="display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: 6px; border-left: 3px solid ${Q.later}; background: rgba(201,163,179,.16); font: 500 12px ${UI}; color: ${INK};">團隊 offsite</span>
@@ -204,7 +266,7 @@ function grid({ squeeze = 0, highlight = false } = {}) {
       <div style="flex: none; height: 1px; background: rgba(0,0,0,.16); margin-top: 12px;"></div>
       <div style="position: relative; flex-grow: 1; min-height: 0; margin-top: 10px; overflow: hidden;">
         ${lines}
-        ${moved}
+        ${highlight ? block(58, 52, Q.do, '送出設計稿給 Zoe', '10:00', true) : ''}
         ${block(145, 74, Q.plan, '設計評審', '11:30 · 還有 1 小時')}
         ${block(290, 52, Q.quick, '回信給客戶', '14:00')}
       </div>
@@ -223,74 +285,135 @@ const nav = `<div style="position: absolute; left: 50%; bottom: 22px; transform:
 function toast(text, action) {
   return `<div role="status" style="position: absolute; left: 22px; right: 22px; bottom: 92px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #1B1B1B; box-shadow: 0 14px 34px -16px rgba(0,0,0,.6);">
       <span style="flex-grow: 1; font: 500 13px ${UI}; color: #fff;">${text}</span>
-      ${
-        action
-          ? `<button type="button" style="flex: none; display: inline-flex; align-items: center; gap: 5px; border: none; background: none; padding: 4px 2px; font: 600 12.5px ${UI}; color: #FFB3C6; cursor: pointer;">${svg(ICON_UNDO, 13)} ${action}</button>`
-          : ''
-      }
+      <button type="button" style="flex: none; display: inline-flex; align-items: center; gap: 5px; border: none; background: none; padding: 4px 2px; font: 600 12.5px ${UI}; color: #FFB3C6; cursor: pointer;">${svg(ICON_UNDO, 13)} ${action}</button>
     </div>`
 }
 
-function phone(inner) {
-  return `<div style="position: relative; width: 393px; height: 852px; overflow: hidden; background: #fff; display: flex; flex-direction: column;">
+const screen = (inner, { withNav = true } = {}) =>
+  `<div style="position: relative; width: 393px; height: 852px; overflow: hidden; background: #fff; display: flex; flex-direction: column;">
     ${inner}
-    ${nav}
+    ${withNav ? nav : ''}
   </div>`
-}
 
 // ---- boards ----
 const boards = {}
 
-boards['Main.dc.html'] = page(
-  '日檢視 · 收合',
+boards['Main.dc.html'] = page('日檢視 · 收合', 393, 852, screen(`${header({ toggle: 'off', count: 15 })}
+    ${grid()}`))
+
+boards['SheetShort.dc.html'] = page(
+  '3 筆 · sheet 貼著內容',
   393,
   852,
-  phone(`${header({ toggle: 'off', count: 3 })}
-    ${grid()}`)
+  screen(
+    `${header({ toggle: 'on', count: 3 })}
+    ${grid()}
+    ${sheet({ groups: SHORT_GROUPS, count: 3, h: 320 })}`,
+    { withNav: false }
+  )
 )
 
-boards['Expanded.dc.html'] = page(
-  '日檢視 · 未完成面板展開',
+boards['SheetHalf.dc.html'] = page(
+  '15 筆 · 預設停在一半',
   393,
   852,
-  phone(`${header({ toggle: 'on', count: 3 })}
-    ${panel({ variant: 'actions' })}
-    ${grid({ squeeze: 6 })}`)
+  screen(
+    `${header({ toggle: 'on', count: 15 })}
+    ${grid()}
+    ${sheet({ groups: GROUPS, count: 15, h: 450, clipped: true })}`,
+    { withNav: false }
+  )
+)
+
+boards['SheetAll.dc.html'] = page(
+  '15 筆 · 往上拖看到全部',
+  393,
+  852,
+  screen(
+    `${header({ toggle: 'on', count: 15 })}
+    ${grid()}
+    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true })}`,
+    { withNav: false }
+  )
 )
 
 boards['Confirm.dc.html'] = page(
   '刪除確認',
   393,
   852,
-  phone(`${header({ toggle: 'on', count: 3 })}
-    ${panel({ variant: 'confirm' })}
-    ${grid({ squeeze: 6 })}`)
+  screen(
+    `${header({ toggle: 'on', count: 15 })}
+    ${grid()}
+    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true, confirmAt: 3 })}`,
+    { withNav: false }
+  )
+)
+
+boards['SheetSelect.dc.html'] = page(
+  '選取模式',
+  393,
+  852,
+  screen(
+    `${header({ toggle: 'on', count: 15 })}
+    ${grid()}
+    ${sheet({ groups: GROUPS, count: 15, h: 700, clipped: true, select: true })}`,
+    { withNav: false }
+  )
 )
 
 boards['Undo.dc.html'] = page(
   '移到今天之後',
   393,
   852,
-  phone(`${header({ toggle: 'none' })}
+  screen(`${header({ toggle: 'on', count: 12 })}
     ${grid({ highlight: true })}
     ${toast('3 筆已移到今天', '復原')}`)
 )
 
-boards['Empty.dc.html'] = page(
-  '沒有未完成',
+boards['Empty.dc.html'] = page('沒有未完成', 393, 852, screen(`${header({ toggle: 'none' })}
+    ${grid()}`))
+
+// ---- 沒採用：內嵌面板 ----
+function inlinePanel({ capped = false } = {}) {
+  const shown = capped
+    ? [...GROUPS[0].rows, ...GROUPS[1].rows.slice(0, 2)]
+    : [...GROUPS[0].rows, GROUPS[1].rows[0]]
+  const foot = capped
+    ? `<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 44px; padding: 0 18px; border: none; border-top: 1px solid ${LINE_SOFT}; background: none; font: 600 12.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">
+        <span>還有 11 筆 · 查看全部</span>
+        ${svg('<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>', 15)}
+      </button>`
+    : ''
+  return `<div style="margin: 16px 22px 0; border-radius: 18px; background: #fff; border: 1px solid ${LINE_SOFT}; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 28px -16px rgba(0,0,0,.22); overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 10px;">
+        <span style="font: 600 11px ${MONO}; letter-spacing: .12em; color: ${INK3};">UNFINISHED · ${capped ? 15 : 3}</span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <button type="button" style="border: none; background: none; padding: 4px 6px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">全部移到今天</button>
+          <button type="button" aria-label="收起" style="display: grid; place-items: center; width: 24px; height: 24px; border: none; border-radius: 8px; background: none; color: ${INK3}; cursor: pointer;">${svg(ICON_CHEVRON_UP, 15)}</button>
+        </div>
+      </div>
+      <div style="height: 1px; background: ${LINE_SOFT}; margin: 0 18px;"></div>
+      ${shown.map((r, i) => row({ ...r, last: i === shown.length - 1 })).join('\n      ')}
+      ${foot}
+    </div>`
+}
+
+boards['Rejected-Panel.dc.html'] = page(
+  '沒採用 A · 內嵌面板',
   393,
   852,
-  phone(`${header({ toggle: 'none' })}
+  screen(`${header({ toggle: 'on', count: 3 })}
+    ${inlinePanel()}
     ${grid()}`)
 )
 
-boards['MultiSelect.dc.html'] = page(
-  '替代方案 B · 多選',
+boards['Rejected-Capped.dc.html'] = page(
+  '沒採用 B · 面板截斷',
   393,
   852,
-  phone(`${header({ toggle: 'on', count: 3 })}
-    ${panel({ variant: 'select' })}
-    ${grid({ squeeze: 6 })}`)
+  screen(`${header({ toggle: 'on', count: 15 })}
+    ${inlinePanel({ capped: true })}
+    ${grid()}`)
 )
 
 // ---- spec sheet ----
@@ -316,25 +439,25 @@ const stage = (inner, h = 120) =>
 boards['Anatomy.dc.html'] = page(
   '規格',
   1040,
-  820,
-  `<div style="width: 1040px; height: 820px; padding: 48px 48px 52px; background: #FBFBFB; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
+  860,
+  `<div style="width: 1040px; height: 860px; padding: 44px 48px 48px; background: #FBFBFB; display: flex; flex-direction: column; gap: 22px; overflow: hidden;">
     <div style="display: flex; flex-direction: column; gap: 8px;">
       <span style="font: 600 11px ${UI}; letter-spacing: .14em; text-transform: uppercase; color: ${INK3};">Cadence · Day view</span>
-      <h1 style="margin: 0; font: 700 34px/1.1 ${UI}; letter-spacing: -.02em; color: ${INK};">未完成待辦面板</h1>
-      <p style="margin: 0; max-width: 760px; font: 400 13px/1.7 ${UI}; color: ${INK2};">標題列右側多一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，面板從標題與時間軸之間長出來；每一列可以移到這一天，或刪掉。</p>
+      <h1 style="margin: 0; font: 700 34px/1.1 ${UI}; letter-spacing: -.02em; color: ${INK};">未完成待辦</h1>
+      <p style="margin: 0; max-width: 780px; font: 400 13px/1.7 ${UI}; color: ${INK2};">標題列右側一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，一張 sheet 由下往上長出來，<strong style="font-weight: 600; color: ${INK};">浮在日檢視上面、不推擠它</strong>，裡面是<strong style="font-weight: 600; color: ${INK};">全部</strong>——不截斷、不收合、不用再點一次。預設停在一半，時間軸還看得到；往上拖就看完整份。</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       ${specPanel(
         '切換鈕 · 三種狀態',
         `${stage(
           `<div style="display: flex; align-items: center; gap: 26px; transform: scale(1.6);">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <button type="button" aria-label="顯示 3 筆未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid transparent; border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06); color: ${INK2}; cursor: pointer;">${svg(ICON_UNCHECKED, 13, 1.9)}<span style="font: 600 11px ${MONO}; line-height: 1;">3</span></button>
+              <button type="button" aria-label="顯示 15 筆未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid transparent; border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06); color: ${INK2}; cursor: pointer;">${svg(ICON_UNCHECKED, 13, 1.9)}<span style="font: 600 11px ${MONO}; line-height: 1;">15</span></button>
               <span style="font: 500 7px ${UI}; letter-spacing: .1em; color: ${INK3};">OFF</span>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <button type="button" aria-label="隱藏未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid ${ACCENT_EDGE}; border-radius: 999px; background: ${ACCENT_TINT}; color: ${ACCENT_INK}; cursor: pointer;">${svg(ICON_UNCHECKED, 13, 1.9)}<span style="font: 600 11px ${MONO}; line-height: 1;">3</span></button>
+              <button type="button" aria-label="隱藏未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid ${ACCENT_EDGE}; border-radius: 999px; background: ${ACCENT_TINT}; color: ${ACCENT_INK}; cursor: pointer;">${svg(ICON_UNCHECKED, 13, 1.9)}<span style="font: 600 11px ${MONO}; line-height: 1;">15</span></button>
               <span style="font: 500 7px ${UI}; letter-spacing: .1em; color: ${INK3};">ON</span>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
@@ -342,21 +465,21 @@ boards['Anatomy.dc.html'] = page(
               <span style="font: 500 7px ${UI}; letter-spacing: .1em; color: ${INK3};">COUNT = 0</span>
             </div>
           </div>`,
-          132
+          128
         )}
         ${kv([
           ['尺寸', '28 高 · 圓角 999 · 命中區 44×44（::after）'],
-          ['關閉態', `白底 + 0 2px 6px rgba(0,0,0,.06)，同 TODAY 鈕`],
+          ['關閉態', '白底 + 0 2px 6px rgba(0,0,0,.06)，同 TODAY 鈕'],
           ['開啟態', `${ACCENT_TINT} 底、${ACCENT_EDGE} 邊、${ACCENT_INK} 墨`],
-          ['數字', `600 11px ${MONO}`],
+          ['數字', `600 11px ${MONO}，照實顯示，不截成 9+`],
           ['沒有逾期時', '整顆不 render，TODAY 鈕遞補位置']
         ])}`
       )}
       ${specPanel(
         '列 · 解剖',
         `${stage(
-          `<div style="width: 349px; border-radius: 14px; background: #fff; border: 1px solid ${LINE_SOFT};">${row({ ...ROWS[0], last: true })}</div>`,
-          132
+          `<div style="width: 349px; border-radius: 14px; background: #fff; border: 1px solid ${LINE_SOFT};">${row({ ...GROUPS[1].rows[1], last: true })}</div>`,
+          128
         )}
         ${kv([
           ['列高', '48（9 上下留白 + 30 內容）'],
@@ -370,179 +493,40 @@ boards['Anatomy.dc.html'] = page(
       )}
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       ${specPanel(
-        '資料規則',
+        'sheet · 高度與分組',
         kv([
-          ['納入條件', "type === 'quadrant' &amp;&amp; !done"],
-          ['', 'date &lt; 檢視中的日期'],
-          ['', 'calendarsStore.isVisible(calendarId)'],
-          ['', 'ownerId 是自己（別人的列唯讀，不納入）'],
-          ['排序', 'date 由舊到新，同日照 start'],
-          ['上限', '不截斷；面板 max-height 232，自身捲動'],
-          ['移到今天', 'date = 檢視中的日期；endDate 同步平移'],
-          ['', 'start / end / allDay 原樣保留'],
-          ['刪除', 'tasksStore.deleteTask（已有樂觀更新 + 失敗回滾）']
+          ['浮在上面', '不推擠時間軸；日檢視的版面一格都不動'],
+          ['預設高度', 'min(內容, 52vh)——短清單就是矮 sheet'],
+          ['第二段', '往上拖 / 上滑 → 82vh，看完整份'],
+          ['超過高度', '清單自己捲；組標題 sticky'],
+          ['分組', '昨天 / 本週 / 更早，全部展開，沒有收合'],
+          ['組標題', `600 11 ${MONO} · ${INK3} · sticky · 半透明白底`],
+          ['組動作', '每組右上「整組移到今天」'],
+          ['排序', '組內 date 由舊到新，同日照 start'],
+          ['頂層', '沒有「全部移到今天」——批次走「選取」'],
+          ['選取模式', '圓形 checkbox + 底部「移到今天 · N」/ 刪除']
         ])
       )}
       ${specPanel(
-        '狀態與回饋',
+        '資料 · 狀態 · 回饋',
         kv([
-          ['開關狀態', 'ui-store 的 ref，不同步、重整回到關閉'],
-          ['換日', '面板不關，數字與內容跟著新日期重算'],
-          ['清空後', '最後一列處理完 → 面板自行收起，鈕消失'],
-          ['移到今天', 'toast「N 筆已移到今天」+ 復原'],
-          ['刪除', '列內就地確認（取消 / 刪除），不用 toast'],
-          ['a11y', '鈕 aria-pressed；面板 role="region" + aria-label'],
-          ['動態', '高度 200ms var(--cd-ease-standard)；reduce-motion 直接切換']
+          ['納入條件', "type === 'quadrant' &amp;&amp; !done"],
+          ['', 'date &lt; 檢視中的日期'],
+          ['', 'isVisible(calendarId) &amp;&amp; ownerId 是自己'],
+          ['上限', '沒有上限，也沒有回看天數的上限'],
+          ['移到今天', 'date = 檢視中的日期；endDate 同步平移'],
+          ['', 'start / end / allDay 原樣保留'],
+          ['刪除', '列內就地確認 → tasksStore.deleteTask'],
+          ['移動回饋', 'toast「N 筆已移到今天」+ 復原'],
+          ['清空後', 'sheet 自己關掉，鈕消失'],
+          ['a11y', 'aria-pressed；sheet role="dialog" + aria-label']
         ])
       )}
     </div>
   </div>`
 )
-
-
-// ---- 很多筆的時候 ----
-
-/** Panel footer that hands a long list over to the sheet. */
-function overflowRow(rest) {
-  return `<button type="button" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 44px; padding: 0 14px; border: none; border-top: 1px solid ${LINE_SOFT}; background: none; font: 600 12.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">
-      <span>還有 ${rest} 筆 · 查看全部</span>
-      ${svg('<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>', 15)}
-    </button>`
-}
-
-/** The inline panel, capped at 4 rows, when the backlog is long. */
-function cappedPanel() {
-  const shown = [
-    { title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan },
-    { title: '回覆設計系統的 PR', meta: '09/18 · 逾期 1 天', color: Q.do },
-    { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
-    { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do }
-  ]
-  return `<div style="margin: 16px 22px 0; border-radius: 18px; background: #fff; border: 1px solid ${LINE_SOFT}; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 12px 28px -16px rgba(0,0,0,.22); overflow: hidden;">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px;">
-        <span style="font: 600 11px ${MONO}; letter-spacing: .12em; color: ${INK3};">UNFINISHED · 15</span>
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <button type="button" style="border: none; background: none; padding: 4px 6px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">全部移到今天</button>
-          <button type="button" aria-label="收起未完成待辦" style="display: grid; place-items: center; width: 24px; height: 24px; border: none; border-radius: 8px; background: none; color: ${INK3}; cursor: pointer;">${svg(ICON_CHEVRON_UP, 15)}</button>
-        </div>
-      </div>
-      <div style="height: 1px; background: ${LINE_SOFT}; margin: 0 14px;"></div>
-      ${shown.map((r, i) => row({ ...r, last: i === shown.length - 1 })).join('\n      ')}
-      ${overflowRow(11)}
-    </div>`
-}
-
-const GROUPS = [
-  {
-    label: '昨天 · 2',
-    rows: [
-      { title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan },
-      { title: '回覆設計系統的 PR', meta: '09/18 · 逾期 1 天', color: Q.do }
-    ]
-  },
-  {
-    label: '本週 · 4',
-    rows: [
-      { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
-      { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do },
-      { title: '補上 focus 頁的 e2e', meta: '09/15 · 逾期 4 天', color: Q.plan },
-      { title: '整理 Q3 收據', meta: '09/14 · 逾期 5 天', color: Q.later }
-    ]
-  }
-]
-
-function groupHead(label, { collapsed = false, select = false } = {}) {
-  return `<div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 8px; background: #fff;">
-        <span style="display: inline-flex; align-items: center; gap: 6px; font: 600 11px ${MONO}; letter-spacing: .1em; color: ${INK3};">
-          ${collapsed ? `<span style="display: inline-grid; place-items: center; color: ${INK3};">${svg('<path d="m8 5.5 6.5 6.5L8 18.5"/>', 13)}</span>` : ''}
-          ${label}
-        </span>
-        ${
-          select || collapsed
-            ? ''
-            : `<button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 11.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">整組移到今天</button>`
-        }
-      </div>`
-}
-
-/** The full-height sheet a long backlog opens into. `select` = multi-select mode. */
-function sheet({ select = false } = {}) {
-  const body = GROUPS.map(
-    (g) =>
-      `${groupHead(g.label, { select })}
-      ${g.rows
-        .map((r, i) =>
-          row({ ...r, state: select ? 'select' : 'idle', checked: select && i < 3, last: i === g.rows.length - 1 })
-        )
-        .join('\n      ')}`
-  ).join('\n      ')
-
-  const collapsed = `${groupHead('更早 · 9', { collapsed: true, select })}
-      <div style="padding: 0 18px 4px;">
-        <span style="font: 400 11.5px/1.6 ${UI}; color: ${INK4};">收起來的不會消失，數字照算。</span>
-      </div>`
-
-  const foot = select
-    ? `<div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 18px 26px; border-top: 1px solid ${LINE_SOFT}; background: #fff;">
-        <button type="button" style="flex-grow: 1; height: 44px; border: none; border-radius: 14px; background: ${ACCENT_INK}; color: #fff; font: 600 14px ${UI}; cursor: pointer;">移到今天 · 3</button>
-        <button type="button" aria-label="刪除選取的 3 筆" style="flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: none; border-radius: 14px; background: ${FILL}; color: ${INK2}; cursor: pointer;">${svg(ICON_TRASH, 18)}</button>
-      </div>`
-    : ''
-
-  return `<div style="position: absolute; inset: 0; z-index: 30; display: flex; align-items: flex-end; background: rgba(0,0,0,.32);">
-      <div role="dialog" aria-label="未完成待辦" style="display: flex; flex-direction: column; width: 100%; height: 672px; border-radius: 28px 28px 0 0; background: #fff; box-shadow: 0 -18px 44px -20px rgba(0,0,0,.4); overflow: hidden;">
-        <div style="flex: none; display: grid; place-items: center; padding: 8px 0 2px;">
-          <span style="width: 38px; height: 4px; border-radius: 999px; background: ${LINE_SOFT};"></span>
-        </div>
-        <div style="flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 8px 18px 10px;">
-          <span style="display: flex; align-items: baseline; gap: 8px;">
-            <span style="font: 600 17px ${UI}; color: ${INK};">未完成</span>
-            <span style="font: 500 12px ${MONO}; color: ${INK3};">15 筆</span>
-          </span>
-          <button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 12.5px ${UI}; color: ${ACCENT_INK}; cursor: pointer;">${select ? '完成' : '選取'}</button>
-        </div>
-        <div style="flex-grow: 1; min-height: 0; overflow: hidden; border-top: 1px solid ${LINE_SOFT};">
-          ${body}
-          ${collapsed}
-        </div>
-        ${foot}
-      </div>
-    </div>`
-}
-
-boards['Many.dc.html'] = page(
-  '面板 · 很多筆',
-  393,
-  852,
-  phone(`${header({ toggle: 'on', count: 15 })}
-    ${cappedPanel()}
-    ${grid({ squeeze: 6 })}`)
-)
-
-boards['Sheet.dc.html'] = page(
-  '全部未完成 · sheet',
-  393,
-  852,
-  `<div style="position: relative; width: 393px; height: 852px; overflow: hidden; background: #fff; display: flex; flex-direction: column;">
-    ${header({ toggle: 'on', count: 15 })}
-    ${grid()}
-    ${sheet()}
-  </div>`
-)
-
-boards['SheetSelect.dc.html'] = page(
-  'sheet · 選取模式',
-  393,
-  852,
-  `<div style="position: relative; width: 393px; height: 852px; overflow: hidden; background: #fff; display: flex; flex-direction: column;">
-    ${header({ toggle: 'on', count: 15 })}
-    ${grid()}
-    ${sheet({ select: true })}
-  </div>`
-)
-
 
 for (const [name, html] of Object.entries(boards)) writeFileSync(join(OUT, name), html)
 
@@ -550,58 +534,61 @@ for (const [name, html] of Object.entries(boards)) writeFileSync(join(OUT, name)
 const GAP = 80
 const W = 393
 const H = 852
-const row1 = ['Main.dc.html', 'Expanded.dc.html', 'Confirm.dc.html', 'Undo.dc.html', 'Empty.dc.html']
+const row1 = [
+  'Main.dc.html',
+  'SheetShort.dc.html',
+  'SheetHalf.dc.html',
+  'SheetAll.dc.html',
+  'Confirm.dc.html',
+  'SheetSelect.dc.html',
+  'Undo.dc.html',
+  'Empty.dc.html'
+]
+const titles = {
+  'Main.dc.html': '收合（預設）',
+  'SheetShort.dc.html': '3 筆 · sheet 貼著內容',
+  'SheetHalf.dc.html': '15 筆 · 預設停在一半',
+  'SheetAll.dc.html': '15 筆 · 往上拖看到全部',
+  'Confirm.dc.html': '刪除確認',
+  'SheetSelect.dc.html': '選取模式',
+  'Undo.dc.html': '移到今天之後',
+  'Empty.dc.html': '沒有未完成',
+  'Anatomy.dc.html': '規格',
+  'Rejected-Panel.dc.html': '沒採用 A · 內嵌面板',
+  'Rejected-Capped.dc.html': '沒採用 B · 面板截斷'
+}
+
 const frames = {}
 row1.forEach((n, i) => {
   frames[n] = { x: i * (W + GAP), y: 0, w: W, h: H }
 })
-frames['MultiSelect.dc.html'] = { x: 0, y: 1252, w: W, h: H }
-frames['Anatomy.dc.html'] = { x: W + GAP, y: 1252, w: 1040, h: 820 }
-const ROW3 = 2504
-;['Many.dc.html', 'Sheet.dc.html', 'SheetSelect.dc.html'].forEach((n, i) => {
-  frames[n] = { x: i * (W + GAP), y: ROW3, w: W, h: H }
-})
-
-frames['Main.dc.html'].title = '收合（預設）'
-frames['Expanded.dc.html'].title = '展開'
-frames['Confirm.dc.html'].title = '刪除確認'
-frames['Undo.dc.html'].title = '移到今天之後'
-frames['Empty.dc.html'].title = '沒有未完成'
-frames['MultiSelect.dc.html'].title = '替代方案 B · 多選'
-frames['Anatomy.dc.html'].title = '規格'
-frames['Many.dc.html'].title = '面板 · 15 筆（截到 4 列）'
-frames['Sheet.dc.html'].title = '全部未完成 · sheet'
-frames['SheetSelect.dc.html'].title = 'sheet · 選取模式'
+frames['Anatomy.dc.html'] = { x: 0, y: 1252, w: 1040, h: 860 }
+frames['Rejected-Panel.dc.html'] = { x: 1120, y: 1252, w: W, h: H }
+frames['Rejected-Capped.dc.html'] = { x: 1593, y: 1252, w: W, h: H }
+for (const [n, t] of Object.entries(titles)) if (frames[n]) frames[n].title = t
 
 const canvas = {
   v: 3,
-  createdOnFiles: { v: 1, at: new Date().toISOString() },
+  createdOnFiles: { v: 1, at: '2026-09-19T10:50:03.166Z' },
   title: 'Day 未完成待辦面板',
   launch: { view: 'canvas' },
   pages: [],
   boards: frames,
-  order: [...row1, 'MultiSelect.dc.html', 'Anatomy.dc.html', 'Many.dc.html', 'Sheet.dc.html', 'SheetSelect.dc.html'],
+  order: [...row1, 'Anatomy.dc.html', 'Rejected-Panel.dc.html', 'Rejected-Capped.dc.html'],
   notes: {
     flow: {
       x: 0,
       y: -300,
-      text: '主流程 · 收合 → 展開 → 處理掉',
+      text: '主流程 · 一顆鈕 → 一張 sheet → 全部在裡面',
       kind: 'title1',
-      maxW: 2285
+      maxW: 3231
     },
     alt: {
       x: 0,
       y: 960,
-      text: '替代方案與規格',
+      text: '規格與沒採用的做法',
       kind: 'title1',
-      maxW: 1513
-    },
-    many: {
-      x: 0,
-      y: 2210,
-      text: '很多筆的時候 · 面板截斷 → sheet',
-      kind: 'title1',
-      maxW: 1259
+      maxW: 1986
     }
   },
   designSystems: []

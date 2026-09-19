@@ -17,103 +17,104 @@
       "h": 852,
       "title": "收合（預設）"
     },
-    "Expanded.dc.html": {
+    "SheetShort.dc.html": {
       "x": 473,
       "y": 0,
       "w": 393,
       "h": 852,
-      "title": "展開"
+      "title": "3 筆 · sheet 貼著內容"
+    },
+    "SheetHalf.dc.html": {
+      "x": 946,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "15 筆 · 預設停在一半"
+    },
+    "SheetAll.dc.html": {
+      "x": 1419,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "15 筆 · 往上拖看到全部"
     },
     "Confirm.dc.html": {
-      "x": 946,
+      "x": 1892,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "刪除確認"
     },
+    "SheetSelect.dc.html": {
+      "x": 2365,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "選取模式"
+    },
     "Undo.dc.html": {
-      "x": 1419,
+      "x": 2838,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "移到今天之後"
     },
     "Empty.dc.html": {
-      "x": 1892,
+      "x": 3311,
       "y": 0,
       "w": 393,
       "h": 852,
       "title": "沒有未完成"
     },
-    "MultiSelect.dc.html": {
-      "x": 0,
-      "y": 1252,
-      "w": 393,
-      "h": 852,
-      "title": "替代方案 B · 多選"
-    },
     "Anatomy.dc.html": {
-      "x": 473,
+      "x": 0,
       "y": 1252,
       "w": 1040,
-      "h": 820,
+      "h": 860,
       "title": "規格"
     },
-    "Many.dc.html": {
-      "x": 0,
-      "y": 2504,
+    "Rejected-Panel.dc.html": {
+      "x": 1120,
+      "y": 1252,
       "w": 393,
       "h": 852,
-      "title": "面板 · 15 筆（截到 4 列）"
+      "title": "沒採用 A · 內嵌面板"
     },
-    "Sheet.dc.html": {
-      "x": 473,
-      "y": 2504,
+    "Rejected-Capped.dc.html": {
+      "x": 1593,
+      "y": 1252,
       "w": 393,
       "h": 852,
-      "title": "全部未完成 · sheet"
-    },
-    "SheetSelect.dc.html": {
-      "x": 946,
-      "y": 2504,
-      "w": 393,
-      "h": 852,
-      "title": "sheet · 選取模式"
+      "title": "沒採用 B · 面板截斷"
     }
   },
   "order": [
     "Main.dc.html",
-    "Expanded.dc.html",
+    "SheetShort.dc.html",
+    "SheetHalf.dc.html",
+    "SheetAll.dc.html",
     "Confirm.dc.html",
+    "SheetSelect.dc.html",
     "Undo.dc.html",
     "Empty.dc.html",
-    "MultiSelect.dc.html",
     "Anatomy.dc.html",
-    "Many.dc.html",
-    "Sheet.dc.html",
-    "SheetSelect.dc.html"
+    "Rejected-Panel.dc.html",
+    "Rejected-Capped.dc.html"
   ],
   "notes": {
     "flow": {
       "x": 0,
       "y": -300,
-      "text": "主流程 · 收合 → 展開 → 處理掉",
+      "text": "主流程 · 一顆鈕 → 一張 sheet → 全部在裡面",
       "kind": "title1",
-      "maxW": 2285
+      "maxW": 3231
     },
     "alt": {
       "x": 0,
       "y": 960,
-      "text": "替代方案與規格",
+      "text": "規格與沒採用的做法",
       "kind": "title1",
-      "maxW": 1513
-    },
-    "many": {
-      "x": 0,
-      "y": 2210,
-      "text": "很多筆的時候 · 面板截斷 → sheet",
-      "kind": "title1",
-      "maxW": 1259
+      "maxW": 1986
     }
   },
   "designSystems": []
