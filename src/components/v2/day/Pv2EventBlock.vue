@@ -23,7 +23,9 @@
         @click.stop="emit('toggleDone')"
       >
         <span class="pv2-event-block__box">
-          <CdIcon v-if="done" name="check" :size="CHECK_GLYPH" :stroke-width="3" color="#fff" />
+          <!-- 2.4 and 3.4 are the only weights check.svg ships a variant for (icons.ts); any
+               other number silently falls back to the 2.0 base file. -->
+          <CdIcon v-if="done" name="check" :size="CHECK_GLYPH" :stroke-width="2.4" color="#fff" />
         </span>
       </button>
 
