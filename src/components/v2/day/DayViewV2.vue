@@ -7,7 +7,15 @@
   <div class="dv2">
     <div class="dv2__body" v-touch-swipe.horizontal.mouse="onSwipe">
       <div class="dv2__header">
-        <Pv2DayHeader :day-num="dayNum" :dow="dow" :month-year="monthYear" @today="goToday" />
+        <Pv2DayHeader
+          :day-num="dayNum"
+          :dow="dow"
+          :month-year="monthYear"
+          :unfinished-count="unfinishedCount"
+          :unfinished-open="unfinishedOpen"
+          @today="goToday"
+          @toggle-unfinished="unfinishedOpen = !unfinishedOpen"
+        />
       </div>
 
       <!-- TEMP: MY GOAL card hidden while the timeline is being reworked -->
@@ -29,17 +37,33 @@
 
     <Pv2Fab @click="onCreate" />
     <Pv2BottomNav active="draft" />
+
+    <!-- Teleported to the page frame so the scrim covers the whole phone frame rather than
+         only this view's box; `defer` for the same remount-ordering reason MonthViewV2 gives.
+         The Transition sits inside so pv2-sheet (app.css) still fades scrim and panel
+         together; :duration matches --cd-duration-sheet. -->
+    <Teleport defer to="#dp2-root">
+      <Transition name="pv2-sheet" :duration="300">
+        <DayUnfinishedSheet
+          v-if="unfinishedOpen"
+          :date="ui.selectedDate"
+          :is-today="isToday"
+          @close="unfinishedOpen = false"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Pv2DayHeader from '@/components/v2/ui/Pv2DayHeader.vue'
 // TEMP: restore alongside the MY GOAL card in the template
 // import Pv2GoalCard from '@/components/v2/ui/Pv2GoalCard.vue'
 // TEMP: restore alongside the tabs block in the template
 // import Pv2DayTabs from '@/components/v2/ui/Pv2DayTabs.vue'
 import DaySchedule from '@/components/v2/day/DaySchedule.vue'
+import DayUnfinishedSheet from '@/components/v2/day/DayUnfinishedSheet.vue'
 // import DayMyDay from '@/components/v2/day/DayMyDay.vue'
 import Pv2Fab from '@/components/v2/ui/Pv2Fab.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
@@ -47,6 +71,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { parseISO, iso, addDays, WD_CAP } from '@/utils/convert-date-time'
 import { useDateSwipe } from '@/composables/use-date-swipe'
+import { useUnfinished } from '@/composables/use-unfinished'
 // TEMP: restore alongside the MY GOAL card
 // import { publicAssetPath } from '@/utils/public-assets'
 
@@ -67,6 +92,22 @@ function stepDayBy(delta: number): void {
 
 // Re-keying the panel on the date is what drives the slide transition.
 const dayKey = computed(() => ui.selectedDate)
+
+const isToday = computed(() => ui.selectedDate === iso(new Date()))
+
+// Only the count lives here; the sheet reads the same composable for the rows, so the number
+// on the pill and the list behind it can never disagree.
+const selectedDate = computed(() => ui.selectedDate)
+const { count: unfinishedCount } = useUnfinished(selectedDate)
+
+// Component-local, like the tab state below and for the same reason as ui-store's monthFilter:
+// this is the shape the screen is in right now, not a preference the account carries.
+// Swiping to another day keeps it open — the sheet re-reads the new date — but a day with
+// nothing overdue has no control to close, so it closes itself.
+const unfinishedOpen = ref(false)
+watch(unfinishedCount, (n) => {
+  if (n === 0) unfinishedOpen.value = false
+})
 
 // No view-local overlays here — the composable already covers the page-shell overlays
 // (this view opens QuickAdd from DaySchedule.vue).

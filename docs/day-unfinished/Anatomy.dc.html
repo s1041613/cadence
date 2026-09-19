@@ -74,15 +74,16 @@
       <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">sheet · 高度與分組</span>
       <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px 18px; align-items: baseline;">
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">浮在上面</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">不推擠時間軸；日檢視的版面一格都不動</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">高度</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">固定 56% 頁框高（852 → 477），與內容無關</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">高度</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">固定 50% 頁框高（852 → 426），與內容無關</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">為什麼是 50</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">Pv2DaySheet 已經是 50%，全 app 一個 sheet 高度</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">為什麼是 %</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">vh 在桌面的 device frame 裡會量錯，要量頁框</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">裝不下時</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">清單自己捲；組標題 sticky</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">裝得下時</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">下面就是留白——穩定比貼合重要</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">拖曳</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">往下拖關掉；沒有第二段高度</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">分組</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">昨天 / 本週 / 更早，全部展開，沒有收合</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">分組</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">昨天 / 一週內 / 更早，全部展開，沒有收合</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">組標題</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">600 11 'JetBrains Mono',ui-monospace,monospace · #8E8E8E · sticky · 半透明白底</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">組動作</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">每組右上「整組移到今天」</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">排序</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">組內 date 由舊到新，同日照 start</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">排序</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">組內 date 由新到舊，同日照 start</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">頂層</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">沒有「全部移到今天」——批次走「選取」</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">選取模式</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">圓形 checkbox + 底部「移到今天 · N」/ 刪除</span>
     </div>

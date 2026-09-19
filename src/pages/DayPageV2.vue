@@ -2,9 +2,11 @@
   <!--
     v2 日檢視頁殼。結構同 WeekPageV2：共用桌布層（Pv2PageBackdrop）、
     data-poster-root（overlay 定位）、桌面手機 frame 置中。
+    #dp2-root 是 sheet 的 teleport 目標（月檢視是 #mp2-root）：讓 scrim 蓋滿整個
+    frame（含頂部 safe-area），而不是只蓋到 DayViewV2 的範圍。
   -->
   <div class="dp2" :class="{ 'dp2--desktop': isDesktop }">
-    <div class="dp2__frame" data-poster-root>
+    <div id="dp2-root" class="dp2__frame" data-poster-root>
       <Pv2PageBackdrop />
 
       <div v-if="tasksStore.isLoading" class="dp2__loading">載入中…</div>

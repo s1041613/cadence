@@ -137,7 +137,7 @@ const GROUPS = [
     ]
   },
   {
-    label: '本週 · 4',
+    label: '一週內 · 4',
     rows: [
       { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
       { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do },
@@ -164,7 +164,7 @@ const GROUPS = [
 const SHORT_GROUPS = [
   { label: '昨天 · 1', rows: [{ title: '寫 week view 的驗收筆記', meta: '09/18 · 逾期 1 天', color: Q.plan }] },
   {
-    label: '本週 · 2',
+    label: '一週內 · 2',
     rows: [
       { title: '訂下週的牙醫', meta: '09/17 · 逾期 2 天', color: Q.quick },
       { title: '送出設計稿給 Zoe', meta: '09/16 · 逾期 3 天', color: Q.do }
@@ -184,11 +184,12 @@ function groupHead(label, { select = false } = {}) {
 }
 
 /**
- * The one surface. ONE fixed height, whatever the list holds: 56% of the frame (477 on the
- * 852 mock). Short list leaves white space, long list scrolls — it opens the same every time.
+ * The one surface. ONE fixed height, whatever the list holds: 50% of the frame (426 on the
+ * 852 mock) — the height Pv2DaySheet already uses, so the app has one bottom-sheet height.
+ * Short list leaves white space, long list scrolls — it opens the same every time.
  * Every overdue task is in it: no cap, no collapsed group, no second tap.
  */
-const SHEET_H = 477
+const SHEET_H = 426
 
 function sheet({ groups, count, h = SHEET_H, select = false, confirmAt = null, clipped = false } = {}) {
   let n = -1
@@ -489,15 +490,16 @@ boards['Anatomy.dc.html'] = page(
         'sheet · 高度與分組',
         kv([
           ['浮在上面', '不推擠時間軸；日檢視的版面一格都不動'],
-          ['高度', '固定 56% 頁框高（852 → 477），與內容無關'],
+          ['高度', '固定 50% 頁框高（852 → 426），與內容無關'],
+          ['為什麼是 50', 'Pv2DaySheet 已經是 50%，全 app 一個 sheet 高度'],
           ['為什麼是 %', 'vh 在桌面的 device frame 裡會量錯，要量頁框'],
           ['裝不下時', '清單自己捲；組標題 sticky'],
           ['裝得下時', '下面就是留白——穩定比貼合重要'],
           ['拖曳', '往下拖關掉；沒有第二段高度'],
-          ['分組', '昨天 / 本週 / 更早，全部展開，沒有收合'],
+          ['分組', '昨天 / 一週內 / 更早，全部展開，沒有收合'],
           ['組標題', `600 11 ${MONO} · ${INK3} · sticky · 半透明白底`],
           ['組動作', '每組右上「整組移到今天」'],
-          ['排序', '組內 date 由舊到新，同日照 start'],
+          ['排序', '組內 date 由新到舊，同日照 start'],
           ['頂層', '沒有「全部移到今天」——批次走「選取」'],
           ['選取模式', '圓形 checkbox + 底部「移到今天 · N」/ 刪除']
         ])
