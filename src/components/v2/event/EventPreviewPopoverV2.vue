@@ -6,7 +6,6 @@
       :cells="copyCells"
       :selected="copySelectedDates"
       :first-day="settings.firstDay"
-      :source-date="task?.date ?? null"
       @close="copyMode = false"
       @prev-month="copyMonth = addMonths(copyMonth, -1)"
       @next-month="copyMonth = addMonths(copyMonth, 1)"
@@ -88,7 +87,6 @@
         :cells="copyCells"
         :selected="copySelectedDates"
         :first-day="settings.firstDay"
-        :source-date="task?.date ?? null"
         @close="copyMode = false"
         @prev-month="copyMonth = addMonths(copyMonth, -1)"
         @next-month="copyMonth = addMonths(copyMonth, 1)"
@@ -403,7 +401,7 @@ function toggleCopyDay(date: string): void {
 
 const copyMonthLabel = computed(() => new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(copyMonth.value))
 const copyCells = computed<Array<CopyToDaysCell | null>>(() =>
-  buildCopyToDaysCells(copyMonth.value.getFullYear(), copyMonth.value.getMonth(), settings.firstDay, task.value?.date)
+  buildCopyToDaysCells(copyMonth.value.getFullYear(), copyMonth.value.getMonth(), settings.firstDay)
 )
 
 function confirmCopy(): void {

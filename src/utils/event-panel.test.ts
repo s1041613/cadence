@@ -19,7 +19,7 @@ describe('reminderLabel', () => {
 
 describe('buildCopyToDaysCells', () => {
   it('keeps a stable 42-cell grid with outside-month days blank', () => {
-    const cells = buildCopyToDaysCells(2026, 6, 'Monday', '2026-07-10')
+    const cells = buildCopyToDaysCells(2026, 6, 'Monday')
 
     expect(cells).toHaveLength(42)
     expect(cells.slice(0, 2)).toEqual([null, null])
@@ -27,10 +27,11 @@ describe('buildCopyToDaysCells', () => {
     expect(cells.at(-1)).toBeNull()
   })
 
-  it('leaves the source date selectable for same-day copies', () => {
-    const cells = buildCopyToDaysCells(2026, 6, 'Monday', '2026-07-10')
-    const source = cells.find((cell) => cell?.date === '2026-07-10')
+  it('leaves every in-month day selectable, the source date included', () => {
+    const cells = buildCopyToDaysCells(2026, 6, 'Monday')
 
-    expect(source).toEqual({ date: '2026-07-10', day: 10, disabled: false })
+    expect(cells.filter((cell) => cell !== null)).toHaveLength(31)
+    expect(cells.every((cell) => cell === null || cell.disabled === false)).toBe(true)
+    expect(cells.find((cell) => cell?.date === '2026-07-10')).toEqual({ date: '2026-07-10', day: 10, disabled: false })
   })
 })

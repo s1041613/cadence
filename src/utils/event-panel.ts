@@ -35,11 +35,12 @@ export function nextReminder(reminder: ReminderPreset | null): ReminderPreset | 
   return REMINDER_OPTIONS[next]?.value ?? null
 }
 
+// Every in-month day is offered, the source task's own date included: copying an event
+// onto the day it already sits on is a legitimate way to duplicate it.
 export function buildCopyToDaysCells(
   year: number,
   month: number,
-  firstDay: FirstDayName,
-  _sourceDate?: string
+  firstDay: FirstDayName
 ): Array<CopyToDaysCell | null> {
   const cells = monthGridCells(year, month, firstDay).map((cell) =>
     cell.outsideMonth ? null : { date: cell.date, day: cell.dayNum, disabled: false }
