@@ -12,10 +12,12 @@ import { readFile } from 'node:fs/promises'
 
 let block = ''
 let grid = ''
+let icons = ''
 
 beforeAll(async () => {
   block = await readFile(new URL('./Pv2EventBlock.vue', import.meta.url), 'utf8')
   grid = await readFile(new URL('./Pv2TimeGrid.vue', import.meta.url), 'utf8')
+  icons = await readFile(new URL('../../ui/icons.ts', import.meta.url), 'utf8')
 })
 
 /** The declaration body of one rule, matched on a selector anchored to a line start. */
@@ -59,6 +61,17 @@ describe('what the checkbox is, and who gets one', () => {
     // `v-if="done"` would compile and look right on a finished task, and would put a checkbox
     // on every calendar event that has ever been checked by something else.
     expect(block).toMatch(/class="pv2-event-block__check"[\s\S]{0,400}?v-if="isTask"|v-if="isTask"[\s\S]{0,400}?class="pv2-event-block__check"/)
+  })
+
+  // A stroke weight CdIcon has no variant file for resolves to the 2.0 base silently — no
+  // error, no warning, just a thinner mark than the one that was asked for. icons.ts is the
+  // list of weights that actually exist; the checkbox must pass one of them.
+  it('the checkmark asks for a stroke weight that check.svg actually ships', () => {
+    const asked = /name="check"[^>]*?:stroke-width="([\d.]+)"/.exec(block)
+    expect(asked, 'no stroke-width on the checkmark').not.toBeNull()
+    const weights = /check:\s*\{[\s\S]*?weights:\s*\{([^}]*)\}/.exec(icons)
+    expect(weights, 'no weights map for check in icons.ts').not.toBeNull()
+    expect([...weights![1].matchAll(/'([\d.]+)'/g)].map((m) => m[1])).toContain(asked![1])
   })
 
   it('it is a circle', () => {
