@@ -11,6 +11,7 @@
     :now-minutes="nowMinutes"
     :time-format="settings.timeFormat"
     @event-click="onEventClick"
+    @toggle-done="tasksStore.toggleDone"
     @column-click="onColumnClick"
   />
 </template>
@@ -22,6 +23,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useSettingsStore } from '@/stores/settings-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { useCurrentTime } from '@/composables/use-current-time'
 import { themeOf } from '@/composables/use-theme'
 import { anchorFromEvent } from '@/utils/popover-anchor'
@@ -33,6 +35,7 @@ const ui = useUiStore()
 const tasksStore = useTasksStore()
 const calendarsStore = useCalendarsStore()
 const settings = useSettingsStore()
+const auth = useAuthStore()
 const now = useCurrentTime()
 
 // 當日、可見日曆的事件（過濾隱藏日曆），與 month/week 同源。
@@ -59,6 +62,12 @@ const timedEvents = computed<Pv2GridEvent[]>(() =>
       // Clipped to the rendered day: a span reaching into the next day would otherwise
       // subtract to a negative height (22:00 -> 02:00 = -1200 minutes).
       ...clipToDay(t, ui.selectedDate),
+      // Only a quadrant task gets a checkbox: an event says where you have to be, a task is
+      // the thing that has to get finished. An absent ownerId means the row was created locally
+      // by this user, which is the same test canWriteSubtasksOf() applies.
+      isTask: t.type === 'quadrant',
+      done: t.done,
+      canToggle: t.ownerId === undefined || t.ownerId === auth.user?.id,
       subtasks: tasksStore.subtasksFor(t.id),
       location: t.location,
       notes: t.notes
