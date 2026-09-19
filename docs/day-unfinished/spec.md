@@ -2,6 +2,7 @@
 
 日檢視標題列右側一顆切換鈕，數字是「比這一天早、而且還沒打勾」的待辦數。
 按下去，一張 sheet 由下往上長出來，**浮在日檢視上面、不推擠它**，
+**高度固定**——3 筆和 30 筆打開來一樣高。
 裡面是**全部**的逾期待辦——不截斷、不收合、不用再點一次。
 每一列可以移到這一天，或刪掉。
 
@@ -10,9 +11,8 @@
 | 檔 | 畫面 |
 | --- | --- |
 | `Main.dc.html` | 收合（預設） |
-| `SheetShort.dc.html` | 3 筆：sheet 貼著內容，矮 |
-| `SheetHalf.dc.html` | 15 筆：預設停在一半，時間軸還看得到 |
-| `SheetAll.dc.html` | 15 筆：往上拖，看完整份 |
+| `SheetShort.dc.html` | 3 筆：一樣的高度，下面留白 |
+| `SheetAll.dc.html` | 15 筆：一樣的高度，清單自己捲 |
 | `Confirm.dc.html` | 刪除的就地確認 |
 | `SheetSelect.dc.html` | 選取模式 |
 | `Undo.dc.html` | 移到今天之後的 toast |
@@ -51,13 +51,21 @@
 沿用 `Pv2DaySheet` 的語彙（scrim + handle + 圓角 28 + teleport 到頁框）。
 DayPageV2 的 `data-poster-root` 目前沒有 id，要補一個 `#dp2-root`，MonthPageV2 是 `#mp2-root`。
 
-**兩段高度：**
+**固定高度：頁框高的 56%**（393×852 上是 477）。跟內容無關，跟拖曳無關，
+每次打開都長一樣。
 
-- 預設 `min(內容高, 52vh)`。三筆就是一張矮 sheet，日期和時間軸都還在上面看得到。
-- 往上拖 / 上滑 → `82vh`，看完整份。往下拖關掉（`Pv2DaySheet` 已有 `v-touch-swipe.down`）。
+- 裝不下 → 清單自己捲，組標題 sticky。477 大約放得下兩個完整的組，
+  第三個組標題露一半，捲動有明顯的提示。
+- 裝得下 → 下面就是留白。**穩定比貼合重要**：每次打開高度都一樣，
+  肌肉記憶才建立得起來，鈕的位置、第一列的位置、時間軸剩多少都是可預期的。
+- 往下拖關掉（`Pv2DaySheet` 已有 `v-touch-swipe.down`）。**沒有第二段高度**，
+  往上拖不會變高。
 
-超過當前段高，清單自己捲，組標題 sticky。捲動只發生在 sheet 裡，
-底下的時間軸這時候是被 scrim 蓋住的，不存在兩層捲動打架的問題。
+捲動只發生在 sheet 裡，底下的時間軸這時候被 scrim 蓋住，不存在兩層捲動打架的問題。
+
+高度寫 `height: 56%` 而不是 `56vh`。sheet 的 scrim 是 `position: absolute; inset: 0`
+掛在頁框裡，`%` 量的是頁框；`vh` 量的是視窗，在桌面的 device frame（393×852 固定尺寸）
+底下會量到整個瀏覽器高度，sheet 會爆出框外。
 
 **分組**：按逾期距離分成 `昨天` / `本週` / `更早`，**全部展開，沒有收合**。
 分組不是為了藏東西，是為了讓「昨天忘了打勾」跟「三週前就放生了」在視覺上分得開——
@@ -104,8 +112,8 @@ DayPageV2 的 `data-poster-root` 目前沒有 id，要補一個 `#dp2-root`，Mo
 
 - 切換鈕 `aria-pressed`，sheet `role="dialog"` + `aria-label="未完成待辦"`。
 - icon-only 的動作鈕都要 `aria-label`（含標題，例如「把『訂下週的牙醫』移到今天」）。
-- sheet 進出沿用 `pv2-sheet` transition（app.css，300ms）；
-  段與段之間的拖曳跟手，放開時吸附到最近的段。
+- sheet 進出沿用 `pv2-sheet` transition（app.css，300ms）。
+  只有「開 / 關」兩個狀態，沒有中間段要吸附。
 - `prefers-reduced-motion` 直接切換。
 
 ## 沒採用的：內嵌面板
@@ -119,14 +127,14 @@ DayPageV2 的 `data-poster-root` 目前沒有 id，要補一個 `#dp2-root`，Mo
    （在頁面裡挖一個四列高的洞去捲三十筆），要嘛截斷再給一顆「查看全部」
    （多一次點擊，而且在那之前你看不到全部）。
 
-sheet 兩個都解決：浮著所以不擠壓，可拖高所以裝得下。
+sheet 兩個都解決：浮著所以不擠壓，固定高度加內捲所以裝得下。
 多選也從面板搬進 sheet——量少的時候勾選比直接按還慢，量大的時候才付得起那個模式的代價。
 
 ## 實作會動到的檔
 
 - `src/components/v2/ui/Pv2DayHeader.vue` — 右側叢集多一顆鈕 + 一組 props/emit。
 - `src/components/v2/day/DayViewV2.vue` — 開關 state、sheet 掛載。
-- `src/components/v2/day/DayUnfinishedSheet.vue`（新）— sheet 本體，含兩段高度與選取模式。
+- `src/components/v2/day/DayUnfinishedSheet.vue`（新）— sheet 本體，含選取模式。
 - `src/pages/DayPageV2.vue` — 頁框補 `id="dp2-root"` 給 sheet teleport。
 - `src/utils/group-by-recency.ts` — 泛化，或寫姊妹函式。
 - `src/stores/ui-store.ts` — `Toast` 加 action。
