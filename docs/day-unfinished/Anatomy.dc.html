@@ -15,23 +15,23 @@
     * { box-sizing: border-box; }
   </style>
 </helmet>
-<div style="width: 1040px; height: 820px; padding: 48px 48px 52px; background: #FBFBFB; display: flex; flex-direction: column; gap: 26px; overflow: hidden;">
+<div style="width: 1040px; height: 860px; padding: 44px 48px 48px; background: #FBFBFB; display: flex; flex-direction: column; gap: 22px; overflow: hidden;">
     <div style="display: flex; flex-direction: column; gap: 8px;">
       <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">Cadence · Day view</span>
-      <h1 style="margin: 0; font: 700 34px/1.1 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em; color: #000000;">未完成待辦面板</h1>
-      <p style="margin: 0; max-width: 760px; font: 400 13px/1.7 'Inter','Noto Sans TC',sans-serif; color: #666666;">標題列右側多一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，面板從標題與時間軸之間長出來；每一列可以移到這一天，或刪掉。</p>
+      <h1 style="margin: 0; font: 700 34px/1.1 'Inter','Noto Sans TC',sans-serif; letter-spacing: -.02em; color: #000000;">未完成待辦</h1>
+      <p style="margin: 0; max-width: 780px; font: 400 13px/1.7 'Inter','Noto Sans TC',sans-serif; color: #666666;">標題列右側一顆藥丸鈕，數字是「比這一天早、而且還沒打勾」的待辦數。按下去，一張 sheet 由下往上長出來，<strong style="font-weight: 600; color: #000000;">浮在日檢視上面、不推擠它</strong>，裡面是<strong style="font-weight: 600; color: #000000;">全部</strong>——不截斷、不收合、不用再點一次。預設停在一半，時間軸還看得到；往上拖就看完整份。</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px 26px 26px; border-radius: 18px; background: #fff; border: 1px solid #EFEFEF; box-shadow: 0 2px 10px rgba(0,0,0,.04);">
       <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">切換鈕 · 三種狀態</span>
-      <div style="display: grid; place-items: center; height: 132px; border-radius: 14px; background: #F3F3F3;"><div style="display: flex; align-items: center; gap: 26px; transform: scale(1.6);">
+      <div style="display: grid; place-items: center; height: 128px; border-radius: 14px; background: #F3F3F3;"><div style="display: flex; align-items: center; gap: 26px; transform: scale(1.6);">
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <button type="button" aria-label="顯示 3 筆未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid transparent; border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06); color: #666666; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="14" width="7.5" height="7.5" rx="2.2"/><path d="M14.5 7.75H21M14.5 17.75H21"/></svg><span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; line-height: 1;">3</span></button>
+              <button type="button" aria-label="顯示 15 筆未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid transparent; border-radius: 999px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.06); color: #666666; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="14" width="7.5" height="7.5" rx="2.2"/><path d="M14.5 7.75H21M14.5 17.75H21"/></svg><span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; line-height: 1;">15</span></button>
               <span style="font: 500 7px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .1em; color: #8E8E8E;">OFF</span>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-              <button type="button" aria-label="隱藏未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid rgba(222,110,140,.38); border-radius: 999px; background: rgba(222,110,140,.12); color: #A8425E; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="14" width="7.5" height="7.5" rx="2.2"/><path d="M14.5 7.75H21M14.5 17.75H21"/></svg><span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; line-height: 1;">3</span></button>
+              <button type="button" aria-label="隱藏未完成待辦" style="display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 9px; border: 1px solid rgba(222,110,140,.38); border-radius: 999px; background: rgba(222,110,140,.12); color: #A8425E; cursor: pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7.5" height="7.5" rx="2.2"/><rect x="3" y="14" width="7.5" height="7.5" rx="2.2"/><path d="M14.5 7.75H21M14.5 17.75H21"/></svg><span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; line-height: 1;">15</span></button>
               <span style="font: 500 7px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .1em; color: #8E8E8E;">ON</span>
             </div>
             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
@@ -43,13 +43,13 @@
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">尺寸</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">28 高 · 圓角 999 · 命中區 44×44（::after）</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">關閉態</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">白底 + 0 2px 6px rgba(0,0,0,.06)，同 TODAY 鈕</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">開啟態</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">rgba(222,110,140,.12) 底、rgba(222,110,140,.38) 邊、#A8425E 墨</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">數字</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">600 11px 'JetBrains Mono',ui-monospace,monospace</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">數字</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">600 11px 'JetBrains Mono',ui-monospace,monospace，照實顯示，不截成 9+</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">沒有逾期時</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">整顆不 render，TODAY 鈕遞補位置</span>
     </div>
     </div>
       <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px 26px 26px; border-radius: 18px; background: #fff; border: 1px solid #EFEFEF; box-shadow: 0 2px 10px rgba(0,0,0,.04);">
       <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">列 · 解剖</span>
-      <div style="display: grid; place-items: center; height: 132px; border-radius: 14px; background: #F3F3F3;"><div style="width: 349px; border-radius: 14px; background: #fff; border: 1px solid #EFEFEF;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+      <div style="display: grid; place-items: center; height: 128px; border-radius: 14px; background: #F3F3F3;"><div style="width: 349px; border-radius: 14px; background: #fff; border: 1px solid #EFEFEF;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #EC5093;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
         <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">送出設計稿給 Zoe</span>
@@ -69,37 +69,41 @@
     </div>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 22px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px 26px 26px; border-radius: 18px; background: #fff; border: 1px solid #EFEFEF; box-shadow: 0 2px 10px rgba(0,0,0,.04);">
-      <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">資料規則</span>
+      <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">sheet · 高度與分組</span>
+      <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px 18px; align-items: baseline;">
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">浮在上面</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">不推擠時間軸；日檢視的版面一格都不動</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">預設高度</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">min(內容, 52vh)——短清單就是矮 sheet</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">第二段</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">往上拖 / 上滑 → 82vh，看完整份</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">超過高度</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">清單自己捲；組標題 sticky</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">分組</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">昨天 / 本週 / 更早，全部展開，沒有收合</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">組標題</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">600 11 'JetBrains Mono',ui-monospace,monospace · #8E8E8E · sticky · 半透明白底</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">組動作</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">每組右上「整組移到今天」</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">排序</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">組內 date 由舊到新，同日照 start</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">頂層</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">沒有「全部移到今天」——批次走「選取」</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">選取模式</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">圓形 checkbox + 底部「移到今天 · N」/ 刪除</span>
+    </div>
+    </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px 26px 26px; border-radius: 18px; background: #fff; border: 1px solid #EFEFEF; box-shadow: 0 2px 10px rgba(0,0,0,.04);">
+      <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">資料 · 狀態 · 回饋</span>
       <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px 18px; align-items: baseline;">
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">納入條件</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">type === 'quadrant' &amp;&amp; !done</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;"></span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">date &lt; 檢視中的日期</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;"></span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">calendarsStore.isVisible(calendarId)</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;"></span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">ownerId 是自己（別人的列唯讀，不納入）</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">排序</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">date 由舊到新，同日照 start</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">上限</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">不截斷；面板 max-height 232，自身捲動</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;"></span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">isVisible(calendarId) &amp;&amp; ownerId 是自己</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">上限</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">沒有上限，也沒有回看天數的上限</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">移到今天</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">date = 檢視中的日期；endDate 同步平移</span>
       <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;"></span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">start / end / allDay 原樣保留</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">刪除</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">tasksStore.deleteTask（已有樂觀更新 + 失敗回滾）</span>
-    </div>
-    </div>
-      <div style="display: flex; flex-direction: column; gap: 14px; padding: 24px 26px 26px; border-radius: 18px; background: #fff; border: 1px solid #EFEFEF; box-shadow: 0 2px 10px rgba(0,0,0,.04);">
-      <span style="font: 600 11px 'Inter','Noto Sans TC',sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8E8E8E;">狀態與回饋</span>
-      <div style="display: grid; grid-template-columns: 150px 1fr; gap: 8px 18px; align-items: baseline;">
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">開關狀態</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">ui-store 的 ref，不同步、重整回到關閉</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">換日</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">面板不關，數字與內容跟著新日期重算</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">清空後</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">最後一列處理完 → 面板自行收起，鈕消失</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">移到今天</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">toast「N 筆已移到今天」+ 復原</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">刪除</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">列內就地確認（取消 / 刪除），不用 toast</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">a11y</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">鈕 aria-pressed；面板 role="region" + aria-label</span>
-      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">動態</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">高度 200ms var(--cd-ease-standard)；reduce-motion 直接切換</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">刪除</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">列內就地確認 → tasksStore.deleteTask</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">移動回饋</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">toast「N 筆已移到今天」+ 復原</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">清空後</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">sheet 自己關掉，鈕消失</span>
+      <span style="font: 500 11.5px 'Inter','Noto Sans TC',sans-serif; color: #8E8E8E;">a11y</span><span style="font: 400 11.5px/1.6 'JetBrains Mono',ui-monospace,monospace; color: #000000;">aria-pressed；sheet role="dialog" + aria-label</span>
     </div>
     </div>
     </div>
   </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1040,"height":820}}'>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1040,"height":860}}'>
 class Component extends DCLogic {
   renderVals() { return {}; }
 }

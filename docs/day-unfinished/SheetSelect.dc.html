@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<title>sheet · 選取模式</title>
+<title>選取模式</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -61,7 +61,7 @@
         
         <div style="position: absolute; left: 44px; right: 0; top: 145px; height: 74px; border-radius: 8px; padding: 6px 12px; overflow: hidden; background: color-mix(in srgb, #D98BC4 10%, #fff); box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 6px 16px -6px rgba(0,0,0,.16);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+            <span style="flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28);"></span>
             <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
               <span style="font: 600 15px/19px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">設計評審</span>
               <span style="font: 500 12px/16px 'JetBrains Mono',ui-monospace,monospace; color: #666666;">11:30 · 還有 1 小時</span>
@@ -70,7 +70,7 @@
         </div>
         <div style="position: absolute; left: 44px; right: 0; top: 290px; height: 52px; border-radius: 8px; padding: 6px 12px; overflow: hidden; background: color-mix(in srgb, #F4A9A0 10%, #fff); box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 6px 16px -6px rgba(0,0,0,.16);">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+            <span style="flex: none; width: 18px; height: 18px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28);"></span>
             <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column;">
               <span style="font: 600 15px/19px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">回信給客戶</span>
               <span style="font: 500 12px/16px 'JetBrains Mono',ui-monospace,monospace; color: #666666;">14:00</span>
@@ -80,26 +80,23 @@
       </div>
     </div>
     <div style="position: absolute; inset: 0; z-index: 30; display: flex; align-items: flex-end; background: rgba(0,0,0,.32);">
-      <div role="dialog" aria-label="未完成待辦" style="display: flex; flex-direction: column; width: 100%; height: 672px; border-radius: 28px 28px 0 0; background: #fff; box-shadow: 0 -18px 44px -20px rgba(0,0,0,.4); overflow: hidden;">
+      <div role="dialog" aria-label="未完成待辦" style="display: flex; flex-direction: column; width: 100%; height: 700px; border-radius: 28px 28px 0 0; background: #fff; box-shadow: 0 -18px 44px -20px rgba(0,0,0,.4); overflow: hidden;">
         <div style="flex: none; display: grid; place-items: center; padding: 8px 0 2px;">
           <span style="width: 38px; height: 4px; border-radius: 999px; background: #EFEFEF;"></span>
         </div>
-        <div style="flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 8px 18px 10px;">
+        <div style="flex: none; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 8px 18px 10px; border-bottom: 1px solid #EFEFEF;">
           <span style="display: flex; align-items: baseline; gap: 8px;">
             <span style="font: 600 17px 'Inter','Noto Sans TC',sans-serif; color: #000000;">未完成</span>
             <span style="font: 500 12px 'JetBrains Mono',ui-monospace,monospace; color: #8E8E8E;">15 筆</span>
           </span>
           <button type="button" style="border: none; background: none; padding: 4px 2px; font: 600 12.5px 'Inter','Noto Sans TC',sans-serif; color: #A8425E; cursor: pointer;">完成</button>
         </div>
-        <div style="flex-grow: 1; min-height: 0; overflow: hidden; border-top: 1px solid #EFEFEF;">
-          <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 8px; background: #fff;">
-        <span style="display: inline-flex; align-items: center; gap: 6px; font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">
-          
-          昨天 · 2
-        </span>
+        <div style="position: relative; flex-grow: 1; min-height: 0; overflow: hidden;">
+          <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 18px 8px; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        <span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">昨天 · 2</span>
         
       </div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid #A8425E; background: #A8425E;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #D98BC4;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
@@ -107,9 +104,9 @@
         <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/18 · 逾期 1 天</span>
       </span>
       
-    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 27px;"></div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
-      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid #A8425E; background: #A8425E;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #EC5093;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
         <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">回覆設計系統的 PR</span>
@@ -117,14 +114,11 @@
       </span>
       
     </div></label>
-      <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 8px; background: #fff;">
-        <span style="display: inline-flex; align-items: center; gap: 6px; font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">
-          
-          本週 · 4
-        </span>
+      <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 18px 8px; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        <span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">本週 · 4</span>
         
       </div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid #A8425E; background: #A8425E;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #F4A9A0;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
@@ -132,8 +126,8 @@
         <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/17 · 逾期 2 天</span>
       </span>
       
-    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 27px;"></div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid #A8425E; background: #A8425E;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #EC5093;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
@@ -141,17 +135,17 @@
         <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/16 · 逾期 3 天</span>
       </span>
       
-    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 27px;"></div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
-      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid #A8425E; background: #A8425E;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #D98BC4;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
         <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">補上 focus 頁的 e2e</span>
         <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/15 · 逾期 4 天</span>
       </span>
       
-    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 27px;"></div>
-      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 14px;">
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
       <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
        <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #C9A3B3;"></span>
       <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
@@ -160,16 +154,92 @@
       </span>
       
     </div></label>
-          <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px 8px; background: #fff;">
-        <span style="display: inline-flex; align-items: center; gap: 6px; font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">
-          <span style="display: inline-grid; place-items: center; color: #8E8E8E;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 5.5 6.5 6.5L8 18.5"/></svg></span>
-          更早 · 9
-        </span>
+      <div style="position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 18px 8px; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+        <span style="font: 600 11px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .1em; color: #8E8E8E;">更早 · 9</span>
         
       </div>
-      <div style="padding: 0 18px 4px;">
-        <span style="font: 400 11.5px/1.6 'Inter','Noto Sans TC',sans-serif; color: #B5B5B5;">收起來的不會消失，數字照算。</span>
-      </div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #D98BC4;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">把設計稿的字級表補完</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/08 · 逾期 11 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #C9A3B3;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">退訂那個電子報</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/07 · 逾期 12 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #F4A9A0;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">回 Ian 的 email</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/05 · 逾期 14 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #C9A3B3;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">換機車機油</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">09/02 · 逾期 17 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #D98BC4;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">寫 focus timer 的 ADR</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">08/30 · 逾期 20 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #C9A3B3;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">整理桌機的截圖資料夾</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">08/28 · 逾期 22 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #F4A9A0;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">問房東冷氣的事</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">08/25 · 逾期 25 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #D98BC4;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">備份舊硬碟</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">08/21 · 逾期 29 天</span>
+      </span>
+      
+    </div></label><div style="height: 1px; background: #EFEFEF; margin-left: 31px;"></div>
+      <label style="display: block; cursor: pointer;"><div style="display: flex; align-items: center; gap: 10px; padding: 9px 18px;">
+      <span style="flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.6px solid rgba(0,0,0,.28); background: transparent;"></span>
+       <span style="flex: none; width: 3px; height: 30px; border-radius: 2px; background: #C9A3B3;"></span>
+      <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font: 600 14px/18px 'Inter','Noto Sans TC',sans-serif; color: #000000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">把 v1 的 token 表存檔</span>
+        <span style="font: 500 10.5px/13px 'JetBrains Mono',ui-monospace,monospace; letter-spacing: .02em; color: #8E8E8E;">08/18 · 逾期 32 天</span>
+      </span>
+      
+    </div></label>
+          <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: linear-gradient(to bottom, rgba(255,255,255,0), #fff);"></div>
         </div>
         <div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 18px 26px; border-top: 1px solid #EFEFEF; background: #fff;">
         <button type="button" style="flex-grow: 1; height: 44px; border: none; border-radius: 14px; background: #A8425E; color: #fff; font: 600 14px 'Inter','Noto Sans TC',sans-serif; cursor: pointer;">移到今天 · 3</button>
@@ -177,6 +247,7 @@
       </div>
       </div>
     </div>
+    
   </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":393,"height":852}}'>

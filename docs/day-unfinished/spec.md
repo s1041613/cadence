@@ -1,6 +1,8 @@
-# Day 檢視 · 未完成待辦面板
+# Day 檢視 · 未完成待辦
 
-日檢視標題列右側多一顆切換鈕，打開「比這一天早、而且還沒打勾」的待辦清單；
+日檢視標題列右側一顆切換鈕，數字是「比這一天早、而且還沒打勾」的待辦數。
+按下去，一張 sheet 由下往上長出來，**浮在日檢視上面、不推擠它**，
+裡面是**全部**的逾期待辦——不截斷、不收合、不用再點一次。
 每一列可以移到這一天，或刪掉。
 
 畫面在 `*.dc.html`（由 `build-artboards.mjs` 產生，同 `docs/month-filter-design/` 的做法）：
@@ -8,22 +10,23 @@
 | 檔 | 畫面 |
 | --- | --- |
 | `Main.dc.html` | 收合（預設） |
-| `Expanded.dc.html` | 展開，三筆逾期 |
+| `SheetShort.dc.html` | 3 筆：sheet 貼著內容，矮 |
+| `SheetHalf.dc.html` | 15 筆：預設停在一半，時間軸還看得到 |
+| `SheetAll.dc.html` | 15 筆：往上拖，看完整份 |
 | `Confirm.dc.html` | 刪除的就地確認 |
+| `SheetSelect.dc.html` | 選取模式 |
 | `Undo.dc.html` | 移到今天之後的 toast |
 | `Empty.dc.html` | 沒有逾期時的標題列 |
-| `MultiSelect.dc.html` | 替代方案 B（多選 + 底部動作列） |
 | `Anatomy.dc.html` | 尺寸、色票、資料規則 |
-| `Many.dc.html` | 15 筆時的面板（截到 4 列） |
-| `Sheet.dc.html` | 全部未完成 · sheet |
-| `SheetSelect.dc.html` | sheet 的選取模式 |
+| `Rejected-Panel.dc.html` | 沒採用 A：內嵌面板 |
+| `Rejected-Capped.dc.html` | 沒採用 B：內嵌面板 + 截斷 |
 
 ## 切換鈕
 
 擺在 `Pv2DayHeader` 的右側叢集，`Pv2HeaderNav`（TODAY）左邊，gap 8。
 與 TODAY 同高（28）、同圓角、同陰影——標題列已經有一套藥丸語彙，這顆沿用，
 而不是另外做一顆月檢視那種玻璃分段鈕：月的 `Pv2TypeSwitch` 是「兩份內容二選一」，
-這裡是「一塊面板開或關」，形狀不該一樣。
+這裡是「開一張清單」，形狀不該一樣。
 
 | | |
 | --- | --- |
@@ -33,64 +36,58 @@
 | 命中區 | 44×44，用 `::after` 撐出來，不改版面（同 `Pv2TypeSwitch__seg`） |
 | 筆數 0 | 整顆不 render |
 
+數字照實顯示，不截成 `9+`。難看正是重點：`9+` 會讓 47 筆和 10 筆長得一樣。
+
 `#A8425E` 不是 `--pv2-accent`：`#DE6E8C` 在白底只有 3.1:1，這顆鈕裡有 11px 的數字，
 過不了 4.5:1。月檢視那顆是純 icon 所以用得下去。這個角色建議進 `cadence-tokens.css`
 （`--pv2-accent-ink`），不要散在元件裡。
 
-## 面板
+## sheet
 
-長在 header 與時間軸之間，白卡、圓角 18、`--pv2-line-soft` 邊、`margin: 16px 22px 0`。
-時間軸是 flex:1，面板一開它自己會縮，不需要額外的 layout 處理。
+由下往上，**absolute 浮在頁框裡，不參與 `.dv2__body` 的 flex column**，
+所以時間軸的高度、捲動位置、ALL-DAY 列一格都不會動。這是它跟內嵌面板最大的差別：
+面板是版面的一部分，開了就得從別人身上拿高度；sheet 只是蓋上去。
 
-面板**永遠不捲動**：最多 5 列（≤5 筆時全部畫出來），超過就只畫 4 列，
-第 5 列換成「還有 N 筆 · 查看全部」，開 sheet。理由見下面「很多筆的時候」。
-
-- 面板頭：`UNFINISHED · N`（600 11 mono、`--pv2-ink-3`，與 `ALL-DAY` 同一個標籤語彙）
-  + 「全部移到今天」文字鈕 + 收起 chevron。
-- 列：3px 象限色條 ／ 標題（600 14/18，單行 ellipsis）／ 副標
-  （`09/16 · 逾期 3 天`，500 10.5 mono）／ 兩顆 32×32 動作鈕。
-- 「移到今天」是主要動作（accent tint 底），「刪除」是安靜的（透明底、灰墨）。
-
-## 很多筆的時候
-
-逾期是會累積的：一個月沒整理就可能三十筆。一個 232px 的內捲區在那個量級下沒有用——
-它在時間軸上面挖了一個小洞，讓你用四列的視窗去捲三十筆，而且捲動巢狀在頁面裡。
-所以面板不吃這個量，它把量交出去。
-
-**≤5 筆** → 面板全部畫出來，每列兩顆鈕，這是日常情況。
-**>5 筆** → 面板畫 4 列（最近逾期的優先），第 5 列是「還有 N 筆 · 查看全部」，開 sheet。
-
-sheet 用現成的 `Pv2DaySheet` 語彙（scrim + handle + 圓角 28 + teleport 到頁框）。
+沿用 `Pv2DaySheet` 的語彙（scrim + handle + 圓角 28 + teleport 到頁框）。
 DayPageV2 的 `data-poster-root` 目前沒有 id，要補一個 `#dp2-root`，MonthPageV2 是 `#mp2-root`。
 
-sheet 裡：
+**兩段高度：**
 
-- 按逾期距離分組，sticky 組標題：`昨天 · 2` / `本週 · 4` / `更早 · 9`。
-  分組不是裝飾——「昨天忘了打勾」和「三週前就放生了」是兩件事，混在一條長清單裡
-  只會讓整份都變成噪音。
-- 每組標題右邊一顆「整組移到今天」。最高價值的動作是「把昨天的搬過來」，
-  它應該是一次點擊，不是勾五次。
-- 「更早」預設收起。數字照算進鈕上的 badge，不偷偷藏——收起的是視線，不是事實。
-- 右上「選取」進多選模式：圓形 checkbox + 底部「移到今天 · N」/ 刪除。
-  這就是原本的替代方案 B，它在長清單下才成立，所以它變成 sheet 的一個模式，
-  而不是面板的另一種長相。
+- 預設 `min(內容高, 52vh)`。三筆就是一張矮 sheet，日期和時間軸都還在上面看得到。
+- 往上拖 / 上滑 → `82vh`，看完整份。往下拖關掉（`Pv2DaySheet` 已有 `v-touch-swipe.down`）。
 
-badge 的數字照實顯示，不截成 `9+`。難看正是重點；`9+` 會讓 47 筆和 10 筆長得一樣。
+超過當前段高，清單自己捲，組標題 sticky。捲動只發生在 sheet 裡，
+底下的時間軸這時候是被 scrim 蓋住的，不存在兩層捲動打架的問題。
+
+**分組**：按逾期距離分成 `昨天` / `本週` / `更早`，**全部展開，沒有收合**。
+分組不是為了藏東西，是為了讓「昨天忘了打勾」跟「三週前就放生了」在視覺上分得開——
+混成一條長清單會讓整份都變噪音。每組標題右邊一顆「整組移到今天」：
+最高價值的動作是「把昨天的搬過來」，它該是一次點擊。
+
+頂層**沒有**「全部移到今天」。15 筆的時候那顆鈕會把 32 天前的東西一起丟進今天，
+批次要有選擇性，所以走右上的「選取」模式：圓形 checkbox + 底部「移到今天 · N」/ 刪除。
 
 ## 資料規則
 
 納入：`type === 'quadrant' && !done && date < 檢視中的日期`，
 且 `calendarsStore.isVisible(calendarId)`，且 `ownerId` 是自己
 （別人的列在這個 app 裡本來就唯讀，放進一個「動作面板」只會給出按不動的鈕）。
-排序 `date` 由舊到新，同日照 `start`。
+組內 `date` 由舊到新，同日照 `start`。
 
-逾期是相對「正在看的那一天」算的，不是相對今天。往前滑到上週四，面板算的就是
-那天之前還沒做完的事，動作的字也跟著變成「移到這天」。理由是日檢視本來就是
-可以左右滑的，錨定在今天的話，滑開之後那顆鈕的數字會跟畫面上的日期對不起來。
+**沒有筆數上限，也沒有回看天數的上限。** 三十筆就是三十筆，捲下去看得到。
+
+逾期是相對「正在看的那一天」算的，不是相對今天。往前滑到上週四，算的就是
+那天之前還沒做完的事，動作的字跟著變成「移到這天」。理由是日檢視本來就可以左右滑，
+錨定在今天的話，滑開之後那顆鈕的數字會跟畫面上的日期對不起來。
 
 - 移到今天：`date = 檢視中的日期`，`endDate` 同步平移，`start`/`end`/`allDay` 原樣保留。
   走現成的 `tasksStore.saveTask`。
 - 刪除：`tasksStore.deleteTask`（已有樂觀更新 + 失敗回滾 + 重試 toast）。
+
+分組要一支按「逾期幾天」分桶的函式。`src/utils/group-by-recency.ts` 形狀對得上
+（Today / Yesterday / Previous 7 Days），但它鎖死 `createdAt`、而且把 7 天以上的直接丟掉，
+這裡不能丟。要嘛把它泛化（取 key 的函式 + 第四個 bucket），要嘛寫一支姊妹函式；
+不要兩份各自漂移的分組邏輯。
 
 ## 回饋
 
@@ -99,34 +96,38 @@ badge 的數字照實顯示，不截成 `9+`。難看正是重點；`9+` 會讓 
   （`{ label, run }`），toast 元件跟著長一顆鈕。
 - 刪除 → 不用 toast，列就地換成「刪除「X」？ ／ 取消 ／ 刪除」。
   刪除在這裡是真的刪掉一筆遠端資料，兩段式比事後復原誠實，也比再擴一次 toast 便宜。
-- 最後一列處理完 → 面板自己收起，切換鈕消失。
+- 最後一筆處理完 → sheet 自己關掉，切換鈕消失。
 - 開關狀態放 `ui-store` 的 ref，不同步、不持久化——理由同 `monthFilter`：
   這是「畫面現在的樣子」，不是帳號帶著走的偏好。
 
 ## a11y / 動態
 
-- 切換鈕 `aria-pressed`，面板 `role="region"` + `aria-label="未完成待辦"`。
+- 切換鈕 `aria-pressed`，sheet `role="dialog"` + `aria-label="未完成待辦"`。
 - icon-only 的動作鈕都要 `aria-label`（含標題，例如「把『訂下週的牙醫』移到今天」）。
-- 高度 200ms `var(--cd-ease-standard)`；`prefers-reduced-motion` 直接切換。
+- sheet 進出沿用 `pv2-sheet` transition（app.css，300ms）；
+  段與段之間的拖曳跟手，放開時吸附到最近的段。
+- `prefers-reduced-motion` 直接切換。
 
-## 沒採用的：面板本身就是多選（`MultiSelect.dc.html`）
+## 沒採用的：內嵌面板
 
-每列一顆圓形 checkbox、底部一條「移到今天 · 2」+ 刪除，取代每列的兩顆鈕。
-批次很有效率，但它逼著每一次展開都先進出一個「選取模式」，而常見情況是兩三筆——
-兩三筆用勾的比直接按還慢。
-所以多選沒有消失，它搬到 sheet 裡（`SheetSelect.dc.html`）：量大的時候才需要它，
-量大的時候才付得起那個模式的代價。
+`Rejected-Panel.dc.html` / `Rejected-Capped.dc.html`。
+一張卡片長在 header 與時間軸之間，是最早的版本。兩個問題：
+
+1. **它擠壓時間軸。** 面板是版面的一部分，一開就從時間軸身上拿走高度，
+   本來看得到的時段被推下去。日檢視的主角是那條時間軸，不該被一個輔助清單推著走。
+2. **它撐不住量。** 為了不把時間軸吃光，面板得設高度上限，於是要嘛內捲
+   （在頁面裡挖一個四列高的洞去捲三十筆），要嘛截斷再給一顆「查看全部」
+   （多一次點擊，而且在那之前你看不到全部）。
+
+sheet 兩個都解決：浮著所以不擠壓，可拖高所以裝得下。
+多選也從面板搬進 sheet——量少的時候勾選比直接按還慢，量大的時候才付得起那個模式的代價。
 
 ## 實作會動到的檔
 
 - `src/components/v2/ui/Pv2DayHeader.vue` — 右側叢集多一顆鈕 + 一組 props/emit。
-- `src/components/v2/day/DayViewV2.vue` — 開關 state、面板掛載位置。
-- `src/components/v2/day/DayUnfinished.vue`（新）— 面板本體。
-- `src/components/v2/day/DayUnfinishedSheet.vue`（新）— 全部未完成的 sheet。
+- `src/components/v2/day/DayViewV2.vue` — 開關 state、sheet 掛載。
+- `src/components/v2/day/DayUnfinishedSheet.vue`（新）— sheet 本體，含兩段高度與選取模式。
 - `src/pages/DayPageV2.vue` — 頁框補 `id="dp2-root"` 給 sheet teleport。
-- `src/utils/group-by-recency.ts` — 形狀對得上（Today / Yesterday / Previous 7 Days），
-  但它鎖死 `createdAt`、而且把 7 天以上的直接丟掉，這裡不能丟。
-  要嘛把它泛化（取 key 的函式 + 第四個 bucket），要嘛寫一支姊妹函式；
-  不要兩份各自漂移的分組邏輯。
+- `src/utils/group-by-recency.ts` — 泛化，或寫姊妹函式。
 - `src/stores/ui-store.ts` — `Toast` 加 action。
 - `src/css/cadence-tokens.css` — `--pv2-accent-ink`。
