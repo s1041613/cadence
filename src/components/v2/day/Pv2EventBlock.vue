@@ -1,18 +1,41 @@
 <template>
   <div
     class="pv2-event-block"
-    :class="[`pv2-event-block--${tier}`, { 'pv2-event-block--active': active }]"
+    :class="[
+      `pv2-event-block--${tier}`,
+      { 'pv2-event-block--active': active, 'pv2-event-block--done': isTask && done }
+    ]"
     :style="blockStyle"
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
   >
     <div class="pv2-event-block__head">
-      <span class="pv2-event-block__title">{{ title }}</span>
-      <span class="pv2-event-block__time">
-        {{ startLabel }}
-        <span v-if="tier !== 'compact' && remainingLabel" class="pv2-event-block__left">
-          · {{ remainingLabel }}
+      <!-- Tasks only. An event is "where you have to be at three"; a task is the thing that has
+           to get finished, and only the second one can be finished. Always live once it is
+           drawn, checked included: unchecking is the only way back from settling a task too
+           early, so it must never be a dead end. -->
+      <button
+        v-if="isTask"
+        type="button"
+        class="pv2-event-block__check"
+        :data-on="done"
+        :disabled="!canToggle"
+        :aria-label="`${done ? 'Uncheck' : 'Check'} ${title}`"
+        @click.stop="emit('toggleDone')"
+      >
+        <span class="pv2-event-block__box">
+          <CdIcon v-if="done" name="check" :size="checkGlyph" :stroke-width="3.4" color="#fff" />
         </span>
-      </span>
+      </button>
+
+      <div class="pv2-event-block__headtext">
+        <span class="pv2-event-block__title">{{ title }}</span>
+        <span class="pv2-event-block__time">
+          {{ startLabel }}
+          <span v-if="tier !== 'compact' && remainingLabel" class="pv2-event-block__left">
+            · {{ remainingLabel }}
+          </span>
+        </span>
+      </div>
     </div>
 
     <!-- Reading a block's intent without opening it. Only as many lines as the block's own
@@ -83,6 +106,14 @@ const props = withDefaults(
     lane: number
     startLabel: string
     active: boolean // true when this event is "in progress" (today + now within range)
+    /** Gates the checkbox. Quadrant tasks carry a completion state; calendar events keep the
+     *  column's default false and are drawn exactly as they were before it existed. */
+    isTask?: boolean
+    done?: boolean
+    /** False on a task someone else authored. The state is still drawn — whether a shared
+     *  calendar's task got finished is worth seeing — but RLS only lets the author write the
+     *  row, so an enabled control would promise a write the server refuses. */
+    canToggle?: boolean
     subtasks?: Subtask[]
     /** Detail lines, shown only as far as the block's height affords. */
     location?: string
@@ -90,11 +121,22 @@ const props = withDefaults(
     /** "3.8 hr left" — passed only for the in-progress block; the grid owns the clock. */
     remainingLabel?: string
   }>(),
-  { subtasks: () => [], location: '', notes: '', remainingLabel: '' }
+  {
+    isTask: false,
+    done: false,
+    canToggle: true,
+    subtasks: () => [],
+    location: '',
+    notes: '',
+    remainingLabel: ''
+  }
 )
 
 const emit = defineEmits<{
   click: [event: MouseEvent]
+  /** Checkbox only. The block's own click opens the preview, so the checkbox stops propagation
+   *  — one tap must not both settle the task and open a card over it. */
+  toggleDone: []
 }>()
 
 // --- Line-box constants. Each mirrors a declaration in the stylesheet below. ---
@@ -122,6 +164,15 @@ const tier = computed<'compact' | 'regular' | 'tall'>(() => {
   if (renderedHeight.value >= REGULAR_MIN) return 'regular'
   return 'compact'
 })
+
+/**
+ * The checkmark inside the circle, by tier. It tracks the circle (16/18/20 in the stylesheet)
+ * rather than staying one size: a 12px glyph drawn inside a 16px circle touches the rim, and a
+ * 10px one rattles around inside a 20px circle.
+ */
+const CHECK_GLYPH = { compact: 10, regular: 11, tall: 12 } as const
+
+const checkGlyph = computed(() => CHECK_GLYPH[tier.value])
 
 const headHeight = computed(() => {
   if (tier.value === 'compact') return MIN_CONTENT_HEIGHT
@@ -247,10 +298,31 @@ const blockStyle = computed(() => ({
     inset 0 0 0 1.5px var(--pv2-block-color);
 }
 
+/* The head is a row in every tier now: the checkbox on the left, the title and time stacked or
+   side by side beside it. What differs per tier is only what __headtext does with its two
+   children, below — so the checkbox's placement is written once instead of three times. */
+.pv2-event-block__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pv2-event-block--tall .pv2-event-block__head {
+  gap: 10px;
+}
+
+.pv2-event-block__headtext {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Compact: title and time share one row. The time is pinned to its natural width and the
    title takes the rest, so a long title ellipsises rather than pushing the time out of view. */
-.pv2-event-block--compact .pv2-event-block__head {
-  display: flex;
+.pv2-event-block--compact .pv2-event-block__headtext {
+  flex-direction: row;
   align-items: baseline;
   gap: 10px;
 }
@@ -264,13 +336,94 @@ const blockStyle = computed(() => ({
   flex: none;
 }
 
-/* Regular and tall: the time drops under the title, where a 12px mono line reads as the
-   title's caption instead of competing with it for the row. */
-.pv2-event-block--regular .pv2-event-block__head,
-.pv2-event-block--tall .pv2-event-block__head {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+/* Regular and tall keep __headtext's column default: the time drops under the title, where a
+   12px mono line reads as the title's caption instead of competing with it for the row. */
+
+/*
+ * The completion checkbox — tasks only.
+ *
+ * The button is one TITLE LINE BOX tall and centres the circle inside it, the same trick
+ * .pv2-event-block__lead uses on a wrapped note: on regular and tall the time sits under the
+ * title, and a checkbox centred on the head as a whole would float between the two lines
+ * instead of level with the word it belongs to. It also means the checkbox costs the block no
+ * vertical space at all — every constant above (PAD_Y, TITLE_LH_*, the tier thresholds, the
+ * detail row budget) is untouched by it. The only cost is horizontal: the title gives up
+ * box + gap, 24px on compact and regular, 30px on tall.
+ */
+.pv2-event-block__check {
+  position: relative;
+  flex: none;
+  width: 18px;
+  height: 19px; /* TITLE_LH_SM */
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.pv2-event-block--compact .pv2-event-block__check {
+  width: 16px;
+}
+
+.pv2-event-block--tall .pv2-event-block__check {
+  width: 20px;
+  height: 24px; /* TITLE_LH_LG */
+}
+
+/* A finger is not 18px. The hit area is pushed out past the circle without moving it, which is
+   all the room there is to give — a bigger circle would crowd the 15px title it sits beside.
+   On a compact block the block's own overflow:hidden clips the vertical overshoot back to the
+   block's 31px: accepted, since the horizontal reach is what a thumb misses by. */
+.pv2-event-block__check::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+}
+
+.pv2-event-block__box {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.6px solid rgba(var(--pv2-ink-rgb), 0.28);
+  display: grid;
+  place-items: center;
+  transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.pv2-event-block--compact .pv2-event-block__box {
+  width: 16px;
+  height: 16px;
+}
+
+.pv2-event-block--tall .pv2-event-block__box {
+  width: 20px;
+  height: 20px;
+}
+
+.pv2-event-block__check:hover:not(:disabled) .pv2-event-block__box {
+  border-color: rgba(var(--pv2-ink-rgb), 0.55);
+  box-shadow: 0 0 0 4px rgba(var(--pv2-ink-rgb), 0.06);
+}
+
+/* Filled in ink, NOT in the event's own colour. The quadrant palette runs from #F4A9A0 to
+   #EC5093; a white checkmark clears 3:1 on the hot end of it and sits at 1.9:1 on the pale
+   end, so a checkmark drawn on the task's colour would be legible on some tasks and invisible
+   on others. One ink fill reads the same on all four. */
+.pv2-event-block__check[data-on='true'] .pv2-event-block__box {
+  background: var(--pv2-ink);
+  border-color: var(--pv2-ink);
+}
+
+/* Someone else's task: shown, not writable (see the canToggle prop). */
+.pv2-event-block__check:disabled {
+  cursor: default;
+}
+
+.pv2-event-block__check:disabled .pv2-event-block__box {
+  border-color: rgba(var(--pv2-ink-rgb), 0.14);
 }
 
 .pv2-event-block__title {
@@ -385,5 +538,32 @@ const blockStyle = computed(() => ({
 .pv2-event-block__more {
   font-weight: 700;
   color: var(--pv2-ink-3);
+}
+
+/*
+ * Done. Last in the sheet on purpose: --done and --active are both one class deep, so this is
+ * what decides which wins where they collide. (The grid also stops marking a finished task
+ * in-progress, so in practice they do not — this is the belt to that braces.)
+ *
+ * The block recedes; it does not leave. Its slot on the axis is still information — the hour
+ * was spent — and on a grid whose vertical axis IS the clock, something vanishing from under
+ * your thumb reads as "I hit the wrong thing", not as "that's finished". So: the wash halves,
+ * the ambient shadow goes and the card settles back onto the paper, and nothing moves.
+ */
+.pv2-event-block--done {
+  background: color-mix(in srgb, var(--pv2-block-color) 5%, var(--pv2-canvas));
+  box-shadow: 0 1px 2px rgba(var(--pv2-ink-rgb), 0.04);
+}
+
+/* ink-3, the same step a finished subtask takes: struck through AND faded to ink-4, a done
+   title stopped being readable at all — done is not the same as gone. */
+.pv2-event-block--done .pv2-event-block__title {
+  color: var(--pv2-ink-3);
+  text-decoration: line-through;
+}
+
+.pv2-event-block--done .pv2-event-block__time {
+  color: var(--pv2-ink-4);
+  font-weight: 500;
 }
 </style>
