@@ -58,11 +58,15 @@
             :lane="block.lane"
             :start-label="block.startLabel"
             :active="block.active"
+            :is-task="block.isTask"
+            :done="block.done"
+            :can-toggle="block.canToggle"
             :subtasks="block.subtasks"
             :location="block.location"
             :notes="block.notes"
             :remaining-label="block.remainingLabel"
             @click="(e) => emit('eventClick', block.id, e)"
+            @toggle-done="emit('toggleDone', block.id)"
           />
         </div>
       </div>
@@ -88,6 +92,11 @@ export interface Pv2GridEvent {
   color: string
   start: number // minutes from midnight
   end: number
+  /** Completion, for the block's checkbox. Only a quadrant task carries one; an event omits
+   *  these and is drawn exactly as it was before the checkbox existed. */
+  isTask?: boolean
+  done?: boolean
+  canToggle?: boolean
   /** Rendered inline so a block's intent is readable without opening it. Optional: callers
    *  that have no checklist to show simply omit it. */
   subtasks?: Subtask[]
@@ -133,6 +142,9 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   eventClick: [eventId: string, event: MouseEvent]
+  /** The block's checkbox was tapped. The grid does not own the data, so it only reports
+   *  which row — the caller flips it. */
+  toggleDone: [eventId: string]
   /** Empty-column click; `minutesFromMidnight` is the raw (unrounded) clicked position — the
    * caller applies quickAddTimeRange() rounding/clamping. */
   columnClick: [minutesFromMidnight: number, event: MouseEvent]
@@ -181,6 +193,9 @@ interface LaidOutBlock {
   lane: number
   startLabel: string
   active: boolean
+  isTask: boolean
+  done: boolean
+  canToggle: boolean
   subtasks: Subtask[]
   location: string
   notes: string
@@ -197,7 +212,12 @@ const laidOutBlocks = computed<LaidOutBlock[]>(() => {
     const wPct = 100 / l.cols
     const left = `calc(${wPct * l.lane}% + ${l.lane === 0 ? 3 : gap}px)`
     const right = `calc(${wPct * (l.cols - 1 - l.lane)}% + ${l.lane === l.cols - 1 ? 3 : gap}px)`
-    const active = props.today && props.nowMinutes >= ev.start && props.nowMinutes < ev.end
+    // `&& !done` so a task finished early stops being "in progress": the ring and the
+    // countdown both hang off this, and "18 min left" under a struck-through title is a
+    // contradiction the user has already resolved by checking it.
+    const done = ev.done ?? false
+    const active =
+      props.today && props.nowMinutes >= ev.start && props.nowMinutes < ev.end && !done
     const h = ((ev.end - ev.start) / 60) * props.rowHeight - 2
     return {
       id: ev.id,
@@ -210,6 +230,9 @@ const laidOutBlocks = computed<LaidOutBlock[]>(() => {
       lane: l.lane,
       startLabel: `${minutesToLabel(ev.start)} – ${minutesToLabel(ev.end)}`,
       active,
+      isTask: ev.isTask ?? false,
+      done,
+      canToggle: ev.canToggle ?? true,
       subtasks: ev.subtasks ?? [],
       location: ev.location ?? '',
       notes: ev.notes ?? '',
