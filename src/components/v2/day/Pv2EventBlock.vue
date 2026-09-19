@@ -23,7 +23,7 @@
         @click.stop="emit('toggleDone')"
       >
         <span class="pv2-event-block__box">
-          <CdIcon v-if="done" name="check" :size="checkGlyph" :stroke-width="3.4" color="#fff" />
+          <CdIcon v-if="done" name="check" :size="checkGlyph" :stroke-width="3" color="#fff" />
         </span>
       </button>
 
@@ -166,11 +166,11 @@ const tier = computed<'compact' | 'regular' | 'tall'>(() => {
 })
 
 /**
- * The checkmark inside the circle, by tier. It tracks the circle (16/18/20 in the stylesheet)
- * rather than staying one size: a 12px glyph drawn inside a 16px circle touches the rim, and a
- * 10px one rattles around inside a 20px circle.
+ * The checkmark inside the circle, by tier. It tracks the circle (13/14/15 in the stylesheet)
+ * rather than staying one size: a 10px glyph drawn inside a 13px circle touches the rim, and an
+ * 8px one rattles around inside a 15px circle.
  */
-const CHECK_GLYPH = { compact: 10, regular: 11, tall: 12 } as const
+const CHECK_GLYPH = { compact: 8, regular: 9, tall: 10 } as const
 
 const checkGlyph = computed(() => CHECK_GLYPH[tier.value])
 
@@ -348,12 +348,12 @@ const blockStyle = computed(() => ({
  * instead of level with the word it belongs to. It also means the checkbox costs the block no
  * vertical space at all — every constant above (PAD_Y, TITLE_LH_*, the tier thresholds, the
  * detail row budget) is untouched by it. The only cost is horizontal: the title gives up
- * box + gap, 24px on compact and regular, 30px on tall.
+ * box + gap, 21px on compact, 22px on regular and 25px on tall.
  */
 .pv2-event-block__check {
   position: relative;
   flex: none;
-  width: 18px;
+  width: 14px;
   height: 19px; /* TITLE_LH_SM */
   padding: 0;
   border: none;
@@ -364,43 +364,44 @@ const blockStyle = computed(() => ({
 }
 
 .pv2-event-block--compact .pv2-event-block__check {
-  width: 16px;
+  width: 13px;
 }
 
 .pv2-event-block--tall .pv2-event-block__check {
-  width: 20px;
+  width: 15px;
   height: 24px; /* TITLE_LH_LG */
 }
 
-/* A finger is not 18px. The hit area is pushed out past the circle without moving it, which is
-   all the room there is to give — a bigger circle would crowd the 15px title it sits beside.
+/* A finger is not 14px. The hit area is pushed out past the circle without moving it, and it
+   absorbs the whole of the shrink: the circle is a marker beside the 15px title, not a control
+   sized for a thumb, so the reach it lost in diameter it takes back in inset.
    On a compact block the block's own overflow:hidden clips the vertical overshoot back to the
    block's 31px: accepted, since the horizontal reach is what a thumb misses by. */
 .pv2-event-block__check::after {
   content: '';
   position: absolute;
-  inset: -10px;
+  inset: -12px;
 }
 
 .pv2-event-block__box {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   box-sizing: border-box;
   border-radius: 50%;
-  border: 1.6px solid rgba(var(--pv2-ink-rgb), 0.28);
+  border: 1.4px solid rgba(var(--pv2-ink-rgb), 0.28);
   display: grid;
   place-items: center;
   transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
 }
 
 .pv2-event-block--compact .pv2-event-block__box {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
 }
 
 .pv2-event-block--tall .pv2-event-block__box {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
 }
 
 .pv2-event-block__check:hover:not(:disabled) .pv2-event-block__box {
