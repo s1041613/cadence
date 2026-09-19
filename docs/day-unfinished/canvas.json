@@ -58,6 +58,27 @@
       "w": 1040,
       "h": 820,
       "title": "規格"
+    },
+    "Many.dc.html": {
+      "x": 0,
+      "y": 2504,
+      "w": 393,
+      "h": 852,
+      "title": "面板 · 15 筆（截到 4 列）"
+    },
+    "Sheet.dc.html": {
+      "x": 473,
+      "y": 2504,
+      "w": 393,
+      "h": 852,
+      "title": "全部未完成 · sheet"
+    },
+    "SheetSelect.dc.html": {
+      "x": 946,
+      "y": 2504,
+      "w": 393,
+      "h": 852,
+      "title": "sheet · 選取模式"
     }
   },
   "order": [
@@ -67,7 +88,10 @@
     "Undo.dc.html",
     "Empty.dc.html",
     "MultiSelect.dc.html",
-    "Anatomy.dc.html"
+    "Anatomy.dc.html",
+    "Many.dc.html",
+    "Sheet.dc.html",
+    "SheetSelect.dc.html"
   ],
   "notes": {
     "flow": {
@@ -83,6 +107,13 @@
       "text": "替代方案與規格",
       "kind": "title1",
       "maxW": 1513
+    },
+    "many": {
+      "x": 0,
+      "y": 2210,
+      "text": "很多筆的時候 · 面板截斷 → sheet",
+      "kind": "title1",
+      "maxW": 1259
     }
   },
   "designSystems": []
