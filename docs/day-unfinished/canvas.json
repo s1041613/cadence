@@ -1,0 +1,89 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-19T10:50:03.166Z"
+  },
+  "title": "Day 未完成待辦面板",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "收合（預設）"
+    },
+    "Expanded.dc.html": {
+      "x": 473,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "展開"
+    },
+    "Confirm.dc.html": {
+      "x": 946,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "刪除確認"
+    },
+    "Undo.dc.html": {
+      "x": 1419,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "移到今天之後"
+    },
+    "Empty.dc.html": {
+      "x": 1892,
+      "y": 0,
+      "w": 393,
+      "h": 852,
+      "title": "沒有未完成"
+    },
+    "MultiSelect.dc.html": {
+      "x": 0,
+      "y": 1252,
+      "w": 393,
+      "h": 852,
+      "title": "替代方案 B · 多選"
+    },
+    "Anatomy.dc.html": {
+      "x": 473,
+      "y": 1252,
+      "w": 1040,
+      "h": 820,
+      "title": "規格"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Expanded.dc.html",
+    "Confirm.dc.html",
+    "Undo.dc.html",
+    "Empty.dc.html",
+    "MultiSelect.dc.html",
+    "Anatomy.dc.html"
+  ],
+  "notes": {
+    "flow": {
+      "x": 0,
+      "y": -300,
+      "text": "主流程 · 收合 → 展開 → 處理掉",
+      "kind": "title1",
+      "maxW": 2285
+    },
+    "alt": {
+      "x": 0,
+      "y": 960,
+      "text": "替代方案與規格",
+      "kind": "title1",
+      "maxW": 1513
+    }
+  },
+  "designSystems": []
+}
