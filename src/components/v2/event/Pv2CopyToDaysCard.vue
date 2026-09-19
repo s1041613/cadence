@@ -28,6 +28,7 @@
         class="pv2-copy-card__cell"
         :class="{
           'pv2-copy-card__cell--blank': !cell,
+          'pv2-copy-card__cell--source': !!cell && cell.date === sourceDate,
           'pv2-copy-card__cell--selected': !!cell && selected.includes(cell.date)
         }"
         :disabled="!cell || cell.disabled"
@@ -57,6 +58,9 @@ const props = defineProps<{
   cells: Array<CopyToDaysCell | null>
   selected: string[]
   firstDay: FirstDayName
+  // The task's own date. Marked with the accent pill the month grid gives today, and
+  // fully selectable — copying an event onto the day it already sits on is allowed.
+  sourceDate?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -196,8 +200,9 @@ const weekdays = computed(() => {
 }
 
 /* Days are bare numerals — no fill, no border — the way the design reads. A day gets
-   a background only when selected (dark disc). Every day in the month is selectable,
-   the task's own date included: copying an event onto its own day is allowed. */
+   a background only when it is the source day (accent pill) or selected (dark disc).
+   Every day in the month is selectable, the task's own date included: copying an event
+   onto the day it already sits on is allowed. */
 .pv2-copy-card__cell {
   aspect-ratio: 1;
   display: inline-flex;
@@ -225,6 +230,22 @@ const weekdays = computed(() => {
 
 .pv2-copy-card__cell:not(:disabled):hover > span {
   background: var(--cc-line);
+}
+
+/* Source day: the accent pill the month grid gives today (Pv2Cell's --today), so "the day
+   this event is on" reads the same in both places. It is a marker, not a lock — the cell
+   stays clickable. Declared ahead of --selected so that selecting the source day hands the
+   cell over to the dark selected disc; the hover rule below bows out for the same reason. */
+.pv2-copy-card__cell--source {
+  color: var(--pv2-on-accent);
+}
+
+.pv2-copy-card__cell--source > span {
+  background: var(--pv2-accent);
+}
+
+.pv2-copy-card__cell--source:not(.pv2-copy-card__cell--selected):not(:disabled):hover > span {
+  background: var(--pv2-accent);
 }
 
 .pv2-copy-card__cell--selected {
