@@ -28,10 +28,9 @@
         class="pv2-copy-card__cell"
         :class="{
           'pv2-copy-card__cell--blank': !cell,
-          'pv2-copy-card__cell--selected': !!cell && selected.includes(cell.date),
-          'pv2-copy-card__cell--source': !!cell && cell.date === sourceDate
+          'pv2-copy-card__cell--selected': !!cell && selected.includes(cell.date)
         }"
-        :disabled="!cell || cell.disabled || (!!cell && cell.date === sourceDate)"
+        :disabled="!cell || cell.disabled"
         @click="cell && emit('toggleDay', cell.date)"
       >
         <span v-if="cell">{{ cell.day }}</span>
@@ -58,9 +57,6 @@ const props = defineProps<{
   cells: Array<CopyToDaysCell | null>
   selected: string[]
   firstDay: FirstDayName
-  // The task's own date — marked with a soft ring and made unselectable (you can't
-  // copy a day onto itself), matching the design's greyed source day.
-  sourceDate?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -84,7 +80,6 @@ const weekdays = computed(() => {
      edit card, not a warm-beige variant. */
   --cc-ink: var(--pv2-ink);
   --cc-ink-2: var(--pv2-ink-2);
-  --cc-ink-3: var(--pv2-ink-4);
   --cc-line: var(--pv2-line-soft);
   --cc-paper: var(--pv2-canvas);
 
@@ -201,7 +196,8 @@ const weekdays = computed(() => {
 }
 
 /* Days are bare numerals — no fill, no border — the way the design reads. A day gets
-   a background only when selected (dark disc) or as the source day (soft ring). */
+   a background only when selected (dark disc). Every day in the month is selectable,
+   the task's own date included: copying an event onto its own day is allowed. */
 .pv2-copy-card__cell {
   aspect-ratio: 1;
   display: inline-flex;
@@ -237,16 +233,6 @@ const weekdays = computed(() => {
 
 .pv2-copy-card__cell--selected > span {
   background: var(--cc-ink);
-}
-
-/* Source day: greyed and ringed, unselectable. */
-.pv2-copy-card__cell--source {
-  color: var(--cc-ink-3);
-  cursor: default;
-}
-
-.pv2-copy-card__cell--source > span {
-  background: var(--pv2-fill-hover);
 }
 
 .pv2-copy-card__cell--blank {
