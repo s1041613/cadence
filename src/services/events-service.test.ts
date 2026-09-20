@@ -23,6 +23,7 @@ const task: Task = {
   start: '10:00',
   end: '11:00',
   allDay: false,
+  showInMonth: true,
   location: '',
   repeat: 'none',
   notes: '',
