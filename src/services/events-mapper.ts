@@ -30,6 +30,9 @@ export interface EventRow {
   all_day: boolean
   starts_at: string
   ends_at: string
+  // Meaningful for type='event' only; always written as-is (mirrors done/estimated_pomodoros,
+  // which round-trip on tasks even though they are only meaningful there too).
+  show_in_month: boolean
   location: string | null
   notes: string | null
   repeat_mode: RepeatMode
@@ -147,6 +150,7 @@ export function taskToRow(task: Task, ctx: MapContext): EventRow {
     color: isTask ? null : task.backgroundColor,
     icon: isTask ? null : task.icon,
     ...encodeInterval(task, isTask),
+    show_in_month: task.showInMonth,
     location: task.location === '' ? null : task.location,
     notes: task.notes === '' ? null : task.notes,
     repeat_mode: task.repeat,
@@ -169,6 +173,7 @@ export function rowToTask(row: EventRow & { event_reminders?: ReminderRow[] }, _
     title: row.title,
     ...decodeInterval(row),
     allDay: row.all_day,
+    showInMonth: row.show_in_month,
     location: row.location ?? '',
     repeat: row.repeat_mode,
     notes: row.notes ?? '',

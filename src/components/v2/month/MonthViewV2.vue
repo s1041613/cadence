@@ -167,6 +167,9 @@ function visibleTasksForDate(date: string): Task[] {
 
 /** The grid's half of the pair above: what ui.monthFilter actually hides. */
 function matchesMonthFilter(t: Task): boolean {
+  // An event opted out of the month grid (showInMonth === false) never draws here, regardless
+  // of the all/events filter — it still shows on the day timeline, this only hides the poster.
+  if (t.type === 'event' && !t.showInMonth) return false
   return ui.monthFilter === 'all' || t.type === 'event'
 }
 

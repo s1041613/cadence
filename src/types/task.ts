@@ -14,6 +14,9 @@ export interface Task {
   start: string
   end: string
   allDay: boolean
+  /** Event-only: whether this shows on the month grid. Ignored for a quadrant task (it never
+   * shows there regardless). Always true unless the user opted an event out via the editor. */
+  showInMonth: boolean
   location: string
   repeat: RepeatMode
   notes: string
