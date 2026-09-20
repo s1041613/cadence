@@ -266,38 +266,36 @@ describe('tasks-store', () => {
         vi.useRealTimers()
       })
 
-      it('stamps timeEditedAt when the start is moved after it already passed', async () => {
+      it('stamps timeEditedAt whenever the start changes, even ahead of the original slot', async () => {
         const store = await signedInStore()
         const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
         store.tasks.push(task)
 
+        // The edit lands well before 09:30 even happens — the marker no longer cares whether
+        // the original slot was in the past or future, only that the time actually moved.
         vi.useFakeTimers()
-        vi.setSystemTime(new Date('2026-07-10T10:15:00'))
-        store.saveTask({ ...task, start: '10:15', end: '10:45' })
+        vi.setSystemTime(new Date('2026-07-10T08:00:00'))
+        store.saveTask({ ...task, start: '09:45', end: '10:15' })
 
-        expect(store.tasks[0]!.timeEditedAt).toBe(new Date('2026-07-10T10:15:00').toISOString())
+        expect(store.tasks[0]!.timeEditedAt).toBe(new Date('2026-07-10T08:00:00').toISOString())
         expect(store.timeEditedTasks.map((t) => t.id)).toEqual([task.id])
       })
 
-      it('leaves timeEditedAt untouched when the edit lands before the original start', async () => {
+      it('stamps timeEditedAt when only the date changes', async () => {
         const store = await signedInStore()
         const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
         store.tasks.push(task)
 
-        vi.useFakeTimers()
-        vi.setSystemTime(new Date('2026-07-10T09:00:00'))
-        store.saveTask({ ...task, start: '09:45', end: '10:15' })
+        store.saveTask({ ...task, date: '2026-07-11' })
 
-        expect(store.tasks[0]!.timeEditedAt).toBeNull()
+        expect(store.tasks[0]!.timeEditedAt).not.toBeNull()
       })
 
-      it('leaves timeEditedAt untouched when the save does not change the time', async () => {
+      it('leaves timeEditedAt untouched when the save does not change the date/start', async () => {
         const store = await signedInStore()
         const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
         store.tasks.push(task)
 
-        vi.useFakeTimers()
-        vi.setSystemTime(new Date('2026-07-10T10:15:00'))
         store.saveTask({ ...task, title: 'Renamed only' })
 
         expect(store.tasks[0]!.timeEditedAt).toBeNull()

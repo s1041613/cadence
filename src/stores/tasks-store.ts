@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
 import type { Subtask } from '@/types/subtask'
-import { addDays, defaultPoms, estPomsOf, iso, isTimeValue, minutes, parseISO, spanDayCount } from '@/utils/convert-date-time'
+import { addDays, defaultPoms, estPomsOf, iso, isTimeValue, parseISO, spanDayCount } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
 import * as subtasksService from '@/services/subtasks-service'
@@ -44,20 +44,13 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
 
 export type TaskSyncStatus = 'pending' | 'synced' | 'failed'
 
-// The instant a task's stored date/start describe, in local wall time. Only meaningful for a
-// timed (non-all-day) entry with a real start value.
-function scheduledStartMs(task: Task): number {
-  return parseISO(task.date).getTime() + minutes(task.start) * 60_000
-}
-
-// True when this save moves a date/start that had already happened by the time it was edited —
-// the marker doesn't care how far off the original slot was, only that the edit landed after
-// the task was already supposed to have started.
-function isLateTimeChange(previous: Task, next: Task): boolean {
+// True when this save changes the task's scheduled date/start — regardless of whether that
+// original slot was in the past or future by the time the edit landed. All-day entries have no
+// clock time to move, so they never qualify.
+function isTimeChange(previous: Task, next: Task): boolean {
   if (previous.allDay || next.allDay) return false
-  if (!isTimeValue(previous.start)) return false
-  if (previous.date === next.date && previous.start === next.start) return false
-  return Date.now() > scheduledStartMs(previous)
+  if (!isTimeValue(previous.start) || !isTimeValue(next.start)) return false
+  return previous.date !== next.date || previous.start !== next.start
 }
 
 export const useTasksStore = defineStore('tasks', () => {
@@ -189,7 +182,7 @@ export const useTasksStore = defineStore('tasks', () => {
     const previous = idx === -1 ? null : tasks.value[idx]!
     const snapshot: Task = {
       ...task,
-      timeEditedAt: previous && isLateTimeChange(previous, task) ? new Date().toISOString() : task.timeEditedAt
+      timeEditedAt: previous && isTimeChange(previous, task) ? new Date().toISOString() : task.timeEditedAt
     }
     if (idx === -1) {
       tasks.value.push(snapshot)

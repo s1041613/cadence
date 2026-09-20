@@ -105,8 +105,8 @@ export interface Pv2GridEvent {
    *  silently when the block has no room for it. */
   location?: string
   notes?: string
-  /** True once this event's date/start has been adjusted after its previous start had already
-   *  passed — the actual breakfast time, not the planned one. Drawn as a dashed edge. */
+  /** True once this event's date/start has been changed from what was previously saved — the
+   *  actual breakfast time, not the planned one. Drawn as a dashed edge. */
   timeEdited?: boolean
 }
 
