@@ -65,6 +65,7 @@
             :location="block.location"
             :notes="block.notes"
             :remaining-label="block.remainingLabel"
+            :time-edited="block.timeEdited"
             @click="(e) => emit('eventClick', block.id, e)"
             @toggle-done="emit('toggleDone', block.id)"
           />
@@ -104,6 +105,9 @@ export interface Pv2GridEvent {
    *  silently when the block has no room for it. */
   location?: string
   notes?: string
+  /** True once this event's date/start has been adjusted after its previous start had already
+   *  passed — the actual breakfast time, not the planned one. Drawn as a dashed edge. */
+  timeEdited?: boolean
 }
 
 export interface Pv2GridAllDayEvent {
@@ -202,6 +206,7 @@ interface LaidOutBlock {
   /** Non-empty only while the block is in progress. The grid owns nowMinutes, so the
    *  countdown is computed here rather than re-deriving "now" inside every block. */
   remainingLabel: string
+  timeEdited: boolean
 }
 
 const laidOutBlocks = computed<LaidOutBlock[]>(() => {
@@ -236,7 +241,8 @@ const laidOutBlocks = computed<LaidOutBlock[]>(() => {
       subtasks: ev.subtasks ?? [],
       location: ev.location ?? '',
       notes: ev.notes ?? '',
-      remainingLabel: active ? remainingLabel(ev.end - props.nowMinutes) : ''
+      remainingLabel: active ? remainingLabel(ev.end - props.nowMinutes) : '',
+      timeEdited: ev.timeEdited ?? false
     }
   })
 })

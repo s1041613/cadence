@@ -34,4 +34,9 @@ export interface Task {
    * current user, so absence means "own task". Foreign ownerId gates the UI to read-only (RLS
    * only lets the author write the row). */
   ownerId?: string
+  /** Set by tasks-store.saveTask when this edit moved a date/start that had already passed —
+   * the actual breakfast at 10:10 instead of the planned 09:30. Null means the time has never
+   * been adjusted after the fact. Read it through timeEditedAt rather than recomputing it: the
+   * "had already passed" instant is only known at save time, not from the row alone. */
+  timeEditedAt: string | null
 }

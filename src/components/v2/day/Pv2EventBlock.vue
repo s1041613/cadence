@@ -3,7 +3,7 @@
     class="pv2-event-block"
     :class="[
       `pv2-event-block--${tier}`,
-      { 'pv2-event-block--active': active, 'pv2-event-block--done': isTask && done }
+      { 'pv2-event-block--active': active, 'pv2-event-block--done': isTask && done, 'pv2-event-block--time-edited': timeEdited }
     ]"
     :style="blockStyle"
     @click="(e) => { e.stopPropagation(); emit('click', e) }"
@@ -126,6 +126,10 @@ const props = withDefaults(
     notes?: string
     /** "3.8 hr left" — passed only for the in-progress block; the grid owns the clock. */
     remainingLabel?: string
+    /** True once this event's date/start was adjusted after its previous start had already
+     *  passed. Drawn as a dashed edge instead of the usual shadow-only card, so a moved slot
+     *  reads differently from one that was scheduled that way from the start. */
+    timeEdited?: boolean
   }>(),
   {
     isTask: false,
@@ -134,7 +138,8 @@ const props = withDefaults(
     subtasks: () => [],
     location: '',
     notes: '',
-    remainingLabel: ''
+    remainingLabel: '',
+    timeEdited: false
   }
 )
 
@@ -530,5 +535,13 @@ const blockStyle = computed(() => ({
 .pv2-event-block--done .pv2-event-block__time {
   color: var(--pv2-ink-4);
   font-weight: 500;
+}
+
+/* A dashed edge in neutral ink, not the event's own colour — --active already uses a solid
+   ring in that colour for "happening now", so a second signal in the same hue would blur the
+   two together. Dashed reads as "this slot moved" independent of every other state a block
+   can be in (active, done, or both). */
+.pv2-event-block--time-edited {
+  border: 1.5px dashed rgba(var(--pv2-ink-rgb), 0.32);
 }
 </style>

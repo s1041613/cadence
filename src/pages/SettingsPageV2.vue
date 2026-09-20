@@ -16,6 +16,7 @@
         <!-- Tab bar is entered from Customization, so Back returns there, not to root -->
         <Pv2SettingsTabBar v-else-if="pane === 'tabs'" @back="pane = 'customization'" />
         <Pv2SettingsNotifications v-else-if="pane === 'notifications'" @back="pane = 'root'" />
+        <Pv2SettingsTimeEdited v-else-if="pane === 'timeEdited'" @back="pane = 'root'" />
       </div>
       <Pv2BottomNav active="setting" />
     </div>
@@ -30,11 +31,12 @@ import Pv2SettingsRoot from '@/components/v2/settings/Pv2SettingsRoot.vue'
 import Pv2SettingsCustomization from '@/components/v2/settings/Pv2SettingsCustomization.vue'
 import Pv2SettingsTabBar from '@/components/v2/settings/Pv2SettingsTabBar.vue'
 import Pv2SettingsNotifications from '@/components/v2/settings/Pv2SettingsNotifications.vue'
+import Pv2SettingsTimeEdited from '@/components/v2/settings/Pv2SettingsTimeEdited.vue'
 
 const { isDesktop } = useBreakpoint()
 
-// root, customization, tabs, notifications; the remaining sub-pages are unimplemented
-const pane = ref<'root' | 'customization' | 'tabs' | 'notifications'>('root')
+// root, customization, tabs, notifications, timeEdited; the remaining sub-pages are unimplemented
+const pane = ref<'root' | 'customization' | 'tabs' | 'notifications' | 'timeEdited'>('root')
 </script>
 
 <style scoped>

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { Task } from '@/types/task'
 import type { Subtask } from '@/types/subtask'
-import { addDays, defaultPoms, estPomsOf, iso, parseISO, spanDayCount } from '@/utils/convert-date-time'
+import { addDays, defaultPoms, estPomsOf, iso, isTimeValue, minutes, parseISO, spanDayCount } from '@/utils/convert-date-time'
 import type { MapContext } from '@/services/events-mapper'
 import * as eventsService from '@/services/events-service'
 import * as subtasksService from '@/services/subtasks-service'
@@ -38,11 +38,28 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
     backgroundColor: null,
     icon: null,
     reminder: '15-min',
+    timeEditedAt: null,
     ...overrides
   }
 }
 
 export type TaskSyncStatus = 'pending' | 'synced' | 'failed'
+
+// The instant a task's stored date/start describe, in local wall time. Only meaningful for a
+// timed (non-all-day) entry with a real start value.
+function scheduledStartMs(task: Task): number {
+  return parseISO(task.date).getTime() + minutes(task.start) * 60_000
+}
+
+// True when this save moves a date/start that had already happened by the time it was edited —
+// the marker doesn't care how far off the original slot was, only that the edit landed after
+// the task was already supposed to have started.
+function isLateTimeChange(previous: Task, next: Task): boolean {
+  if (previous.allDay || next.allDay) return false
+  if (!isTimeValue(previous.start)) return false
+  if (previous.date === next.date && previous.start === next.start) return false
+  return Date.now() > scheduledStartMs(previous)
+}
 
 export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref<Task[]>([])
@@ -169,8 +186,12 @@ export const useTasksStore = defineStore('tasks', () => {
       return
     }
     const version = sessionVersion
-    const snapshot: Task = { ...task }
-    const idx = tasks.value.findIndex((t) => t.id === snapshot.id)
+    const idx = tasks.value.findIndex((t) => t.id === task.id)
+    const previous = idx === -1 ? null : tasks.value[idx]!
+    const snapshot: Task = {
+      ...task,
+      timeEditedAt: previous && isLateTimeChange(previous, task) ? new Date().toISOString() : task.timeEditedAt
+    }
     if (idx === -1) {
       tasks.value.push(snapshot)
     } else {
@@ -432,7 +453,8 @@ export const useTasksStore = defineStore('tasks', () => {
         date,
         ...(spanLength > 0 ? { endDate: iso(addDays(parseISO(date), spanLength)) } : {}),
         done: false,
-        completedPomodoros: 0
+        completedPomodoros: 0,
+        timeEditedAt: null
       })
     )
 
@@ -461,12 +483,21 @@ export const useTasksStore = defineStore('tasks', () => {
     return snapshots
   }
 
+  // Most-recently-adjusted first, for the Settings "Adjusted Times" list — a plain lookup
+  // rather than a store action, since nothing here mutates state.
+  const timeEditedTasks = computed(() =>
+    tasks.value
+      .filter((t): t is Task & { timeEditedAt: string } => t.timeEditedAt !== null)
+      .sort((a, b) => b.timeEditedAt.localeCompare(a.timeEditedAt))
+  )
+
   return {
     tasks,
     subtasks,
     isLoading,
     isSaving,
     syncStatusByTaskId,
+    timeEditedTasks,
     loadFromRemote,
     resetLocal,
     saveTask,
