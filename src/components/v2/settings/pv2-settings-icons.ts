@@ -16,6 +16,7 @@ export const PV2_SETTINGS_ICONS = {
   time: `<svg ${ATTRS}><circle cx="12" cy="12" r="8.5"/><path d="M12 7 V12 L15.5 14"/></svg>`,
   customization: `<svg ${ATTRS}><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="8.5" cy="9" r="1.6"/><path d="M20 15 L15 10 L5 20"/></svg>`,
   notifications: `<svg ${ATTRS}><path d="M6 9 a6 6 0 0 1 12 0 c0 5 2 6 2 6 H4 s2-1 2-6"/><path d="M10 20 a2 2 0 0 0 4 0"/></svg>`,
+  history: `<svg ${ATTRS}><path d="M3 12 a9 9 0 1 0 3-6.7"/><path d="M3 4 V9 H8"/><path d="M12 7.5 V12 L15.5 14"/></svg>`,
   privacy: `<svg ${ATTRS}><path d="M12 3 L19 6 V11 c0 5-3 8-7 10 c-4-2-7-5-7-10 V6 Z"/></svg>`,
   logout: `<svg ${ATTRS}><path d="M9 5 H5 a2 2 0 0 0-2 2 v10 a2 2 0 0 0 2 2 h4 M15 8 l4 4-4 4 M19 12 H9"/></svg>`
 } as const

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useTasksStore, mkTask } from './tasks-store'
 import * as eventsService from '@/services/events-service'
@@ -259,6 +259,49 @@ describe('tasks-store', () => {
 
       expect(store.tasks).toHaveLength(1)
       expect(store.tasks[0]!.title).toBe('Updated')
+    })
+
+    describe('timeEditedAt marker', () => {
+      afterEach(() => {
+        vi.useRealTimers()
+      })
+
+      it('stamps timeEditedAt when the start is moved after it already passed', async () => {
+        const store = await signedInStore()
+        const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
+        store.tasks.push(task)
+
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-07-10T10:15:00'))
+        store.saveTask({ ...task, start: '10:15', end: '10:45' })
+
+        expect(store.tasks[0]!.timeEditedAt).toBe(new Date('2026-07-10T10:15:00').toISOString())
+        expect(store.timeEditedTasks.map((t) => t.id)).toEqual([task.id])
+      })
+
+      it('leaves timeEditedAt untouched when the edit lands before the original start', async () => {
+        const store = await signedInStore()
+        const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
+        store.tasks.push(task)
+
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-07-10T09:00:00'))
+        store.saveTask({ ...task, start: '09:45', end: '10:15' })
+
+        expect(store.tasks[0]!.timeEditedAt).toBeNull()
+      })
+
+      it('leaves timeEditedAt untouched when the save does not change the time', async () => {
+        const store = await signedInStore()
+        const task = mkTask({ date: '2026-07-10', start: '09:30', end: '10:00', calendarId: DEFAULT_CALENDAR_UUID })
+        store.tasks.push(task)
+
+        vi.useFakeTimers()
+        vi.setSystemTime(new Date('2026-07-10T10:15:00'))
+        store.saveTask({ ...task, title: 'Renamed only' })
+
+        expect(store.tasks[0]!.timeEditedAt).toBeNull()
+      })
     })
   })
 

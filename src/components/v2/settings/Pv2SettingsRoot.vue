@@ -57,9 +57,9 @@ import Pv2SettingsRow from './Pv2SettingsRow.vue'
 import { PV2_SETTINGS_CHEVRON } from './pv2-settings-icons'
 import type { Pv2SettingsIconKey } from './pv2-settings-icons'
 
-// Customization and Notifications are built; the rest of the menu isn't yet.
+// Customization, Notifications and Adjusted Times are built; the rest of the menu isn't yet.
 const emit = defineEmits<{
-  open: [pane: 'customization' | 'notifications']
+  open: [pane: 'customization' | 'notifications' | 'timeEdited']
 }>()
 
 const auth = useAuthStore()
@@ -79,7 +79,7 @@ async function onLogout(): Promise<void> {
 
 // `pane` doubles as "is this built": a row without one is disabled. Keyed by icon because
 // each row uses its icon exactly once, so there is no second id to keep in step.
-type NavPane = 'customization' | 'notifications'
+type NavPane = 'customization' | 'notifications' | 'timeEdited'
 interface PrefRow {
   icon: Pv2SettingsIconKey
   label: string
@@ -89,7 +89,8 @@ const prefRows: PrefRow[] = [
   { icon: 'calendars', label: 'Calendars' },
   { icon: 'time', label: 'Time' },
   { icon: 'customization', label: 'Customization', pane: 'customization' },
-  { icon: 'notifications', label: 'Notifications', pane: 'notifications' }
+  { icon: 'notifications', label: 'Notifications', pane: 'notifications' },
+  { icon: 'history', label: 'Adjusted Times', pane: 'timeEdited' }
 ]
 </script>
 

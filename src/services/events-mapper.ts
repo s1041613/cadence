@@ -36,6 +36,7 @@ export interface EventRow {
   done: boolean
   estimated_pomodoros: number
   completed_pomodoros: number
+  time_edited_at: string | null
 }
 
 export interface ReminderRow {
@@ -155,7 +156,8 @@ export function taskToRow(task: Task, ctx: MapContext): EventRow {
     // Not clamped to the estimate: the estimate is derived from the slot length, so it is a
     // reference rather than a limit, and a count past it is displayed as 4/3. The DB
     // constraint that used to enforce the ceiling was dropped in the same change.
-    completed_pomodoros: task.completedPomodoros
+    completed_pomodoros: task.completedPomodoros,
+    time_edited_at: task.timeEditedAt
   }
 }
 
@@ -185,6 +187,7 @@ export function rowToTask(row: EventRow & { event_reminders?: ReminderRow[] }, _
     // boundary now).
     calendarId: row.calendar_id,
     reminder: reminderRow ? minutesToReminder(reminderRow.minutes_before) : null,
-    ownerId: row.owner_id
+    ownerId: row.owner_id,
+    timeEditedAt: row.time_edited_at
   }
 }

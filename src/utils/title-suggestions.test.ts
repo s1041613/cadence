@@ -26,6 +26,7 @@ function mkEvent(overrides: Partial<Task> = {}): Task {
     calendarId: 'cal-1',
     reminder: null,
     ownerId: ME,
+    timeEditedAt: null,
     ...overrides
   }
 }

@@ -70,7 +70,8 @@ const timedEvents = computed<Pv2GridEvent[]>(() =>
       canToggle: t.ownerId === undefined || t.ownerId === auth.user?.id,
       subtasks: tasksStore.subtasksFor(t.id),
       location: t.location,
-      notes: t.notes
+      notes: t.notes,
+      timeEdited: t.timeEditedAt !== null
     }))
     // Sorted on the clipped start, not the stored one: a span's middle day begins at
     // midnight, and ordering it by its original 22:00 would place it after the whole day.

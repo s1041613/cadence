@@ -35,7 +35,8 @@ const task: Task = {
   backgroundColor: null,
   icon: null,
   calendarId: OWN_CALENDAR_UUID,
-  reminder: '15-min'
+  reminder: '15-min',
+  timeEditedAt: null
 }
 
 describe('events-service', () => {
