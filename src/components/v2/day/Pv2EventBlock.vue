@@ -126,9 +126,9 @@ const props = withDefaults(
     notes?: string
     /** "3.8 hr left" — passed only for the in-progress block; the grid owns the clock. */
     remainingLabel?: string
-    /** True once this event's date/start was adjusted after its previous start had already
-     *  passed. Drawn as a dashed edge instead of the usual shadow-only card, so a moved slot
-     *  reads differently from one that was scheduled that way from the start. */
+    /** True once this event's date/start has been changed from what was previously saved.
+     *  Drawn as a dashed edge instead of the usual shadow-only card, so a moved slot reads
+     *  differently from one that was scheduled that way from the start. */
     timeEdited?: boolean
   }>(),
   {
