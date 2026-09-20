@@ -12,6 +12,7 @@ function mkEvent(overrides: Partial<Task> = {}): Task {
     start: '12:00',
     end: '13:00',
     allDay: false,
+    showInMonth: true,
     location: '',
     repeat: 'none',
     notes: '',

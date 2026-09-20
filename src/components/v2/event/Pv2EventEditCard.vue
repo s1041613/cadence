@@ -57,6 +57,11 @@
         <CdSwitch :model-value="allDay" size="34x19" @update:model-value="(v) => emit('update:allDay', v)" />
       </div>
 
+      <div v-if="type === 'event'" class="pv2-edit-card__line">
+        <span class="pv2-edit-card__label">SHOW IN MONTH</span>
+        <CdSwitch :model-value="showInMonth" size="34x19" @update:model-value="(v) => emit('update:showInMonth', v)" />
+      </div>
+
       <div v-if="type === 'task'" class="pv2-edit-card__matrix">
         <div class="pv2-edit-card__matrix-head">
           <span>URGENT</span>
@@ -246,6 +251,7 @@ const props = withDefaults(
     quad: 'do' | 'plan' | 'quick' | 'later'
     color?: string
     allDay: boolean
+    showInMonth: boolean
     date: string
     /** Inclusive end date. The host resolves the absent case, so this is always a real date. */
     endDate: string
@@ -274,6 +280,7 @@ const emit = defineEmits<{
   'update:quad': [value: 'do' | 'plan' | 'quick' | 'later']
   'update:color': [value: string]
   'update:allDay': [value: boolean]
+  'update:showInMonth': [value: boolean]
   'update:date': [value: string]
   'update:endDate': [value: string]
   'update:start': [value: string]

@@ -21,6 +21,7 @@
       :quad="editQuad"
       :color="editColor"
       :all-day="editAllDay"
+      :show-in-month="editShowInMonth"
       :date="editDate"
       :end-date="editEndDate"
       :start="editStart"
@@ -41,6 +42,7 @@
       @update:quad="(v) => (editQuad = v)"
       @update:color="(v) => (editColor = v)"
       @update:all-day="(v) => (editAllDay = v)"
+      @update:show-in-month="(v: boolean) => (editShowInMonth = v)"
       @update:date="(v) => (editDate = v)"
       @update:end-date="(v: string) => (editEndDate = v)"
       @update:start="(v) => (editStart = v)"
@@ -103,6 +105,7 @@
         :quad="editQuad"
         :color="editColor"
         :all-day="editAllDay"
+        :show-in-month="editShowInMonth"
         :date="editDate"
         :end-date="editEndDate"
         :start="editStart"
@@ -123,6 +126,7 @@
         @update:quad="(v) => (editQuad = v)"
         @update:color="(v) => (editColor = v)"
         @update:all-day="(v) => (editAllDay = v)"
+      @update:show-in-month="(v: boolean) => (editShowInMonth = v)"
         @update:date="(v) => (editDate = v)"
         @update:end-date="(v: string) => (editEndDate = v)"
         @update:start="(v) => (editStart = v)"
@@ -256,6 +260,7 @@ const editColor = ref<string>(DEFAULT_EVENT_COLOR)
 // any event edited in v2, which v1's picker can still set.
 const editIcon = ref<string | null>(null)
 const editAllDay = ref(false)
+const editShowInMonth = ref(true)
 const editDate = ref('')
 // Always a concrete date while editing; saveEdit drops it again when the span is one day.
 const editEndDate = ref('')
@@ -282,6 +287,7 @@ function seedEditState(t: Task): void {
   editColor.value = t.backgroundColor ?? DEFAULT_EVENT_COLOR
   editIcon.value = t.icon
   editAllDay.value = t.allDay
+  editShowInMonth.value = t.showInMonth
   editDate.value = t.date
   editEndDate.value = endDateOf(t)
   editStart.value = t.start
@@ -349,6 +355,7 @@ function saveEdit(): void {
     backgroundColor: editType.value === 'event' ? editColor.value : task.value.backgroundColor,
     icon: editType.value === 'event' ? editIcon.value : null,
     allDay: editType.value === 'event' ? editAllDay.value : false,
+    showInMonth: editType.value === 'event' ? editShowInMonth.value : task.value.showInMonth,
     date: editDate.value,
     // Absent rather than equal to the start date, so a single-day event keeps the shape it
     // has always had; delete below covers the multi-day -> single-day edit.

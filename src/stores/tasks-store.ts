@@ -25,6 +25,7 @@ export function mkTask(overrides: Partial<Task> & Pick<Task, 'date' | 'calendarI
     start,
     end,
     allDay,
+    showInMonth: true,
     location: '',
     repeat: 'none',
     notes: '',
