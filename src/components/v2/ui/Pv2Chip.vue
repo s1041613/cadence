@@ -3,7 +3,7 @@
   <button
     type="button"
     class="pv2-chip-tab"
-    :class="{ 'pv2-chip-tab--on': active }"
+    :class="{ 'pv2-chip-tab--on': active, 'pv2-chip-tab--cute': mode.cute.value }"
     @click="emit('toggle')"
   >
     <span class="pv2-chip-tab__label">{{ label }}</span>
@@ -11,6 +11,8 @@
 </template>
 
 <script setup lang="ts">
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
+
 defineProps<{
   label: string
   active: boolean
@@ -19,6 +21,8 @@ defineProps<{
 const emit = defineEmits<{
   toggle: []
 }>()
+
+const mode = useBackdropMode()
 </script>
 
 <style scoped>
@@ -58,6 +62,25 @@ const emit = defineEmits<{
 }
 
 .pv2-chip-tab--on .pv2-chip-tab__label {
+  color: var(--pv2-accent);
+}
+
+/* Cute mode, on the photo. Off: a white outline and white label. On: the 12% pink wash vanishes
+   into a purple photo, so the selected chip becomes a solid white capsule carrying the pink label. */
+.pv2-chip-tab--cute {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.pv2-chip-tab--cute .pv2-chip-tab__label {
+  color: #fff;
+}
+
+.pv2-chip-tab--cute.pv2-chip-tab--on {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.pv2-chip-tab--cute.pv2-chip-tab--on .pv2-chip-tab__label {
   color: var(--pv2-accent);
 }
 </style>

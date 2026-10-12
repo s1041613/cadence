@@ -12,6 +12,7 @@
            tapping the poster opens the month wheel, so a button living inside it would be a
            target inside a target. -->
       <div class="mv2__topbar">
+        <Pv2BackdropToggle :size="38" />
         <Pv2TypeSwitch v-model="ui.monthFilter" />
       </div>
 
@@ -109,6 +110,7 @@ import { computed, ref } from 'vue'
 import Pv2CalStrip, { type Pv2ChipItem } from '@/components/v2/ui/Pv2CalStrip.vue'
 import Pv2Poster from '@/components/v2/ui/Pv2Poster.vue'
 import Pv2TypeSwitch from '@/components/v2/ui/Pv2TypeSwitch.vue'
+import Pv2BackdropToggle from '@/components/v2/ui/Pv2BackdropToggle.vue'
 import Pv2WeekdayHeader from '@/components/v2/ui/Pv2WeekdayHeader.vue'
 import Pv2Grid, { type Pv2GridWeek } from '@/components/v2/ui/Pv2Grid.vue'
 import Pv2MonthSheet from '@/components/v2/ui/Pv2MonthSheet.vue'
@@ -378,7 +380,9 @@ const { onSwipe, transitionName, setDirection } = useDateSwipe({
    and the other 4 out of the title's gap below. */
 .mv2__topbar {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 8px;
   padding: 8px 16px 0;
 }
 

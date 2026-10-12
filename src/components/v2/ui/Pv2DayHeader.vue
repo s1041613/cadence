@@ -3,7 +3,7 @@
     日檢視標題：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側控制叢集。
     控制叢集＝未完成待辦鈕（有逾期時才畫）+ TODAY 鈕。
   -->
-  <div class="pv2-dh">
+  <div class="pv2-dh" :class="{ 'pv2-dh--cute': mode.cute.value }">
     <div class="pv2-dh__row">
       <div class="pv2-dh__lead">
         <span class="pv2-dh__num">{{ dayNum }}</span>
@@ -13,6 +13,7 @@
         </span>
       </div>
       <div class="pv2-dh__controls">
+        <Pv2BackdropToggle />
         <!-- 只有真的有逾期時才存在。一顆永遠只會說「沒有」的鈕是噪音，
              而數字本身就是這顆鈕全部的內容。 -->
         <button
@@ -40,6 +41,8 @@
 
 <script setup lang="ts">
 import Pv2HeaderNav from '@/components/v2/ui/Pv2HeaderNav.vue'
+import Pv2BackdropToggle from '@/components/v2/ui/Pv2BackdropToggle.vue'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 defineProps<{
   dayNum: number
@@ -54,6 +57,8 @@ const emit = defineEmits<{
   today: []
   toggleUnfinished: []
 }>()
+
+const mode = useBackdropMode()
 </script>
 
 <style scoped>
@@ -194,5 +199,13 @@ const emit = defineEmits<{
   font: 500 11px var(--cd-font-ui);
   letter-spacing: 0.12em;
   color: var(--pv2-ink);
+}
+
+/* Cute mode: the header sits on the photo, so its ink goes light. */
+.pv2-dh--cute .pv2-dh__num,
+.pv2-dh--cute .pv2-dh__dow,
+.pv2-dh--cute .pv2-dh__my {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 </style>

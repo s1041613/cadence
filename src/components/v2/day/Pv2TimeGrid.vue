@@ -1,5 +1,5 @@
 <template>
-  <div class="pv2-grid">
+  <div class="pv2-grid" :class="{ 'pv2-grid--cute': mode.cute.value }">
     <!-- ALL-DAY row: always present, even empty. Sits above the rule, outside the scroll area. -->
     <div class="pv2-grid__allday">
       <span class="pv2-grid__allday-label">ALL-DAY</span>
@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import Pv2EventBlock from './Pv2EventBlock.vue'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 import { assignLanes } from '@/utils/timeline-lanes'
 import { formatTime, type TimeFormatName } from '@/utils/convert-date-time'
 import type { Subtask } from '@/types/subtask'
@@ -153,6 +154,8 @@ const emit = defineEmits<{
    * caller applies quickAddTimeRange() rounding/clamping. */
   columnClick: [minutesFromMidnight: number, event: MouseEvent]
 }>()
+
+const mode = useBackdropMode()
 
 const scrollEl = ref<HTMLElement | null>(null)
 
@@ -405,5 +408,27 @@ function tint(hex: string): string {
   height: 9px;
   border-radius: 50%;
   background: #a8443c;
+}
+
+/* Cute mode: the axis sits on the photo. Labels go light and a step heavier (12px at 500 in
+   white was too thin to hold over the texture); the rules go light and faint. Event blocks and
+   the now-line keep their own colours — they carry their own fills. */
+.pv2-grid--cute .pv2-grid__allday-label,
+.pv2-grid--cute .pv2-grid__hour-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.pv2-grid--cute .pv2-grid__hour-label--now {
+  color: #ffc2d8;
+}
+
+.pv2-grid--cute .pv2-grid__rule {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pv2-grid--cute .pv2-grid__hour-line {
+  border-top-color: rgba(255, 255, 255, 0.15);
 }
 </style>

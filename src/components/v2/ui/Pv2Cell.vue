@@ -8,7 +8,7 @@
     columns, which a cell cannot do, so the week row draws them in an overlay above these cells.
     The cell keeps the day number, the click target, and the "+N" overflow count.
   -->
-  <div class="pv2-cell" @click="emit('cellClick')">
+  <div class="pv2-cell" :class="{ 'pv2-cell--cute': mode.cute.value }" @click="emit('cellClick')">
     <div class="pv2-cell__head">
       <span
         class="pv2-cell__num"
@@ -36,6 +36,7 @@
 
 <script setup lang="ts">
 import type { Festival } from '@/utils/festivals'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 defineProps<{
   dayNum: number
@@ -50,6 +51,8 @@ defineProps<{
 const emit = defineEmits<{
   cellClick: []
 }>()
+
+const mode = useBackdropMode()
 </script>
 
 <style scoped>
@@ -124,6 +127,37 @@ const emit = defineEmits<{
 /* 外月的節日跟著外月的日期一起退到背景，否則上下月的紅字會比本月的日期還搶眼。 */
 .pv2-cell__festival--outside {
   opacity: 0.45;
+}
+
+/* Cute mode: the cell sits straight on the photo. The ink goes light, the rule goes (lines and
+   the photo's own texture fought each other), and the outside-month days drop back further so
+   the month's own dates lead. The shadow is short and dark — a lift off the photo, not a halo. */
+.pv2-cell--cute {
+  border-bottom: none;
+}
+
+.pv2-cell--cute .pv2-cell__num {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.pv2-cell--cute .pv2-cell__num--today {
+  color: var(--pv2-on-accent);
+  text-shadow: none;
+}
+
+.pv2-cell--cute .pv2-cell__num--outside {
+  color: rgba(255, 255, 255, 0.4);
+  text-shadow: none;
+}
+
+.pv2-cell--cute .pv2-cell__festival {
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.pv2-cell--cute .pv2-cell__festival--holiday {
+  color: #ffc2d8;
 }
 
 /* Pinned to the bottom of the cell rather than following a chip list — the chips live in the
