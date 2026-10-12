@@ -1,7 +1,7 @@
 <template>
   <!--
     日檢視標題：超大日期數字（serif）+ DOW/月年疊放（mono 副標）+ 右側控制叢集。
-    控制叢集＝未完成待辦鈕（有逾期時才畫）+ TODAY 鈕。
+    控制叢集＝膠囊（桌布切換｜代辦｜逾期任務，最後一個有逾期時才畫）+ TODAY 鈕。
   -->
   <div class="pv2-dh" :class="{ 'pv2-dh--cute': mode.cute.value }">
     <div class="pv2-dh__row">
@@ -13,26 +13,41 @@
         </span>
       </div>
       <div class="pv2-dh__controls">
-        <Pv2BackdropToggle />
-        <!-- 只有真的有逾期時才存在。一顆永遠只會說「沒有」的鈕是噪音，
-             而數字本身就是這顆鈕全部的內容。 -->
-        <button
-          v-if="unfinishedCount > 0"
-          type="button"
-          class="pv2-dh__unfinished"
-          :class="{ 'pv2-dh__unfinished--on': unfinishedOpen }"
-          :aria-pressed="unfinishedOpen"
-          :aria-label="`${unfinishedOpen ? '隱藏' : '顯示'} ${unfinishedCount} 筆未完成待辦`"
-          @click="emit('toggleUnfinished')"
-        >
-          <svg class="pv2-dh__unfinished-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="3" y="4" width="7.5" height="7.5" rx="2.2" />
-            <rect x="3" y="14" width="7.5" height="7.5" rx="2.2" />
-            <path d="M14.5 7.75H21M14.5 17.75H21" />
-          </svg>
-          <!-- 照實顯示，不截成 9+：47 筆和 10 筆不該長得一樣。 -->
-          <span class="pv2-dh__unfinished-count">{{ unfinishedCount }}</span>
-        </button>
+        <!-- 一顆膠囊收三個「看這一天的東西」：桌布切換、代辦、逾期任務。只有 icon、不放數字——
+             數字讓膠囊忽長忽短，而且點開就看得到。TODAY 是「跳去別天」，所以分開放。 -->
+        <div class="pv2-dh__cap">
+          <Pv2BackdropToggle bare class="pv2-dh__seg" />
+          <button
+            type="button"
+            class="pv2-dh__seg pv2-dh__btn"
+            :class="{ 'pv2-dh__btn--on': todoOpen }"
+            :aria-pressed="todoOpen"
+            :aria-label="todoOpen ? '隱藏這天的代辦' : '顯示這天的代辦'"
+            @click="emit('toggleTodo')"
+          >
+            <svg class="pv2-dh__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.5 3h8.5l4 4v12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19.5v-15A1.5 1.5 0 0 1 6.5 3Z" />
+              <path d="M8.5 11l2 2 3.5-4" />
+              <path d="M8.5 16.5h7" />
+            </svg>
+          </button>
+          <!-- 只有真的有逾期時才存在。一顆永遠只會說「沒有」的鈕是噪音。 -->
+          <button
+            v-if="unfinishedCount > 0"
+            type="button"
+            class="pv2-dh__seg pv2-dh__btn"
+            :class="{ 'pv2-dh__btn--on': unfinishedOpen }"
+            :aria-pressed="unfinishedOpen"
+            :aria-label="`${unfinishedOpen ? '隱藏' : '顯示'} ${unfinishedCount} 筆未完成待辦`"
+            @click="emit('toggleUnfinished')"
+          >
+            <svg class="pv2-dh__icon" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4" width="7.5" height="7.5" rx="2.2" />
+              <rect x="3" y="14" width="7.5" height="7.5" rx="2.2" />
+              <path d="M14.5 7.75H21M14.5 17.75H21" />
+            </svg>
+          </button>
+        </div>
         <Pv2HeaderNav today-label="回到今天" @today="emit('today')" />
       </div>
     </div>
@@ -51,11 +66,14 @@ defineProps<{
   /** Tasks dated before this day and still unticked. 0 hides the control entirely. */
   unfinishedCount: number
   unfinishedOpen: boolean
+  /** Whether the day's to-do sheet is open — the todo segment wears the open tint. */
+  todoOpen: boolean
 }>()
 
 const emit = defineEmits<{
   today: []
   toggleUnfinished: []
+  toggleTodo: []
 }>()
 
 const mode = useBackdropMode()
@@ -84,60 +102,76 @@ const mode = useBackdropMode()
 
 /* Same capsule as Pv2HeaderNav's TODAY — height, radius and shadow all match, because the
    header already has a pill vocabulary and this is another pill in it. Not the month view's
-   glass segmented switch: that control picks between two sets of contents, this one opens a
-   list, and they should not share a shape. */
-.pv2-dh__unfinished {
-  position: relative;
+   glass segmented switch: that one picks between two sets of contents, these open things. */
+.pv2-dh__cap {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
   height: 28px;
-  padding: 0 10px 0 9px;
-  border: 1px solid transparent;
+  padding: 0 2px;
   border-radius: 999px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* A hairline between neighbours, drawn by whichever segment follows — so a segment that is not
+   there (no wallpaper, nothing overdue) takes its divider with it. */
+.pv2-dh__seg + .pv2-dh__seg {
+  margin-left: 1px;
+}
+
+.pv2-dh__seg + .pv2-dh__seg::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  width: 1px;
+  height: 14px;
+  transform: translateY(-50%);
+  background: var(--pv2-line);
+}
+
+.pv2-dh__btn {
+  position: relative;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
   color: var(--pv2-ink-2);
   cursor: pointer;
 }
 
-/* The 44px touch target, taken outside the layout box so the capsule stays 28 tall —
-   same construction as .pv2-typeswitch__seg. */
-.pv2-dh__unfinished::after {
+/* The 44px touch target, taken outside the layout box so the capsule stays 28 tall — same
+   construction as .pv2-typeswitch__seg. */
+.pv2-dh__btn::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 100%;
-  min-width: 44px;
+  width: 44px;
   height: 44px;
   transform: translate(-50%, -50%);
 }
 
-/* --pv2-accent-ink, not --pv2-accent: this carries an 11px numeral, and the accent proper is
-   3.1:1 on white. */
-.pv2-dh__unfinished--on {
+/* Open: a tint, and --pv2-accent-ink rather than the accent proper, which is 3.1:1 on white. */
+.pv2-dh__btn--on {
   background: rgba(var(--pv2-accent-rgb), 0.12);
-  border-color: rgba(var(--pv2-accent-rgb), 0.38);
-  box-shadow: none;
   color: var(--pv2-accent-ink);
 }
 
-.pv2-dh__unfinished-icon {
-  width: 13px;
-  height: 13px;
+.pv2-dh__icon {
+  width: 15px;
+  height: 15px;
   flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.9;
+  stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-
-.pv2-dh__unfinished-count {
-  font: 600 11px var(--cd-font-mono);
-  font-variant-numeric: var(--cd-numeric-aligned);
-  line-height: 1;
 }
 
 /* 大數字 + 右側 DOW/月年 疊放，底線對齊 */

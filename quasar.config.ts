@@ -41,6 +41,7 @@ export default defineConfig((/* ctx */) => {
     boot: [
       'auth',
       'auth-data-sync',
+      'day-todos-carry-over',
       'ios-active-state'
     ],
 
