@@ -1,6 +1,6 @@
 <template>
   <!-- 日曆過濾條：橫向捲動的 chip 列，右側漸層淡出（照設計稿）。 -->
-  <div class="pv2-strip">
+  <div class="pv2-strip" :class="{ 'pv2-strip--cute': mode.cute.value }">
     <div class="pv2-strip__row">
       <Pv2Chip
         v-for="c in chips"
@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import Pv2Chip from './Pv2Chip.vue'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 export interface Pv2ChipItem {
   id: string
@@ -30,6 +31,8 @@ defineProps<{
 const emit = defineEmits<{
   toggle: [id: string]
 }>()
+
+const mode = useBackdropMode()
 </script>
 
 <style scoped>
@@ -57,5 +60,16 @@ const emit = defineEmits<{
   width: 40px;
   background: linear-gradient(90deg, rgba(var(--pv2-canvas-rgb), 0), var(--pv2-canvas));
   pointer-events: none;
+}
+
+/* On a photo a canvas-coloured fade is a white block painted over the picture. Fade the chips
+   themselves out instead, so whatever is behind them shows through. */
+.pv2-strip--cute .pv2-strip__fade {
+  display: none;
+}
+
+.pv2-strip--cute .pv2-strip__row {
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
 }
 </style>

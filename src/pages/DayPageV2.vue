@@ -26,6 +26,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
+import { provideBackdropMode } from '@/composables/use-backdrop-mode'
 import DayViewV2 from '@/components/v2/day/DayViewV2.vue'
 import QuickAddPopover from '@/components/shell/QuickAddPopover.vue'
 import EventPreviewPopoverV2 from '@/components/v2/event/EventPreviewPopoverV2.vue'
@@ -34,6 +35,9 @@ import EventComposerOverlay from '@/components/shell/EventComposerOverlay.vue'
 const ui = useUiStore()
 const tasksStore = useTasksStore()
 const { isDesktop } = useBreakpoint()
+
+// 可愛／清楚模式的狀態放在頁殼：換頁時元件重建，自然回到可愛模式（不記住，見 composable）。
+provideBackdropMode()
 
 onBeforeUnmount(() => {
   ui.qaPop = null

@@ -39,6 +39,12 @@ export function monthWordmarkPath(monthIndex: number): string {
   return publicAssetPath(`month-wordmarks/${MONTH_FILE_STEMS[monthIndex % 12]!}.png`)
 }
 
+// The same drawings with the ink recoloured warm white, for the month view's cute mode over a
+// photo. Generated, not drawn: scripts/make-light-wordmarks.py derives them from the files above.
+export function monthWordmarkLightPath(monthIndex: number): string {
+  return publicAssetPath(`month-wordmarks/light/${MONTH_FILE_STEMS[monthIndex % 12]!}.png`)
+}
+
 // A page's own drawn title, in the same hand as the month wordmarks above but keyed by page
 // rather than by month — hence a directory of its own instead of a thirteenth month. Settings
 // is the only one drawn so far; it is the page's h1, not decoration, so it carries the page

@@ -134,17 +134,13 @@ function onSwipe(details: SwipeDetails): void {
   display: none;
 }
 
-/* WHITE capsules on a hairline, not grey ones. The premise this rule used to carry — "on a
-   pure-white canvas" — was never true of this page: Notebook mounts Pv2PageBackdrop exactly as
-   Month/Day/Week do, so every fill here sits on the user's photo under a white scrim (0.8 by
-   default). A --pv2-fill capsule on a washed photo is a grey patch laid over an image, and the
-   row of them read as smudges; white reads as a clean chip lifted off the picture, which is
-   what the page is actually doing.
+/* WHITE capsules on a hairline, not grey ones. These were drawn when Notebook still carried the
+   wallpaper, where a --pv2-fill capsule over a washed photo read as a grey smudge and white read
+   as a chip lifted off the picture. The page is bare canvas now (see NotebookPageV2), and white
+   still holds: it matches the search field and the month view's chips.
 
-   The hairline is what makes white safe rather than decoration. The scrim slider runs to 1.0
-   and the photo can be cleared outright (Pv2PageBackdrop's v-if), and at either the page IS
-   pure white — a naked white capsule on it is not a quiet chip, it is an invisible one. The
-   softest line role holds the shape there and all but disappears at any scrim below it.
+   The hairline is what makes white safe rather than decoration: on a pure-white page a naked
+   white capsule is not a quiet chip, it is an invisible one.
    Border-box (Quasar's reset sets it on html) keeps the 1px inside the 32.
 
    32px tall, up from 30. The radius is already at the pill's ceiling, so the only thing left

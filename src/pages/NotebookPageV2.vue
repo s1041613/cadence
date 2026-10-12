@@ -1,15 +1,14 @@
 <template>
   <!--
-    v2 notebook page shell. A content page, so it carries the shared wallpaper
-    (Pv2PageBackdrop) exactly as Month/Day/Week do — only Settings, the tool page, stays
-    on the bare canvas. No overlays. Desktop centres the 393px phone frame.
+    v2 notebook page shell. No wallpaper: notes are read and written here, and long multi-line
+    titles over a photo were the hardest text in the app to read, so this page stays on the bare
+    canvas like Settings. Month and Day keep the photo. No overlays. Desktop centres the 393px
+    phone frame.
     The bottom nav sits outside the v-if/v-else so it is present while loading too —
     otherwise the loading state strands the user on a screen with no way out.
   -->
   <div class="nb2" :class="{ 'nb2--desktop': isDesktop }">
     <div class="nb2__frame">
-      <Pv2PageBackdrop />
-
       <div class="nb2__content">
         <div v-if="!store.isLoaded" class="nb2__loading">載入中…</div>
         <NotebookViewV2 v-else />
@@ -47,7 +46,6 @@ import { useNotebookStore } from '@/stores/notebook-store'
 import NotebookViewV2 from '@/components/v2/notebook/NotebookViewV2.vue'
 import Pv2NoteComposer from '@/components/v2/notebook/Pv2NoteComposer.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
-import Pv2PageBackdrop from '@/components/v2/ui/Pv2PageBackdrop.vue'
 
 const { isDesktop } = useBreakpoint()
 const store = useNotebookStore()

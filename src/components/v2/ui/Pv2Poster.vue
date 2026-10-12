@@ -11,14 +11,15 @@
       :alt="monthName"
       @error="onWordmarkError"
     />
-    <span v-else class="pv2-poster__month">{{ monthName }}</span>
-    <span v-if="year" class="pv2-poster__year">{{ year }}</span>
+    <span v-else class="pv2-poster__month" :class="{ 'pv2-poster__month--light': mode.cute.value }">{{ monthName }}</span>
+    <span v-if="year" class="pv2-poster__year" :class="{ 'pv2-poster__year--light': mode.cute.value }">{{ year }}</span>
   </button>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { monthWordmarkPath } from '@/utils/public-assets'
+import { monthWordmarkLightPath, monthWordmarkPath } from '@/utils/public-assets'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 const props = defineProps<{
   monthName: string
@@ -36,9 +37,15 @@ const emit = defineEmits<{
 // deploy) — and it resets per month, because a month whose file failed says nothing about the
 // next one's.
 const wordmarkFailed = ref(false)
-watch(() => props.monthIndex, () => { wordmarkFailed.value = false })
+const mode = useBackdropMode()
+// Switching cute/clear swaps the file too, and the other file says nothing about this one.
+watch([() => props.monthIndex, mode.cute], () => { wordmarkFailed.value = false })
 
-const wordmarkSrc = computed(() => (wordmarkFailed.value ? null : monthWordmarkPath(props.monthIndex)))
+// Cute mode sits on the photo, where the dark ink disappears: it takes the light copy instead.
+const wordmarkSrc = computed(() => {
+  if (wordmarkFailed.value) return null
+  return mode.cute.value ? monthWordmarkLightPath(props.monthIndex) : monthWordmarkPath(props.monthIndex)
+})
 
 function onWordmarkError() {
   wordmarkFailed.value = true
@@ -94,6 +101,12 @@ function onWordmarkError() {
   color: var(--pv2-poster-ink);
 }
 
+/* The typeset fallback, on the photo: same light ink the cells use in cute mode. */
+.pv2-poster__month--light {
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 /* 畫好的月份字樣。以寬度定尺寸而不是高度：這是一個字樣，它與版面的關係是「橫向佔多寬」。
    十二張圖都畫在同一個 3:1 的畫布上，所以高度不必寫死也不會跟著月份跳動——換月時標題框是同
    一個大小，底下的月曆不會被推上推下。
@@ -121,5 +134,10 @@ function onWordmarkError() {
   font: 600 12px var(--cd-font-ui);
   letter-spacing: 0.16em;
   color: var(--pv2-ink);
+}
+
+.pv2-poster__year--light {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 </style>

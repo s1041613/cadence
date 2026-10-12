@@ -11,19 +11,29 @@
         堆疊脈絡把它關在 frame 內，否則會沉到 frame 底下）
       - --pv2-safe-top，即 frame 自己的 padding-top（見下方負 top 的說明）
   -->
-  <template v-if="appearance.backgroundImage">
-    <img :src="appearance.backgroundImage" alt="" class="pv2-backdrop__image" />
+  <!-- 清楚模式（useBackdropMode 的 clear）把整張桌布收掉、落回 frame 底色。兩層各自包
+       Transition：<template> 不是元素，淡出要掛在真的節點上。 -->
+  <Transition name="pv2-backdrop-fade">
+    <img v-if="shown" :src="appearance.backgroundImage!" alt="" class="pv2-backdrop__image" />
+  </Transition>
+  <Transition name="pv2-backdrop-fade">
     <div
+      v-if="shown"
       class="pv2-backdrop__scrim"
       :style="{ opacity: appearance.scrimOpacity }"
     />
-  </template>
+  </Transition>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 const appearance = useV2AppearanceStore()
+const mode = useBackdropMode()
+
+const shown = computed(() => appearance.backgroundImage !== null && !mode.clear.value)
 </script>
 
 <style scoped>
@@ -60,8 +70,23 @@ const appearance = useV2AppearanceStore()
   transition: opacity 0.25s ease;
 }
 
+/* 可愛 ↔ 清楚：整頁從照片換成素面，0.3s 淡入淡出讓它讀起來是同一頁換了皮，而不是跳頁。
+   只動 opacity；scrim 自己的 opacity 是 inline style，所以淡出走 Transition 的 class 而不是
+   直接改它。 */
+.pv2-backdrop-fade-enter-active,
+.pv2-backdrop-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.pv2-backdrop-fade-enter-from,
+.pv2-backdrop-fade-leave-to {
+  opacity: 0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pv2-backdrop__scrim {
+  .pv2-backdrop__scrim,
+  .pv2-backdrop-fade-enter-active,
+  .pv2-backdrop-fade-leave-active {
     transition: none;
   }
 }

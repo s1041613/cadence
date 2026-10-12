@@ -1,6 +1,6 @@
 <template>
   <!-- 星期表頭：3 字母首字大寫、依 firstDay 重排。週日與國定假日同一個色。 -->
-  <div class="pv2-wd">
+  <div class="pv2-wd" :class="{ 'pv2-wd--cute': mode.cute.value }">
     <span
       v-for="w in labels"
       :key="w.label"
@@ -13,10 +13,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { FirstDay } from '@/stores/settings-store'
+import { useBackdropMode } from '@/composables/use-backdrop-mode'
 
 const props = defineProps<{
   firstDay: FirstDay
 }>()
+
+const mode = useBackdropMode()
 
 // 3 字母首字大寫，索引 0=Sun..6=Sat（對齊 convert-date-time 的 WD 慣例）
 const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -61,5 +64,16 @@ const labels = computed(() =>
 /* 週日與國定假日共用 --pv2-holiday：兩個講的是同一件事——這天不用上班。 */
 .pv2-wd__cell--sunday {
   color: var(--pv2-holiday);
+}
+/* 照片上：退一步，讓日期數字領頭。 */
+.pv2-wd--cute .pv2-wd__cell {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.75);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.pv2-wd--cute .pv2-wd__cell--sunday {
+  color: #ffc2d8;
 }
 </style>
