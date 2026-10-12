@@ -36,6 +36,9 @@ export interface OnAuthUserChangeDeps {
   // surfaces its own toast on failure, because an empty notebook is indistinguishable from having
   // lost every note. That handler is also why it never rejects — see the Promise.all note below.
   notebookStore: TitleDismissalsStoreLike
+  // The day's rough to-do list. Same user-scoped shape and the same never-rejects contract as the
+  // notebook: its load notifies on failure itself, because an empty list looks like a lost one.
+  dayTodosStore: TitleDismissalsStoreLike
   // v2 background photo + scrim opacity, and the v2 bottom-nav tab list. Two stores sharing one
   // user_settings row (see stores/user-settings-sync.ts). Same user-scoped shape as titleDismissals,
   // and both fail silently: falling back to the bundled wallpaper and the default nav is cosmetic,
@@ -70,6 +73,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore,
     titleDismissalsStore,
     notebookStore,
+    dayTodosStore,
     v2AppearanceStore,
     v2TabsStore,
     notificationPrefsStore,
@@ -83,6 +87,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore.resetLocal()
     titleDismissalsStore.resetLocal()
     notebookStore.resetLocal()
+    dayTodosStore.resetLocal()
     // Also cancels the appearance store's pending slider debounce, so a write armed
     // just before sign-out cannot stamp this user's opacity onto the next session.
     v2AppearanceStore.resetLocal()
@@ -114,6 +119,7 @@ export async function onAuthUserChange(userId: string | null, deps: OnAuthUserCh
     inboxStore.loadFromRemote(userId, defaultId),
     titleDismissalsStore.loadFromRemote(),
     notebookStore.loadFromRemote(),
+    dayTodosStore.loadFromRemote(),
     // All three read the same user_settings row, so this is three round trips for one
     // row. Left as-is rather than merged: sharing a fetch would couple stores that
     // otherwise know nothing about each other, to save two requests on sign-in only.

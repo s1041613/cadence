@@ -89,8 +89,8 @@ describe('accent text uses the readable ink', () => {
     expect(rule(sheet, selector)).toMatch(/--pv2-accent-ink/)
   })
 
-  it('applies to the header count too', () => {
-    expect(rule(header, '.pv2-dh__unfinished--on')).toMatch(/--pv2-accent-ink/)
+  it('applies to the header control too', () => {
+    expect(rule(header, '.pv2-dh__btn--on')).toMatch(/--pv2-accent-ink/)
   })
 })
 
@@ -99,15 +99,16 @@ describe('the control and its target', () => {
     expect(header).toMatch(/v-if="unfinishedCount > 0"/)
   })
 
-  it('shows the real count rather than a saturating badge', () => {
-    // The template prints the number straight through: no clamp, no "9+" substitution.
-    expect(header).toMatch(/pv2-dh__unfinished-count">\{\{ unfinishedCount \}\}</)
-    expect(header).not.toMatch(/Math\.min\(/)
+  it('prints no count in the header — the capsule stays one length', () => {
+    // The number moved off the control on purpose: it made the capsule grow and shrink, and the
+    // sheet it opens shows the list anyway. Screen readers still get it from the label.
+    expect(header).not.toMatch(/\{\{ unfinishedCount \}\}/)
+    expect(header).toMatch(/aria-label="`[^`]*\$\{unfinishedCount\} 筆未完成待辦`"/)
   })
 
   it('keeps a 44px touch target under a 28px capsule', () => {
-    expect(rule(header, '.pv2-dh__unfinished')).toMatch(/height:\s*28px/)
-    expect(rule(header, '.pv2-dh__unfinished::after')).toMatch(/height:\s*44px/)
+    expect(rule(header, '.pv2-dh__cap')).toMatch(/height:\s*28px/)
+    expect(rule(header, '.pv2-dh__btn::after')).toMatch(/height:\s*44px/)
   })
 
   it('teleports to an id the page actually renders', () => {

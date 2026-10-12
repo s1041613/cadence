@@ -13,8 +13,10 @@
           :month-year="monthYear"
           :unfinished-count="unfinishedCount"
           :unfinished-open="unfinishedOpen"
+          :todo-open="todoOpen"
           @today="goToday"
-          @toggle-unfinished="unfinishedOpen = !unfinishedOpen"
+          @toggle-unfinished="toggleUnfinished"
+          @toggle-todo="toggleTodo"
         />
       </div>
 
@@ -52,6 +54,17 @@
         />
       </Transition>
     </Teleport>
+    <Teleport defer to="#dp2-root">
+      <Transition name="pv2-sheet" :duration="300">
+        <DayTodoSheet
+          v-if="todoOpen"
+          :date="ui.selectedDate"
+          :is-today="isToday"
+          @close="todoOpen = false"
+          @schedule="scheduleTodo"
+        />
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -64,19 +77,23 @@ import Pv2DayHeader from '@/components/v2/ui/Pv2DayHeader.vue'
 // import Pv2DayTabs from '@/components/v2/ui/Pv2DayTabs.vue'
 import DaySchedule from '@/components/v2/day/DaySchedule.vue'
 import DayUnfinishedSheet from '@/components/v2/day/DayUnfinishedSheet.vue'
+import DayTodoSheet from '@/components/v2/day/DayTodoSheet.vue'
 // import DayMyDay from '@/components/v2/day/DayMyDay.vue'
 import Pv2Fab from '@/components/v2/ui/Pv2Fab.vue'
 import Pv2BottomNav from '@/components/v2/ui/Pv2BottomNav.vue'
 import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore } from '@/stores/tasks-store'
+import { useDayTodosStore } from '@/stores/day-todos-store'
 import { parseISO, iso, addDays, WD_CAP } from '@/utils/convert-date-time'
 import { useDateSwipe } from '@/composables/use-date-swipe'
 import { useUnfinished } from '@/composables/use-unfinished'
+import type { DayTodo } from '@/types/day-todo'
 // TEMP: restore alongside the MY GOAL card
 // import { publicAssetPath } from '@/utils/public-assets'
 
 const ui = useUiStore()
 const tasksStore = useTasksStore()
+const dayTodosStore = useDayTodosStore()
 
 const cur = computed(() => parseISO(ui.selectedDate))
 const dayNum = computed(() => cur.value.getDate())
@@ -108,6 +125,40 @@ const unfinishedOpen = ref(false)
 watch(unfinishedCount, (n) => {
   if (n === 0) unfinishedOpen.value = false
 })
+
+// The day's to-do list. One sheet at a time: both float over the same frame, and two stacked
+// scrims would leave the lower one's close tap landing on the upper one.
+const todoOpen = ref(false)
+
+function toggleUnfinished(): void {
+  todoOpen.value = false
+  unfinishedOpen.value = !unfinishedOpen.value
+}
+
+function toggleTodo(): void {
+  unfinishedOpen.value = false
+  todoOpen.value = !todoOpen.value
+}
+
+/**
+ * Hands a todo to the task composer, seeded the way an inbox draft is (DraftDrawer's
+ * openSchedule): a task, on the todo's day, at a placeholder hour the user is about to change.
+ * The todo leaves the list only when that task is saved — see EventComposerOverlay.trySave.
+ * The sheet closes first so the composer is not opened underneath it.
+ */
+function scheduleTodo(todo: DayTodo): void {
+  if (tasksStore.isLoading) return
+  if (!dayTodosStore.beginSchedule(todo.id)) return
+  todoOpen.value = false
+  ui.eventComposerInitialValues = {
+    date: todo.date,
+    title: todo.title,
+    type: 'quadrant',
+    allDay: false,
+    start: '09:00',
+    end: '10:00'
+  }
+}
 
 // No view-local overlays here — the composable already covers the page-shell overlays
 // (this view opens QuickAdd from DaySchedule.vue).

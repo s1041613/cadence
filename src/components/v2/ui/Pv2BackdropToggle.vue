@@ -8,7 +8,7 @@
     v-if="mode.available.value"
     type="button"
     class="pv2-bt"
-    :class="{ 'pv2-bt--on': mode.clear.value }"
+    :class="{ 'pv2-bt--on': mode.clear.value, 'pv2-bt--bare': bare }"
     :style="{ '--pv2-bt-size': `${size}px` }"
     :aria-pressed="mode.clear.value"
     :aria-label="mode.clear.value ? '顯示背景' : '隱藏背景，切換成清楚模式'"
@@ -29,8 +29,11 @@ withDefaults(
     /** Matched to the control it sits beside: 28 next to the day header's pills, 38 next to the
      *  month view's segmented switch. */
     size?: number
+    /** Drops the button's own white circle, for when it sits as one segment of a capsule that
+     *  already draws the white (the day header's control capsule). */
+    bare?: boolean
   }>(),
-  { size: 28 }
+  { size: 28, bare: false }
 )
 
 const mode = useBackdropMode()
@@ -70,6 +73,20 @@ const mode = useBackdropMode()
   border-color: transparent;
   background: var(--pv2-accent);
   color: var(--pv2-on-accent);
+}
+
+.pv2-bt--bare {
+  width: 32px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* .pv2-bt--bare comes later and would otherwise wipe the fill: the on state still has to say
+   itself inside the capsule, for the reason the template comment gives. */
+.pv2-bt--bare.pv2-bt--on {
+  background: var(--pv2-accent);
 }
 
 .pv2-bt__icon {

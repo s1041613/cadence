@@ -6,6 +6,7 @@ import { useCalendarsStore } from '@/stores/calendars-store'
 import { useInboxStore } from '@/stores/inbox-store'
 import { useTitleDismissalsStore } from '@/stores/title-dismissals-store'
 import { useNotebookStore } from '@/stores/notebook-store'
+import { useDayTodosStore } from '@/stores/day-todos-store'
 import { useV2AppearanceStore } from '@/stores/v2-appearance-store'
 import { useV2TabsStore } from '@/stores/v2-tabs-store'
 import { useNotificationPrefsStore } from '@/stores/notification-prefs-store'
@@ -25,6 +26,7 @@ export default defineBoot(({ store }) => {
   const inboxStore = useInboxStore(store)
   const titleDismissalsStore = useTitleDismissalsStore(store)
   const notebookStore = useNotebookStore(store)
+  const dayTodosStore = useDayTodosStore(store)
   const v2AppearanceStore = useV2AppearanceStore(store)
   const v2TabsStore = useV2TabsStore(store)
   // Constructed here for every session, not lazily from the Notifications pane:
@@ -42,6 +44,7 @@ export default defineBoot(({ store }) => {
         inboxStore,
         titleDismissalsStore,
         notebookStore,
+        dayTodosStore,
         v2AppearanceStore,
         v2TabsStore,
         notificationPrefsStore,

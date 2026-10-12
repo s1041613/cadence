@@ -123,6 +123,7 @@ import { useUiStore } from '@/stores/ui-store'
 import { useTasksStore, mkTask } from '@/stores/tasks-store'
 import { useCalendarsStore } from '@/stores/calendars-store'
 import { useInboxStore } from '@/stores/inbox-store'
+import { useDayTodosStore } from '@/stores/day-todos-store'
 import { useSettingsStore } from '@/stores/settings-store'
 import { useBreakpoint } from '@/composables/use-breakpoint'
 import { quadrantOf, themeOf } from '@/composables/use-theme'
@@ -139,6 +140,7 @@ const ui = useUiStore()
 const tasksStore = useTasksStore()
 const calendarsStore = useCalendarsStore()
 const inboxStore = useInboxStore()
+const dayTodosStore = useDayTodosStore()
 const settings = useSettingsStore()
 const { isDesktop } = useBreakpoint()
 
@@ -324,6 +326,9 @@ function trySave(): void {
   draft.value.estimatedPomodoros = defaultPoms(draft.value)
   tasksStore.saveTask(draft.value)
   inboxStore.completePromotion({ type: draft.value.type === 'event' ? 'event' : 'task', color: theme.value.backgroundColor, tag: 'Scheduled' })
+  // A todo scheduled into this task leaves the day's list now that the task exists — not when the
+  // composer opened, so backing out of it leaves the list as it was.
+  dayTodosStore.completeSchedule()
   ui.eventComposerInitialValues = null
   ui.createOpen = false
   ui.draftConv = null
@@ -331,6 +336,7 @@ function trySave(): void {
 
 function close(): void {
   inboxStore.cancelPromotion()
+  dayTodosStore.cancelSchedule()
   ui.eventComposerInitialValues = null
   ui.createOpen = false
   ui.draftConv = null
