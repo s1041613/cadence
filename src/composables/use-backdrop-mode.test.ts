@@ -21,7 +21,7 @@ const fetchMock = vi.mocked(service.fetchUserSettings)
 // The suite runs without a DOM, so it exercises the mode object a page creates rather than
 // mounting components. Provide/inject itself is Vue's; what matters here is the state rules.
 async function setWallpaper(path: string | null): Promise<void> {
-  fetchMock.mockResolvedValue({ backgroundPath: path, scrimOpacity: 0, shownTabKeys: null, notifyOnMemberEvents: true })
+  fetchMock.mockResolvedValue({ backgroundPath: path, scrimOpacity: 0, shownTabKeys: null, notifyOnMemberEvents: true, notifyNightlyUnfinished: true })
   await useV2AppearanceStore().loadFromRemote()
 }
 

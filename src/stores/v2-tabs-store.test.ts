@@ -232,7 +232,7 @@ describe('v2-tabs-store persistence', () => {
     const { clearSettingsSlices, registerSettingsSlice } = await import('./user-settings-sync')
     clearSettingsSlices()
     registerSettingsSlice('v2-appearance', () => ({ backgroundPath: null, scrimOpacity: 0.8 }))
-    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true, notifyNightlyUnfinished: true }))
   })
 
   it('does not call the service when nobody is signed in', async () => {
@@ -260,7 +260,8 @@ describe('v2-tabs-store persistence', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const store = useV2TabsStore()
 
@@ -274,7 +275,8 @@ describe('v2-tabs-store persistence', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: ['week', 'month', 'setting'],
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const store = useV2TabsStore()
 
@@ -292,7 +294,8 @@ describe('v2-tabs-store persistence', () => {
       scrimOpacity: 0.8,
       // duplicate, unknown key, over the cap, and missing the mandatory tab
       shownTabKeys: ['month', 'month', 'bogus', 'week', 'draft', 'notes'],
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const store = useV2TabsStore()
 
@@ -311,7 +314,8 @@ describe('v2-tabs-store persistence', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: [],
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const store = useV2TabsStore()
 
@@ -405,7 +409,8 @@ describe('v2-tabs-store persistence', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: ['week', 'setting'],
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const store = useV2TabsStore()
     await store.loadFromRemote()

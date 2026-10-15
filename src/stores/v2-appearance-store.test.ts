@@ -52,7 +52,7 @@ beforeEach(async () => {
   const { clearSettingsSlices, registerSettingsSlice } = await import('./user-settings-sync')
   clearSettingsSlices()
   registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: null }))
-  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
+  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true, notifyNightlyUnfinished: true }))
 })
 
 afterEach(() => {
@@ -88,7 +88,8 @@ describe('loadFromRemote', () => {
       backgroundPath: 'user-1/abc.jpg',
       scrimOpacity: 0.4,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     const { useV2AppearanceStore } = await importStore()
     const store = useV2AppearanceStore()
@@ -166,7 +167,8 @@ describe('setScrimOpacity', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
@@ -189,7 +191,8 @@ describe('setScrimOpacity', () => {
       backgroundPath: null,
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
@@ -263,7 +266,8 @@ describe('resetLocal', () => {
       backgroundPath: 'user-1/abc.jpg',
       scrimOpacity: 0.1,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
 
@@ -300,7 +304,8 @@ describe('uploadBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     uploadMock.mockResolvedValue('user-1/new.jpg')
@@ -329,7 +334,8 @@ describe('uploadBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     uploadMock.mockRejectedValue(new Error('boom'))
@@ -349,7 +355,8 @@ describe('uploadBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     uploadMock.mockResolvedValue('user-1/new.jpg')
@@ -368,7 +375,8 @@ describe('uploadBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.8,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
 
@@ -439,7 +447,8 @@ describe('clearBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
 
@@ -457,7 +466,8 @@ describe('clearBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
 
@@ -473,7 +483,8 @@ describe('clearBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     saveMock.mockRejectedValueOnce(new Error('boom'))
@@ -492,7 +503,8 @@ describe('clearBackground', () => {
       backgroundPath: 'user-1/old.jpg',
       scrimOpacity: 0.3,
       shownTabKeys: null,
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
     await store.loadFromRemote()
     expect(store.hasCustomBackground).toBe(true)

@@ -72,7 +72,8 @@ const SETTINGS: UserSettings = {
   backgroundPath: 'user-1/abc.jpg',
   scrimOpacity: 0.6,
   shownTabKeys: ['month', 'notes', 'setting'],
-  notifyOnMemberEvents: true
+  notifyOnMemberEvents: true,
+  notifyNightlyUnfinished: true
 }
 
 beforeEach(() => {
@@ -86,7 +87,8 @@ describe('fetchUserSettings', () => {
         background_path: 'user-1/abc.jpg',
         scrim_opacity: 0.6,
         shown_tab_keys: ['month', 'notes', 'setting'],
-        notify_on_member_events: true
+        notify_on_member_events: true,
+        notify_nightly_unfinished: true
       },
       error: null
     })
@@ -108,7 +110,8 @@ describe('fetchUserSettings', () => {
       'background_path',
       'scrim_opacity',
       'shown_tab_keys',
-      'notify_on_member_events'
+      'notify_on_member_events',
+      'notify_nightly_unfinished'
     ]) {
       expect(columns).toContain(column)
     }
@@ -130,7 +133,8 @@ describe('fetchUserSettings', () => {
     requireSupabaseMock.mockReturnValue({ from: () => builder })
 
     await expect(fetchUserSettings('user-1')).resolves.toMatchObject({
-      notifyOnMemberEvents: true
+      notifyOnMemberEvents: true,
+      notifyNightlyUnfinished: true
     })
   })
 
@@ -179,7 +183,8 @@ describe('saveUserSettings', () => {
       background_path: 'user-1/abc.jpg',
       scrim_opacity: 0.6,
       shown_tab_keys: ['month', 'notes', 'setting'],
-      notify_on_member_events: true
+      notify_on_member_events: true,
+      notify_nightly_unfinished: true
     })
   })
 
@@ -201,7 +206,13 @@ describe('saveUserSettings', () => {
     requireSupabaseMock.mockReturnValue({ from: () => builder })
 
     await saveUserSettings(
-      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null, notifyOnMemberEvents: false },
+      {
+        backgroundPath: null,
+        scrimOpacity: 0.8,
+        shownTabKeys: null,
+        notifyOnMemberEvents: false,
+        notifyNightlyUnfinished: false
+      },
       'user-1'
     )
 
@@ -210,6 +221,7 @@ describe('saveUserSettings', () => {
     expect(row).toHaveProperty('shown_tab_keys', null)
     // false is a real preference, not an absent one — it must survive the write.
     expect(row).toHaveProperty('notify_on_member_events', false)
+    expect(row).toHaveProperty('notify_nightly_unfinished', false)
   })
 
   it('throws when the write errors', async () => {

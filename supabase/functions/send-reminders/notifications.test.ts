@@ -3,7 +3,9 @@ import {
   formatWhen,
   groupByRecipientCalendar,
   memberActivityPush,
-  type PendingNotification
+  nightlyUnfinishedPush,
+  type PendingNotification,
+  type UnfinishedDigest
 } from './notifications.ts'
 
 // The dispatcher itself needs Deno, but its copy and grouping rules are pure and
@@ -126,5 +128,55 @@ describe('memberActivityPush', () => {
 
   it('refuses an empty group rather than sending a blank notification', () => {
     expect(() => memberActivityPush([])).toThrow()
+  })
+})
+
+describe('nightlyUnfinishedPush', () => {
+  function digest(overrides: Partial<UnfinishedDigest> = {}): UnfinishedDigest {
+    return {
+      user_id: 'bob',
+      todo_count: 0,
+      task_count: 0,
+      todo_titles: [],
+      task_titles: [],
+      ...overrides
+    }
+  }
+
+  it('sends nothing when nothing is open', () => {
+    expect(nightlyUnfinishedPush(digest(), '2026-10-15')).toBeNull()
+  })
+
+  it('names both counts and lists tasks before todos', () => {
+    const push = nightlyUnfinishedPush(
+      digest({ todo_count: 1, task_count: 1, todo_titles: ['買牛奶'], task_titles: ['寫週報'] }),
+      '2026-10-15'
+    )
+
+    expect(push?.body).toBe('還有 1 件待辦、1 個任務：寫週報、買牛奶')
+    expect(push?.url).toBe('v2/day')
+  })
+
+  it('omits a kind that has nothing open', () => {
+    const push = nightlyUnfinishedPush(digest({ todo_count: 2, todo_titles: ['a', 'b'] }), '2026-10-15')
+
+    expect(push?.body).toBe('還有 2 件待辦：a、b')
+  })
+
+  it('caps the list at three titles and marks the rest', () => {
+    const push = nightlyUnfinishedPush(
+      digest({ todo_count: 5, task_count: 1, todo_titles: ['a', 'b', 'c'], task_titles: ['t'] }),
+      '2026-10-15'
+    )
+
+    expect(push?.body).toBe('還有 5 件待辦、1 個任務：t、a、b…')
+  })
+
+  it('tags by day so a re-run replaces rather than stacks', () => {
+    // A repeated tag replaces the notification on screen; keying on the day keeps one
+    // per night without wiping an unread one from the night before.
+    const push = nightlyUnfinishedPush(digest({ task_count: 1, task_titles: ['t'] }), '2026-10-15')
+
+    expect(push?.tag).toBe('nightly-unfinished-2026-10-15')
   })
 })

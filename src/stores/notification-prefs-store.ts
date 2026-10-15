@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { notifySyncError } from '@/lib/notify'
 import { fetchUserSettings } from '@/services/user-settings-service'
 import { persistSettings, registerSettingsSlice } from './user-settings-sync'
 import { useAuthStore } from './auth-store'
 
-// Account-level notification preferences. Today that is one switch: whether to
-// receive a push when another member adds an event to a shared calendar
-// (Settings › Notifications › Shared calendar activity).
+// Account-level notification preferences. Two switches: whether to receive a push
+// when another member adds an event to a shared calendar (Settings › Notifications ›
+// Shared calendar activity), and whether to receive the 23:00 push listing what is
+// still open today (… › Nightly check-in).
 //
 // WHY a store at all, when the "Event reminders" switch on the same screen has
 // none: that switch's truth is the browser's own push subscription, which is
@@ -21,22 +22,32 @@ import { useAuthStore } from './auth-store'
 // how several stores own different columns of one row without importing each
 // other.
 
-// Matches the column default in the migration. Someone who joins a shared
+// Matches the column defaults in the migrations. Someone who joins a shared
 // calendar and never opens Settings should still hear about it.
 const DEFAULT_NOTIFY_ON_MEMBER_EVENTS = true
+const DEFAULT_NOTIFY_NIGHTLY_UNFINISHED = true
+
+type PrefKey = 'notifyOnMemberEvents' | 'notifyNightlyUnfinished'
 
 export const useNotificationPrefsStore = defineStore('notification-prefs', () => {
   const notifyOnMemberEventsRef = ref(DEFAULT_NOTIFY_ON_MEMBER_EVENTS)
+  const notifyNightlyUnfinishedRef = ref(DEFAULT_NOTIFY_NIGHTLY_UNFINISHED)
+  const refs: Record<PrefKey, Ref<boolean>> = {
+    notifyOnMemberEvents: notifyOnMemberEventsRef,
+    notifyNightlyUnfinished: notifyNightlyUnfinishedRef
+  }
 
   const notifyOnMemberEvents = computed(() => notifyOnMemberEventsRef.value)
+  const notifyNightlyUnfinished = computed(() => notifyNightlyUnfinishedRef.value)
 
   // Bumped on load and reset, mirroring the tabs and appearance stores: a write
   // still in flight at sign-out must not roll back into the next session.
   let generation = 0
 
-  // This store owns one column of the shared user_settings row.
+  // This store owns two columns of the shared user_settings row.
   registerSettingsSlice('notification-prefs', () => ({
-    notifyOnMemberEvents: notifyOnMemberEventsRef.value
+    notifyOnMemberEvents: notifyOnMemberEventsRef.value,
+    notifyNightlyUnfinished: notifyNightlyUnfinishedRef.value
   }))
 
   /**
@@ -62,6 +73,7 @@ export const useNotificationPrefsStore = defineStore('notification-prefs', () =>
       if (!remote) return
 
       notifyOnMemberEventsRef.value = remote.notifyOnMemberEvents
+      notifyNightlyUnfinishedRef.value = remote.notifyNightlyUnfinished
     } catch {
       // Keep the default; see the doc comment.
     }
@@ -70,17 +82,18 @@ export const useNotificationPrefsStore = defineStore('notification-prefs', () =>
   function resetLocal(): void {
     generation += 1
     notifyOnMemberEventsRef.value = DEFAULT_NOTIFY_ON_MEMBER_EVENTS
+    notifyNightlyUnfinishedRef.value = DEFAULT_NOTIFY_NIGHTLY_UNFINISHED
   }
 
   /** The only write path. Applies optimistically, then rolls back on failure. */
-  function setNotifyOnMemberEvents(next: boolean): void {
-    const previous = notifyOnMemberEventsRef.value
+  function setPref(key: PrefKey, next: boolean): void {
+    const previous = refs[key].value
     if (next === previous) return
-    notifyOnMemberEventsRef.value = next
-    void persist(previous)
+    refs[key].value = next
+    void persist(key, previous)
   }
 
-  async function persist(rollbackTo: boolean): Promise<void> {
+  async function persist(key: PrefKey, rollbackTo: boolean): Promise<void> {
     const ownerId = useAuthStore().user?.id
     if (!ownerId) return
 
@@ -89,23 +102,25 @@ export const useNotificationPrefsStore = defineStore('notification-prefs', () =>
     // assembles the row from current store state, so the retry has to restore the
     // user's intent first — otherwise it would re-save the rolled-back value and
     // silently discard the change it was offered to recover.
-    const intended = notifyOnMemberEventsRef.value
+    const intended = refs[key].value
 
     try {
       await persistSettings(ownerId)
     } catch {
       if (version !== generation) return
-      notifyOnMemberEventsRef.value = rollbackTo
+      refs[key].value = rollbackTo
       notifySyncError('Could not save the notification setting.', () => {
-        notifyOnMemberEventsRef.value = intended
-        void persist(rollbackTo)
+        refs[key].value = intended
+        void persist(key, rollbackTo)
       })
     }
   }
 
   return {
     notifyOnMemberEvents,
-    setNotifyOnMemberEvents,
+    notifyNightlyUnfinished,
+    setNotifyOnMemberEvents: (next: boolean) => setPref('notifyOnMemberEvents', next),
+    setNotifyNightlyUnfinished: (next: boolean) => setPref('notifyNightlyUnfinished', next),
     loadFromRemote,
     resetLocal
   }

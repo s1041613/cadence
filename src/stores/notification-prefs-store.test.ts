@@ -54,7 +54,8 @@ describe('notification-prefs-store', () => {
         backgroundPath: null,
         scrimOpacity: 0.8,
         shownTabKeys: null,
-        notifyOnMemberEvents: false
+        notifyOnMemberEvents: false,
+        notifyNightlyUnfinished: true
       })
       const store = useNotificationPrefsStore()
 
@@ -176,13 +177,59 @@ describe('notification-prefs-store', () => {
     })
   })
 
+  describe('setNotifyNightlyUnfinished', () => {
+    it('writes its own column and leaves the other switch alone', async () => {
+      const store = useNotificationPrefsStore()
+
+      store.setNotifyNightlyUnfinished(false)
+
+      expect(store.notifyNightlyUnfinished).toBe(false)
+      expect(store.notifyOnMemberEvents).toBe(true)
+      await flush()
+      expect(saveMock.mock.calls[0]?.[0]).toMatchObject({
+        notifyOnMemberEvents: true,
+        notifyNightlyUnfinished: false
+      })
+    })
+
+    it('rolls back only its own switch when the write fails', async () => {
+      // Both switches share one row and one persist path; a failure on this one
+      // must not flip the member-events switch, which the user did not touch.
+      saveMock.mockRejectedValueOnce(new Error('boom'))
+      const store = useNotificationPrefsStore()
+
+      store.setNotifyNightlyUnfinished(false)
+      await flush()
+
+      expect(store.notifyNightlyUnfinished).toBe(true)
+      expect(store.notifyOnMemberEvents).toBe(true)
+      expect(notifyMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('loads the stored preference', async () => {
+      fetchMock.mockResolvedValue({
+        backgroundPath: null,
+        scrimOpacity: 0.8,
+        shownTabKeys: null,
+        notifyOnMemberEvents: true,
+        notifyNightlyUnfinished: false
+      })
+      const store = useNotificationPrefsStore()
+
+      await store.loadFromRemote()
+
+      expect(store.notifyNightlyUnfinished).toBe(false)
+    })
+  })
+
   describe('resetLocal', () => {
     it('returns to the default so the next session does not inherit it', async () => {
       fetchMock.mockResolvedValue({
         backgroundPath: null,
         scrimOpacity: 0.8,
         shownTabKeys: null,
-        notifyOnMemberEvents: false
+        notifyOnMemberEvents: false,
+        notifyNightlyUnfinished: true
       })
       const store = useNotificationPrefsStore()
       await store.loadFromRemote()

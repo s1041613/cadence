@@ -3,7 +3,7 @@
     v2 設定 · Notifications 子頁。骨架照 Customization：header(back)+scroll+card。
     「Event reminders」接到 Web Push 訂閱（push-service）：真相來源是瀏覽器本機訂閱
     （hasActiveSubscription），per-device，不進 store，避免雙狀態不同步。
-    「Shared calendar activity」則相反——它決定伺服器要不要為這位使用者入列通知，
+    「Shared calendar activity」與「Nightly check-in」則相反——它決定伺服器要不要為這位使用者入列通知，
     是 per-account 偏好，住在共用的 user_settings 列（notification-prefs-store）。
     Daily agenda / Assistant nudges 先顯示但停用（尚無後端排程，見 web-push plan MVP 排除項）。
   -->
@@ -37,6 +37,18 @@
             size="46x28"
             :model-value="notificationPrefs.notifyOnMemberEvents"
             @update:model-value="notificationPrefs.setNotifyOnMemberEvents"
+          />
+        </div>
+
+        <div class="pv2-notif__row pv2-notif__row--divided">
+          <div class="pv2-notif__row-text">
+            <div class="pv2-notif__row-label">Nightly check-in</div>
+            <div class="pv2-notif__row-sub">{{ nightlySub }}</div>
+          </div>
+          <CdSwitch
+            size="46x28"
+            :model-value="notificationPrefs.notifyNightlyUnfinished"
+            @update:model-value="notificationPrefs.setNotifyNightlyUnfinished"
           />
         </div>
 
@@ -105,6 +117,12 @@ const busy = ref(false)
 const sharedActivitySub = computed(() =>
   eventReminders.value
     ? 'When someone adds an event to a shared calendar'
+    : 'Turn on Event reminders to receive these'
+)
+
+const nightlySub = computed(() =>
+  eventReminders.value
+    ? "At 11 PM, if today's to-dos or tasks are still open"
     : 'Turn on Event reminders to receive these'
 )
 

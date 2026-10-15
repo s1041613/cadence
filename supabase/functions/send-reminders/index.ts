@@ -11,6 +11,11 @@
 //      AFTER INSERT trigger when someone adds an event to a shared calendar,
 //      pushed to the OTHER members, then stamped with sent_at.
 //
+// A second cron job (23:00 Asia/Taipei) calls the same function with
+// {"job":"nightly_unfinished"} and gets only the nightly "still open today"
+// digest — see runNightlyUnfinished(). Same function and Vault entries again,
+// for the same reason.
+//
 // Auth: pg_cron passes a shared CRON_SECRET as a Bearer token. Deployed with
 // --no-verify-jwt so this function's own check is the gate (a service-role key
 // must never travel in a cron header).
@@ -21,7 +26,9 @@ import {
   formatWhen,
   groupByRecipientCalendar,
   memberActivityPush,
-  type PendingNotification
+  nightlyUnfinishedPush,
+  type PendingNotification,
+  type UnfinishedDigest
 } from './notifications.ts'
 
 const supabase = createClient(
@@ -95,6 +102,37 @@ async function deliver(
   return { ok: true, sent, subsFound: subs?.length ?? 0 }
 }
 
+const json = (body: unknown, status = 200): Response =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } })
+
+/**
+ * The 23:00 digest: one push per user who still has open todos or tasks today.
+ *
+ * Nothing is stamped. The cron job fires once a night and the push is tagged by day, so a
+ * manual re-run replaces the notification on screen rather than stacking a second one —
+ * there is no row whose "already sent" state would need remembering.
+ */
+async function runNightlyUnfinished(): Promise<Response> {
+  const { data, error } = await supabase.rpc('nightly_unfinished_digest')
+  if (error) return json({ error: error.message }, 500)
+
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' })
+  const rows = (data ?? []) as UnfinishedDigest[]
+  const errors: PushError[] = []
+  let notified = 0
+  let subsFound = 0
+
+  for (const row of rows) {
+    const payload = nightlyUnfinishedPush(row, today)
+    if (!payload) continue
+    const result = await deliver(row.user_id, JSON.stringify(payload), errors)
+    notified += result.sent
+    subsFound += result.subsFound
+  }
+
+  return json({ job: 'nightly_unfinished', users: rows.length, notified, subsFound, errors })
+}
+
 Deno.serve(async (req) => {
   // Fail closed if the secret is unset — otherwise the comparison target becomes
   // "Bearer undefined" and any caller sending that literal string would pass.
@@ -106,6 +144,11 @@ Deno.serve(async (req) => {
   if (auth !== `Bearer ${cronSecret}`) {
     return new Response('unauthorized', { status: 401 })
   }
+
+  // The per-minute tick posts '{}'; only the nightly job names itself. A body that
+  // fails to parse is treated as the per-minute tick, which is what it was before.
+  const body = (await req.json().catch(() => ({}))) as { job?: string }
+  if (body.job === 'nightly_unfinished') return runNightlyUnfinished()
 
   const { data: due, error } = await supabase.rpc('due_reminders')
   if (error) {

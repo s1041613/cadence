@@ -85,3 +85,42 @@ export function memberActivityPush(group: readonly PendingNotification[]): PushP
 
   return { title: first.calendar_name, body, url: 'v2/month', tag: first.outbox_id }
 }
+
+/** One user's row from nightly_unfinished_digest(). Titles are the first few of each kind. */
+export interface UnfinishedDigest {
+  user_id: string
+  todo_count: number
+  task_count: number
+  todo_titles: string[]
+  task_titles: string[]
+}
+
+/**
+ * Renders the 23:00 "still open today" push, or null when there is nothing open.
+ *
+ * The RPC only returns users with at least one open item, but the null keeps a zero row
+ * from ever turning into an empty "0 件" notification if that ever changes.
+ *
+ * The tag is per day, so a re-run of the same night replaces the notification already on
+ * screen instead of stacking a second copy, while yesterday's (if still unread) is left alone.
+ */
+export function nightlyUnfinishedPush(row: UnfinishedDigest, today: string): PushPayload | null {
+  if (row.todo_count <= 0 && row.task_count <= 0) return null
+
+  const counts: string[] = []
+  if (row.todo_count > 0) counts.push(`${row.todo_count} 件待辦`)
+  if (row.task_count > 0) counts.push(`${row.task_count} 個任務`)
+
+  // Tasks first: they had a decided time, so they are the ones most likely to matter tonight.
+  const titles = [...row.task_titles, ...row.todo_titles]
+  const total = row.todo_count + row.task_count
+  const shown = titles.slice(0, 3)
+  const list = shown.length > 0 ? `：${shown.join('、')}${total > shown.length ? '…' : ''}` : ''
+
+  return {
+    title: '今天還沒完成',
+    body: `還有 ${counts.join('、')}${list}`,
+    url: 'v2/day',
+    tag: `nightly-unfinished-${today}`
+  }
+}

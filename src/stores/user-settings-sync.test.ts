@@ -26,7 +26,7 @@ function registerAllStores(): void {
     scrimOpacity: 0.5
   }))
   registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: ['month', 'setting'] }))
-  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
+  registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true, notifyNightlyUnfinished: true }))
 }
 
 describe('currentSettings', () => {
@@ -83,7 +83,8 @@ describe('persistSettings', () => {
         backgroundPath: 'u/1.jpg',
         scrimOpacity: 0.5,
         shownTabKeys: ['month', 'setting'],
-        notifyOnMemberEvents: true
+        notifyOnMemberEvents: true,
+        notifyNightlyUnfinished: true
       },
       'user-1'
     )
@@ -96,7 +97,7 @@ describe('persistSettings', () => {
       backgroundPath: 'u/1.jpg',
       scrimOpacity: 0.5
     }))
-    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true, notifyNightlyUnfinished: true }))
 
     await expect(persistSettings('user-1')).rejects.toThrow(/shownTabKeys/)
     expect(saveMock).not.toHaveBeenCalled()
@@ -110,12 +111,12 @@ describe('persistSettings', () => {
       scrimOpacity: 0.8
     }))
     registerSettingsSlice('v2-tabs', () => ({ shownTabKeys: null }))
-    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true }))
+    registerSettingsSlice('notification-prefs', () => ({ notifyOnMemberEvents: true, notifyNightlyUnfinished: true }))
 
     await persistSettings('user-1')
 
     expect(saveMock).toHaveBeenCalledWith(
-      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null, notifyOnMemberEvents: true },
+      { backgroundPath: null, scrimOpacity: 0.8, shownTabKeys: null, notifyOnMemberEvents: true, notifyNightlyUnfinished: true },
       'user-1'
     )
   })

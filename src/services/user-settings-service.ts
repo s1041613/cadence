@@ -24,6 +24,7 @@ interface UserSettingsRow {
   scrim_opacity: number
   shown_tab_keys: string[] | null
   notify_on_member_events: boolean
+  notify_nightly_unfinished: boolean
 }
 
 /** Client-side shape. `null` on a field means "no preference" and the caller
@@ -37,6 +38,8 @@ export interface UserSettings {
   // preference" value inside the row — an absent row is the only way to say
   // that, and the caller falls back to its own default.
   notifyOnMemberEvents: boolean
+  // Same shape as above: the 23:00 "still open today" push.
+  notifyNightlyUnfinished: boolean
 }
 
 /**
@@ -46,7 +49,7 @@ export interface UserSettings {
 export async function fetchUserSettings(ownerId: string): Promise<UserSettings | null> {
   const { data, error } = await requireSupabase()
     .from('user_settings')
-    .select('background_path, scrim_opacity, shown_tab_keys, notify_on_member_events')
+    .select('background_path, scrim_opacity, shown_tab_keys, notify_on_member_events, notify_nightly_unfinished')
     .eq('user_id', ownerId)
     .abortSignal(timeoutSignal())
     // maybeSingle, not single: zero rows is the expected first-run state, and
@@ -63,7 +66,8 @@ export async function fetchUserSettings(ownerId: string): Promise<UserSettings |
     // A row written before this column existed reads back as null through an
     // older PostgREST cache; treat that like the column default rather than
     // silently turning notifications off.
-    notifyOnMemberEvents: row.notify_on_member_events ?? true
+    notifyOnMemberEvents: row.notify_on_member_events ?? true,
+    notifyNightlyUnfinished: row.notify_nightly_unfinished ?? true
   }
 }
 
@@ -83,7 +87,8 @@ export async function saveUserSettings(settings: UserSettings, ownerId: string):
     background_path: settings.backgroundPath,
     scrim_opacity: settings.scrimOpacity,
     shown_tab_keys: settings.shownTabKeys,
-    notify_on_member_events: settings.notifyOnMemberEvents
+    notify_on_member_events: settings.notifyOnMemberEvents,
+    notify_nightly_unfinished: settings.notifyNightlyUnfinished
   }
 
   // No ignoreDuplicates here, unlike notes-service: this table has a real UPDATE

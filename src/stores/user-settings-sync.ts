@@ -4,7 +4,8 @@ import { saveUserSettings, type UserSettings } from '@/services/user-settings-se
 //
 // Several stores own different columns of the same row: v2-appearance-store owns
 // background_path and scrim_opacity, v2-tabs-store owns shown_tab_keys, and
-// notification-prefs-store owns notify_on_member_events. The service deliberately
+// notification-prefs-store owns notify_on_member_events and
+// notify_nightly_unfinished. The service deliberately
 // writes every column on every save (a partial upsert would let one store clobber
 // another's column with a stale value), which means whoever saves must know the
 // current value of columns it does not own.
@@ -53,7 +54,8 @@ const OWNED_COLUMNS = [
   'backgroundPath',
   'scrimOpacity',
   'shownTabKeys',
-  'notifyOnMemberEvents'
+  'notifyOnMemberEvents',
+  'notifyNightlyUnfinished'
 ] as const
 
 /**
