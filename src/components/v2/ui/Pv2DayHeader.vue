@@ -14,7 +14,8 @@
       </div>
       <div class="pv2-dh__controls">
         <!-- 一顆膠囊收三個「看這一天的東西」：桌布切換、代辦、逾期任務。只有 icon、不放數字——
-             數字讓膠囊忽長忽短，而且點開就看得到。TODAY 是「跳去別天」，所以分開放。 -->
+             數字讓膠囊忽長忽短，而且點開就看得到。TODAY 是「跳去別天」，所以分開放。
+             裡面有東西時 icon 右上角掛一顆小圓點，不用點開就知道有沒有要處理的。 -->
         <div class="pv2-dh__cap">
           <Pv2BackdropToggle bare class="pv2-dh__seg" />
           <button
@@ -22,9 +23,10 @@
             class="pv2-dh__seg pv2-dh__btn"
             :class="{ 'pv2-dh__btn--on': todoOpen }"
             :aria-pressed="todoOpen"
-            :aria-label="todoOpen ? '隱藏這天的代辦' : '顯示這天的代辦'"
+            :aria-label="`${todoOpen ? '隱藏' : '顯示'}這天的代辦${hasTodos ? '（有未完成）' : ''}`"
             @click="emit('toggleTodo')"
           >
+            <span v-if="hasTodos" class="pv2-dh__dot" aria-hidden="true" />
             <svg class="pv2-dh__icon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M6.5 3h8.5l4 4v12.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19.5v-15A1.5 1.5 0 0 1 6.5 3Z" />
               <path d="M8.5 11l2 2 3.5-4" />
@@ -41,6 +43,7 @@
             :aria-label="`${unfinishedOpen ? '隱藏' : '顯示'} ${unfinishedCount} 筆未完成待辦`"
             @click="emit('toggleUnfinished')"
           >
+            <span class="pv2-dh__dot" aria-hidden="true" />
             <svg class="pv2-dh__icon" viewBox="0 0 24 24" aria-hidden="true">
               <rect x="3" y="4" width="7.5" height="7.5" rx="2.2" />
               <rect x="3" y="14" width="7.5" height="7.5" rx="2.2" />
@@ -68,6 +71,8 @@ defineProps<{
   unfinishedOpen: boolean
   /** Whether the day's to-do sheet is open — the todo segment wears the open tint. */
   todoOpen: boolean
+  /** The day has at least one unticked todo — the todo segment wears a dot. */
+  hasTodos: boolean
 }>()
 
 const emit = defineEmits<{
@@ -161,6 +166,20 @@ const mode = useBackdropMode()
 .pv2-dh__btn--on {
   background: rgba(var(--pv2-accent-rgb), 0.12);
   color: var(--pv2-accent-ink);
+}
+
+/* "There's something in here." Sits on the icon's top-right corner; the white ring keeps it
+   separate from the stroke and from the open tint behind it. */
+.pv2-dh__dot {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pv2-accent);
+  box-shadow: 0 0 0 1.5px #fff;
+  pointer-events: none;
 }
 
 .pv2-dh__icon {
