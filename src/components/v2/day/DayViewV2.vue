@@ -14,7 +14,8 @@
           :unfinished-count="unfinishedCount"
           :unfinished-open="unfinishedOpen"
           :todo-open="todoOpen"
-          :has-todos="hasOpenTodos"
+          :todo-total="todoProgress.total"
+          :todo-done="todoProgress.done"
           @today="goToday"
           @toggle-unfinished="toggleUnfinished"
           @toggle-todo="toggleTodo"
@@ -130,8 +131,11 @@ watch(unfinishedCount, (n) => {
 // The day's to-do list. One sheet at a time: both float over the same frame, and two stacked
 // scrims would leave the lower one's close tap landing on the upper one.
 const todoOpen = ref(false)
-// Ticked-off todos don't count: the dot means "something here still needs doing".
-const hasOpenTodos = computed(() => dayTodosStore.todosFor(ui.selectedDate).some((t) => !t.done))
+// Drives the progress bar under the todo icon: how much of the day's list is ticked off.
+const todoProgress = computed(() => {
+  const list = dayTodosStore.todosFor(ui.selectedDate)
+  return { total: list.length, done: list.filter((t) => t.done).length }
+})
 
 function toggleUnfinished(): void {
   todoOpen.value = false
