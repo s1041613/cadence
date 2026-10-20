@@ -1,0 +1,28 @@
+{
+  "pages": [
+    { "id": "page-1", "name": "密度" },
+    { "id": "page-2", "name": "標題字體" }
+  ],
+  "artboards": [
+    { "file": "Now.dc.html",   "x": 0,    "y": 0, "w": 402, "h": 874, "title": "現況", "page": "page-1" },
+    { "file": "Step1.dc.html", "x": 522,  "y": 0, "w": 402, "h": 874, "title": "1 列高由內容決定", "page": "page-1" },
+    { "file": "Step2.dc.html", "x": 1044, "y": 0, "w": 402, "h": 874, "title": "2 白底 + 去背圖槽", "page": "page-1" },
+    { "file": "Main.dc.html",  "x": 1566, "y": 0, "w": 402, "h": 874, "title": "3 chip 實心淡填", "page": "page-1" },
+
+    { "file": "TypeInter.dc.html",   "x": 0,    "y": 0, "w": 402, "h": 330, "title": "現況 Inter italic 400", "page": "page-2" },
+    { "file": "TypeFredoka.dc.html", "x": 522,  "y": 0, "w": 402, "h": 330, "title": "A Fredoka 600", "page": "page-2" },
+    { "file": "TypeBaloo.dc.html",   "x": 1044, "y": 0, "w": 402, "h": 330, "title": "B Baloo 2 800", "page": "page-2" },
+    { "file": "TypeNunito.dc.html",  "x": 1566, "y": 0, "w": 402, "h": 330, "title": "C Nunito 900", "page": "page-2" }
+  ],
+  "annotations": [
+    { "id": "n-now", "page": "page-1", "x": 0, "y": 916, "w": 402, "text": "現況（402x874，數值全部取自 src）\n一列 105.4px，maxLanes 反推出 4 條 lane。\n格子區 527px = 螢幕高的 71%，但多數天只用 1-2 條。\n桌布圖滿版，星星直接穿過資料區。" },
+    { "id": "n-1", "page": "page-1", "x": 522, "y": 916, "w": 402, "text": "1｜列高由內容決定\nlane 上限固定 3 條，一列 81px = padTop4 + headH20 + gap3 + 3x15 + 2x2 + padBottom5。\n5 列從 527px 降到 405px，空出 122px。\n代價：8/31 第 4 個事件被收成 +1，而且那個 +N 在 Pv2Cell 現在的右下角會被最後一條 chip 蓋住，順手移到日期列右側。" },
+    { "id": "n-2", "page": "page-1", "x": 1044, "y": 916, "w": 402, "text": "2｜格子區永遠白底\n桌布不再滿版。改成上下兩個去背圖片槽：上 181px（標題那一帶）、下 113px。\n下面那 113px 正好是第 1 項空出來的空間。\n圖是佔位線稿，換成你自己的去背 PNG。" },
+    { "id": "n-3", "page": "page-1", "x": 1566, "y": 916, "w": 402, "text": "3｜定時事件 chip 由描邊改實心淡填\n底色 = 事件色混白 78%，文字 = 事件色混黑 36%，去掉 1px 邊框。\n高度維持 15px（我上一則說要降是算錯了，你本來就跟參考圖差不多高）。\n整天事件維持飽和實心白字，兩者靠彩度分，不會混。" },
+    { "id": "n-risk", "page": "page-1", "x": 1044, "y": 1120, "w": 924, "text": "沒解掉的：chip 文字還是截斷（欄寬 57px，9px 字最多 5 個中文字）。這要動欄寬或字級，不在這三項裡。\n最大的風險：白底方案等於把 Pv2PageBackdrop 的滿版桌布從月檢視拿掉，改成 topImage / bottomImage 兩個槽。Day / Week / Notes 三頁共用同一個元件，要嘛一起改、要嘛月檢視自己走一套。" },
+
+    { "id": "n-type", "page": "page-2", "x": 0, "y": 380, "w": 924, "text": "參考圖那個字體我認不出來，低解析度截圖判不準，不猜。\n特徵是明確的：幾何圓體、字重極重、末端全圓、直立不斜。Google Fonts 上最接近的三個放在右邊。\n三個都只換月份標題，48px 不動、顏色維持 #1b1b1b（粉紅是另一個決定）。字檔已內嵌 latin 子集，PNG 匯出不會退回 Inter。" },
+    { "id": "n-type-b", "page": "page-2", "x": 1044, "y": 380, "w": 924, "text": "我選 B（Baloo 2 800）：重量和圓度最接近參考圖。A（Fredoka）比較寬但偏輕，C（Nunito）夠重但偏窄、比較人文而不是幾何。\n代價：cadence-tokens.css 寫著「本產品只出一套拉丁字體」，六個 font token 全指向 Inter；Pv2Poster 也記著月/週/日三個主標題刻意都是 400。換月標題等於同時破這兩條——要嘛三個標題一起換，要嘛接受月檢視自己一套。\nlatin 子集約 16-18KB（woff2），@fontsource 有這三個套件。" }
+  ],
+  "launch": { "view": "canvas", "page": "page-2" }
+}
