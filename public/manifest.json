@@ -10,6 +10,7 @@
   "theme_color": "#fafaf9",
   "icons": [
     { "src": "icons/favicon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/apple-touch-icon-180x180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+    { "src": "icons/apple-touch-icon-180x180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
