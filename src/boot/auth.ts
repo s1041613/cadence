@@ -1,7 +1,7 @@
 import { defineBoot } from '#q-app'
 import { useAuthStore } from '@/stores/auth-store'
 
-const PUBLIC_ROUTES = new Set(['/auth/callback', '/login'])
+const PUBLIC_ROUTES = new Set(['/auth/callback', '/login', '/oauth/consent'])
 
 export default defineBoot(async ({ router, store }) => {
   const auth = useAuthStore(store)

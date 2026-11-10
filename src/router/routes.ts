@@ -27,6 +27,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/LoginPage.vue'),
   },
 
+  // OAuth consent for AI clients connecting through the mcp Edge Function. Supabase Auth's
+  // "authorization path" points here. Public in boot/auth.ts for the same reason as /join/: the
+  // page handles the signed-out branch so authorization_id survives the login round-trip.
+  {
+    path: '/oauth/consent',
+    component: () => import('@/pages/OAuthConsentPage.vue'),
+  },
+
   // Invite deep link (public — boot/auth.ts whitelists the /join/ prefix; the page itself
   // handles the signed-out branch so the token survives the login round-trip).
   {

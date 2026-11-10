@@ -42,6 +42,18 @@ describe('post-login-redirect', () => {
     expect(consumePostLoginRedirect()).toBeNull()
   })
 
+  it('round-trips an OAuth consent request, query included', () => {
+    savePostLoginRedirect('/oauth/consent?authorization_id=abc123def456')
+    expect(consumePostLoginRedirect()).toBe('/oauth/consent?authorization_id=abc123def456')
+  })
+
+  it('rejects look-alikes of the consent path', () => {
+    savePostLoginRedirect('/oauth/consent-evil')
+    expect(consumePostLoginRedirect()).toBeNull()
+    savePostLoginRedirect('//evil.example/oauth/consent?x')
+    expect(consumePostLoginRedirect()).toBeNull()
+  })
+
   it('returns null when nothing was saved', () => {
     expect(consumePostLoginRedirect()).toBeNull()
   })
