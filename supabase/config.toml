@@ -412,3 +412,9 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# The MCP server verifies tokens itself (@supabase/server withSupabase), and must let an
+# unauthenticated request through so it can answer with the OAuth discovery challenge.
+# See supabase/functions/mcp/README.md.
+[functions.mcp]
+verify_jwt = false
